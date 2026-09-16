@@ -45,8 +45,8 @@ docs/
   build-report.html          the deliverable — self-contained, open in a browser
   source/
     build-report.src.html    editable source (contains a /*@FONTS@*/ placeholder)
-    index.pdf                the original nine-page design draft
   fonts/                     subset woff2 used by the report
+index.pdf                    the original nine-page design draft
 scripts/
   build-fonts.sh             builds the gallery's self-hosted webfonts
   build-report.sh            inlines fonts into the report
