@@ -1,0 +1,322 @@
+/* ===========================================================================
+   SENSO COMUNE — GALLERY
+
+     N-03  tombstone hierarchy: price is the boldest element; year beside the
+           title; both units; "Unique work" and "Frame not included"
+     N-04  sold state keeps the price visible and repurposes the CTA slot
+     N-05  zero-JS lightbox via <dialog> + invoker commands
+     N-06  scale diagram and detail crops
+     N-07  01–06 counter — a phone visitor needs to know the show is finite
+   =========================================================================== */
+
+/* ---------- masthead ---------- */
+.masthead{
+  position:sticky; top:0; z-index:50;
+  background:color-mix(in oklab,var(--paper) 88%,transparent);
+  backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--rule-soft);
+}
+@supports not (backdrop-filter:blur(1px)){ .masthead{ background:var(--paper) } }
+
+.masthead__inner{
+  display:flex; align-items:baseline; gap:var(--space-4);
+  flex-wrap:wrap;
+  padding-block:var(--space-3);
+}
+.wordmark{
+  font-family:var(--font-display);
+  font-size:var(--size-mark);
+  font-variation-settings:'opsz' 22.4,'SOFT' 0,'WONK' 1;
+  color:var(--ink); text-decoration:none;
+  margin-right:auto;
+}
+.nav{ display:flex; gap:var(--space-4); flex-wrap:wrap; align-items:center }
+.nav a{
+  /* 2.5.8: a nav bar is not a sentence, so the "inline" exception does not
+     apply. Padding gives the hit area without growing the type. */
+  display:inline-flex; align-items:center;
+  min-height:var(--target-min);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label); text-transform:uppercase;
+  color:var(--body); text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:color var(--dur-quick) var(--ease-settle),
+             border-color var(--dur-quick) var(--ease-settle);
+}
+.nav a:hover{ color:var(--ink); border-bottom-color:var(--rule) }
+.nav a[aria-current]{ color:var(--ink); border-bottom-color:var(--sanguine) }
+
+.lang-switch{
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label);
+  color:var(--body); text-decoration:none;
+  display:inline-flex; align-items:center; min-height:var(--target-min);
+  padding-inline:var(--space-1);
+}
+.lang-switch:hover{ color:var(--sanguine) }
+
+/* ---------- hero ---------- */
+.hero{ padding-block:var(--space-7) var(--space-6) }
+.hero h1{ max-width:var(--measure-sm); margin-bottom:var(--space-4) }
+.hero blockquote{
+  margin:0 0 var(--space-5);
+  max-width:var(--measure);
+  font-family:var(--font-display);
+  font-size:var(--size-body);
+  font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1;
+  font-style:italic;
+  color:var(--body);
+  border-left:1px solid var(--rule);
+  padding-left:var(--space-4);
+}
+.hero blockquote cite{
+  display:block; margin-top:var(--space-2);
+  font-family:var(--font-body); font-style:normal;
+  font-size:var(--size-caption); letter-spacing:.02em;
+  color:var(--muted);
+}
+
+/* ---------- section headers ---------- */
+.section{ padding-block:var(--space-6) }
+.section__head{
+  display:grid; gap:var(--space-4);
+  grid-template-columns:minmax(0,1fr);
+  margin-bottom:var(--space-6);
+}
+@media (min-width:760px){
+  .section__head{ grid-template-columns:minmax(0,22ch) minmax(0,var(--measure)) }
+}
+.section__intro{ margin:0; color:var(--body) }
+
+/* ---------- work list ---------- */
+.works{ list-style:none; margin:0; padding:0; display:grid; gap:var(--space-7) }
+
+.work{ display:grid; gap:var(--space-4) }
+.work__figure{ margin:0; position:relative }
+
+/* Intrinsic ratios, never normalised. Cropping an original painting into a
+   uniform frame misrepresents the object being sold — and the varying heights
+   are part of the editorial rhythm. width/height on the <img> give CLS 0. */
+.work__img{
+  width:100%; height:auto;
+  cursor:zoom-in;
+  background:var(--wash-warm);
+}
+
+/* The counter. Award-winning scroll sites all supply a finiteness cue; a
+   phone visitor otherwise scrolls six viewport-heights not knowing it ends. */
+.work__index{
+  position:absolute; top:0; left:0;
+  transform:translateY(-140%);
+  font-family:var(--font-body);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label);
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- tombstone ----------
+   N-03. Order is title → year → medium → dimensions → price, which is the
+   convention across Artsy, David Zwirner, MoMA, Saatchi and Tappan. The
+   draft had the year last and the price whispering. */
+.tombstone{
+  display:grid; gap:var(--space-1);
+  font-family:var(--font-body);
+}
+.tombstone__title{
+  font-family:var(--font-display);
+  font-size:var(--size-body);
+  font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1;
+  font-weight:400;
+  line-height:var(--lh-head);
+  color:var(--ink);
+  margin:0;
+}
+/* On a detail page the title IS the page heading, so it takes display size. */
+h1.tombstone__title{
+  font-size:var(--size-h3);
+  font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1;
+}
+/* On the index each work sits under the section's h2. */
+h3.tombstone__title{ font-size:var(--size-body) }
+.tombstone__title em{ font-style:italic }
+.tombstone__meta{
+  font-size:var(--size-caption);
+  color:var(--muted);
+  margin:0; line-height:1.5;
+}
+.tombstone__meta span{ white-space:nowrap }
+
+.tombstone__row{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--space-4); flex-wrap:wrap;
+  margin-top:var(--space-2);
+}
+
+/* The boldest, darkest element in the block — the single change with the
+   best evidence behind it in the whole report. */
+.price{
+  font-family:var(--font-display);
+  font-size:var(--size-h3);
+  font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1;
+  font-weight:600;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums lining-nums;
+  margin:0;
+}
+.price--sold{ color:var(--sold) }
+.price__struck{
+  color:var(--muted);
+  text-decoration:line-through;
+  font-size:var(--size-body);
+  margin-right:var(--space-2);
+}
+
+/* N-04. Sold is rendered at full contrast in the price position — not greyed,
+   not struck through, not a badge — and the CTA slot becomes a capture. */
+.sold-mark{
+  font-family:var(--font-body);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label); text-transform:uppercase;
+  color:var(--sold);
+}
+
+/* ---------- work detail page ---------- */
+.detail{ padding-block:var(--space-6) }
+.detail__grid{ display:grid; gap:var(--space-6) }
+@media (min-width:900px){
+  .detail__grid{ grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); align-items:start }
+  .detail__aside{ position:sticky; top:6.5rem }
+}
+.detail__desc{ max-width:var(--measure) }
+.detail__desc p{ color:var(--body) }
+
+.artist-note{
+  margin-top:var(--space-4);
+  padding-top:var(--space-4);
+  border-top:1px solid var(--rule);
+  color:var(--body);
+}
+.artist-note__label{
+  display:block;
+  font-family:var(--font-body);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label); text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:var(--space-1);
+}
+
+/* Detail crops — shot at a raking angle so impasto casts real micro-shadow.
+   This is where the texture idea belongs: a photograph of a real surface,
+   not a CSS impression of one. */
+.details-row{
+  display:grid; gap:var(--space-3);
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  margin-top:var(--space-5);
+}
+.details-row figure{ margin:0 }
+.details-row figcaption{
+  font-size:var(--size-caption); color:var(--muted);
+  margin-top:var(--space-1);
+}
+
+/* ---------- scale diagram ----------
+   N-06. Baymard: 42% of users try to judge size from the page images, and
+   37% of sites give them nothing. Drawn as thin technical linework, with the
+   wall bar left visible so it reads as a diagram rather than a mock-up. */
+.scale{ margin:var(--space-5) 0 0 }
+.scale svg{ width:100%; height:auto }
+.scale figcaption{
+  font-size:var(--size-caption); color:var(--muted); margin-top:var(--space-2);
+}
+
+/* ---------- lightbox ----------
+   N-05. Invoker commands reached Baseline in December 2025, so the browser
+   supplies the modal, top layer, backdrop, focus trap, focus restore and Esc
+   with no JavaScript at all. */
+dialog.lightbox{
+  border:0; padding:0; max-width:min(96vw,1400px); max-height:96vh;
+  background:transparent; overflow:visible;
+}
+dialog.lightbox::backdrop{
+  /* A sfumato wash, not the default black. */
+  background:color-mix(in oklab,var(--wash-warm) 94%,transparent);
+  backdrop-filter:blur(3px);
+}
+@supports not (background:color-mix(in oklab,red,blue)){
+  dialog.lightbox::backdrop{ background:rgba(250,247,242,.94) }
+}
+dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
+.lightbox__close{
+  position:absolute; top:calc(var(--space-3) * -1 - var(--target-min));
+  right:0;
+  min-height:var(--target-min); min-width:var(--target-min);
+  display:inline-flex; align-items:center; justify-content:center;
+  background:none; border:1px solid var(--muted-ui); color:var(--ink);
+  font-family:var(--font-body); font-size:var(--size-caption);
+  letter-spacing:var(--track-label); text-transform:uppercase;
+  cursor:pointer;
+}
+.lightbox__close:hover{ border-color:var(--ink) }
+
+/* ---------- prev / next ---------- */
+.pager{
+  display:flex; justify-content:space-between; gap:var(--space-4);
+  flex-wrap:wrap;
+  margin-top:var(--space-6);
+  padding-top:var(--space-4);
+  border-top:1px solid var(--rule);
+}
+.pager a{
+  font-size:var(--size-caption); letter-spacing:var(--track-label);
+  text-transform:uppercase; color:var(--body); text-decoration:none;
+  display:inline-flex; align-items:center; min-height:var(--target-min);
+}
+.pager a:hover{ color:var(--sanguine) }
+
+/* ---------- steps ---------- */
+.steps{ list-style:none; counter-reset:step; margin:0; padding:0; display:grid; gap:var(--space-4) }
+.steps li{
+  counter-increment:step;
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:var(--space-4);
+  align-items:start;
+}
+.steps li::before{
+  content:counter(step,decimal-leading-zero);
+  font-family:var(--font-display);
+  font-size:var(--size-body);
+  font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1;
+  color:var(--sanguine);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- footer ---------- */
+.footer{
+  margin-top:var(--space-7);
+  padding-block:var(--space-6);
+  border-top:1px solid var(--rule);
+  font-size:var(--size-caption);
+  color:var(--muted);
+}
+.footer__grid{ display:grid; gap:var(--space-4) }
+@media (min-width:760px){ .footer__grid{ grid-template-columns:2fr 1fr 1fr } }
+.footer a{ color:var(--body); text-decoration:none }
+.footer a:hover{ color:var(--sanguine); text-decoration:underline }
+.footer ul{ list-style:none; margin:0; padding:0; display:grid; gap:var(--space-1) }
+
+/* SAMR Order 37 Art. 12 self-declaration. Quoted verbatim from the rule;
+   the build fails if it is edited. */
+.legal-declaration{
+  margin-top:var(--space-4);
+  padding-top:var(--space-4);
+  border-top:1px solid var(--rule-soft);
+  color:var(--muted);
+  line-height:1.6;
+}
+
+/* ---------- prose pages ---------- */
+.page{ padding-block:var(--space-6) var(--space-7) }
+.page h2{ margin-bottom:var(--space-4) }
+.page h3{ font-size:var(--size-body); margin:var(--space-5) 0 var(--space-2) }
+.page .prose{ max-width:var(--measure) }
+.page .prose p{ color:var(--body) }

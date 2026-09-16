@@ -1,0 +1,152 @@
+/* ===========================================================================
+   SENSO COMUNE — DESIGN TOKENS
+
+   Every colour carries its provenance and its measured contrast on the paper
+   ground. `npm run check` recomputes all of these and fails the build if any
+   pair regresses, so do not edit a value without running it.
+
+   The governing rule, from the build report:
+     Buy quietness with SIZE and WHITESPACE, never with contrast.
+   The draft failed because every call to action was #A19E97 at 2.67:1.
+   =========================================================================== */
+
+:root{
+
+  /* --- ground ------------------------------------------------------------
+     The draft declares pure #FFFFFF. It READS warm, and the sfumato bands
+     below are warm, so the safe-grey trap applies: #767676 passes on pure
+     white by 0.04 and fails the moment the ground warms at all. Every text
+     token below is checked against --paper, not against white.            */
+  --paper:            #FFFFFF;
+
+  /* --- ink ---------------------------------------------------------------
+     Unchanged from the draft. 14.99:1 and 7.55:1 on paper.                */
+  --ink:              #2B2620;   /* headings        14.99:1  AAA */
+  --body:             #5C5346;   /* running text     7.55:1  AAA */
+
+  /* --- accents -----------------------------------------------------------
+     --sanguine is the artist's own oxblood, unchanged. It happens to be,
+     within measurement error, red chalk — the medium Leonardo drew in
+     (sanguine measures 6.33:1; this measures 6.68:1). The homage was
+     arrived at by eye. Do not "correct" it.
+
+     --ultramarine is a verified Starry Night pigment, held in reserve for
+     the Tribute section only — the one part of the site that is itself
+     about admiration for other painters. It is the only blue on the site.
+
+     NOTE these are NOMINAL pigment values, not sampled from the paintings.
+     Sampled values land at 2.70–2.78:1, which is the original failure.    */
+  --sanguine:         #8B4A3C;   /* primary accent   6.68:1  AA  */
+  --sanguine-deep:    #6E3A2F;   /* hover            9.09:1  AAA */
+  --ultramarine:      #2E3A8C;   /* Tribute only    10.00:1  AAA */
+
+  /* --- rules -------------------------------------------------------------
+     Van Gogh told Theo the Bedroom walls were "of a pale violet". They read
+     blue today because the red lake faded. The rules on this site are the
+     colour he said, not the colour that survived.
+
+     Solved against the DARKEST ground (--wash-blue), not against white, so
+     it holds on every band: 3.43 / 3.21 / 3.07 / 3.03. Hue preserved at 276°.
+     --rule-soft is decorative only and is exempt from 1.4.11.             */
+  --rule:             #9684A2;   /* meaningful rule  3.03:1 worst  */
+  --rule-soft:        #E0DED9;   /* decorative — aged laid paper   */
+
+  /* --- muted text --------------------------------------------------------
+     REPLACES the draft's #A19E97 (2.67:1, failed everything).
+
+     Solved against --wash-blue, the darkest ground on the site, NOT against
+     white. Solving against white gives #7A766E, which passes on paper at
+     4.52 and then fails on all three washes at 4.23 / 4.04 / 3.99 — the
+     exact warm-ground trap the build report flags. Worst case now 4.54.  */
+  --muted:            #716D66;   /* captions, meta   4.54:1 worst */
+  --muted-ui:         #8F8A83;   /* icon/border only 3.02:1 worst */
+
+  /* --- sfumato grounds ---------------------------------------------------
+     Section bands. Leonardo: lights and shadows united "senza tratti o
+     segni" — without strokes or lines. Body text measures 6.67–7.07:1 on
+     all three, so the quiet costs nothing.                                */
+  --wash-warm:        #FAF7F2;   /* Original Works */
+  --wash-violet:      #F4F1F6;   /* Tribute        */
+  --wash-blue:        #EEF1F5;   /* About          */
+
+  /* --- semantic ----------------------------------------------------------
+     Sold is ACTIVE content, not an inactive control, so the 1.4.3
+     "incidental" exemption does not apply. It must pass.                  */
+  --sold:             #6E3A2F;   /* 9.09:1 */
+
+  /* ======================================================================
+     TYPE — the Vitruvian scale
+
+     Not phi. The one proportional system in Leonardo's own hand, on the
+     Vitruvian Man sheet, is whole-number fractions of height: 1/10, 1/8,
+     1/6, 1/4, 1/7. The draft's six sizes already sat within a few percent
+     of that scale; these snap them onto it.
+
+     The opsz values matter: Fraunces' optical-size axis is kept live in
+     the font build precisely so each size gets its own drawing.
+     ====================================================================== */
+  --font-display: 'Fraunces', Georgia, 'Songti SC', 'Times New Roman', serif;
+  --font-body:    'Inter', system-ui, -apple-system, 'PingFang SC',
+                  'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+
+  --size-hero:    38.4px;   /* the "height"            */
+  --size-h2:      33.6px;   /* less 1/8                */
+  --size-h3:      28.8px;   /* less 1/4                */
+  --size-mark:    22.4px;   /* wordmark                */
+  --size-body:    16.8px;   /* the unit                */
+  --size-caption: 12.6px;   /* less 1/4                */
+
+  --lh-tight:  1.12;
+  --lh-head:   1.22;
+  --lh-body:   1.70;   /* generous leading is how the quiet is bought */
+
+  --track-label: .09em;
+
+  /* ======================================================================
+     SPACE — same rational fractions, on a 96px base
+     ====================================================================== */
+  --space-1:  9.6px;    /* 1/10 */
+  --space-2:  13.7px;   /* 1/7  */
+  --space-3:  16px;     /* 1/6  */
+  --space-4:  24px;     /* 1/4  */
+  --space-5:  48px;     /* 1/2  */
+  --space-6:  96px;     /* 1    */
+  --space-7:  144px;
+
+  --measure:    62ch;   /* running prose  */
+  --measure-sm: 26ch;   /* display headings */
+  --col-max:    1100px;
+  --gutter:     20px;
+
+  /* --- sfumato band ------------------------------------------------------
+     XRF modelling puts the Mona Lisa's glaze at 40 ± 10 µm at its darkest,
+     thinning below 5 µm across 5.5 cm of surface — a ratio near 1400:1.
+     That is why the band is tall and shallow rather than a tight fade.    */
+  --edge-height: 9rem;
+
+  /* ======================================================================
+     MOTION
+
+     Derived from the CHARACTER the turbulence paper describes — many small
+     fluctuations, rare large ones — not from its mathematics. No easing
+     function is derivable from a turbulence PDF in any rigorous sense, and
+     claiming otherwise would be overselling it.
+
+     Leave quickly, settle slowly, never overshoot.
+     ====================================================================== */
+  --ease-settle: cubic-bezier(.16,.84,.30,1);
+  --ease-enter:  cubic-bezier(.22,1,.36,1);
+  --dur-quick:   140ms;
+  --dur-settle:  320ms;
+
+  /* --- targets -----------------------------------------------------------
+     48px clears WCAG 2.5.8 (24px AA), 2.5.5 (44px AAA) and Android's 48dp
+     simultaneously. Reached via padding, never via font size.             */
+  --target-min: 48px;
+}
+
+/* Honour the OS setting. Scroll-triggered movement on six viewport-heights
+   of large paintings is a vestibular risk, not a flourish. */
+@media (prefers-reduced-motion: reduce){
+  :root{ --dur-quick: 1ms; --dur-settle: 1ms; }
+}

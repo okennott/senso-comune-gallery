@@ -1,0 +1,129 @@
+{
+  "$comment": [
+    "Site-wide strings and structure. Two locales, two URL trees:",
+    "  en -> /            (default, no prefix)",
+    "  zh -> /zh/",
+    "hreflang tags are emitted on every page pair, plus x-default on en."
+  ],
+
+  "url": "https://sensocomune.example",
+  "$urlNote": "NEEDS-INPUT - the live origin. Used for canonical and og:url.",
+
+  "defaultLocale": "en",
+  "locales": {
+    "en": { "lang": "en",    "label": "EN", "dir": "ltr", "prefix": ""     },
+    "zh": { "lang": "zh-CN", "label": "中文", "dir": "ltr", "prefix": "/zh" }
+  },
+
+  "nav": [
+    { "id": "works",   "href": "#works",   "label": { "en": "Original Works", "zh": "原作" } },
+    { "id": "tribute", "href": "#tribute", "label": { "en": "Tribute",        "zh": "致敬" } },
+    { "id": "about",   "href": "#about",   "label": { "en": "About",          "zh": "关于" } },
+    { "id": "buy",     "href": "#buy",     "label": { "en": "How to Buy",     "zh": "购买方式" } }
+  ],
+
+  "hero": {
+    "eyebrow": { "en": "Original Oil & Paper Works", "zh": "布面与纸本原作" },
+    "title":   { "en": "What is done with love is done well.", "zh": "以爱完成之事，方为善成。" },
+    "quote": {
+      "en": "I want to make drawings that move some people… Whether in figures or in landscapes, I would like to express not something sentimentally melancholic but deep sorrow.",
+      "zh": "我想画出能打动人的画……无论是人物还是风景，我想表达的不是伤感的忧郁，而是深沉的悲恸。"
+    },
+    "attribution": "Vincent van Gogh",
+    "cta": { "en": "View works", "zh": "浏览作品" }
+  },
+
+  "sections": {
+    "works": {
+      "title": { "en": "Original Works", "zh": "原作" },
+      "intro": {
+        "en": "Each piece is a unique physical object. Click through for full dimensions, a detail of the surface, and how it looks on a wall.",
+        "zh": "每件作品都是独一无二的实物。点击可查看完整尺寸、表面细节，以及悬挂效果。"
+      }
+    },
+    "tribute": {
+      "title": { "en": "Tribute", "zh": "致敬" },
+      "intro": {
+        "en": "Studies in tribute to the artists who shaped my eye. Not original compositions, and priced lower than original works.",
+        "zh": "向塑造了我眼光的艺术家致敬的习作。非原创构图，定价低于原作。"
+      }
+    },
+    "archive": {
+      "title": { "en": "Archive", "zh": "已售作品" },
+      "intro": {
+        "en": "Works that have found homes. Prices are left visible; if something here is close to what you were looking for, say so.",
+        "zh": "已被收藏的作品。价格保留展示；若其中有接近您所寻找的，请告诉我。"
+      }
+    },
+    "about": { "title": { "en": "About", "zh": "关于" } },
+    "buy":   { "title": { "en": "How to Buy", "zh": "购买方式" } }
+  },
+
+  "about": {
+    "$comment": "Paragraphs from the original draft, plus one addition from finding D-04.",
+    "paragraphs": {
+      "en": [
+        "These paintings are my creations — born from moments, places, and feelings I wanted to hold onto long enough to paint. I also hope they can serve, in a small way, as a form of support: I personally donate 10% of my profits from this shop each quarter to research related to bipolar disorder.",
+        "The works on this site have accumulated slowly over the past few years. There aren't many — partly because I paint slowly, and partly because I don't want to make something simply for the sake of making it. More than trying to create something impressive, I want the work to feel honest. If you paused for a moment in front of a certain painting, perhaps that pause is enough. It may be saying what I hoped it would.",
+        "Every work here is photographed under controlled lighting against a colour reference, and the images are prepared in sRGB so they show as accurately as a screen allows. Even so, screens differ, and paint keeps changing after it leaves the studio. Van Gogh knew this about his own colours and thought it was a reason to be bolder, not more careful: “All the colours that the Impressionists have brought into fashion are unstable, so there is all the more reason not to be afraid to lay them on too crudely — time will tone them down only too much.”"
+      ],
+      "zh": [
+        "这些画是我的创作——来自我想留住、久到足以画下来的瞬间、地方与感受。我也希望它们能以微小的方式成为一种支持：我每季度个人捐出本店利润的 10%，用于双相情感障碍相关研究。",
+        "这些作品是过去几年慢慢积累的。数量不多——一部分因为我画得慢，一部分因为我不想只为了做而做。比起做出令人惊艳的东西，我更希望作品是诚实的。如果你曾在某一幅画前停留片刻，也许那一刻就够了。它也许正在说我希望它说的话。",
+        "每件作品都在受控光线下、对照色卡拍摄，图像以 sRGB 处理，力求在屏幕上尽可能准确。即便如此，屏幕各不相同，而颜料在离开画室后仍在变化。梵高深知自己颜色的这一点，并认为这是更大胆而非更谨慎的理由：「印象派带起来的那些颜色都不稳定，所以更没有理由害怕把它们铺得太浓——时间只会把它们冲淡得太过分。」"
+      ]
+    }
+  },
+
+  "buy": {
+    "steps": {
+      "en": [
+        "Choose a piece and use the payment link, or message me with any questions first.",
+        "I'll confirm your shipping address by email and send a payment link if you don't have one.",
+        "The piece is packed flat between acid-free boards, or upright if it's on canvas, and shipped with a tracking number."
+      ],
+      "zh": [
+        "选择作品并使用付款链接，或先与我联系提出任何问题。",
+        "我会通过邮件确认您的收件地址，如尚未收到付款链接会一并发送。",
+        "作品以无酸卡纸夹平包装（布面作品则直立包装），寄出并提供追踪号。"
+      ]
+    },
+    "accessNote": {
+      "$comment": "Finding B-06. Satisfies the CRD, the UK anticipatory duty, and the US alternative-access expectation - and lets a blind collector actually buy the painting.",
+      "en": "If any part of this site stops you buying a painting, email me. I'll describe the work to you, take your order, and arrange payment and shipping personally — usually within two working days.",
+      "zh": "如果本网站的任何部分妨碍了您购买作品，请给我发邮件。我会为您描述作品、接受订单，并亲自安排付款与寄送——通常在两个工作日内。"
+    }
+  },
+
+  "ui": {
+    "buy":            { "en": "Buy",              "zh": "购买" },
+    "sold":           { "en": "Sold",             "zh": "已售" },
+    "soldEnquire":    { "en": "Sold — tell me when new work is listed",  "zh": "已售 — 有新作品时通知我" },
+    "enquire":        { "en": "Questions about this work?",              "zh": "对这件作品有疑问？" },
+    "backToWorks":    { "en": "Back to works",    "zh": "返回作品" },
+    "prevWork":       { "en": "Previous work",    "zh": "上一件" },
+    "nextWork":       { "en": "Next work",        "zh": "下一件" },
+    "uniqueWork":     { "en": "Unique work",      "zh": "独版作品" },
+    "frameNotIncl":   { "en": "Frame not included", "zh": "不含画框" },
+    "viewFull":       { "en": "View full size",   "zh": "查看大图" },
+    "closeDialog":    { "en": "Close",            "zh": "关闭" },
+    "fullDescription":{ "en": "Full description of this painting", "zh": "作品完整描述" },
+    "artistNote":     { "en": "Artist's note",    "zh": "作者手记" },
+    "skipToContent":  { "en": "Skip to content",  "zh": "跳到主要内容" },
+    "detailCrop":     { "en": "Detail — surface",  "zh": "细节 — 肌理" },
+    "scaleCaption":   { "en": "Shown against a 244 cm (8 ft) wall and a 213 cm sofa", "zh": "与 244 厘米（8 英尺）墙面及 213 厘米沙发比例对照" },
+    "measuredNote":   { "en": "Measured to the canvas edge.", "zh": "尺寸量至画布边缘。" },
+    "returnsShort":   { "en": "14-day returns, worldwide", "zh": "全球 14 天退货" },
+    "langSwitch":     { "en": "中文", "zh": "English" }
+  },
+
+  "footer": {
+    "rights": { "en": "All works © the artist.", "zh": "所有作品版权归艺术家所有。" },
+    "links": [
+      { "href": "/returns/",  "label": { "en": "Returns",  "zh": "退货政策" } },
+      { "href": "/shipping/", "label": { "en": "Shipping", "zh": "配送说明" } },
+      { "href": "/privacy/",  "label": { "en": "Privacy",  "zh": "隐私政策" } },
+      { "href": "/giving/",   "label": { "en": "Giving",   "zh": "捐赠记录" } }
+    ]
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "$comment": [
+    "SELLER IDENTITY AND LEGAL DISCLOSURE.",
+    "",
+    "Phase 2 step 0 decision: launch as an individual, but keep the Hong Kong",
+    "entity reachable as a configuration change rather than a rebuild.",
+    "",
+    "To migrate later, change `activeEntity` from 'individual' to 'hk-sole-prop'",
+    "and fill in that profile. Nothing else in the codebase needs to change:",
+    "the disclosure block, the checkout provider, the invoice language and the",
+    "returns page all read from the active profile.",
+    "",
+    "Anything still marked NEEDS-INPUT is reported by `npm run build` and must be",
+    "filled in before the site goes live."
+  ],
+
+  "activeEntity": "individual",
+
+  "artist": {
+    "name":   { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
+    "siteName": { "en": "Senso Comune Gallery", "zh": "常识画廊" },
+    "instagram": "NEEDS-INPUT",
+    "wechatId": "NEEDS-INPUT",
+    "xiaohongshu": "NEEDS-INPUT"
+  },
+
+  "contact": {
+    "$comment": [
+      "EU Consumer Rights Directive Art. 6(1)(c) requires a geographical address,",
+      "a telephone number AND an email address for distance contracts. Other",
+      "online channels are an addition, never a substitute. SAMR Order 37 Art. 12",
+      "separately requires the real operating address and contact details.",
+      "One block satisfies both. All three fields are mandatory."
+    ],
+    "email": "NEEDS-INPUT",
+    "phone": "NEEDS-INPUT",
+    "address": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" }
+  },
+
+  "entities": {
+    "individual": {
+      "kind": "individual",
+      "label": { "en": "Individual seller", "zh": "个人经营者" },
+
+      "registration": {
+        "$comment": [
+          "SAMR Order 37 Art. 8 para 3: an individual doing online trade with",
+          "annual turnover not exceeding CNY 100,000 is exempt from 市场主体登记.",
+          "Art. 12 then prescribes the EXACT sentence that must be published.",
+          "Do not paraphrase the Chinese string — it is quoted from the rule."
+        ],
+        "required": false,
+        "exemptionBasis": "零星小额交易活动",
+        "annualTurnoverCeilingCNY": 100000,
+        "selfDeclaration": {
+          "zh": "个人从事零星小额交易活动，依法不需要办理市场主体登记",
+          "en": "Individual engaged in small-scale, occasional transactions; not required to register as a market entity under PRC law."
+        },
+        "businessLicenceNo": null
+      },
+
+      "invoicing": {
+        "$comment": [
+          "Without a business licence she cannot self-issue 发票. Art. 16 of the",
+          "Invoice Management Measures allows 代开 at the tax bureau on request."
+        ],
+        "canSelfIssueFapiao": false,
+        "note": {
+          "zh": "默认提供收据。如需发票，可凭交易凭证向经营地税务机关申请代开。",
+          "en": "A receipt is issued by default. A tax invoice (fapiao) can be obtained on request through the local tax authority."
+        }
+      },
+
+      "vat": {
+        "$comment": "Monthly sales under CNY 100,000 are VAT-exempt through 2027-12-31.",
+        "registered": false,
+        "exempt": true
+      },
+
+      "checkout": {
+        "$comment": [
+          "Individual launch path. Stripe is unavailable to a mainland-China",
+          "seller and Airwallex excludes mainland entities from card acquiring,",
+          "so cards are not available on this profile. Each artwork carries its",
+          "own checkoutUrl in artworks.json; this only declares what is offered."
+        ],
+        "provider": "manual",
+        "methods": ["paypal", "alipay", "wechatpay"],
+        "supportsCards": false,
+        "collectsAddressAtCheckout": false,
+        "note": {
+          "en": "Payment is arranged directly. Message or email me and I'll send a secure payment link.",
+          "zh": "付款方式将直接安排。请联系我，我会发送付款链接。"
+        }
+      }
+    },
+
+    "hk-sole-prop": {
+      "kind": "business",
+      "label": { "en": "Hong Kong sole proprietorship", "zh": "香港独资企业" },
+
+      "registration": {
+        "$comment": [
+          "Once a HK Business Registration certificate exists, Airwallex can",
+          "approve the Payments product, which unlocks international cards PLUS",
+          "Alipay and WeChat Pay from one checkout. NOTE: Airwallex approves the",
+          "Payments product separately from account opening, and reviews the live",
+          "site. Confirm before incorporating."
+        ],
+        "required": true,
+        "exemptionBasis": null,
+        "annualTurnoverCeilingCNY": null,
+        "selfDeclaration": null,
+        "businessLicenceNo": "NEEDS-INPUT",
+        "businessRegistrationNo": "NEEDS-INPUT"
+      },
+
+      "invoicing": {
+        "canSelfIssueFapiao": false,
+        "note": {
+          "en": "An invoice is issued with every order.",
+          "zh": "每笔订单均开具发票。"
+        }
+      },
+
+      "vat": { "registered": false, "exempt": true },
+
+      "checkout": {
+        "provider": "airwallex",
+        "methods": ["card", "paypal", "alipay", "wechatpay"],
+        "supportsCards": true,
+        "collectsAddressAtCheckout": true,
+        "note": {
+          "en": "Secure checkout. Card, PayPal, Alipay and WeChat Pay accepted.",
+          "zh": "安全结账。支持银行卡、PayPal、支付宝与微信支付。"
+        }
+      }
+    }
+  },
+
+  "returns": {
+    "$comment": [
+      "A unique pre-existing painting gets NO exception under either regime.",
+      "CN: CPL Art. 25 gives 7 days; the exclusions in SAIC Order 90 Arts. 6-7",
+      "are a closed list and a pre-existing painting fits none of them. The 2024",
+      "Implementing Regulations Art. 19 forbid expanding that list.",
+      "EU: CRD Art. 16(c) covers goods made to the consumer's specifications.",
+      "Uniqueness is not personalisation.",
+      "One worldwide 14-day policy over-satisfies both and avoids geo-detection."
+    ],
+    "windowDays": 14,
+    "buyerPaysReturnShipping": true,
+    "refundWithinDays": 7,
+    "commissionsExcluded": true
+  },
+
+  "donation": {
+    "$comment": [
+      "Framed as a personal pledge rather than a per-transaction consumer",
+      "promise. State the same basis everywhere - site, receipts, social."
+    ],
+    "percentOfProfit": 10,
+    "cadence": "quarterly",
+    "recipient": "NEEDS-INPUT",
+    "recipientUrl": "NEEDS-INPUT",
+    "notTaxDeductibleToBuyer": true
+  },
+
+  "shipping": {
+    "incoterm": "DAP",
+    "$comment": [
+      "DAP = Delivered at Place. Seller pays freight; buyer handles import",
+      "duties and clearance. State it BEFORE checkout, not after payment."
+    ],
+    "usImportNote": {
+      "$comment": [
+        "Section 301 List 4A adds 7.5% on HTSUS 9701.91.00 for China-origin",
+        "paintings, and the $800 de minimis exemption is suspended. Do NOT",
+        "tell US buyers the purchase is duty-free."
+      ],
+      "en": "US buyers: original paintings carry no base import duty, but China-origin works currently attract approximately 7.5% Section 301 duty plus customs handling. Budget roughly 8–12% above the price.",
+      "zh": "美国买家：原作本身无基础关税，但中国原产作品目前适用约 7.5% 的 301 条款关税，另加清关手续费，合计约为价格的 8–12%。"
+    },
+    "ukImportNote": {
+      "$comment": "Verified: 0% duty, ERGA OMNES (origin-neutral), reduced art VAT rate.",
+      "en": "UK buyers: no import duty, and original art is charged at the reduced VAT rate.",
+      "zh": "英国买家：无进口关税，原创艺术品适用增值税优惠税率。"
+    },
+    "euImportNote": {
+      "$comment": "OPEN ITEM - EU reduced art VAT rates unverified; Council Directive (EU) 2022/542 changed art VAT from 2025. Do not publish rates until confirmed.",
+      "en": "EU buyers: import VAT is charged on arrival at your country's rate for works of art. Any duties or handling fees are payable to the carrier on delivery.",
+      "zh": "欧盟买家：进口增值税按贵国艺术品税率于到货时征收。任何关税或手续费须在收货时支付给承运商。"
+    }
+  }
+}

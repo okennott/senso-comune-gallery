@@ -1,0 +1,22 @@
+{
+  "name": "senso-comune-gallery",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gallery site for a solo painter. Static output, no framework.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "npm run build:images && npm run build:site",
+    "build:site": "node build.js",
+    "build:images": "node scripts/build-images.mjs",
+    "check": "node scripts/check-contrast.mjs && node scripts/check-links.mjs",
+    "serve": "node scripts/serve.mjs",
+    "fonts": "bash scripts/build-fonts.sh",
+    "report": "bash scripts/build-report.sh"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

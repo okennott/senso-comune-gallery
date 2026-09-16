@@ -1,0 +1,258 @@
+/* ===========================================================================
+   SENSO COMUNE — BASE
+
+   Findings implemented here, by id:
+     A-01  filled ink CTA at 14.99:1, replacing #A19E97 at 2.67:1
+     A-02  underlines on body-copy links (G183 — structural, not stylistic)
+     A-03  two-tone focus ring that survives being over a dark painting
+     A-05  48px targets via padding; visually-hidden utility
+     N-07  scroll-padding-top so the sticky nav cannot obscure focus (2.4.11)
+     D-02  sfumato section edges, oklab, noise-dithered
+     D-03  Leonardo hatching at 45°, "\" direction, one use only
+     D-05  easing tokens; all motion gated on prefers-reduced-motion
+   =========================================================================== */
+
+@font-face{
+  font-family:'Fraunces';
+  src:url('/fonts/fraunces-latin.woff2') format('woff2');
+  font-weight:400 700; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:'Inter';
+  src:url('/fonts/inter-latin.woff2') format('woff2');
+  font-weight:400 600; font-style:normal; font-display:swap;
+}
+
+*,*::before,*::after{ box-sizing:border-box }
+
+html{
+  /* N-07 / SC 2.4.11 Focus Not Obscured. Also fixes the visual bug where an
+     anchor jump tucks the heading under the nav. */
+  scroll-padding-top:5.5rem;
+  -webkit-text-size-adjust:100%;
+}
+@media (prefers-reduced-motion: no-preference){
+  /* Deliberately NOT smooth for nav jumps — six viewport-heights of large
+     images is a long, disorienting glide. Smooth is opt-in per element. */
+  html:focus-within{ scroll-behavior:auto }
+}
+[id]{ scroll-margin-top:5.5rem }
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--body);
+  font-family:var(--font-body);
+  font-size:var(--size-body);
+  line-height:var(--lh-body);
+  font-synthesis-weight:none;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+img,svg,video{ max-width:100%; height:auto; display:block }
+img{ background:var(--wash-warm) }   /* holds the box before bytes arrive */
+
+/* ---------- layout ---------- */
+.wrap{
+  max-width:var(--col-max);
+  margin-inline:auto;
+  padding-inline:var(--gutter);
+}
+.measure{ max-width:var(--measure) }
+
+/* ---------- type ---------- */
+h1,h2,h3{
+  font-family:var(--font-display);
+  color:var(--ink);
+  font-weight:400;
+  line-height:var(--lh-head);
+  text-wrap:balance;
+  margin:0;
+}
+h1{ font-size:var(--size-hero); font-variation-settings:'opsz' 38.4,'SOFT' 0,'WONK' 1; line-height:var(--lh-tight) }
+h2{ font-size:var(--size-h2);   font-variation-settings:'opsz' 33.6,'SOFT' 0,'WONK' 1 }
+h3{ font-size:var(--size-h3);   font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1 }
+p{ margin:0 0 var(--space-4); text-wrap:pretty }
+
+.eyebrow{
+  font-family:var(--font-body);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label);
+  text-transform:uppercase;
+  color:var(--sanguine);
+  margin:0 0 var(--space-3);
+}
+
+/* ---------- links ----------
+   A-02. --sanguine is 1.13:1 against --body, nowhere near the 3:1 that
+   technique G183 requires for colour-alone differentiation. The underline
+   is therefore structural. Standalone links (nav, CTA) are exempt because
+   they do not sit inside surrounding static text. */
+a{ color:var(--sanguine) }
+
+.prose a{
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:.22em;
+  text-decoration-color:var(--rule);
+  transition:text-decoration-color var(--dur-quick) var(--ease-settle);
+}
+.prose a:hover,
+.prose a:focus-visible{
+  color:var(--sanguine-deep);
+  text-decoration-thickness:2px;
+  text-decoration-color:currentColor;
+}
+
+/* ---------- focus ----------
+   A-03. The largest focusable targets are the paintings. A single-colour
+   ring drops to 2.15:1 over a dark passage and 1.57:1 over a mid-tone. The
+   white outer halo reads at 14.35:1 on a dark painting, so the pair works
+   on any background. */
+:focus-visible{
+  outline:2px solid var(--sanguine);
+  outline-offset:2px;
+  box-shadow:0 0 0 4px var(--paper);
+  border-radius:1px;
+}
+@supports not selector(:focus-visible){
+  :focus{ outline:2px solid var(--sanguine); outline-offset:2px }
+}
+
+/* ---------- controls ----------
+   A-01 + A-05. Filled ink at 14.99:1. min-height reached via padding, and
+   inline-flex because padding on an inline <a> does not expand its layout
+   box. 48px clears 2.5.8 (24), 2.5.5 (44) and Android 48dp at once. */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:var(--target-min);
+  padding-inline:var(--space-4);
+  background:var(--ink); color:var(--paper);
+  border:1px solid var(--ink); border-radius:0;
+  font-family:var(--font-body);
+  font-size:var(--size-caption); font-weight:500;
+  letter-spacing:var(--track-label); text-transform:uppercase;
+  text-decoration:none;
+  transition:background var(--dur-quick) var(--ease-settle),
+             border-color var(--dur-quick) var(--ease-settle);
+}
+.btn:hover{ background:var(--sanguine); border-color:var(--sanguine) }
+.btn:active{ background:var(--sanguine-deep); border-color:var(--sanguine-deep) }
+
+/* Quiet secondary action — a real link, not a ghost button. */
+.link-quiet{
+  display:inline-flex; align-items:center;
+  min-height:var(--target-min);
+  color:var(--ink);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label); text-transform:uppercase;
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:.28em;
+  text-decoration-color:var(--muted-ui);
+  transition:text-decoration-color var(--dur-quick) var(--ease-settle),
+             color var(--dur-quick) var(--ease-settle);
+}
+.link-quiet::after{ content:'\00a0→' }   /* affordance that is not colour */
+.link-quiet:hover{ color:var(--sanguine); text-decoration-color:currentColor }
+
+/* ---------- sfumato edges ----------
+   D-02. Leonardo: lights and shadows united "senza tratti o segni".
+   Replaces the draft's 1px hairlines, which were 1.32:1 and doing no
+   accessibility work anyway.
+
+   Two things matter here. oklab interpolation avoids the grey dip that sRGB
+   produces through the midpoint of a low-saturation gradient; and a gradient
+   this shallow over this large an area WILL band on 8-bit displays, which is
+   what .edge::after dithers away. */
+.edge{
+  height:var(--edge-height);
+  position:relative;
+  pointer-events:none;
+}
+.edge--warm{   background:linear-gradient(in oklab,var(--paper) 0%,var(--wash-warm)   55%,var(--paper) 100%) }
+.edge--violet{ background:linear-gradient(in oklab,var(--paper) 0%,var(--wash-violet) 55%,var(--paper) 100%) }
+.edge--blue{   background:linear-gradient(in oklab,var(--paper) 0%,var(--wash-blue)   55%,var(--paper) 100%) }
+
+@supports not (background:linear-gradient(in oklab,red,blue)){
+  .edge--warm{   background:linear-gradient(var(--paper),var(--wash-warm),var(--paper)) }
+  .edge--violet{ background:linear-gradient(var(--paper),var(--wash-violet),var(--paper)) }
+  .edge--blue{   background:linear-gradient(var(--paper),var(--wash-blue),var(--paper)) }
+}
+
+/* Noise dither. ~1.4KB inline SVG, no network request, no repaint cost
+   beyond one composited layer. */
+.edge::after{
+  content:'';
+  position:absolute; inset:0;
+  opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+}
+
+/* Section grounds, so the wash continues behind content rather than
+   appearing only in the band. */
+.ground--warm{   background:var(--wash-warm) }
+.ground--violet{ background:var(--wash-violet) }
+.ground--blue{   background:var(--wash-blue) }
+
+/* ---------- Leonardo hatch ----------
+   D-03. Left-handed: the stroke runs upper-left to lower-right. Measured at
+   43.8° by structure-tensor analysis of his sheets; use 45°.
+   ONE use only — behind the Tribute eyebrow. Never a page background. */
+.hatch{
+  background-image:repeating-linear-gradient(
+    45deg,
+    color-mix(in oklab,var(--sanguine) 20%,transparent) 0 1px,
+    transparent 1px 7px
+  );
+}
+@supports not (color:color-mix(in oklab,red,blue)){
+  .hatch{ background-image:repeating-linear-gradient(45deg,rgba(139,74,60,.2) 0 1px,transparent 1px 7px) }
+}
+
+/* ---------- utilities ---------- */
+.visually-hidden{
+  position:absolute; width:1px; height:1px;
+  clip-path:inset(50%); overflow:hidden;
+  margin:-1px; padding:0; white-space:nowrap;
+}
+/* Never display:none — that removes it from the accessibility tree too. */
+
+.skip-link{
+  position:absolute; left:var(--gutter); top:0;
+  transform:translateY(-120%);
+  background:var(--ink); color:var(--paper);
+  padding:var(--space-2) var(--space-4);
+  z-index:100; text-decoration:none;
+  font-size:var(--size-caption); letter-spacing:var(--track-label);
+  text-transform:uppercase;
+}
+.skip-link:focus{ transform:translateY(0) }
+
+/* ---------- reduced motion ----------
+   D-05. Neutralise, don't merely speed up. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:1ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:1ms !important;
+    scroll-behavior:auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*){ animation:none !important }
+}
+
+/* ---------- view transitions ----------
+   N-02. Makes seven documents feel like the one page the artist drew.
+   Browsers without support navigate normally; no errors. */
+@view-transition{ navigation:auto }
+
+@media (prefers-reduced-motion: no-preference){
+  ::view-transition-old(root),
+  ::view-transition-new(root){
+    animation-duration:var(--dur-settle);
+    animation-timing-function:var(--ease-enter);
+  }
+}
