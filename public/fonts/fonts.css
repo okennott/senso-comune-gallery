@@ -1,0 +1,51 @@
+/* Senso Comune Gallery — self-hosted webfaces.
+   Built by scripts/build-fonts.sh. See README for why these are not on a CDN.
+
+   Preload these two in <head>, before this stylesheet:
+     <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font"
+           type="font/woff2" crossorigin>
+     <link rel="preload" href="/fonts/inter-latin.woff2" as="font"
+           type="font/woff2" crossorigin>
+   `crossorigin` is required even same-origin, or the font is fetched twice.
+
+   Serve with: Cache-Control: public, max-age=31536000, immutable
+   (filenames should be content-hashed at deploy time). */
+
+@font-face{
+  font-family:'Fraunces';
+  src:url('/fonts/fraunces-latin.woff2') format('woff2');
+  font-weight:400 700;          /* draft uses 400 and 500 */
+  font-style:normal;
+  font-display:swap;
+}
+
+@font-face{
+  font-family:'Inter';
+  src:url('/fonts/inter-latin.woff2') format('woff2');
+  font-weight:400 600;
+  font-style:normal;
+  font-display:swap;
+}
+
+:root{
+  /* The draft drives Fraunces' optical-size axis from the font size.
+     These are the six sizes measured out of index.pdf. */
+  --fr-opsz-hero: 38.4;
+  --fr-opsz-h2:   30.4;
+  --fr-opsz-h3:   27.2;
+  --fr-opsz-mark: 21.6;
+  --fr-opsz-body: 16.8;
+  --fr-opsz-min:  16.0;
+
+  --font-display:'Fraunces', Georgia, 'Songti SC', 'Times New Roman', serif;
+  --font-body:'Inter', system-ui, -apple-system, 'PingFang SC',
+              'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* Keep opsz tied to size, which is the whole reason the axis was kept live. */
+.display-hero{font-family:var(--font-display);font-size:38.4px;
+              font-variation-settings:'opsz' 38.4,'SOFT' 0,'WONK' 1}
+.display-h2  {font-family:var(--font-display);font-size:30.4px;
+              font-variation-settings:'opsz' 30.4,'SOFT' 0,'WONK' 1}
+.display-mark{font-family:var(--font-display);font-size:21.6px;
+              font-variation-settings:'opsz' 21.6,'SOFT' 0,'WONK' 1}

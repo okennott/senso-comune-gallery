@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build output
+dist/
+.astro/
+.cache/
+public/img/generated/
+
+# image masters — never commit full-resolution originals
+masters/
+*.dng
+*.CR2
+*.NEF
+*.ARW
+*.psd
+*.tif
+*.tiff
+
+# environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+.dev.vars
+
+# os / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# dropbox
+.dropbox
+.dropbox.attr
+~$*
+trat.html
