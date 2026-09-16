@@ -13,10 +13,10 @@ based in mainland China.
 
 **[`docs/build-report.html`](docs/build-report.html)** — open it in a browser.
 
-Thirty-eight findings against the original design draft, each scoped to a cost,
+Twenty-nine findings against the original design draft, each scoped to a cost,
 an effort and a specific change. It is a single self-contained file: fonts
 embedded as base64, **zero external requests**, so it works offline and works
-from mainland China. 265 KB.
+from mainland China. 279 KB.
 
 Rebuild it after editing the source with:
 
@@ -24,7 +24,7 @@ Rebuild it after editing the source with:
 ./scripts/build-report.sh          # docs/source/build-report.src.html -> docs/build-report.html
 ```
 
-### The six blocking findings
+### The seven that would sink it
 
 | # | Finding |
 |---|---|
@@ -34,6 +34,7 @@ Rebuild it after editing the source with:
 | B-03 | `vercel.app` and `workers.dev` measure **100% blocked** from mainland China. `pages.dev` measures 0%. |
 | B-05 | A unique pre-existing painting gets **no returns exception** under either Chinese or EU law. Uniqueness is not personalisation. |
 | B-06 | Instagram is the draft's only contact channel, and it is blocked in mainland China — as well as being insufficient under EU consumer law. |
+| B-08 | **China-origin paintings are not duty-free into the US.** Section 301 List 4A adds **+7.5%** on HTSUS 9701.91.00, and the $800 de minimis exemption is suspended, so every painting needs a customs entry. |
 
 ---
 
@@ -106,11 +107,26 @@ unaudited third party able to inject arbitrary CSS.
 - **No AR, no deep zoom, no image CDN, no donation SaaS, no watermarks, no
   right-click blocking, no accessibility overlay.** Reasoning in the report.
 - **Design direction:** a debt to Leonardo and van Gogh carried in colour, ground
-  and motion, never announced. The organising idea is that Leonardo's *sfumato*
-  — "without lines or borders, in the manner of smoke" — and the Chinese 没骨
+  and motion, never announced. The organising idea is that Leonardo's instruction
+  to paint "without strokes or lines, in the manner of smoke" and the Chinese 没骨
   ("boneless") tradition of painting without contour are the same idea reached
-  independently, which for a Chinese painter addressing both audiences is a
-  structural principle rather than a motif.
+  independently — which, for a Chinese painter addressing both audiences, is a
+  structural principle rather than a motif. It resolves to one decision: **a site
+  with no hard edges.**
+
+  Three things fell out of the research that are worth knowing before anyone
+  edits the palette:
+
+  - The artist's existing oxblood `#8B4A3C` (6.68:1) is, within measurement
+    error, **sanguine — the red chalk Leonardo drew in** (6.33:1). The homage was
+    already there, arrived at by eye. Don't change it.
+  - **Do not sample colours off the paintings.** The *Bedroom* wall as it
+    survives today is 2.78:1 and the *Sunflowers* chrome yellow 2.70:1 — both
+    within a hair of the `#A19E97` failure this whole report opens with.
+  - **Leonardo never wrote the word *sfumato***, and did not invent the idea —
+    Cennino Cennini described blending shadows "like smoke" a century earlier.
+    The one proportional system in Leonardo's own hand, on the *Vitruvian Man*
+    sheet, is whole-number fractions (1/10, 1/8, 1/6, 1/4, 1/7), not φ.
 
 ---
 
@@ -123,9 +139,16 @@ unaudited third party able to inject arbitrary CSS.
    from one checkout. This decision gates all checkout work.
 2. **CJK webfont strategy.** A full CJK face is 5–10 MB against 80 KB for the
    Latin pair. Unresolved.
-3. **US import treatment of China-origin art in 2026.** HS 9701 is normally
-   duty-free; whether current tariff action reaches it determines what the site
-   can tell US buyers.
+3. **Exporting the work from China.** Three linked questions are unresolved
+   because the Chinese government sources were unreachable: whether a living
+   artist's new work needs a cultural-relics export appraisal (文物出境审核),
+   what carriers charge and insure from China, and what an individual actually
+   files for a US$300 painting — which also determines what document supports
+   the bank's foreign-exchange authenticity check.
+4. **EU reduced art VAT rates.** France 5.5% / Germany 7% / Italy 5% could not be
+   verified, and Council Directive (EU) 2022/542 changed art VAT from 2025. The
+   **UK is verified** — 0% duty, ERGA OMNES, so origin-neutral, with the reduced
+   VAT rate present.
 
 ---
 

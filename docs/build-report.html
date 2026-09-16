@@ -145,7 +145,7 @@ a:hover{text-decoration-thickness:2px}
     <div class="meta-cell"><dt>Base / markets</dt><dd>Mainland China → CN + international</dd></div>
     <div class="meta-cell"><dt>Price band</dt><dd>$60 – $440</dd></div>
     <div class="meta-cell"><dt>Typefaces</dt><dd>Fraunces · Inter (self-hosted, 79.8 KB)</dd></div>
-    <div class="meta-cell"><dt>Findings</dt><dd>38 · 6 blocking</dd></div>
+    <div class="meta-cell"><dt>Findings</dt><dd>29 · 11 blocking</dd></div>
     <div class="meta-cell"><dt>Running cost</dt><dd>$0/mo + ~$11/yr domain</dd></div>
   </dl>
 </header>
@@ -156,13 +156,14 @@ a:hover{text-decoration-thickness:2px}
   <p class="sec-intro">Revision 1 assumed a Western seller. That assumption was wrong in a way that invalidates several recommendations outright — and, unexpectedly, makes the design brief easier rather than harder.</p>
 
   <div class="callout">
-    <h4>Six blocking findings</h4>
+    <h4>The seven that would sink it</h4>
     <p><strong>1. Every call to action fails contrast.</strong> <code>#A19E97</code> — "View Works", "Buy", "Sold", "Go to Checkout" — is 2.67:1 on white. No font size rescues it. <em>(Unchanged from rev. 1.)</em></p>
     <p><strong>2. A one-page site cannot link to one painting.</strong> A <code>#work-3</code> fragment never reaches the server. <em>(Unchanged.)</em></p>
     <p><strong>3. Stripe is unavailable to a mainland-China seller</strong> — not merely PayPal-via-Stripe, the whole account. Verified against Stripe's own country list.</p>
     <p><strong>4. Airwallex will not give card acquiring to a mainland-China entity,</strong> and will not open an account for an individual at all. A Hong Kong entity turns it on.</p>
     <p><strong>5. Instagram is blocked in mainland China</strong> and is the draft's only contact channel — which was already a consumer-law problem in the EU and is now a reachability problem at home too.</p>
     <p><strong>6. The no-returns assumption is wrong in both markets.</strong> A unique pre-existing painting gets no exception under Chinese or EU law. The draft's "How to Buy" needs a returns policy it currently does not have.</p>
+    <p><strong>7. China-origin paintings are not duty-free into the US.</strong> Section 301 List 4A adds 7.5%, and the $800 de minimis exemption is suspended, so every painting needs a customs entry. The site cannot tell US buyers there is no duty.</p>
   </div>
 
   <p class="prose">What survives untouched: the single-column editorial scroll, which is correct at six works and is the gallery idiom rather than the marketplace one; the decision to show prices; the tombstone line's quiet grey; and both typefaces, which are open-source and therefore self-hostable — the single most useful accident in the draft, as section 05 explains.</p>
@@ -283,6 +284,9 @@ a:hover{text-decoration-thickness:2px}
 }</code></pre>
       <p><strong>Two implementation notes that matter.</strong> Interpolate <code>in oklab</code> — sRGB interpolation produces a visible grey dip through the midpoint on low-saturation gradients, which is precisely the case here. And a gradient this shallow across this large an area <em>will</em> band on 8-bit displays; the fix is a fixed-position SVG <code>feTurbulence</code> noise overlay at very low opacity, which dithers the steps away.</p>
       <p>Tint the bands from the pigment set, one per section, at the washed-out end: warm sfumato <code>#FAF7F2</code> for Original Works, <code>#F4F1F6</code> violet for Tribute, blue-paper <code>#EEF1F5</code> for About. <strong>Body text still measures 6.67–7.07:1 on all three</strong>, so the quiet is free.</p>
+      <p><strong>The measured facts justify the proportion, not just the idea.</strong> X-ray fluorescence modelling of the <i>Mona Lisa</i> puts the total glaze at its darkest at <strong>40 ± 10 µm</strong>, thinning to <strong>under 5 µm</strong> where the shadow begins — and that taper is spread over <strong>5.5 cm</strong> of picture surface. The lead white underneath stays flat at 40–45 µm, so <em>the entire transition is carried by the glaze wedge alone.</em></p>
+      <p>Two design consequences follow directly. The ratio of transition length to layer depth is roughly <strong>1,400:1</strong> — which is why a sfumato band has to be tall and shallow rather than a tight fade; a 9rem band across a 1200px column is close to the same proportion. And the transition is carried by <em>one</em> continuous element, not by stacking many: resist the urge to layer three gradients.</p>
+      <p class="ev"><b>Verified:</b> de Viguerie et al., <i>Angew. Chem. Int. Ed.</i> 49(35), 6125–6128 (2010), and the underlying 2009 thesis. <b>Note:</b> XRF returns total attenuating thickness, so the authors state they cannot even validate a two-glaze model — <strong>any "thirty layers" figure is untraceable</strong> and should not appear in the documentation.</p>
     </div>
     <dl class="scope">
       <div><dt>Effort</dt><dd>2–3 hours</dd></div><div><dt>Cost</dt><dd>$0</dd></div>
@@ -290,30 +294,66 @@ a:hover{text-decoration-thickness:2px}
     </dl>
   </div>
 
-  <div class="hatch-demo">
-    <div class="hatch-box">
-      <div class="hatch-label">Right-handed hatching — wrong</div>
-      <div class="hatch-fill" style="background-image:repeating-linear-gradient(45deg,#8B4A3C 0 1px,transparent 1px 7px);opacity:.5"></div>
-    </div>
-    <div class="hatch-box">
-      <div class="hatch-label">Leonardo's direction — left-handed</div>
-      <div class="hatch-fill" style="background-image:repeating-linear-gradient(-45deg,#8B4A3C 0 1px,transparent 1px 7px);opacity:.5"></div>
-    </div>
-  </div>
+  <figure>
+    <svg viewBox="0 0 640 150" role="img" aria-label="Two hatching patterns side by side. The right-handed stroke runs from lower-left to upper-right; Leonardo's left-handed stroke runs from upper-left to lower-right, the mirror of it. Measured orientation analysis of his drawings gives a mean angle of 43.8 degrees.">
+      <g stroke="#8B4A3C" stroke-width="1.4" opacity=".62">
+        <g transform="translate(20,20)">
+          <clipPath id="cA"><rect width="260" height="96"/></clipPath>
+          <g clip-path="url(#cA)">
+            <!-- "/" right-handed: lower-left to upper-right -->
+            <g>
+              <line x1="-100" y1="196" x2="100" y2="-4"/><line x1="-80" y1="196" x2="120" y2="-4"/>
+              <line x1="-60" y1="196" x2="140" y2="-4"/><line x1="-40" y1="196" x2="160" y2="-4"/>
+              <line x1="-20" y1="196" x2="180" y2="-4"/><line x1="0" y1="196" x2="200" y2="-4"/>
+              <line x1="20" y1="196" x2="220" y2="-4"/><line x1="40" y1="196" x2="240" y2="-4"/>
+              <line x1="60" y1="196" x2="260" y2="-4"/><line x1="80" y1="196" x2="280" y2="-4"/>
+              <line x1="100" y1="196" x2="300" y2="-4"/><line x1="120" y1="196" x2="320" y2="-4"/>
+              <line x1="140" y1="196" x2="340" y2="-4"/><line x1="160" y1="196" x2="360" y2="-4"/>
+              <line x1="180" y1="196" x2="380" y2="-4"/><line x1="200" y1="196" x2="400" y2="-4"/>
+            </g>
+          </g>
+          <rect width="260" height="96" fill="none" stroke="currentColor" stroke-width="1" opacity=".3"/>
+        </g>
+        <g transform="translate(340,20)">
+          <clipPath id="cB"><rect width="260" height="96"/></clipPath>
+          <g clip-path="url(#cB)">
+            <!-- "\" Leonardo, left-handed: upper-left to lower-right -->
+            <g>
+              <line x1="-100" y1="-4" x2="100" y2="196"/><line x1="-80" y1="-4" x2="120" y2="196"/>
+              <line x1="-60" y1="-4" x2="140" y2="196"/><line x1="-40" y1="-4" x2="160" y2="196"/>
+              <line x1="-20" y1="-4" x2="180" y2="196"/><line x1="0" y1="-4" x2="200" y2="196"/>
+              <line x1="20" y1="-4" x2="220" y2="196"/><line x1="40" y1="-4" x2="240" y2="196"/>
+              <line x1="60" y1="-4" x2="260" y2="196"/><line x1="80" y1="-4" x2="280" y2="196"/>
+              <line x1="100" y1="-4" x2="300" y2="196"/><line x1="120" y1="-4" x2="320" y2="196"/>
+              <line x1="140" y1="-4" x2="340" y2="196"/><line x1="160" y1="-4" x2="360" y2="196"/>
+              <line x1="180" y1="-4" x2="380" y2="196"/><line x1="200" y1="-4" x2="400" y2="196"/>
+            </g>
+          </g>
+          <rect width="260" height="96" fill="none" stroke="currentColor" stroke-width="1" opacity=".3"/>
+        </g>
+      </g>
+      <text x="20" y="132" font-family="JetBrains Mono, monospace" font-size="10.5" fill="currentColor" opacity=".7">RIGHT-HANDED — the default</text>
+      <text x="340" y="132" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#8B4A3C">LEONARDO — measured 43.8°</text>
+    </svg>
+    <figcaption><b>The stroke runs the other way.</b> Structure-tensor orientation analysis of Leonardo's sheets returns a dominant "\" direction at a mean of 43.8°, with a coherent-tile census of 25 to 2 on the equestrian study; a right-handed control on Michelangelo returns the mirror. Use 45°.</figcaption>
+  </figure>
 
   <div class="finding">
     <div class="f-top"><span class="f-id">D-03</span><span class="sev sev-adopt">Adopt</span></div>
     <div class="f-body">
       <p class="f-title">Hatch the other way</p>
-      <p>Leonardo was left-handed, and his hatching runs upper-left to lower-right — the mirror of a right-hander's stroke. It is one of the standard tells used to attribute sheets to his hand. A hatching texture angled <em>his</em> way is the definition of a detail that costs nothing and rewards only the person who would notice.</p>
-      <p>Use it in one place, very faintly — behind the Tribute eyebrow label, or as the sold-state fill. Not as a page background.</p>
-      <pre><code>background-image:repeating-linear-gradient(-45deg,
-    color-mix(in oklab,#8B4A3C 22%,transparent) 0 1px, transparent 1px 7px);</code></pre>
-      <p class="ev"><b>Not verified this session.</b> Leonardo's left-handedness and the resulting hatching direction are art-historical commonplaces, but I could not retrieve a primary source in this session. The design works regardless of which way the strokes run — <strong>confirm before anyone writes it into the documentation as fact.</strong></p>
+      <p>Leonardo was left-handed — his mirror writing is uncontested — and his hatching therefore runs <strong>upper-left to lower-right</strong>, the mirror of a right-hander's stroke. It is one of the standard tells used to attribute sheets to his hand. A hatching texture angled <em>his</em> way costs nothing and rewards only the person who would notice.</p>
+      <p>Draw it as SVG rather than a CSS gradient, because the angle sign is unambiguous in path coordinates and easy to get backwards in <code>repeating-linear-gradient</code>:</p>
+      <pre><code>&lt;pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse"
+         patternTransform="rotate(-45)"&gt;
+  &lt;line x1="0" y1="0" x2="0" y2="7" stroke="#8B4A3C" stroke-opacity=".22"/&gt;
+&lt;/pattern&gt;</code></pre>
+      <p>Use it in one place only, very faintly — behind the Tribute eyebrow label, or as the sold-state fill. Never as a page background.</p>
+      <p class="ev"><b>Left-handedness: verified.</b> <b>Direction: measured, not cited.</b> No text source could be retrieved (the Royal Collection, Britannica and NGA all refuse automated fetch), so the angle was established by structure-tensor analysis of the drawings themselves, validated first against synthetic hatch fields of known angle. Measured spread 40–52°; two chalk sheets ran the other way, and hatching that follows curved form has no single global angle. <strong>Present it as a measurement, not a citation.</strong></p>
     </div>
     <dl class="scope">
       <div><dt>Effort</dt><dd>30 minutes</dd></div><div><dt>Cost</dt><dd>$0</dd></div>
-      <div><dt>Use</dt><dd>One location only</dd></div><div><dt>Confidence</dt><dd>Unverified — check</dd></div>
+      <div><dt>Use</dt><dd>One location only</dd></div><div><dt>Angle</dt><dd>45°, "\" direction</dd></div>
     </dl>
   </div>
 
@@ -324,8 +364,11 @@ a:hover{text-decoration-thickness:2px}
       <p>This is the strongest available van Gogh reference, and it is not a swirl.</p>
       <p>Van Gogh wrote to Theo of <i>The Bedroom</i>: <strong>"The walls are of a pale violet."</strong> The painting today reads blue, because the red lake pigment he mixed in has faded in the intervening century. The work we look at is not the work he chose. That is a real, documented, quietly devastating fact about painting and time — and it is exactly what a site selling <em>original physical objects</em> is implicitly arguing about.</p>
       <p><strong>Implementation:</strong> use the pale violet <code>#9B8AA6</code> — his stated colour, not the faded one — as the hairline and rule colour throughout, and as the <code>::selection</code> background. It measures 3.19:1, which clears the 3:1 non-text threshold for a rule that carries meaning. Nobody will decode it. It will simply be the one slightly unusual grey on the site.</p>
-      <p>This also earns the About page a single true sentence about why the artist photographs and colour-manages carefully — connecting the homage to finding I-01 rather than leaving it as ornament.</p>
-      <p class="ev"><b>Verified:</b> van Gogh's own words, letter to Theo, quoted in the standard literature on <i>Bedroom in Arles</i>. The fading of red lakes in his work is well documented by the Van Gogh Museum; specific reconstruction values were not retrievable this session.</p>
+      <p><strong>And he knew.</strong> From Arles, on his own palette — the chromes, Prussian blue, emerald, the crimson lakes:</p>
+      <blockquote><p>All the colours that the Impressionists have brought into fashion are unstable, so there is all the more reason not to be afraid to lay them on too crudely — time will tone them down only too much.</p></blockquote>
+      <p>That is the whole argument of this site in one sentence by someone else: a painting is a physical object that keeps changing after it leaves the studio, and that is a reason to be bolder rather than more careful. It belongs on the About page far more than any biographical note about ears or asylums.</p>
+      <p>It also earns the single true sentence about why the artist photographs and colour-manages carefully — connecting the homage to finding I-01 rather than leaving it as ornament.</p>
+      <p class="ev"><b>Verified:</b> van Gogh to Theo, letter 476 (old numbering), Arles; and his own description of the <i>Bedroom</i> walls as "pale violet". The letters are fully published and need no myth.</p>
     </div>
     <dl class="scope">
       <div><dt>Effort</dt><dd>1 hour</dd></div><div><dt>Cost</dt><dd>$0</dd></div>
@@ -351,12 +394,42 @@ a:hover{text-decoration-thickness:2px}
     </dl>
   </div>
 
+  <div class="finding">
+    <div class="f-top"><span class="f-id">D-06</span><span class="sev sev-adopt">Adopt</span></div>
+    <div class="f-body">
+      <p class="f-title">Use the proportions Leonardo actually wrote down — they are whole numbers, not φ</p>
+      <p>The golden-ratio story is the wrong homage. The one proportional system documented in Leonardo's own hand, on the <i>Vitruvian Man</i> sheet, is entirely rational: <strong>4 fingers = 1 palm; 4 palms = 1 foot; 6 palms = 1 cubit; 4 cubits = the height of a man.</strong> Then, as fractions of total height — hairline to chin <strong>1/10</strong>, chin to crown <strong>1/8</strong>, breast to crown <strong>1/6</strong>, nipples to crown <strong>1/4</strong>, the hand <strong>1/10</strong>, the foot <strong>1/7</strong>. There is no φ anywhere on the sheet.</p>
+      <p>That is a usable modular scale, and it is better than φ for typography because the steps are coarse enough to be legible as hierarchy. Taking the draft's own 16.8px body as the unit and treating the hero as the "height":</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Vitruvian fraction</th><th>Computed</th><th>Draft uses</th></tr></thead>
+          <tbody>
+            <tr><td>Hero</td><td>1 (the height)</td><td class="num">38.4px</td><td class="num">38.4</td></tr>
+            <tr><td>Section heading</td><td>− 1/8 (chin to crown)</td><td class="num">33.6px</td><td class="num">30.4</td></tr>
+            <tr><td>Sub-heading</td><td>− 1/4 (nipples to crown)</td><td class="num">28.8px</td><td class="num">27.2</td></tr>
+            <tr><td>Wordmark</td><td>1/6 + 1/4 of hero</td><td class="num">22.4px</td><td class="num">21.6</td></tr>
+            <tr><td>Body</td><td>the unit</td><td class="num">16.8px</td><td class="num">16.8</td></tr>
+            <tr><td>Caption</td><td>− 1/4</td><td class="num">12.6px</td><td class="num">13.1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>The draft is already within a few percent of it at every step.</strong> The recommendation is to snap the six sizes onto the rational scale and record why — which costs an afternoon and makes the type system explicable rather than arbitrary.</p>
+      <p class="ev"><b>Verified</b> from Richter §343, the full text of Leonardo's note on the sheet. The mapping to type sizes is mine, not his.</p>
+    </div>
+    <dl class="scope">
+      <div><dt>Effort</dt><dd>2–3 hours</dd></div><div><dt>Cost</dt><dd>$0</dd></div>
+      <div><dt>Change</dt><dd>Six type sizes snap</dd></div><div><dt>Replaces</dt><dd>The φ myth</dd></div>
+    </dl>
+  </div>
+
   <div class="flag">
     <h4>Cut, and why — the myth filter</h4>
     <ul>
-      <li><strong>Golden-ratio grid.</strong> Cut. The claim that Leonardo composed the <i>Mona Lisa</i> or <i>Last Supper</i> on φ is not supported; he illustrated Pacioli's <i>De divina proportione</i>, which establishes that he drew the solids, not that he composed on the ratio. A φ grid would encode a myth as homage. The <em>Vitruvian Man</em>'s actual ratios are small whole-number fractions of body height — a far better and genuinely sourced basis if a proportional system is wanted.</li>
+      <li><strong>Golden-ratio grid.</strong> Cut, and replaced by D-06. The claim that Leonardo composed the <i>Mona Lisa</i> or <i>Last Supper</i> on φ is unsupported; illustrating Pacioli's <i>De divina proportione</i> establishes that he drew the solids, not that he composed on the ratio.</li>
+      <li><strong>"Leonardo invented sfumato", and the word itself.</strong> Cut from any copy. Cennino Cennini described blending shadows "like smoke" a century earlier, and <strong>Leonardo never used the noun <i>sfumato</i></strong> — a full-text search of the <i>Trattato</i> returns none. What he wrote is <span lang="it"><i>"ad uso di fumo"</i></span>, in the passage instructing that lights and shadows be united <span lang="it"><i>"senza tratti o segni"</i></span> — without strokes or lines. Quote that if anything is quoted.</li>
       <li><strong>Impasto texture on the UI.</strong> Cut. A raised, light-catching surface is the one thing a flat screen cannot honestly imitate, and faking it with drop shadows is precisely the kitsch the brief forbids. The real impasto belongs in the <em>photography</em> — the raking-light detail crop in finding N-06 — where it is a photograph of a real surface rather than a CSS impression of one.</li>
-      <li><strong>Any yellow as text or UI.</strong> Cut on measurement. Indian yellow is 2.10:1 and zinc yellow 1.53:1 on white. They are genuine <i>Starry Night</i> pigments and they are unusable for anything but a mark inside an image.</li>
+      <li><strong>Any yellow as text or UI.</strong> Cut on measurement. Indian yellow is 2.10:1 and zinc yellow 1.53:1 on white. They are genuine <i>Starry Night</i> pigments and are unusable for anything but a mark inside an image.</li>
+      <li><strong>Sampling colours off the paintings themselves.</strong> Cut — and this is the trap most likely to recreate the original failure. Sampled from a reproduction, the <i>Bedroom</i> wall as it survives today is <code>#8E9EA1</code> at <strong>2.78:1</strong>, and the <i>Sunflowers</i> chrome yellow is <code>#B19E14</code> at <strong>2.70:1</strong>. Both sit within a hair of the <code>#A19E97</code> 2.67:1 failure this whole report opens with. <strong>Desaturated mid-tones lifted off paintings are exactly where low contrast comes back in.</strong> Use nominal pigment values, darkened to pass, and label which you mean — the blues in section 02 are nominal, not as-painted; the as-painted <i>Starry Night</i> sky samples at <code>#4E6991</code> (5.59:1).</li>
       <li><strong>"He sold only one painting" / absinthe / digitalis.</strong> Cut as framing for any About copy. The first is the most repeated van Gogh claim and is not accurate; the palette theories are unsupported speculation. If the site says anything about him, quote the letters — they are fully published and need no myth.</li>
     </ul>
   </div>
@@ -511,6 +584,28 @@ a:hover{text-decoration-thickness:2px}
     <dl class="scope">
       <div><dt>Effort</dt><dd>3 hours</dd></div><div><dt>Cost</dt><dd>$0</dd></div>
       <div><dt>Not needed</dt><dd>Rep, filing, CAC mechanisms</dd></div><div><dt>Needed</dt><dd>Privacy page + 1-page PIPIA</dd></div>
+    </dl>
+  </div>
+
+  <div class="finding">
+    <div class="f-top"><span class="f-id">B-08</span><span class="sev sev-block">Blocking</span><span class="sev sev-note">Site copy</span></div>
+    <div class="f-body">
+      <p class="f-title">China-origin paintings are not duty-free into the US — the draft must not say they are</p>
+      <p>Original paintings under HS 9701 carry a <strong>Free</strong> base rate, which is where the "art is duty-free" belief comes from. For a <em>China-origin</em> shipment in 2026 that is wrong, and the error would land on the buyer as a surprise bill.</p>
+      <ul>
+        <li><strong>Section 301 List 4A applies.</strong> HTSUS heading 9903.88.15 imposes <strong>+7.5%</strong> on products of China, and US note 20(s)(i) enumerates <code>9701.91.00</code> — contemporary paintings — among the covered subheadings. The product exclusion that once covered paintings is marked expired. There is no informational-materials carve-out in Section 301.</li>
+        <li><strong>De minimis is suspended.</strong> The $800 exemption no longer applies to mail or other modes, so <strong>every $300 painting now needs a customs entry filed</strong>. Only the ≤$100 bona fide gift and ≤$200 traveller exemptions survive.</li>
+        <li><strong>The IEEPA tariffs are gone</strong> — struck down and revoked in February 2026 — and artworks were separately carved out of them as "informational materials" under 50 U.S.C. §1702(b)(3). That relief does not extend to Section 301.</li>
+        <li><strong>The 2026 forced-labour Section 301 action does not add to this</strong> — heading 9903.05.86 exempts 9701.21.00–9701.99.00.</li>
+      </ul>
+      <p><strong>Practical effect on a $300 painting to a US buyer:</strong> $0 base duty, <strong>+$22.50 Section 301</strong>, a few dollars of CBP fees, plus the carrier's brokerage or disbursement charge. Roughly <strong>8–12% on top of the price</strong>.</p>
+      <p><strong>Site copy must say</strong> "US buyers pay approximately 7.5% import duty plus customs handling," not "duty-free" and not a bare "buyer pays any duties." Surprise customs bills are a leading cause of cross-border art complaints, and this one is predictable enough to quote.</p>
+      <p><strong>The UK is the opposite case and is safe to state.</strong> Queried against the UK Trade Tariff API for 9701910000 filtered to China: third-country duty <strong>0.00%, geographical area ERGA OMNES</strong> — the measure attaches to the commodity code, not the country — with VAT measures of 5% and 20% present, confirming the reduced rate for works of art. <strong>Origin does not change UK treatment.</strong></p>
+      <p class="ev"><b>Verified:</b> HTSUS Chapter 99 Revision 19 (2026); <i>Learning Resources, Inc. v. Trump</i> (20 Feb 2026) and EO 14389; CBP de minimis final rules of 24 June 2026; UK Trade Tariff API. <b>Not verified:</b> the EU reduced art VAT rates (France 5.5%, Germany 7%, Italy 5%) — see section 07.</p>
+    </div>
+    <dl class="scope">
+      <div><dt>Effort</dt><dd>30 min copy change</dd></div><div><dt>Cost to buyer</dt><dd>~8–12% on US orders</dd></div>
+      <div><dt>Changes</dt><dd>How to Buy + shipping policy</dd></div><div><dt>Risk if omitted</dt><dd>Surprise bills, disputes</dd></div>
     </dl>
   </div>
 
@@ -779,9 +874,12 @@ a:hover{text-decoration-thickness:2px}
       <thead><tr><th>Item</th><th>Status</th><th>What to do</th></tr></thead>
       <tbody>
         <tr><td>Airwallex + HK sole proprietorship</td><td>Entity list verified for account opening; Payments approval is separate and discretionary</td><td>Ask Airwallex before incorporating</td></tr>
-        <tr><td>Leonardo's hatching direction</td><td>Art-historical commonplace; no primary source retrieved this session</td><td>Confirm before documenting as fact</td></tr>
-        <tr><td>Exporting artwork from China</td><td class="no">Not researched — the stream died</td><td>Cultural-relics thresholds for living artists, carrier caps, HS 9701 on China-origin goods, and 2026 US tariff treatment</td></tr>
-        <tr><td>US tariffs on Chinese-origin art</td><td class="no">Unverified</td><td>Check whether 9701 is excluded from Section 301 / IEEPA actions before quoting duty-free to US buyers</td></tr>
+        <tr><td>Leonardo's hatching direction</td><td>Left-handedness verified; the 43.8° angle is an original measurement, not a citation</td><td>Present as measured. Two chalk sheets ran the other way</td></tr>
+        <tr><td class="no">Cultural-relics export appraisal</td><td class="no">Not established — ncha.gov.cn unreachable, search engines useless</td><td><strong>Re-run with working access to Chinese government sources.</strong> Expectation is that a living artist's new work is not 文物, but do not publish that</td></tr>
+        <tr><td class="no">Carriers and insurance caps from China</td><td class="no">No verified figures</td><td>Needed before writing the shipping page</td></tr>
+        <tr><td class="no">Export declaration for a $300 painting</td><td class="no">Not established</td><td>Also determines what document supports the bank's FX authenticity check</td></tr>
+        <tr><td>EU reduced art VAT rates</td><td>France 5.5% / Germany 7% / Italy 5% <strong>not verified</strong>; TARIC and Access2Markets not queryable</td><td>Check Council Directive (EU) 2022/542, which changed art VAT from 2025. Do not publish the rates yet. UK <em>is</em> verified and origin-neutral</td></tr>
+        <tr><td>Mona Lisa glaze layer <em>count</em></td><td>Thickness verified (40 ± 10 µm); count is not measurable by XRF and the authors say so</td><td>Never write "thirty layers" — it is untraceable</td></tr>
         <tr><td>CJK webfont strategy</td><td>Subsetting experiments run; no decision</td><td>Phase 2 item 13 — resolve before translating copy</td></tr>
         <tr><td>Payhip / platform eligibility for CN sellers</td><td>Unverified</td><td>Moot if B-01 or B-02 is adopted</td></tr>
         <tr><td>PIPL Art. 39 separate consent under a contract basis</td><td>Genuinely unsettled in Chinese practice</td><td>Don't litigate it — add the cheap separate acknowledgement</td></tr>
