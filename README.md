@@ -4,8 +4,10 @@ A small gallery site for a solo painter: six unique original works, sold to both
 an international and a Chinese domestic audience, run by a non-technical owner
 based in mainland China.
 
-**Phase 1 (complete): research and review.**
-**Phase 2 (next): design, build and test.**
+**Phase 1 (complete):** research and review — see the report.
+**Phase 2 (in progress):** the site is built and passing its checks. What
+remains is content, not code: photographs, titles, descriptions and the
+contact details.
 
 ---
 
@@ -130,15 +132,36 @@ unaudited third party able to inject arbitrary CSS.
 
 ---
 
-## Open before Phase 2 starts
+## The entity switch
 
-1. **Does the site take payment online, and under what entity?** Launching as an
-   individual is viable — under CNY 100,000/year turnover there is no
-   registration requirement, no FX quota consumed and no VAT. A Hong Kong sole
-   proprietorship unlocks Airwallex card acquiring *plus* Alipay and WeChat Pay
-   from one checkout. This decision gates all checkout work.
+**Decided: launch as an individual.** Under CNY 100,000/year turnover there is
+no business-registration requirement (SAMR Order 37 Art. 8 ¶3), no foreign-
+exchange quota consumed, no balance-of-payments filing, and no VAT.
+
+The Hong Kong path is not blocked by that choice. `src/data/seller.json` holds
+both entity profiles; changing one string —
+
+```json
+"activeEntity": "individual"   →   "activeEntity": "hk-sole-prop"
+```
+
+— switches the published legal disclosure, the invoicing language, the checkout
+provider and the returns basis together. No template knows which entity is
+active. A HK sole proprietorship needs only a Business Registration
+certificate, and unlocks Airwallex card acquiring *plus* Alipay and WeChat Pay
+from one checkout.
+
+⚠️ Airwallex approves its Payments product separately from account opening, and
+reviews the live site as part of that. Ask before incorporating.
+
+## Still open
+
+1. **Content.** Titles, descriptions, alt text, contact details, the donation
+   recipient, and the six photographs. `npm run build` lists every one.
 2. **CJK webfont strategy.** A full CJK face is 5–10 MB against 80 KB for the
-   Latin pair. Unresolved.
+   Latin pair. The build currently falls back to a system CJK stack
+   (PingFang / Hiragino / Microsoft YaHei), which costs nothing and looks
+   acceptable, but is not a decision so much as a deferral.
 3. **Exporting the work from China.** Three linked questions are unresolved
    because the Chinese government sources were unreachable: whether a living
    artist's new work needs a cultural-relics export appraisal (文物出境审核),
