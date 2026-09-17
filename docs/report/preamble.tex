@@ -1,0 +1,80 @@
+\usepackage{makeidx}
+\makeindex
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable,skins}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage[normalem]{ulem}
+
+% --- the site's own palette, so the document and the thing it
+% --- documents are the same object
+\definecolor{ink}{HTML}{3A2B22}
+\definecolor{body}{HTML}{66594B}
+\definecolor{sanguine}{HTML}{8B4A3C}
+\definecolor{field}{HTML}{969B7D}
+\definecolor{paper}{HTML}{F3EBDD}
+\definecolor{paperdeep}{HTML}{EDE4D3}
+\definecolor{muted}{HTML}{69655E}
+\definecolor{crit}{HTML}{A81E14}
+\definecolor{ok}{HTML}{14653F}
+\definecolor{warn}{HTML}{8A5600}
+
+% hyperref is loaded by the template after this file, so defer both.
+\AtBeginDocument{%
+  \color{ink}%
+  \hypersetup{linkcolor=sanguine,urlcolor=sanguine,citecolor=sanguine,
+              filecolor=sanguine}%
+}
+
+% --- running heads
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{field}\leaders\hrule height \headrulewidth\hfill}}
+\fancyhead[LE,RO]{\small\color{muted}\thepage}
+\fancyhead[LO]{\small\color{muted}\nouppercase{\leftmark}}
+\fancyhead[RE]{\small\color{muted}Senso Comune Gallery}
+\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[C]{\small\color{muted}\thepage}}
+
+% --- headings in the accent
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{ink}}
+  {\color{sanguine}\normalsize\MakeUppercase{Part \thechapter}}
+  {8pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{26pt}
+\titleformat{\section}{\normalfont\large\bfseries\color{ink}}{\color{sanguine}\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries\color{ink}}{\color{sanguine}\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalfont\small\bfseries\color{body}}{\color{sanguine}\thesubsubsection}{0.6em}{}
+
+% --- callouts
+\newtcolorbox{finding}[1]{
+  colback=paper, colframe=sanguine, boxrule=0.6pt, arc=1pt,
+  left=7pt, right=7pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\small, title={#1}, coltitle=white,
+  colbacktitle=sanguine, breakable}
+\newtcolorbox{blocker}[1]{
+  colback=white, colframe=crit, boxrule=0.8pt, arc=1pt,
+  left=7pt, right=7pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\small, title={#1}, coltitle=white,
+  colbacktitle=crit, breakable}
+\newtcolorbox{openitem}[1]{
+  colback=white, colframe=warn, boxrule=0.6pt, arc=1pt,
+  left=7pt, right=7pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\small, title={#1}, coltitle=white,
+  colbacktitle=warn, breakable}
+
+\setlist[itemize]{topsep=3pt,itemsep=1.5pt,parsep=0pt,leftmargin=13pt}
+\setlist[enumerate]{topsep=3pt,itemsep=1.5pt,parsep=0pt,leftmargin=15pt}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.18}
+
+% --- front matter in roman, body in arabic, which `report` does not do itself
+\AtBeginDocument{\pagenumbering{roman}}
+\newcommand{\startbody}{\clearpage\pagenumbering{arabic}}
