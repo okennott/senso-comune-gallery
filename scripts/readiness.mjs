@@ -121,7 +121,7 @@ export const RULES = [
   {
     id: 'ID-05', area: 'Identity and contact', severity: 'blocker', waivable: true,
     title: 'A WeChat ID for buyers in mainland China',
-    basis: 'Report B-06: the domestic contact channel; Instagram is unreachable in mainland China',
+    basis: 'The domestic contact channel: Instagram is unreachable in mainland China (report, Summary)',
     fix: 'Set seller.artist.wechatId: 6-20 letters, digits, _ or -, starting with a letter.',
     check: ({ seller }) => {
       const w = seller.artist?.wechatId;
@@ -204,7 +204,7 @@ export const RULES = [
   {
     id: 'SH-01', area: 'The site', severity: 'blocker', waivable: true,
     title: 'No header control leads to a page that does not exist',
-    basis: 'Search, account and cart are placeholders by decision (report, Part 6): each click lands on the 404',
+    basis: 'Search, account and cart are placeholders by decision (report, Part 6, decision D1): each click lands on the 404',
     fix: 'Build the page and remove its route from site.json → placeholders.routes, or waive this until it is built.',
     check: ({ site }) => Object.entries(site.placeholders?.routes ?? {})
       .map(([role, route]) => ({ path: `site.placeholders.routes.${role}`, message: `${route} is still a placeholder` })),

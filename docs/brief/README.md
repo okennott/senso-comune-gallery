@@ -23,18 +23,17 @@ source is just a number somebody typed.
 - **The palette.** Priscilla later published a live mockup with a sage-green
   revision, which the site follows instead. The draft's own palette failed
   contrast at every call to action.
-- **The structure.** The draft was one scrolling page. The site is seven
-  documents per language, because a one-page site cannot link to a single
-  painting, and a link to a single painting is how the work is actually shared.
+- **The structure.** The draft was one scrolling page. The site gives every
+  work, series and policy its own page in both languages, because a one-page
+  site cannot link to a single painting, and a link to a single painting is how
+  the work is actually shared.
 - **The eyebrow.** "ORIGINAL OIL & PAPER WORKS" above the van Gogh quote was
-  cut; the hero now carries a factual line generated from the work data.
+  cut; the quote is now in his own words from letter 143, attributed beneath it.
 
 ## Where to read the reasoning
 
 - [`../report/senso-comune-report.pdf`](../report/senso-comune-report.pdf) —
   the technical report: what it costs, what it requires, what is unresolved.
-- [`../build-report/index.html`](../build-report/index.html) — the research
-  findings as a web page.
 
 Do not edit this PDF. If Priscilla sends a new draft, add it here beside this
 one with its date in the filename, and record what changed.

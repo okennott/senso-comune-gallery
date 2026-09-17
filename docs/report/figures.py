@@ -603,105 +603,7 @@ def softness():
     save(fig, "softness")
 
 
-# ------------------------------------------------ 9. the planned work page
-def pdp_wire():
-    """Wireframe of the planned work page, desktop and phone. Proportions are
-    schematic; the phone masthead widths are the measured ones from the report."""
-    fig = plt.figure(figsize=(6.6, 4.9))
-    D = fig.add_axes([0.0, 0.0, 0.66, 1.0]); P = fig.add_axes([0.70, 0.0, 0.30, 1.0])
-    for ax, w, h in ((D, 100, 100), (P, 42, 100)):
-        ax.set_xlim(0, w); ax.set_ylim(0, h); ax.axis("off"); ax.set_aspect("equal")
-
-    def box(ax, x, y, w, h, fc, ec=None, lw=.5, z=2):
-        ax.add_patch(Rectangle((x, y), w, h, facecolor=fc, edgecolor=ec or "none", linewidth=lw, zorder=z))
-    def txt(ax, x, y, s, fs=5.2, c=None, **k):
-        ax.text(x, y, s, fontsize=fs, color=c or INK, zorder=5, **k)
-    def tag(ax, x, y, n):
-        ax.add_patch(plt.Circle((x, y), 1.55, color=SANG, zorder=6))
-        ax.text(x, y - .05, str(n), fontsize=4.6, color="white", ha="center", va="center", zorder=7, weight="bold")
-
-    # ---------------- desktop
-    box(D, 0, 0, 100, 100, FIELD)
-    box(D, 0, 92, 100, 8, BAR)
-    box(D, 4, 94.2, 3.6, 3.6, "none", FIELD, .5); box(D, 5.2, 94.9, 1.3, 1.8, PAPER)
-    txt(D, 9, 95.2, "Senso Comune Gallery", 5.4, PAPER)
-    txt(D, 33, 95.3, "ORIGINAL WORKS   TRIBUTE   ABOUT   HOW TO BUY    |", 3.6, T["paper-deep"])
-    D.text(65.6, 95.3, "\u4e2d\u6587", fontsize=3.8, color=T["paper-deep"], zorder=5, fontproperties=cjk_or_die("\u4e2d"))
-    txt(D, 70.5, 95.3, "Search", 3.6, T["muted-ui"], style="italic")
-    txt(D, 78.8, 95.3, "\u2661 Saved", 3.6, PAPER)
-    txt(D, 86.4, 95.3, "\u25a2 Selection (2)", 3.6, PAPER)
-    tag(D, 98.4, 90.4, 1)
-    box(D, 3, 3, 94, 86.5, PAPER)
-    txt(D, 6, 86, "WORKS / ORIGINAL WORKS / HARBOUR LIGHT", 3.2, MUTED)
-    # thumbnail rail
-    for i, lab in enumerate(["Front", "Detail", "Edge", "Back", "In scale"]):
-        y = 76 - i * 8.2
-        box(D, 6, y, 6, 7, T["paper-deep"], MUTED if i == 0 else None, .6)
-        box(D, 7.2, y + 1.1, 3.6, 4.8, BODY if i != 4 else PAPER, None)
-        if i == 4:
-            box(D, 7, y + 1.4, 4, .25, MUTED); box(D, 8.2, y + 3, 1.6, 2.2, BODY)
-        txt(D, 9, y - 1.3, lab, 2.8, BODY, ha="center")
-    tag(D, 1.5, 76, 2)
-    # main view
-    box(D, 15, 26, 40, 57, T["paper-deep"]); box(D, 18, 29, 34, 51, "#4A4E60")
-    txt(D, 35, 23.3, "\u25c0  2 / 5  \u25b6     View full size", 3.4, BODY, ha="center")
-    tag(D, 57.2, 81.5, 3)
-    # buy box
-    x = 60
-    txt(D, x, 81.5, "Harbour Light, 2026", 6.2, INK)
-    txt(D, x, 78.3, "Oil on canvas · 50 × 40 × 3.5 cm (19¾ × 15¾ in)", 3.5, BODY)
-    txt(D, x, 75.8, "Unique work · Frame not included · Signed on the back", 3.5, BODY)
-    txt(D, x, 70.4, "$180", 8.4, INK, weight="bold")
-    box(D, x, 63.5, 33, 4.6, INK); txt(D, x + 16.5, 65.3, "ENQUIRE ABOUT THIS PIECE", 3.5, PAPER, ha="center")
-    box(D, x, 57.8, 16, 4.2, "none", MUTED, .6); txt(D, x + 8, 59.4, "♡  SAVE", 3.4, INK, ha="center")
-    box(D, x + 17, 57.8, 16, 4.2, "none", MUTED, .6); txt(D, x + 25, 59.4, "+  ADD TO SELECTION", 3.1, INK, ha="center")
-    tag(D, 98.4, 66, 4)
-    for i, s_ in enumerate(["✓ 14-day returns, worldwide", "✓ Packed flat/upright, insured to the price", "✓ Estimate import duty for your country →"]):
-        txt(D, x, 53 - i * 2.9, s_, 3.4, BODY)
-    tag(D, 98.4, 50, 5)
-    for i, s_ in enumerate(["Details", "Shipping & packaging", "Duty & import", "Returns", "Contact"]):
-        y = 42 - i * 4.4
-        D.plot([x, x + 33], [y + 3.4, y + 3.4], color=T["rule-soft"], lw=.6, zorder=3)
-        txt(D, x, y + .9, s_, 3.7, INK); txt(D, x + 32, y + .9, "+", 4.2, INK, ha="right")
-    tag(D, 98.4, 40, 6)
-    txt(D, x, 17.2, "PayPal · Alipay · WeChat Pay   (from the active entity)", 3.2, MUTED)
-    txt(D, x, 14.3, "Share ↗   Copy link", 3.4, BODY)
-    tag(D, 98.4, 16, 7)
-    D.plot([6, 94], [10.5, 10.5], color=T["rule-soft"], lw=.6)
-    txt(D, 6, 7.2, "The work, in the artist's words  ·  More works", 3.6, INK)
-    for i in range(3):
-        box(D, 58 + i * 12.5, 4.6, 10.5, 4.6, T["paper-deep"])
-    tag(D, 98.4, 7, 8)
-
-    # ---------------- phone (390 px)
-    box(P, 0, 0, 42, 100, FIELD)
-    box(P, 0, 87.6, 42, 12.4, BAR)
-    box(P, 2.2, 95.4, 2.9, 2.9, "none", FIELD, .5); box(P, 3.1, 95.9, 1.1, 1.5, PAPER)
-    txt(P, 6.2, 96.1, "Senso Comune", 4.4, PAPER)
-    txt(P, 29.5, 96.2, "\u2661    \u25a2 2", 4.6, PAPER)
-    txt(P, 2.2, 90.3, "WORKS  TRIBUTE  ABOUT  BUY", 3.0, T["paper-deep"])
-    P.text(22.6, 90.3, "\u4e2d\u6587", fontsize=3.2, color=T["paper-deep"], zorder=5, fontproperties=cjk_or_die("\u4e2d"))
-    tag(P, 40.5, 86.5, 1)
-    box(P, 1.5, 1, 39, 85.2, PAPER)
-    box(P, 7.5, 47.5, 27, 36.5, T["paper-deep"]); box(P, 9.5, 49.5, 23, 32.5, "#4A4E60")
-    txt(P, 21, 45.3, "swipe · 1 / 5", 3.2, BODY, ha="center")
-    for i in range(5):
-        box(P, 3 + i * 7.6, 37.2, 6.6 if i < 4 else 4.2, 6.6, T["paper-deep"], MUTED if i == 0 else None, .6)
-    txt(P, 39.5, 34.5, "more →", 2.8, MUTED, ha="right")
-    tag(P, 40.5, 40.5, 2)
-    txt(P, 3, 30.2, "Harbour Light, 2026", 5.2, INK)
-    txt(P, 3, 27.4, "Oil on canvas · 50 × 40 cm", 3.2, BODY)
-    txt(P, 3, 22.4, "$180", 7, INK, weight="bold")
-    box(P, 3, 15.8, 36, 4.2, INK); txt(P, 21, 17.4, "ENQUIRE ABOUT THIS PIECE", 3.2, PAPER, ha="center")
-    box(P, 3, 10.6, 17.5, 3.9, "none", MUTED, .6); txt(P, 11.7, 12.1, "♡ SAVE", 3.1, INK, ha="center")
-    box(P, 21.5, 10.6, 17.5, 3.9, "none", MUTED, .6); txt(P, 30.2, 12.1, "+ SELECTION", 3.1, INK, ha="center")
-    txt(P, 3, 6.4, "Details  +", 3.4, INK); txt(P, 3, 3.3, "Shipping & packaging  +", 3.4, INK)
-    txt(P, 21, -3.6, "390 px", 5, BODY, ha="center")
-    txt(D, 50, -3.6, "1440 px", 5, BODY, ha="center")
-    save(fig, "pdp-wire")
-
-
-# ------------------------------------------------ 10. the site's structure
+# ------------------------------------------------- 9. the site's structure
 def structure():
     """The site map before and after the restructure. Drawn from site.json so the
     'after' tree is the navigation and series the build actually generates."""
@@ -761,4 +663,4 @@ def _cream_ramp():
 
 if __name__ == "__main__":
     print("figures:")
-    palette(); sage_limit(); payments(); oversell(); duty(); shipping(); logo(); softness(); pdp_wire(); structure()
+    palette(); sage_limit(); payments(); oversell(); duty(); shipping(); logo(); softness(); structure()

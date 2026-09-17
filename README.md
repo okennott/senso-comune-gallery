@@ -5,19 +5,18 @@ and a Chinese domestic audience, run by Priscilla herself from mainland China.
 Six are catalogued today; the site takes as many as `src/data/artworks.json`
 lists, and nothing in the build caps that.
 
-**Phase 1 (complete):** research and review — see the reports.
-**Phase 2 (in progress):** the site is built and passing its checks. What
-remains is content, not code: photographs, titles, descriptions and contact
-details.
+**Phase 1 (complete):** research and review — see the report.
+**Phase 2 (in progress):** the site is built, passing its checks and published
+as a preview. It cannot go live until every critical detail is supplied
+(§2.8): photographs, titles, descriptions and contact details. The buy box and
+the cart, search and account pages are still to be built (§2.7).
 
 ---
 
-## The reports
-
-There are two, for two audiences.
+## The report
 
 **[`docs/report/senso-comune-report.pdf`](docs/report/senso-comune-report.pdf)** —
-the printable technical report. 25 pages, A4, typeset with Quarto and XeLaTeX:
+the technical report. A4, typeset with Quarto and XeLaTeX:
 table of contents, list of figures, list of tables, numbered parts and an
 alphabetical index. This is the one to print, share, or hand to an accountant
 or a lawyer.
@@ -28,14 +27,6 @@ npm run report:pdf
 
 Figures regenerate from `src/styles/tokens.css` on every build, so the palette
 in the document cannot drift from the palette in the site.
-
-**[`docs/build-report/index.html`](docs/build-report/index.html)** — the same
-findings as a web page, for reading on screen. One self-contained file, no
-external requests, so it opens offline and from behind the Great Firewall.
-
-```bash
-npm run report:html
-```
 
 **[`docs/brief/`](docs/brief/)** — Priscilla's original nine-page draft,
 retired. Nothing builds from it; it is kept because several measurements in the
@@ -398,7 +389,7 @@ npm run icons        # rebuild the favicon, home-screen icon and manifest
 npm run check:render # paintings keep their proportions in a real browser (needs Chrome)
 npm run readiness    # what is still owed before the site may go live
 npm run build:release # the only build that may go live; refuses while anything is owed
-npm run report       # rebuild both reports (report:pdf, report:html)
+npm run report       # rebuild the technical report (PDF)
 ```
 
 `build` and `check` are the two that matter. `check` is not advisory — all
@@ -485,13 +476,8 @@ reading it from the other.
 │   │                               retired. Nothing builds from it; kept
 │   │                               because measurements were taken from it.
 │   │                               Its README says which, and what replaced it.
-│   ├── build-report/               the research findings as a web page
-│   │   ├── index.html                built: one file, 0 external requests
-│   │   ├── src.html                  the source
-│   │   ├── fonts/                    inlined as base64 at build time
-│   │   └── build.sh
 │   └── report/                     the printable technical report
-│       ├── senso-comune-report.pdf   built: A4, indexed, 58 pages
+│       ├── senso-comune-report.pdf   built: A4, indexed
 │       ├── senso-comune-report.qmd   the source
 │       ├── preamble.tex              typesetting: fonts, heads, callouts, and
 │       │                             the mark, redrawn in TikZ for the footers
@@ -515,7 +501,7 @@ reading it from the other.
 │
 ├── .github/workflows/pages.yml   preview deploy, for layout review only, at
 │                                 okennott.github.io/senso-comune-gallery/.
-│                                 Built with PREVIEW=1, so every page is
+│                                 Built as a preview, so every page is
 │                                 noindex; checked under the same variables.
 │                                 Production is Cloudflare Pages: GitHub's
 │                                 terms exclude commercial sites, and
@@ -595,7 +581,9 @@ that adds an unaudited third party able to inject arbitrary CSS.
 
 ## 2.5 Checks
 
-All three block the build, and all three have earned it.
+Five, and every one blocks. `npm run check` runs the first four anywhere;
+`npm run check:render` needs Chrome, and GitHub runs it on every preview. A
+release runs all five (§2.8).
 
 `check-contrast.mjs` recomputes every colour token against **the darkest ground
 it is ever painted on**. Checking against white instead is the trap that caught
@@ -616,9 +604,11 @@ nothing reporting it.
 every painting in a mat — padding, a shadow and `border-box` inside layouts that
 already cap heights — and that is exactly where an image box can quietly stop
 matching the painting's proportions. It lays the built pages out in Chrome at
-1440, 900, 390 and 360 px and fails if any painting's box drifts more than 1% from
-its own ratio, or carries a radius or a transform. It is kept out of
-`npm run check` so that one runs anywhere; CI runs it on every deploy.
+1440, 900, 390, 360 and 320 px and fails if any painting's box drifts more than 1%
+from its own ratio, or carries a radius or a transform. It also fails if the
+masthead overflows, takes more than two rows or has a control under 44 px, and if
+van Gogh's line is re-wrapped, its attribution leaves its right edge, or the
+featured work comes before it on a phone.
 
 Headless Chrome never lays a window out narrower than 500px — ask for 390 and
 you get a 500px layout cropped to 390. Phone widths are therefore laid out in
@@ -626,17 +616,17 @@ an iframe of exactly that width, with scrollbars hidden as a phone's are, and
 the check asserts the content width it actually received. `docs/report/shots.sh`
 takes the phone screenshot the same way.
 
-`check-review.mjs` holds one assertion per finding from the September 2026
-design review, written against the built site, so a fix that stops being
+`check-review.mjs` holds 66 assertions over 46 findings — the September 2026
+design review, the mark, softness, the shop bar and views, the structure, the
+red flags and the readiness gate — written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
 also asserts that every `var(--token)` in the stylesheet resolves: a fix that
 referenced a token which did not exist fell back to inherited size, and a test
 that only matched the CSS text called it green.
 
-Between them they caught a muted grey that passed on white and failed on the
-darkest wash, work pages shipping with no `<h1>` at all, a mobile override
-that made the navigation invisible once the dark bar was adopted, and the
-footer contrast failure above.
+`test-readiness.mjs` proves the readiness gate with 43 tests: it opens on data
+with every critical detail supplied, and closes on the named rule when any one
+of them is broken (§2.8).
 
 They are a floor, not a pass. Automated testing decides roughly 13–30% of
 accessibility criteria and catches almost none of the focus-order failures that
@@ -665,18 +655,20 @@ block people outright.
   outright), and it only turns to glass once content scrolls beneath it.
   Paintings are never rounded, zoomed or stretched. The report's Softness
   section lists every option considered, adopted and optional.
-- **The work page and the shop bar are scoped, not built.** Report Part 6 has
-  the research, the recommended views and shop bar, five decisions for
-  Priscilla (D1–D5) and a six-phase implementation scope with acceptance
-  checks. Nothing there should be built before D1–D3 are answered.
+- **The work page and the shop bar.** Decisions D1–D5 (report, Part 6): search,
+  account and cart in the header, as placeholders until built; detail, edge,
+  back and video views on every work; any number of works in one order, within
+  availability and the payment route's limit; no search threshold; video on work
+  pages only. The views and the shop bar are built; the buy box and the pages
+  behind the shop bar are not (§2.7).
 - **Cloudflare Pages.** The only host with no bill, no pause and no terms
   problem. `vercel.app` and `workers.dev` measure 100% blocked from mainland
   China; `pages.dev` measures 0%.
 - **No ICP filing**, because nothing is hosted inside mainland China. Individual
   备案 forbids profit-generating sites and the commercial licence cannot be held
   by an individual at all — hosting overseas is what keeps the door open.
-- **Seven documents per language, not one.** `@view-transition` restores the
-  single-page feel in two lines of CSS.
+- **A page for everything that is shared,** in both languages.
+  `@view-transition` keeps the calm of a single page in two lines of CSS.
 - **`.com`, not `.cn`.** A `.cn` adds a real-name verification obligation that
   can silently `serverHold` the domain, for benefits unusable without mainland
   hosting.
@@ -748,7 +740,7 @@ route accepts.
   cart of several works is paid work by work, or by one invoiced enquiry. One
   payment for several works needs a hosted checkout that takes several line
   items; whether the `hk-sole-prop` provider offers that is not established
-  (report, open item 5).
+  (report, open item 6).
 - **Overselling.** Every layer in report §5.3 has to treat a cart as a
   possible second buyer. The published rule stands: the first completed payment
   wins, and the second is refunded within 24 hours.
@@ -872,7 +864,7 @@ touching the last built site.
 
 ## Still open
 
-Five items, and every one needs a person outside this project.
+Six items, and every one needs a person outside this project.
 
 1. **Cultural-relics export appraisal.** Confirm a living artist's new work is
    not 文物 before the first export. Chinese government sources were unreachable
@@ -885,10 +877,13 @@ Five items, and every one needs a person outside this project.
    supports the bank's foreign-exchange check.
 5. **Airwallex and a HK sole proprietorship.** The entity list verified covers
    account opening only. Ask before incorporating.
+6. **Several works in one payment, and the largest single transaction.** Not
+   established on either route. Ask the provider in writing before the cart is
+   built; the figure becomes `maxTransactionUSD`.
 
 **Content** is the other outstanding half: a photograph, title and description
 for each catalogued work, and the contact details. The email and phone are not optional —
-they are the consumer-law requirement. `npm run build` lists every field.
+they are the consumer-law requirement. `npm run readiness` lists every field still owed.
 
 ---
 
@@ -898,6 +893,6 @@ Contrast ratios were computed with the WCAG 2 relative-luminance formula against
 the draft's **declared** fill values, extracted from the PDF content stream
 rather than sampled from a render.
 
-Nothing in the reports is legal advice. The consumer-law, foreign-exchange, tax
+Nothing in the report is legal advice. The consumer-law, foreign-exchange, tax
 and charitable-solicitation findings identify issues for a qualified
 professional in the relevant jurisdiction.

@@ -76,11 +76,6 @@ check('A-01', 'a painting is in the hero, above the fold', () => {
   };
 });
 
-/* RETIRED 17 Sep 2026 with the structure change: "the list below the hero
-   starts its count at 02". The homepage no longer lists the catalogue, so a
-   running 01/06 counter has nothing to count; finiteness is now stated
-   outright — "All works (5)" — and asserted in I-02. */
-
 check('A-02', 'no mail link is labelled "Buy"', () => {
   // an unusable control keeps its address in data-inert-href (readiness gate)
   const btns = [...home.matchAll(/<a class="btn"[^>]*(?:data-inert-href|href)="(mailto:[^"]*)"[^>]*>([^<]*)/g)];
@@ -240,7 +235,7 @@ check('D-03', 'the language switch is divided from the navigation', () =>
 check('D-04', 'the homepage names a subject in its h1', () => {
   const h1 = home.match(/<h1[^>]*>([^<]*)<\/h1>/);
   // the motto is set with its line breaks as written, and attributed (17 Sep 2026)
-  const motto = /<p class="hero__motto">What is done<br>with love<br>is done well\.<\/p><\/blockquote>\s*<figcaption class="hero__cite">— Vincent van Gogh<\/figcaption>/.test(home);
+  const motto = /<p class="hero__motto">That which<br>is done<br>with love<br>is well done\.<\/p><\/blockquote>\s*<figcaption class="hero__cite">— Vincent van Gogh<\/figcaption>/.test(home);
   const zh = /<h1 class="visually-hidden">常识画廊<\/h1>/.test(zhHome);
   return { ok: h1 && h1[1] === 'Senso Comune Gallery' && motto && zh, detail: `h1 "${h1?.[1]}", motto kept ${motto}` };
 });

@@ -18,9 +18,8 @@
     "check:render": "node scripts/check-render.mjs",
     "preview": "node scripts/preview.mjs",
     "fonts": "bash scripts/build-fonts.sh",
-    "report": "npm run report:pdf && npm run report:html",
-    "report:pdf": "bash docs/report/build.sh",
-    "report:html": "bash docs/build-report/build.sh"
+    "report": "bash docs/report/build.sh",
+    "report:pdf": "bash docs/report/build.sh"
   },
   "devDependencies": {
     "sharp": "^0.33.5"

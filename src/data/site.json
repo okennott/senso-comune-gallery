@@ -74,7 +74,7 @@
   ],
   "hero": {
     "title": {
-      "en": "What is done\nwith love\nis done well.",
+      "en": "That which\nis done\nwith love\nis well done.",
       "zh": "以爱完成之事，\n方为善成。"
     },
     "cta": {
@@ -82,17 +82,12 @@
       "zh": "浏览作品"
     },
     "$comment": [
-      "The motto, attributed. It paraphrases van Gogh, letter 143 to Theo, Amsterdam,",
-      "3 April 1878: 'that which is done with love is well done' (vangoghletters.org,",
-      "let143). The attribution sits right-aligned under the motto's longest line.",
+      "The motto, in van Gogh's own words: letter 143 to Theo, Amsterdam, 3 April",
+      "1878 — 'that which is done with love is well done' (vangoghletters.org/en/let143).",
       "",
-      "`title` may contain a line break (\\n). The motto is set as written, never",
+      "`title` holds its line breaks (\\n). The motto is set as written, never",
       "re-wrapped by the browser, so the attribution can align to its real right",
-      "edge; a browser cannot shrink a box to the longest line of wrapped text.",
-      "",
-      "What was removed: a generated line under the motto (count, media, years),",
-      "replaced by the attribution; and before that an 'Original Oil & Paper Works'",
-      "eyebrow."
+      "edge; a browser cannot shrink a box to the longest line of wrapped text."
     ],
     "ctaHref": "/works/",
     "attribution": {

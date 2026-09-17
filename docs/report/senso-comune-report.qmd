@@ -46,23 +46,39 @@ that takes money across the Chinese border, ships physical objects
 internationally, satisfies two consumer-law regimes at once and loads
 acceptably on both sides of the Great Firewall is not.
 
-Nothing in the build is fixed to six. The count, the year span, the
-counters and the page set are all derived from the work data; adding a
-seventh is a data edit.
+Nothing in the build is fixed to six. The counts, the series and the page set
+are all derived from the work data; adding a seventh work, or a new series, is
+a data edit.
+
+## Where things stand {#sec-status}
+
+```{=latex}
+\Needspace*{14\baselineskip}
+```
+
+: The site on 17 September 2026 {#tbl-status}
+
+| | |
+|:--------------------|:--------------------------------------------------------------|
+| Built | 36 pages, 18 in each language: the homepage, the catalogue and its two series, six work pages, sold works, and seven pages of information |
+| Published | A **preview** on GitHub Pages: not indexed, labelled on every page, and unable to take an order |
+| Ready to sell | **No.** The readiness gate counts 54 details still owed (@sec-readiness-today), and a release refuses to build until they are supplied |
+| Checked | Five checks on every build, and a sixth in a real browser (@sec-checks) |
+| Still to build | The buy box and disclosures on the work page; the cart, search and account behind the shop bar (@sec-next-todo) |
 
 ## The seven findings that would have sunk it {#sec-blockers}
 
-: Blocking findings, in the order they must be dealt with {#tbl-blockers}
+: Blocking findings, all now dealt with in the build {#tbl-blockers}
 
-| Ref | Finding |
-|:-----|:------------------------------------------------|
-| A-01 | Every call to action was `#A19E97` — **2.67:1**, failing both the body-text and the large-text floor. No font size rescues it. |
-| B-01 | **Stripe**\index{Stripe} is unavailable to a mainland-China seller — the whole account, not merely PayPal. **Airwallex**\index{Airwallex} excludes mainland entities from card acquiring and opens no individual accounts at all. |
-| B-03 | `vercel.app` and `workers.dev` measure **100% blocked** from mainland China. `pages.dev` measures 0%. |
-| B-05 | A unique pre-existing painting gets **no returns exception** under either Chinese or EU law. Uniqueness is not personalisation. |
-| B-06 | Instagram was the only contact channel. It is blocked in mainland China, and EU law requires an email address regardless. |
-| B-08 | **China-origin paintings are not duty-free into the United States.** Section 301\index{Section 301} adds 7.5% and the \$800 de minimis\index{de minimis} exemption is suspended. |
-| N-01 | A one-page site cannot link to one painting, which is the site's main acquisition motion. |
+| Finding | Where |
+|:----------------------------------------------------------|:-------------|
+| Every call to action was `#A19E97` — **2.67:1**, failing both the body-text and the large-text floor. No font size rescues it. | @sec-palette |
+| **Stripe**\index{Stripe} is unavailable to a mainland-China seller — the whole account, not merely PayPal. **Airwallex**\index{Airwallex} excludes mainland entities from card acquiring and opens no individual accounts at all. | @sec-paying |
+| `vercel.app` and `workers.dev` measure **100% blocked** from mainland China. `pages.dev` measures 0%. | @sec-decisions |
+| A unique pre-existing painting gets **no returns exception** under either Chinese or EU law. Uniqueness is not personalisation. | @sec-returns |
+| Instagram was the only contact channel. It is blocked in mainland China, and EU law requires an email address regardless. | @sec-disclosure |
+| **China-origin paintings are not duty-free into the United States.** Section 301\index{Section 301} adds 7.5% and the \$800 de minimis\index{de minimis} exemption is suspended. | @sec-duty |
+| A one-page site cannot link to one painting, which is the site's main acquisition motion. | @sec-structure |
 
 ## Decisions taken {#sec-decisions}
 
@@ -78,10 +94,11 @@ foreign-exchange quota consumed, no balance-of-payments filing and no VAT.
 **Host on Cloudflare Pages**\index{Cloudflare Pages}. The only option with no
 bill, no pause, no terms problem and no ICP filing\index{ICP filing}.
 
-**Seven documents per language, not one.** The editorial scroll is kept; two
-lines of CSS (`@view-transition`) restore the single-page feel.
+**A page for everything that is shared.** Every work, series and policy has its
+own address in both languages; two lines of CSS (`@view-transition`) keep the
+calm of a single page when moving between them.
 
-**Self-host the fonts.** 79.8 KB for both families, built from the variable
+**Self-host the fonts.** 81.7 KB for both families, built from the variable
 originals.
 
 **Adopt Priscilla's sage palette**, with text moved onto cream.
@@ -218,10 +235,9 @@ serves one audience and decorates the other. `SC` is not the initials of
 \begin{finding}{This is why the first icon was replaced}
 ```
 
-The icon shipped in September was `SC`, cut from real Fraunces outlines. It was
-a correct solution to the problem as stated — *make something that reads at
-16 px* — and it reads at 16 px. It was the wrong solution to the problem as it
-actually is, which is *make something that reads at 16 px in two languages*.
+The first icon was `SC`, cut from real Fraunces outlines. It read at 16 px, and
+it served only one of the two audiences: the problem is *make something that
+reads at 16 px in two languages*.
 
 ```{=latex}
 \end{finding}
@@ -299,7 +315,7 @@ launch.
 and the name are a single link and a single tab stop; and this document, in the
 footer of every page and on the title page.
 
-Eight assertions in `scripts/check-review.mjs` hold it together: that the icon
+Seven assertions in `scripts/check-review.mjs` (F-01 to F-04) hold it together: that the icon
 is the geometry `mark.mjs` declares, that the masthead draws the same plate,
 that the mark contributes no accessible name of its own, that it is identical
 in both locales, that it spends no accent, and that the hanging figure is the
@@ -354,21 +370,12 @@ contrast figure reveals: a translucent bar at the top of the page sits over the
 sage, so every page would show a greyed, greenish masthead instead of
 Priscilla's brown. Glass is only wanted once there is something beneath it.
 
-**The old section boundaries were invisible and hard at once.** The washes the
-sfumato bands faded between differ by ΔE 0.8–2.6 in OKLab — at or under the
-threshold of perception when spread across 9 rem. A boundary was therefore only
-ever seen where it broke. Sampling the rendered homepage row by row found four
-such breaks, each a 10-level hard step (@tbl-seams). The "soft edge" was being
-read as a faint line.
-
-: Where the homepage's soft edges were hard, before this pass {#tbl-seams}
-
-| Boundary | Seam | Cause |
-|:----------------------|:----------------------------|:---------------------------------------------|
-| Hero → Works | `#ECE3D2 → #F3EBDD` | The band faded to violet; the section below is warm |
-| Tribute → archive link | `#EDE4D3 → #F3EBDD` | The link sat outside Tribute, on the bare sheet |
-| Archive link → About | `#F3EBDD → #ECE3D3` | …so the next band started violet against warm |
-| About → How to Buy | `#E9E3D6 → #F3EBDD` | No band at all |
+**A boundary between near-identical washes is invisible and hard at once.** The
+washes differ by ΔE 0.8–2.6 in OKLab — at or under the threshold of perception
+when spread across 9 rem — so a boundary is only ever seen where it breaks: a
+band that fades to the wrong neighbour, or a section with no band at all, leaves
+a hard step that reads as a faint line. A band must fade between the grounds
+actually either side of it, and be visible enough to be felt.
 
 **A peak reads as a crease.** A boundary that rises and falls through a few
 evenly weighted stops draws a pointed profile, and the eye finds the point. The
@@ -409,7 +416,7 @@ the reason says so.
 | Glass | Masthead at 60–70% | Optional — *fails 4.5:1* | 3.06–4.11:1 over a white passage |
 | Glass | Translucent reading panels over the sage | Optional — *unbounded contrast* | The sheet is the reading surface; text on glass over a painting has no worst case to solve against |
 | Boundaries | The field breathing through each band at 20% | **Adopted** | ΔE 5.3: plainly there when scrolling, a fifth of the way to the sage |
-| Boundaries | Bands named by, and fading between, their actual neighbours | **Adopted** | Removes all four seams in @tbl-seams |
+| Boundaries | Bands named by, and fading between, their actual neighbours | **Adopted** | No hard step where a band meets the section beside it |
 | Boundaries | Each section its own sheet, with sage between | Optional | The most emphatic; replaces one mounted sheet with several and doubles the shadows |
 | Boundaries | The mark set small at the centre of a band | Optional | A signpost that repeats the logo on every scroll |
 | Boundaries | A hairline or short sanguine rule | Optional — *adds a line and spends the accent* | Contradicts both principles above |
@@ -426,7 +433,7 @@ the reason says so.
 
 ### What was built {#sec-soft-built}
 
-![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: a section boundary between Original Works and Tribute.](fig/cap-soft.png){#fig-soft width=100%}
+![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: the homepage boundary between Latest works and Series.](fig/cap-soft.png){#fig-soft width=100%}
 
 Nothing in the palette changed. All nine new softness tokens — two radii, three
 shadows, the mat, the glass opacity and blur, and the boundary breath — are
@@ -438,17 +445,14 @@ a literal colour appears among them.
 - `check-contrast.mjs` composites the bar at `--glass-bar-opacity` over pure
   white and fails the build below 7:1 for navigation text. Set to the usual 70%,
   it names three failures.
-- `check-render.mjs` is new, and the first check that needs a browser. It lays
-  the built pages out in Chrome at 1440, 900 and 390 px and asserts that every
+- `check-render.mjs` lays the built pages out in Chrome and asserts that every
   painting's box keeps the painting's own proportions to within 1%, with no
-  radius and no transform. It is not part of `npm run check`, which must run
-  anywhere; CI runs it on every deploy. Forcing the hero full-width under its
-  height cap makes it report a 17% distortion by name.
+  radius and no transform (@sec-checks).
 - Six assertions in `check-review.mjs` (G-01 to G-06) cover the rest: no
   literal colour in the new tokens, a mat and nothing that alters a painting,
   glass solid at rest and gated, all new motion standing down for reduced
   motion, one transition name per painting per page, and every band joining the
-  grounds actually either side of it. Each was mutation-tested.
+  grounds actually either side of it.
 
 ## The two masters {#sec-masters}
 
@@ -505,14 +509,10 @@ is 2.78:1; the *Sunflowers* chrome yellow 2.70:1. Both sit within a hair of the
 
 ## The site's structure {#sec-structure}
 
-The four menu items — *Original Works, Tribute, About, How to Buy* — looked
-like four pages and were not. Two were jumps down the homepage, two were pages,
-so the same menu did different things depending on where it was clicked, and
-from any work page *Original Works* reloaded the homepage and scrolled. There
-was no page that listed the works; sold works were reachable only from the
-footer; the homepage showed every painting at full size, one per screen; and
-the only way to group a work was a two-value field. None of that survives a
-catalogue growing past a few dozen works, or a new genre.
+The first build's menu — *Original Works, Tribute, About, How to Buy* — mixed
+jumps down the homepage with real pages, had no page that listed the works, and
+could group a work only by a two-value field. None of that survives a catalogue
+growing past a few dozen works, or a new genre. The structure below replaced it.
 
 ### Method {#sec-structure-method}
 
@@ -526,9 +526,8 @@ and side columns were read from the rendered page and checked against a
 screenshot. Three first choices could not be used: Gerhard Richter's site was
 offline, Hauser & Wirth rate-limited the request, and Artsy refused it.
 
-One trap is worth recording. Counting `<aside>` elements suggested four of the
-six had sidebars; every one of them was a region-settings pop-up. Only the
-rendered layout was trusted.
+Counting `<aside>` elements suggested four of the six had sidebars; every one
+was a region-settings pop-up, so only the rendered layout was trusted.
 
 ### What the six agree on {#sec-structure-consensus}
 
@@ -580,8 +579,7 @@ with its own page, and the Works section's rooms are one quiet row of tabs.
 
 - **The header goes to four real pages:** *Works, About, How to Buy, Contact*
   (作品, 关于, 购买方式, 联系), and marks the one the visitor is in — `page` on
-  the section's own page, `true` beneath it. The stylesheet had styled that marker
-  since the first build; nothing had ever set it.
+  the section's own page, `true` beneath it.
 - **Works is the catalogue.** `/works/` lists every available work, newest first,
   with a row of tabs: *All, Original Works, Tribute, Sold works*, each with its
   count. Each series is a room at `/works/series/{id}/`; sold works moved from
@@ -590,8 +588,9 @@ with its own page, and the Works section's rooms are one quiet row of tabs.
   its homepage card are generated from it, and the build refuses a work that names
   an undeclared series or genre, or a slug that would collide with a page under
   `/works/`.
-- **The homepage is a front door, not the catalogue:** the hero painting, the four
-  latest works with *All works (5)*, a card for each series, about, and buying.
+- **The homepage is a front door, not the catalogue:** van Gogh's line beside
+  one *Featured work*, the four *Latest works* with a link to all of them and
+  their number, a card for each series, About, and How to Buy.
 - **Breadcrumbs from the second level down,** with the current page as text and a
   work's trail running through its one series (*Home / Works / Tribute / …*), and
   published as structured data. The top level has none: there is nothing above it
@@ -636,24 +635,12 @@ is added across, not down.
 
 ### How it is held {#sec-structure-held}
 
-Six assertions (I-01 to I-06): the header links to four real pages and marks the
+Assertions I-01 to I-06: the header links to four real pages and marks the
 current one; every work is listed exactly once — on *Works*, on its series page, or
 among sold works; the homepage shows at most four and states how many there are; a
 series needs only data; deeper pages carry a breadcrumb whose last step is the page
 itself; the old address still arrives; and no navigation lives in a side column.
-
-Three existing assertions changed with the structure, each for a stated reason:
-*B-04* now tests the *How to Buy / Buy* label pair; *D-02* finds sold works at their
-new address and checks that selling pages use the larger card; and the counter
-assertion under *A-01* is **retired** — the homepage no longer lists the catalogue,
-so a running *01 / 06* has nothing to count, and the number is now stated outright.
-
-The render check now covers the catalogue, both series pages and sold works, and
-on its first run it caught a real defect: series-card covers drawn at 0.745 when
-the painting is 0.800, a fixed height squeezed by a narrow column. Running the
-checks with the preview's address prefix caught another — four of the new
-assertions matched root paths only, and would have passed on this machine and
-failed in CI.
+The render check covers the catalogue, both series pages and sold works.
 
 [^nng-rail]: Nielsen Norman Group, [Fight against "right-rail blindness"](https://www.nngroup.com/articles/fight-right-rail-blindness/) and [Banner blindness revisited](https://www.nngroup.com/articles/banner-blindness-old-and-new-findings/).
 [^nng-local]: Nielsen Norman Group, [Local navigation is a valuable orientation and wayfinding aid](https://www.nngroup.com/articles/local-navigation/).
@@ -663,25 +650,25 @@ failed in CI.
 
 ## The site as built {#sec-built}
 
-Four views, at the two widths the layout was verified at. The screenshots are
-of the built pages, not mockups: what is shown is what `npm run build`
-produces — `docs/report/shots.sh` takes them from `dist/` over a real origin,
-so this section cannot quietly describe a version of the site that no longer
-exists.
+Five captures of the preview build, four on a desktop and one on a phone. They
+are not mockups: `docs/report/shots.sh` takes them from `dist/` each time this
+document is built, so they show the site as it is. The ribbon across the top of
+each page and the red `NEEDS-INPUT` flags are the preview's; a release has
+neither (@sec-readiness).
 
-![The homepage. Cream sheet mounted on the sage field, dark brown bar, the mark at the head of the wordmark. The motto — a paraphrase of van Gogh's letter 143 to Theo, attributed beneath it and aligned to its longest line — sits beside the featured work under its own heading; on a phone the motto leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
+![The homepage. Cream sheet mounted on the sage field, dark brown bar, the mark at the head of the wordmark, and search, account and cart at the right. Van Gogh's line, in his own words from letter 143 to Theo — *that which is done with love is well done* — is attributed beneath it, aligned to its longest line, beside the featured work; on a phone the line leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
 
-![A work page, the painting in its mat. The price is the boldest element in the block — the single change with the best evidence behind it. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
+![A work page. The views of the work — front, detail, edge, back and video — sit in a strip with thumbnails always visible, grey placeholders until the photographs exist. The price is the boldest element in the block. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
 
 ![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.png){#fig-sold width=100%}
 
-![Mobile. The masthead is static below 720 px: at 390 px the sticky version grew to 280 px, a third of the viewport, and broke the scroll padding that the focus-obscured criterion depends on. The mark is sized in `em`, so it shrinks with the wordmark rather than needing its own breakpoint.](fig/cap-mob.png){#fig-mob width=42%}
+![The homepage on a 390 px phone. The masthead takes two rows — the short name and the shop bar, then the sections and the language switch — and does not stick: a sticky masthead that tall would take a third of the screen and hide the focused item. Van Gogh's line comes before the featured work.](fig/cap-mob.png){#fig-mob width=42%}
 
 ## The design review {#sec-review}
 
-The built site was reviewed again in September, as a designer rather than as
-its author, and the twenty findings were implemented. They are recorded here
-because several of them change claims made earlier in this document.
+The built site was reviewed in September as a designer rather than as its
+author. Nineteen findings, in five groups; eighteen were implemented, and each
+is held by an assertion of the same number in `check-review.mjs`.
 
 ```{=latex}
 \Needspace*{24\baselineskip}
@@ -696,14 +683,12 @@ because several of them change claims made earlier in this document.
 | **C** Reach | 4 | The icon set, `theme-color` and manifest (@sec-mark); Open Graph typed as a product with price and availability; the sage field restored on a phone |
 | **D** Reading | 5 | Prose pages given a narrower mount; the archive set as a grid rather than a second selling gallery; the gallery name made the `h1`; dead rules deleted |
 | **E** Fonts | 2 | The Chinese subset's coverage is now asserted at build time, and each locale preloads only the face it uses |
-| **F** The mark | 4 | @sec-mark |
 
-Two of the twenty were not fixes. **C-04** proposed freezing the wordmark in
-English; it was declined, and the wordmark still translates — which is what
-later decided the logo. And half of **B-03** was simply wrong: the review
-claimed the scale diagram's painting and sofa were composed off-axis. They are
-both centred, and always were. The contrast half of that finding was real and
-is the measurement above.
+Two were not fixes. **C-04** proposed freezing the wordmark in English; it was
+declined, and the wordmark still translates — which is what later decided the
+logo (@sec-mark). And half of **B-03** was wrong: the scale diagram's painting
+and sofa were said to be off-axis, and are centred. Its contrast half was real,
+and is the measurement above.
 
 # Money {#sec-money}
 
@@ -712,7 +697,7 @@ is the measurement above.
 ### The constraint
 
 ```{=latex}
-\begin{blocker}{B-01 \textperiodcentered{} Stripe is not available}
+\begin{blocker}{Stripe is not available}
 ```
 
 Mainland China is absent from Stripe's\index{Stripe} supported business countries. Hong Kong,
@@ -818,7 +803,7 @@ Every one of those caps sits above this entire inventory.
 ## Duty and tax at the border {#sec-duty}
 
 ```{=latex}
-\begin{blocker}{B-08 \textperiodcentered{} The site cannot say ``duty-free'' to US buyers}
+\begin{blocker}{The site cannot say ``duty-free'' to US buyers}
 ```
 
 Original paintings under HS 9701\index{HS heading 9701} carry a **Free** base
@@ -867,7 +852,7 @@ cumulative total.
 ## Returns {#sec-returns}
 
 ```{=latex}
-\begin{blocker}{B-05 \textperiodcentered{} Returns cannot be refused, in either market}
+\begin{blocker}{Returns cannot be refused, in either market}
 ```
 
 **China.** Consumer Protection Law Art. 25 gives a seven-day no-reason return on
@@ -879,7 +864,7 @@ expressly forbid a trader expanding that list, and ban pre-ticked exclusion.
 **European Union.** CRD\index{Consumer Rights Directive} Art. 16(c) excepts goods "made to the consumer's
 specifications or clearly personalised". **Uniqueness is not personalisation** —
 the test is whether the *buyer* specified it. A pre-existing painting chosen
-from a catalogue of six fails that test.
+from a catalogue fails that test.
 
 A "governed by PRC law" clause does not help: Rome I\index{Rome I Regulation} Art. 6(2) prevents a choice
 of law from depriving a consumer of protections that cannot be derogated from
@@ -969,24 +954,27 @@ wrong description is worse than none, because it burns trust in the channel.
 
 ## Shape
 
-Plain Node, no framework. Twenty-eight pages generated from three data files,
-with `sharp` the only runtime dependency — which is the only architecture
-consistent with a design whose argument is restraint.
+Plain Node, no framework. Thirty-six pages generated from three data files,
+with `sharp` the only dependency — which is the only architecture consistent
+with a design whose argument is restraint.
 
 ```
-src/data/       seller.json · artworks.json · site.json
-src/styles/     tokens.css · base.css · gallery.css
+src/data/        site.json · seller.json · artworks.json
+                 readiness-waivers.json       signed exceptions to the gate
+src/styles/      tokens.css · base.css · gallery.css
+src/scripts/     gallery.js                   the work-page views, enhanced
 src/templates.js
-build.js        28 pages, two locales
-scripts/        mark.mjs          the logo geometry, shared with the report
-                build-fonts · build-fonts-cjk · build-images · build-icons
-                check-contrast · check-links · check-review · check-render
-                preview.mjs       one page, inlined, for review
-docs/           brief/ · build-report/ · report/     one document each
+build.js         36 pages, two locales, and the 404
+scripts/         mark.mjs                     the logo, shared with this report
+                 build-fonts · build-fonts-cjk · build-images · build-icons
+                 readiness · check-readiness · test-readiness · release
+                 check-contrast · check-links · check-review · check-render
+                 preview.mjs                  one page, inlined, for review
+docs/            brief/ · report/
 ```
 
-The page count follows the catalogue: fourteen routes per locale for six
-works, of which six are work pages.
+The page count follows the data: eighteen pages per locale for six works in two
+series, of which six are work pages.
 
 ## The entity switch {#sec-switch}
 
@@ -1015,32 +1003,27 @@ payment stands and the second is refunded in full within 24 hours.*
 
 ## Checks that block the build {#sec-checks}
 
-Four. `npm run check` runs the first three anywhere; the fourth needs a
-browser and runs in CI.
+`npm run check` runs the first four anywhere, in seconds. The rendering check
+needs Chrome; GitHub runs it on every preview, and the release runs all of them.
 
-`check-contrast.mjs` recomputes every token against its worst-case ground. It
-also resolves the *cascade*: where several rules set a colour on the dark bar,
-it takes the declaration that actually wins and measures that one.
+```{=latex}
+\Needspace*{16\baselineskip}
+```
 
-`check-links.mjs` verifies dead links, missing `alt`, missing `width` or
-`height`, heading order, landmark counts, hreflang reciprocity, and that the
-shipped Chinese subset still covers every CJK character the build puts in a
-display position.
+: The checks {#tbl-checks}
 
-`check-review.mjs` is newer and differently shaped: **47 assertions over 30
-findings** — the design review (@sec-review), the mark and the softness pass —
-written against the built pages rather than the source, so a fix that silently
-stops being applied fails the build instead of being noticed in a screenshot
-months later.
+| Check | What fails it |
+|:----------------------|:----------------------------------------------------------|
+| `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white |
+| `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
+| `check-review` | **66 assertions over 46 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `test-readiness` | Any of **43 tests** showing the gate opens only when it should (@sec-readiness-proof) |
+| `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; van Gogh's line re-wrapped, its attribution off its edge, or the featured work ahead of it on a phone |
 
-`check-render.mjs` lays the built pages out in headless Chrome and fails if any
-painting is drawn out of its own proportions, rounded or transformed
-(@sec-soft-held).
-
-Between them they caught a muted grey that passed
-on white and failed on the darkest wash, work pages shipping with no `<h1>` at
-all, and a mobile override that made the navigation invisible once the dark bar
-was adopted.
+Headless Chrome will not lay a page out narrower than 500 px — asked for 390, it
+lays out at 500 and crops. Phone widths are therefore laid out inside an iframe
+of exactly that width, with scrollbars hidden, and the check asserts the width
+the page actually received.
 
 ```{=latex}
 \begin{finding}{A test that passes for the wrong reason}
@@ -1071,11 +1054,11 @@ outright. The checks are a floor, not a pass.
 
 ## Readiness {#sec-readiness}
 
-The site must not go live until every critical detail is supplied. Until this
-section, nothing enforced that. The build printed the fields still marked
-`NEEDS-INPUT` — stopping after forty of ninety-eight — and built the site anyway;
-any build could be published; and only the literal word was detected, so an
-empty email, `test@example.com` or a placeholder photograph passed in silence.
+The site must not go live until every critical detail is supplied. A list of
+fields marked `NEEDS-INPUT` is not enough to ensure that: an empty email,
+`test@example.com` or a placeholder photograph contains no such word, and a list
+that is printed does not stop a build that is published. The readiness gate
+checks what is in each field, and a release cannot be built while it is closed.
 
 ### What the research says {#sec-readiness-research}
 
@@ -1131,7 +1114,9 @@ empty email, `test@example.com` or a placeholder photograph passed in silence.
   name and a date; expired or unsigned waivers do not count, and every live one is
   printed in every report and written into the release. Identity, the registration
   disclosure, returns, prices, dimensions, photographs and payment links cannot be
-  waived — a waiver naming one keeps the gate shut.
+  waived — a waiver naming one keeps the gate shut. That includes the Chinese
+  registration declaration, which must match the rule's wording character for
+  character (rule LG-01).
 - **Loud where it matters.** The production host's build command is the release
   script, so a closed gate is never published; a *Release check* workflow runs the
   same script on GitHub and fails red with the report on the run's summary page, and
@@ -1148,20 +1133,6 @@ empty email, `test@example.com` or a placeholder photograph passed in silence.
 | Photography | 3 | A work for sale still showing its placeholder; a real view photograph with no description |
 | Payments | 3 | No way to pay on the active entity; a live cart with no transaction ceiling |
 | Backstop | 1 | A placeholder in any field no rule names |
-
-### Found while building it {#sec-readiness-found}
-
-- **A claim in the stylesheet was false.** It said the build fails if the Chinese
-  registration declaration is edited. Nothing checked it. Rule LG-01 now does, and
-  it cannot be waived.
-- **The first backstop defeated its own conditions.** It blocked on the transaction
-  ceiling even while the cart is a placeholder, which the ceiling's own rule had set
-  aside, and on descriptions of views that a release leaves out. Rules now own their
-  fields.
-- **Four review assertions described a preview, not the site.** They expected five
-  views on every page, a video on every work, and flagged placeholders to exist. A
-  correct release has none of those. They now expect what the build should produce
-  in each mode.
 
 ### How it is proved {#sec-readiness-proof}
 
@@ -1186,6 +1157,12 @@ address, the donation recipient, and the three header placeholders. Most are
 typing. One is a decision: search, account and cart block a release until those pages
 exist, or until someone signs a waiver for them.
 
+`npm run readiness` prints the list, each with the field, what is wrong, how to fix
+it and why it matters. On the preview, every placeholder a reader can see is also
+flagged in red on its own pale ground, and the flag goes the moment the field is
+filled; placeholders inside alt text, page titles and link previews cannot carry a
+flag and are on the printed list instead.
+
 [^owasp-fail]: OWASP, [Fail securely](https://owasp.org/www-community/Fail_securely).
 [^crd]: Directive 2011/83/EU on consumer rights, [Article 6(1)](https://www.legislation.gov.uk/eudr/2011/83/article/6), points (a), (b), (c), (e) and (g); Article 9(1) for the 14-day withdrawal period.
 [^ecl15]: 中华人民共和国电子商务法, [第十五条](https://www.cac.gov.cn/2018-09/01/c_1123362506.htm).
@@ -1195,26 +1172,15 @@ exist, or until someone signs a waiver for them.
 [^wechat]: WeChat Help Center, [How do I set my WeChat ID?](https://cs.help.wechat.com/hc/en-us/articles/11916094962703-How-do-I-set-my-WeChat-ID)
 [^cf-silent]: [tallyfy/documentation #242](https://github.com/tallyfy/documentation/issues/242): the pipeline stays green when the Cloudflare Pages build that publishes the site fails.
 
-# Next: the work page and the shop bar {#sec-next}
-
-```{=latex}
-\begin{finding}{Status of this part}
-```
-
-Written as research and scope; the decisions in @sec-next-decisions were then
-taken, and part of the scope was built. @sec-next-built records what was
-decided, where the decisions depart from the recommendations below, and what
-is built. The recommendations are left as written, so the reasoning behind
-each departure stays on the record.
-
-```{=latex}
-\end{finding}
-```
+# The work page and the shop bar {#sec-next}
 
 Two requests, researched together because they meet on the same page: a work
 page that gives a visitor *enough views* of a painting, modelled on three
 reference shops, and the *search · account · cart* trio that sits top-right on
-nearly every shop.
+nearly every shop. Five decisions were taken on 17 September 2026
+(@sec-next-decisions). The views and the shop bar are built; the buy box, and the
+cart, search and account behind the shop bar, are specified and not yet built
+(@sec-next-todo).
 
 ## What the reference shops do {#sec-next-refs}
 
@@ -1244,8 +1210,8 @@ will this look like on my wall?*
 thumbnails for additional images; 76% of mobile sites do not. Where only dot
 indicators are shown, half of desktop test users had difficulty finding the
 additional images, and users missed the one that would have answered their
-question. On mobile, a
-partly visible last thumbnail signals that more exist.[^baymard-thumbs]
+question. On mobile, a partly visible last thumbnail signals that more
+exist.[^baymard-thumbs]
 
 **At least one image in scale.** 42% of users try to judge a product's size
 from its images, and 28% of sites give them nothing to judge by.[^baymard-scale]
@@ -1269,14 +1235,8 @@ exist on a phone.[^nng-icons]
 
 **Search should be as prominent as search is useful.** Where people browse
 visually — Baymard's examples are apparel and home décor, and art is the same
-kind of purchase — a small search control is right;
-dominant search fields belong to large catalogues bought by specification.
-[^baymard-search]
-
-**Saving should not require an account.** Shoppers use the cart as a memory as
-much as a purchase, and a login gate is what stops people using a save
-feature; "favourites" is a better word than
-"wishlist".[^nng-wish]
+kind of purchase — a small search control is right; dominant search fields
+belong to large catalogues bought by specification.[^baymard-search]
 
 **Urgency must be true.** EU law treats falsely claiming limited availability to
 rush a decision as unfair in all circumstances.[^ucpd] A unique work *is*
@@ -1286,103 +1246,142 @@ already says *Unique work*, and a "Hurry" is pressure the brief rules out.
 ## What is different here {#sec-next-constraints}
 
 A shop template assumes multiple units of many products, an account system and
-one checkout for everything in the cart. None of those three is true of this
-site, and each one changes what the trio should be.
+one checkout for everything in the cart. None of those is true of this site yet.
 
 - **Every work is unique.** A quantity stepper has one legal value. "Only 1
   left" is permanently true.
-- **The catalogue is small.** Six works at launch, uncapped (@sec-summary). A
-  search box with six things to find is a dead control.
+- **The catalogue is small.** Search earns its place only by finding what a
+  visitor would actually type — a title, a medium, a year, a series — in either
+  language, and nothing else.
 - **There is no server.** The site is static by design. Accounts need
   authentication, password recovery and storage of personal data — which makes
   Priscilla a data controller under both PIPL and GDPR (@sec-privacy) for
   nothing the buying path requires. The payment provider already holds the
   buyer's record.
-- **There is no multi-item checkout.** On the launch route each work has its own
-  payment link, or is sold by enquiry; two works cannot be paid for in one
-  transaction. Whether the Hong Kong route's provider can take several line items
-  in one hosted checkout is **not established**.
+- **There is no multi-item checkout yet.** On the launch route each work has its
+  own payment link, or is sold by enquiry. Whether a provider on either route can
+  take several works in one hosted checkout is **not established** (@tbl-open).
 - **A cart widens the overselling window.** @sec-oversell defends a unique work
   from being sold twice. A cart invites a buyer to believe a work is held while
-  it sits there, and every layer of that defence would have to re-check it.
+  it sits there, and every layer of that defence has to re-check it.
 
-## Recommendations {#sec-next-recs}
+## The decisions {#sec-next-decisions}
 
-### The work page
+```{=latex}
+\Needspace*{18\baselineskip}
+```
 
-![The planned work page. Numbered: (1) the shop bar; (2) five views with thumbnails always visible; (3) the current view, opening full size; (4) one primary action, with Save and Add to selection secondary; (5) assurance lines drawn from the seller data; (6) disclosures as native accordions; (7) payment methods derived from the active entity, and sharing; (8) the artist's words and more works. Proportions are schematic.](fig/pdp-wire.pdf){#fig-pdp-wire width=100%}
+: The decisions of 17 September 2026 {#tbl-next-decisions}
 
-**Five views per work,** each with a stated purpose.
+| # | Decided | What it means |
+|:--|:----------------------------------------|:----------------------------------------|
+| D1 | **Search, account and cart** in the header now | Each leads to a placeholder route that lands on the 404 until its page is built |
+| D2 | **Detail, edge, back and video** views on every work | Placeholders until the photographs and video exist. The scale diagram stays beside the work rather than becoming a generated view |
+| D3 | **Any number of works in one order** | Limited only by availability and by the payment route's largest single transaction |
+| D4 | **No search threshold** | Search appears regardless of catalogue size, provided the query and the searchable text are correctly scoped |
+| D5 | **Video on work pages only** | Nowhere else on the site carries video |
+
+## What is built {#sec-next-built}
+
+@fig-work shows the result on a desktop.
+
+- **The shop bar.** Search, account and cart on every page, in both languages,
+  as icons whose accessible names are the words (*Search*, *Account*, *Cart*;
+  搜索, 账户, 购物车). Each destination is a declared placeholder, and
+  `check-links` fails the build if one ever resolves — so a page cannot be built
+  without its placeholder being retired in the same change. On a phone the
+  masthead takes two rows: the short name, *Senso Comune*, with the three icons;
+  then the sections and the language switch. Below 360 px the name is kept for
+  screen readers and the mark alone leads home.
+- **Icons only, at every width.** The research above favours visible words; the
+  reference Priscilla chose shows icons alone, and that is what was built. Only
+  the magnifying glass is close to universal. If the account or cart icon proves
+  ambiguous in use, the labels are one CSS change away: the words are already in
+  the markup.
+- **A bilingual 404.** Every placeholder lands on it: both languages, no
+  canonical, not indexed, not in the sitemap.
+- **The five views.** Front, detail, edge, back and video on every work page, in a
+  scroll-snap strip that swipes natively, with thumbnails always visible — a rail
+  from 900 px, a row below that. It works with no script. A small script adds
+  what links cannot: the current thumbnail marked for screen readers, no history
+  entry per thumbnail, arrow keys, Home and End, and a video that pauses when it
+  leaves the strip. Video is never preloaded and never plays by itself. Only the
+  front view carries the painting between pages (@sec-soft).
+- **Placeholders that step aside.** The image pipeline draws a labelled
+  placeholder for each missing view at a sensible proportion; a real photograph
+  replaces it on the next build and keeps its own proportions. A release leaves
+  out any view without a photograph rather than showing its placeholder.
+
+## Still to build {#sec-next-todo}
+
+Each item names the evidence that closes it; *done* means the check exists and
+passes, not that the page looks right. Sizes: S is under a day, M a few days,
+L a week or more.
+
+### The buy box and disclosures
+
+- **Assurance from data, not copy.** Three lines under the action, each true and
+  each already argued in this document: the worldwide 14-day return
+  (@sec-returns); how the work is packed and insured (@sec-shipping); and a link
+  that estimates import duty for the buyer's country (@sec-duty) — which none of
+  the reference shops offer, and which is the question an international buyer of
+  a \$300 painting actually has.
+- **Disclosures as native accordions:** Details, Shipping and packaging, Duty and
+  import, Returns, Contact. No script, keyboard-operable, readable with styles off.
+- **Payment methods from the active entity.** On the launch route that is PayPal,
+  Alipay and WeChat Pay and *no card marks*. A card logo shown by a seller that
+  cannot take cards is a misleading claim, so the list is generated, like the rest
+  of the entity switch (@sec-switch).
+- **Sharing that works in China.** The device's own share sheet where the browser
+  has one, and *Copy link* everywhere — not Facebook, X and Pinterest buttons, all
+  unreachable in mainland China. WeChat builds its own link card from the Open
+  Graph tags the site already publishes.
+
+```{=latex}
+\Needspace*{18\baselineskip}
+```
+
+: The buy box, item by item {#tbl-next-buybox}
+
+| Work | Done when | Size |
+|:-------------------------------------------|:-------------------------------------|:-----|
+| Reorder the aside: price, action, assurance | The price is still the boldest element | S |
+| Assurance lines generated from `seller.json` | No assurance string typed into a template | S |
+| Duty estimate linked by destination | Every destination in @tbl-import reachable | M |
+| `<details>` disclosures | Operable by keyboard; content present with styles off | S |
+| Payment methods from the active entity | Built with `hk-sole-prop`, card marks appear; with `individual`, none | S |
+| Share sheet with copy-link fallback | Works with the API absent; no third-party share scripts | S |
+| More works: three available, never sold | A sold work never appears | S |
+
+```{=latex}
+\Needspace*{22\baselineskip}
+```
+
+### Behind the shop bar
+
+Each is specified in the README (*Scripting still needed*). Building one means
+removing its placeholder route from `site.json`, which the link check and the
+readiness gate both require.
+
+: The cart, search and account {#tbl-next-bar}
+
+| Page | Work | Done when | Size |
+|:--------|:--------------------------------------|:--------------------------------------|:-----|
+| Cart | Works gathered on the device; a total held under the entity's `maxTransactionUSD`; `availability.json` re-checked on open and before paying; several works paid in one payment where the provider allows it, otherwise work by work | A sold work is never counted in a total; no single payment exceeds the ceiling; a work in two carts cannot be paid for twice; order confirmation and withdrawal information reviewed against @sec-returns and @sec-disclosure | L |
+| Search | An index written by the build — title, medium, year and series, in both languages — searched in the browser, by substring so Chinese needs no word segmentation | English and Chinese queries both find titles and media; nothing outside the indexed fields matches | M |
+| Account | A server, a login, password recovery and a privacy regime, for an order history the payment provider already keeps | Reasonable only if the site moves to a hosted commerce platform that supplies accounts; not scheduled | — |
+
+### Considered, and not planned
 
 ```{=latex}
 \Needspace*{14\baselineskip}
 ```
 
-: The view vocabulary {#tbl-next-views}
-
-| View | What it answers | Source |
-|:--------------|:----------------------------------------|:----------------------------------|
-| Front | What the work is | The existing photograph |
-| Detail | What the surface is like | Raking-light photograph; the data field exists and is empty |
-| Edge | How deep it is, and how it hangs unframed | Photograph at 45° |
-| Back | Signature, inscription, hardware — provenance | Photograph |
-| In scale | How big it is on a wall | **Generated** from the dimensions, as the scale diagram already is |
-
-The in-scale view needs no photography. The scale diagram on every work page
-is already drawn at true proportion against a 244 cm wall, a 213 cm sofa and a
-144.78 cm hanging line; it becomes the fifth view instead of a figure in the
-sidebar. Every work gets Baymard's most-missed image on day one.
-
-**A zero-script gallery, enhanced.** The views sit in a horizontal
-scroll-snap strip, so a phone swipes natively. The thumbnails are in-page links
-to each view: a rail on the left from 900 px, a row beneath below that, with the
-last one partly cut off. That works with no JavaScript at all. A short script
-then adds what links cannot: the current thumbnail marked with `aria-current`,
-no history entry per thumbnail, and arrow-key movement along the rail. The
-lightbox opens whichever view is showing. Only the front view carries the
-painting's transition name (@sec-soft).
-
-**One primary action.** *Buy* when a checkout link exists, *Enquire about this
-piece* when it does not, as today. *Save* and *Add to selection* sit beneath it
-as quiet outlined controls; neither may outweigh the price, which remains the
-boldest element (@sec-built).
-
-**Assurance from data, not copy.** Three lines under the actions, each true and
-each already argued in this document: the worldwide 14-day return
-(@sec-returns); how the work is packed and insured (@sec-shipping); and a link
-that estimates import duty for the buyer's country (@sec-duty) — which none of
-the reference shops offer, and which is the question an international buyer of a
-\$300 painting actually has.
-
-**Disclosures as native accordions.** `<details>` elements: Details, Shipping and
-packaging, Duty and import, Returns, Contact. No script, keyboard-operable, and
-readable with styles off.
-
-**Payment methods from the active entity.** On the launch route that is PayPal,
-Alipay and WeChat Pay and *no card marks*; card marks appear only when the
-Hong Kong entity is active. A card logo shown by a seller that cannot take cards
-is a misleading claim, so the list is generated, like the rest of the entity
-switch (@sec-switch).
-
-**Sharing that works in China.** A share button using the device's own share
-sheet where the browser supports it, and *Copy link* everywhere. Not a row of
-Facebook, X and Pinterest buttons, all three of which are unreachable in
-mainland China; WeChat builds its own link card from the Open Graph tags the
-site already publishes.
-
-: Reference features considered for the work page {#tbl-next-pdp-options}
+: Reference features left out {#tbl-next-options}
 
 | Feature | Status | Why |
 |:------------------------------|:--------------------|:-----------------------------------------|
-| Thumbnail rail and five views | **Recommended** | The research, directly |
-| Generated in-scale view | **Recommended** | Answers the most consequential question with no photography |
-| Assurance lines and duty estimate | **Recommended** | True, already argued, and not offered by the references |
-| Accordions for disclosures | **Recommended** | Zero script; keeps the buy box short |
-| Payment methods from the entity | **Recommended** | Accuracy is a legal matter, not a style |
-| Device share sheet and copy link | **Recommended** | The only sharing that reaches both audiences |
-| More works, three at a time | **Recommended** | Available works only; the archive stays separate |
-| Breadcrumb | Optional | Useful once there are more sections; two levels today |
-| Short video of the surface in moving light | Optional | Heavy across the border; poster and on-demand loading only |
+| A generated in-scale view | Optional | Not taken under D2; the scale diagram already does the job beside the work |
 | Web AR on the wall | Optional — *later* | Native Android AR viewers rely on Google Play services, largely absent in mainland China; in-browser AR needs a commercial platform |
 | Make an offer | Optional | The enquiry already does this; a form needs a back end |
 | Quantity stepper | Not recommended | One legal value |
@@ -1390,281 +1389,18 @@ site already publishes.
 | Instalment financing | Not recommended | Neither entity route has a lending partner |
 | Review score | Not recommended at launch | No reviews exist; inventing them is unlawful |
 
-### The shop bar {#sec-next-bar}
-
-The trio as requested would put three controls in the masthead, and on this
-site two of them would lead nowhere at launch: a search with six things to find,
-and an account with nothing behind it. The recommendation keeps the convention
-people look for in that corner, and gives each position something true to do.
-
-```{=latex}
-\Needspace*{20\baselineskip}
-```
-
-: The shop bar, as requested and as recommended {#tbl-next-bar}
-
-| Position | As requested | Recommended | Why |
-|:------------|:--------------------|:----------------------------------|:------------------------------------|
-| First | Search | **Search**, shown once the catalogue passes a threshold | Dead with six works; built from a static index when it earns its place |
-| Second | Account | **Saved** (收藏) — favourites kept on the device, no login | Saving without an account is what the research recommends; no personal data leaves the browser |
-| Third | Cart | **Selection** (选购) — gathers works into one enquiry | Matches how works are really sold; a real cart waits for a real multi-item checkout |
-
-**Selection, not cart.** Works added to the selection are listed on one page
-with their prices and a total, and one action sends a single enquiry — email or
-a WeChat message ready to paste — naming every work and asking for the delivery
-country, so shipping and duty can be quoted together. It states plainly that
-adding a work does not reserve it, and it checks `availability.json` when it
-opens, so a work sold in the meantime is shown as sold rather than silently
-kept. It becomes a true cart only if and when the entity and its provider can
-take one payment for several works (@sec-next-decisions).
-
-**Labels.** Like the language switch, 中文, the controls are words first. From 900 px each control carries its word beside its icon — *Search*,
-*Saved*, *Selection (2)*, and 搜索, 收藏, 选购 in Chinese. On phones the icons
-stand alone at 44 px with the count as text, and each accessible name matches
-what is shown.
-
-**Room on a phone.** The masthead was measured at true phone widths (see
-@sec-next-harness for why that needed saying).
-
-```{=latex}
-\Needspace*{12\baselineskip}
-```
-
-: The masthead's top row on a phone, measured {#tbl-next-budget}
-
-| Arrangement | 360 px (320 usable) | 390 px (350 usable) |
-|:---------------------------------------------------|---------:|---------:|
-| Today: full name, language switch | 306 | 306 |
-| Full name + two icons, language switch kept | 414 — *overflows* | 414 — *overflows* |
-| **Short name + two icons; language switch to the second row** | **256** | **256** |
-| Short name + three icons (search enabled) | 304 | 304 |
-
-The short name is the one the web manifest already uses, *Senso Comune*: 116 px
-against 178. The Chinese name, 常识画廊, is 67 px and keeps its full form. On
-the second row the language switch follows the four section links (226 px),
-without its divider below 400 px, where it would not fit.
-
-**Search, when it comes.** A small index written by the build — title, medium,
-year and section in both languages — searched in the browser. Substring matching
-serves Chinese without word segmentation, and for a catalogue of this size the
-index is a few kilobytes. It is switched on by one value in `site.json`; the
-proposal is when more than 24 works are available, which is four rows of the
-archive grid. That number is a judgement, and is listed as a decision.
-
-**Account, not now.** It would need a server, a login, password recovery and a
-privacy regime, to provide an order history the payment provider already keeps.
-It becomes reasonable only if the site ever moves to a hosted commerce platform
-that supplies accounts — which would reverse the architecture in @sec-build.
-
-## Decisions for Priscilla {#sec-next-decisions}
-
-```{=latex}
-\Needspace*{16\baselineskip}
-```
-
-: Needed before building {#tbl-next-decisions}
-
-| # | Decision | Recommended | Blocks |
-|:--|:----------------------------------------|:------------------------------|:----------|
-| D1 | The shop bar: the literal *search · account · cart*, or *search · saved · selection* | Saved and selection now; search at the threshold | Phase 4 |
-| D2 | Which views can be photographed for each work: detail, edge, back | All three, to the shot list in Phase 1 | Phase 2 |
-| D3 | Whether two works must be payable in one transaction | Not at launch: one enquiry for several works | Phase 6 |
-| D4 | The number of available works at which search appears | 24 | Phase 5 |
-| D5 | Whether a short surface video is wanted for any work | No, at launch | — |
-
-## Decisions taken, and what was built {#sec-next-built}
-
-: The decisions, as taken on 17 September 2026 {#tbl-next-taken}
-
-| # | Decision taken | Against the recommendation |
-|:--|:----------------------------------------|:----------------------------------------|
-| D1 | The literal **search · account · cart**, shown now, each linking to a placeholder route that lands on the 404 page | Departs: the recommendation was *saved · selection*, with search at a threshold |
-| D2 | **Detail, edge, back and video** views on every work, as placeholders until the files exist | As recommended, with video added; the generated in-scale view was not taken, and the scale diagram stays in the sidebar |
-| D3 | **Any number of works in one order**, limited only by availability and by the payment route's largest single transaction | Departs: the recommendation was one enquiry for several works until a multi-item checkout exists |
-| D4 | **No search threshold**, provided the query and the searchable text are correctly scoped | Departs: the recommendation was 24 works |
-| D5 | **Video on work pages only**, for now | As recommended in effect: nowhere else carries video |
-
-**What is built.**
-
-- **The shop bar.** Search, account and cart on every page, in both languages,
-  as icons whose accessible names are the words (*Search*, *Account*, *Cart*;
-  搜索, 账户, 购物车). The destinations are placeholders by decision: each link
-  is marked, its route is declared in `site.json`, and `check-links` fails the
-  build if a marked route ever resolves — so a page cannot be built without its
-  placeholder being retired in the same change. On phones the masthead takes the
-  two rows measured in @tbl-next-budget: the short name and the three icons, then
-  the sections and the language switch. `check-render` now fails on any masthead
-  overflow, on more than two rows below 720 px, or on a shop control under 44 px,
-  at 360 and 390 px in both languages.
-- **A bilingual 404.** Every placeholder lands on it, so it is built rather than
-  left to the host's default: both languages, no canonical, not indexed, not in
-  the sitemap.
-- **The five views.** Front, detail, edge, back and video on every work page, in
-  the zero-script gallery of @sec-next-recs, with thumbnails always visible. The
-  image pipeline makes a labelled placeholder at a sensible proportion for each
-  missing view — square for detail, 3:4 for the edge, the work's own ratio for the
-  back, 4:5 for video — and a real photograph replaces it on the next build and
-  keeps its own proportions, read from a size manifest rather than assumed. One
-  4.8 KB placeholder clip serves every work until its own video exists, so the
-  preview build needs no video tooling. Video is never preloaded and never plays
-  by itself.
-- **Checked in a browser.** The gallery script was driven headlessly: a
-  thumbnail scrolls its view into place, marks it current and adds no history
-  entry; Home and End work along the thumbnails. `check-render` now measures 164
-  painting and video boxes across the four widths, and eight new assertions
-  (H-01 to H-06) cover the rest; an autoplaying video and a built cart page each
-  fail them by name.
-
-**What is not built, and is specified instead.** The cart, search and account
-behind the placeholders. The README's *Scripting still needed* sets out each —
-state, availability checks, the transaction ceiling, the searchable fields and
-query rules, and why an account needs a back end — so the next build starts from
-a specification rather than from this discussion. The transaction ceiling is
-declared per entity as `maxTransactionUSD` and is `NEEDS-INPUT` on both routes:
-no figure for it has been established.
-
-**The shop bar is icons only at every width.** The research in
-@sec-next-research favours visible words beside icons; the reference Priscilla
-chose shows icons alone, and that is what was built. Only the magnifying glass
-is close to universal. If the account or cart icon proves ambiguous in use, the
-labels are one CSS change away: the words are already in the markup.
-
-: Scope status after the first build {#tbl-next-status}
-
-| Phase | Status |
-|:--------------------------------|:------------------------------------------------|
-| 1 Data, photography and images | Built: views data, placeholders, thumbnails, size manifest, video pipeline, alt text audited. The shot list is in the README |
-| 2 The gallery | Built, including the per-view lightbox and the extended render check |
-| 3 The buy box and disclosures | Not started |
-| 4 Saved and selection | Superseded by D1 and D3: the shop bar is built with placeholders; the cart is specified in the README |
-| 5 Search | Superseded by D4: specified in the README, with no threshold |
-| 6 A real cart | Specified in the README; still depends on the provider confirming multi-item checkout |
-
-## Implementation scope {#sec-next-scope}
-
-Six phases, in order of dependency. Every item names the evidence that closes
-it; *done* means the check exists and passes, not that the page looks right.
-Sizes are relative: S is under a day, M a few days, L a week or more.
-
-```{=latex}
-\Needspace*{16\baselineskip}
-```
-
-### Phase 1 — Data, photography and images
-
-| ID | Work | Done when | Size |
-|:----|:-------------------------------------|:-------------------------------------|:-----|
-| 1.1 | `views[]` in `artworks.json`: kind, image, bilingual alt; the existing `image` becomes the front view | The build reads both shapes; every work has a front view | S |
-| 1.2 | Shot list and lighting brief for detail, edge and back | A one-page brief Priscilla can follow with a phone | S |
-| 1.3 | `build-images.mjs` takes `masters/<slug>/<kind>`; a 160 and 320 px thumbnail width | Every view resolves at every width; `check-links` covers them | M |
-| 1.4 | The in-scale view rendered from dimensions as an image | Its proportions checked against `widthCm` and `heightCm` | M |
-| 1.5 | `NEEDS-INPUT` audit covers views and their alt text in both languages | A missing view or alt is reported by name | S |
-
-```{=latex}
-\Needspace*{16\baselineskip}
-```
-
-### Phase 2 — The gallery
-
-| ID | Work | Done when | Size |
-|:----|:-------------------------------------|:-------------------------------------|:-----|
-| 2.1 | Scroll-snap strip and linked thumbnails, no script | Every view reachable with scripts off, by keyboard and by swipe | M |
-| 2.2 | Rail from 900 px; row with a partly cut-off last thumbnail below | Measured at 1440, 900, 390 and 360 px in `check-render` | S |
-| 2.3 | Enhancement: `aria-current`, no history per view, arrow keys | A review assertion for each; reduced motion honoured | S |
-| 2.4 | Lightbox opens the current view | One transition name per painting per page still holds (G-05) | S |
-| 2.5 | Front view eager; other views lazy | Only the front view is requested before interaction | S |
-| 2.6 | `check-render` extended to every view and thumbnail | No view distorted, rounded or transformed at any width | S |
-
-```{=latex}
-\Needspace*{18\baselineskip}
-```
-
-### Phase 3 — The buy box and disclosures
-
-| ID | Work | Done when | Size |
-|:----|:-------------------------------------|:-------------------------------------|:-----|
-| 3.1 | Reorder the aside; Save and Add to selection beneath the primary action | The price is still the boldest element (N-03) | S |
-| 3.2 | Assurance lines generated from `seller.json` | No assurance string typed into a template | S |
-| 3.3 | Duty estimate linked by destination | Every destination in @tbl-import reachable | M |
-| 3.4 | `<details>` disclosures | Operable by keyboard; content present with styles off | S |
-| 3.5 | Payment methods from the active entity | Built with `hk-sole-prop`, card marks appear; with `individual`, none | S |
-| 3.6 | Share sheet with copy-link fallback | Works with the API absent; no third-party share scripts | S |
-| 3.7 | More works: three available, never sold | A sold work never appears | S |
-
-```{=latex}
-\Needspace*{15\baselineskip}
-```
-
-### Phase 4 — Saved and selection
-
-| ID | Work | Done when | Size |
-|:----|:-------------------------------------|:-------------------------------------|:-----|
-| 4.1 | Masthead: short name and icons on phones; labels from 900 px | No overflow at 360 px; accessible names match labels (2.5.3) | M |
-| 4.2 | Saved: device storage, `/saved/` page in both locales | Works with storage blocked; nothing leaves the browser | M |
-| 4.3 | Selection: `/selection/` page, total, one composed enquiry | The enquiry lists every work; the page says nothing is reserved | M |
-| 4.4 | Both re-check `availability.json` on open | A work sold since saving is shown as sold | S |
-| 4.5 | Privacy page notes on-device storage | Reviewed against @sec-privacy | S |
-
-```{=latex}
-\Needspace*{11\baselineskip}
-```
-
-### Phase 5 — Search, at the threshold
-
-| ID | Work | Done when | Size |
-|:----|:-------------------------------------|:-------------------------------------|:-----|
-| 5.1 | Build-time index in both languages | Rebuilt with the site; size reported | S |
-| 5.2 | Search control and results page | Chinese and English queries both find titles and media | M |
-| 5.3 | The switch in `site.json` | The control is absent below the threshold, present above it | S |
-
-```{=latex}
-\Needspace*{13\baselineskip}
-```
-
-### Phase 6 — A real cart, only if D3 says so
-
-| ID | Work | Done when | Size |
-|:----|:-------------------------------------|:-------------------------------------|:-----|
-| 6.1 | Confirm the provider takes several line items in one hosted checkout | Written confirmation, as for item 5 in @tbl-open | — |
-| 6.2 | Selection becomes a cart | One payment covers every work in it | L |
-| 6.3 | Overselling defence extended to carts | A work in two carts cannot be paid for twice | M |
-| 6.4 | Order confirmation and withdrawal information per order | Reviewed against @sec-returns and @sec-disclosure | M |
-
-Throughout: the report updated with each phase, screenshots re-taken by
-`shots.sh`, and nothing marked done without its check.
-
-## A verification fault found while scoping {#sec-next-harness}
-
-Measuring the masthead for @tbl-next-budget turned up a fault in how this project
-had been checking phone layouts. **Headless Chrome will not lay a page out
-narrower than 500 px.** Asked for 390 px, it lays the page out at 500 and the
-screenshot simply crops the left 390. Every headless "390 px" result before
-this part — including the phone screenshot in @sec-built and the 390 px pass of
-`check-render.mjs` — was a 500 px layout.
-
-Phone widths are now measured inside an iframe of exactly that width, which is
-a true viewport, and `check-render` asserts the width it actually received. A
-second trap followed immediately: inside the iframe Chrome drew a 15 px desktop
-scrollbar, so "360 px" left 345 px for the page and appeared to show the
-language switch wrapping onto its own line. No phone has that scrollbar; with it
-hidden the masthead fits, and the check now measures *content* width so the
-same artefact would fail loudly instead of passing as a finding. `check-render`
-now covers 1440, 900, 390 and 360 px, and a defect confined to widths under
-400 px — which the old check could not see — fails it by name.
-
 [^baymard-thumbs]: Baymard Institute, [Always use thumbnails to represent additional product images](https://baymard.com/blog/always-use-thumbnails-additional-images).
 [^baymard-scale]: Baymard Institute, [Provide at least one "in scale" image](https://baymard.com/blog/in-scale-product-images).
 [^apg-carousel]: W3C, [ARIA Authoring Practices Guide: Carousel pattern](https://www.w3.org/WAI/ARIA/apg/patterns/carousel/).
 [^nng-icons]: Nielsen Norman Group, [Icon usability](https://www.nngroup.com/articles/icon-usability/).
 [^baymard-search]: Baymard Institute, [E-commerce search field design and its implications](https://baymard.com/blog/search-field-design).
-[^nng-wish]: Nielsen Norman Group, [Wishlist or shopping cart? Saving products for later](https://www.nngroup.com/articles/wishlist-or-cart/).
 [^ucpd]: Directive 2005/29/EC, Annex I, point 7.
 
 # Open items {#sec-open}
 
-Five places where the evidence is thinner than the recommendation resting on
-it. Every one needs a person outside this project — a customs broker, a tax
-adviser, a carrier, Airwallex — and none can be closed by writing more code.
+Six places where the evidence is thinner than the decision resting on it. Every
+one needs a person outside this project — a customs broker, a tax adviser, a
+carrier, a payment provider — and none can be closed by writing more code.
 
 : Unresolved, in rough order of cost if wrong {#tbl-open}
 
@@ -1675,33 +1411,29 @@ adviser, a carrier, Airwallex — and none can be closed by writing more code.
 | 3 | Carrier costs and insurance from China | No verified figures | Needed before the shipping page is final |
 | 4 | Export declaration for a \$300 painting | Not established | Also determines what supports the bank's FX check |
 | 5 | Airwallex + HK sole proprietorship | Entity list verified for account opening only | Ask before incorporating |
+| 6 | Several works in one payment, and the largest single transaction | **Not established** on either route | Ask the provider in writing before the cart is built; the figure becomes `maxTransactionUSD` |
 
-## Closed since the first draft {#sec-closed}
+## Settled in the build {#sec-closed}
 
-Three items that were open have been settled in the build itself.
-
-: Closed, and where {#tbl-closed}
+: Questions the build answered, and where {#tbl-closed}
 
 | Item | Resolution | Where |
 |:-----|:----------|:---------|
-| CJK webfont strategy | The display face is subset to the ~100 characters that appear in headings, work titles and UI labels: **34 KB, from a 24 MB face.** `unicode-range` gates the fetch, so an English page never downloads it, and a character added before the next build falls through to the system face rather than rendering as tofu. Chinese body prose is deliberately not webfont-served. | `scripts/build-fonts-cjk.py` |
+| CJK webfont strategy | The display face is subset to the characters that appear in headings, work titles and UI labels: **34 KB, from a 24 MB face.** `unicode-range` gates the fetch, so an English page never downloads it, and a character added before the next build falls through to the system face rather than rendering as tofu. Chinese body prose is deliberately not webfont-served. | `scripts/build-fonts-cjk.py` |
 | Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
-| No logo | A mark that carries no letterforms, so one file serves both locales, generated from a single geometry for the tab, the home screen, the masthead and this document | `scripts/mark.mjs` |
-| The report's own Chinese subset | Was built by hand, with `cjk-chars.txt` recording what somebody had built and nothing checking it still matched the prose. It is now derived from the `.qmd` on every build, and instanced to Regular first — subsetting the variable original silently yields **ExtraLight**, which is what the statutory quotations would have been set in | `docs/report/fonts.py` |
-| Phone-width verification | Headless Chrome lays out at no less than 500 px, so every "390 px" check and capture had been a cropped 500 px layout. Phone widths are now laid out in an iframe of the stated width and the received width is asserted (@sec-next-harness) | `scripts/check-render.mjs` |
-| The report's screenshots | Were taken by hand in a section that claims to show what the build produces. Now taken from `dist/` by script | `docs/report/shots.sh` |
+| A mark for two languages | A mark that carries no letterforms, so one file serves both locales, generated from a single geometry for the tab, the home screen, the masthead and this document | `scripts/mark.mjs` |
 
 ## Content still outstanding
 
-The build reports every placeholder; 98 fields are still `NEEDS-INPUT`, 48 of them the alt text owed for the new views. Every one a reader could see is also flagged on the page in red on its own pink ground — its own ground, because red directly on the dark footer would be unreadable (5.91:1 as flagged) — and the flag is added around the placeholder word itself, so filling the field removes it with no other change. Supplying one title took that work's page from ten flags to seven. Placeholders in alt text, page titles and link previews cannot carry a mark and stay on the build's list; assertion J-01 checks that every visible one is flagged and that no mark lands inside an attribute. The
-blocking ones are the photographs, the titles and descriptions, and the contact
-details — the email and phone are not optional, they are the consumer-law
-requirement in @sec-disclosure.
+The 54 details in @sec-readiness-today. The blocking ones that matter most are
+the photographs, the titles and descriptions, and the contact details — the email
+and phone are not optional; they are the consumer-law requirement in
+@sec-disclosure.
 
 One design item is also still open. The Chinese-locale enquiry route should be
 WeChat rather than a `mailto:`, and that needs a QR image that does not exist
-yet; the label was fixed, the channel was not.
+yet.
 
 ```{=latex}
 \clearpage
@@ -1730,13 +1462,12 @@ accepted.
 from the HTSUS and the Federal Register. Article numbers are given so each can
 be checked.
 
-**Layout.** Verified by headless screenshot at 1440 px and at phone widths,
-not by description. Before @sec-next-harness, headless captures labelled 390 px
-were 500 px layouts cropped to 390; phone widths are now laid out in an iframe
-of the stated width. Three defects were found that way and are recorded in the commit
-history. The captures in @sec-built are taken from `dist/` by
-`docs/report/shots.sh` as part of this document's build, so they cannot show a
-version of the site that is no longer shipping.
+**Layout.** Verified in headless Chrome at 1440, 900, 390, 360 and 320 px, not
+by description; phone widths are laid out in an iframe of the stated width,
+because Chrome will not lay a window out below 500 px (@sec-checks). The
+captures in @sec-built are taken from `dist/` by `docs/report/shots.sh` as part
+of this document's build, so they cannot show a version of the site that is no
+longer shipping.
 
 **The mark.** @fig-logo and the mark in this document's footer are both drawn
 from `mark.mjs`, the one file the site's icons and its masthead are generated
