@@ -43,8 +43,15 @@ shoot home "/"                              1440 900  2
 shoot work "/works/harbour-light/"          1440 900  2
 shoot sold "/works/long-afternoon/"         1440 620  2
 shoot buy  "/how-to-buy/"                   1440 900  2
-shoot mob  "/"                               390 844  2
+# Headless Chrome will not lay a window out below 500px: asked for 390 it lays
+# out at 500 and the screenshot crops it. The phone view is therefore shot
+# through an iframe of exactly 390px, which is a real 390px viewport.
+mkdir -p "$ROOT/dist/_report"
+printf '<!doctype html><body style="margin:0"><iframe src="%s" style="border:0;width:390px;height:844px;display:block"></iframe>' \
+  "${BASE_PATH:-}/" > "$ROOT/dist/_report/phone.html"
+shoot mob  "/_report/phone.html"             390 844  2
 
 # The softness plate needs a painting to show a mat, a mount shadow or glass
 # on, and forced states a plain screenshot cannot reach. See soft_shots.mjs.
 node "$HERE/soft_shots.mjs" "http://127.0.0.1:$PORT"
+rm -rf "$ROOT/dist/_report"

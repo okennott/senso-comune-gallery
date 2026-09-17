@@ -911,6 +911,402 @@ outright. The checks are a floor, not a pass.
 \end{finding}
 ```
 
+# Next: the work page and the shop bar {#sec-next}
+
+```{=latex}
+\begin{finding}{Status of this part}
+```
+
+Research and scope only. Nothing described here is built, except the
+verification fix in @sec-next-harness, which the scope depends on. Each
+recommendation is marked, and every decision that belongs to Priscilla is
+listed in @sec-next-decisions before any work begins.
+
+```{=latex}
+\end{finding}
+```
+
+Two requests, researched together because they meet on the same page: a work
+page that gives a visitor *enough views* of a painting, modelled on three
+reference shops, and the *search · account · cart* trio that sits top-right on
+nearly every shop.
+
+## What the reference shops do {#sec-next-refs}
+
+```{=latex}
+\Needspace*{30\baselineskip}
+```
+
+: Three reference work pages, as they stood in September 2026 {#tbl-next-refs}
+
+| | +ART Gallery (Shopify) | Saatchi Art | National Gallery of Art shop |
+|:----------------|:------------------------------|:------------------------------|:------------------------------|
+| Gallery | Left thumbnail rail: four stills and a fifth with a media badge | Left thumbnail rail: the work, a detail, two views in a furnished room | One image, no thumbnails |
+| Size cues | Dimensions in the details | Dimensions; room views; web AR | Dimensions in the description |
+| Buy box | Title, vendor, price with tax line; quantity stepper; add to cart; one-click wallet | Title, artist, medium, size, "ships in a tube"; price; instalments; add to cart; make an offer | Title, SKU, price; add to cart |
+| Assurance | Payment-method badges; accordions for shipping, delivery, contact | Shipping included; 14-day guarantee; review score | None beyond price and tax |
+| Pressure | "Hurry, only 1 left" bar | None visible | None |
+| Share | Facebook, X, Pinterest | Favourite count; add to collection | Facebook, X, Pinterest |
+| Header | Search field, log in, cart with count | Search, log in / register, cart with count | Search, log in, bag with subtotal |
+
+Saatchi's is the closest model for a painter: it is the only one whose
+thumbnails answer the question a buyer of a unique object actually has — *what
+will this look like on my wall?*
+
+## What the research says {#sec-next-research}
+
+**Thumbnails, always.** Every desktop site in Baymard's benchmark shows
+thumbnails for additional images; 76% of mobile sites do not. Where only dot
+indicators are shown, half of desktop test users had difficulty finding the
+additional images, and users missed the one that would have answered their
+question. On mobile, a
+partly visible last thumbnail signals that more exist.[^baymard-thumbs]
+
+**At least one image in scale.** 42% of users try to judge a product's size
+from its images, and 28% of sites give them nothing to judge by.[^baymard-scale]
+For a painting sold unframed, whose size is its single most consequential
+property after the image itself, this is the finding that matters most.
+
+**Different images answer different questions.** Product-page guidance commonly
+separates a plain view, an in-scale view, a close-up of material and texture,
+and a view in use. For a painting those become: the front, a raking-light
+detail, the edge and back, and the work at true size on a wall.
+
+**No auto-rotation, and real controls.** The W3C pattern for a carousel requires
+a stop control whenever slides rotate on their own, stops rotation on focus and
+hover, and prefers a tab-style picker when slides are chosen directly — which is
+what a thumbnail rail is.[^apg-carousel]
+
+**Icons need words.** Only the house, the printer and the magnifying glass are
+close to universally recognised; everything else — a person, a bag, a heart —
+is ambiguous without a visible label, and a label shown only on hover does not
+exist on a phone.[^nng-icons]
+
+**Search should be as prominent as search is useful.** Where people browse
+visually — Baymard's examples are apparel and home décor, and art is the same
+kind of purchase — a small search control is right;
+dominant search fields belong to large catalogues bought by specification.
+[^baymard-search]
+
+**Saving should not require an account.** Shoppers use the cart as a memory as
+much as a purchase, and a login gate is what stops people using a save
+feature; "favourites" is a better word than
+"wishlist".[^nng-wish]
+
+**Urgency must be true.** EU law treats falsely claiming limited availability to
+rush a decision as unfair in all circumstances.[^ucpd] A unique work *is*
+available once, so a scarcity bar would not be false here — but the page
+already says *Unique work*, and a "Hurry" is pressure the brief rules out.
+
+## What is different here {#sec-next-constraints}
+
+A shop template assumes multiple units of many products, an account system and
+one checkout for everything in the cart. None of those three is true of this
+site, and each one changes what the trio should be.
+
+- **Every work is unique.** A quantity stepper has one legal value. "Only 1
+  left" is permanently true.
+- **The catalogue is small.** Six works at launch, uncapped (@sec-summary). A
+  search box with six things to find is a dead control.
+- **There is no server.** The site is static by design. Accounts need
+  authentication, password recovery and storage of personal data — which makes
+  Priscilla a data controller under both PIPL and GDPR (@sec-privacy) for
+  nothing the buying path requires. The payment provider already holds the
+  buyer's record.
+- **There is no multi-item checkout.** On the launch route each work has its own
+  payment link, or is sold by enquiry; two works cannot be paid for in one
+  transaction. Whether the Hong Kong route's provider can take several line items
+  in one hosted checkout is **not established**.
+- **A cart widens the overselling window.** @sec-oversell defends a unique work
+  from being sold twice. A cart invites a buyer to believe a work is held while
+  it sits there, and every layer of that defence would have to re-check it.
+
+## Recommendations {#sec-next-recs}
+
+### The work page
+
+![The planned work page. Numbered: (1) the shop bar; (2) five views with thumbnails always visible; (3) the current view, opening full size; (4) one primary action, with Save and Add to selection secondary; (5) assurance lines drawn from the seller data; (6) disclosures as native accordions; (7) payment methods derived from the active entity, and sharing; (8) the artist's words and more works. Proportions are schematic.](fig/pdp-wire.pdf){#fig-pdp-wire width=100%}
+
+**Five views per work,** each with a stated purpose.
+
+```{=latex}
+\Needspace*{14\baselineskip}
+```
+
+: The view vocabulary {#tbl-next-views}
+
+| View | What it answers | Source |
+|:--------------|:----------------------------------------|:----------------------------------|
+| Front | What the work is | The existing photograph |
+| Detail | What the surface is like | Raking-light photograph; the data field exists and is empty |
+| Edge | How deep it is, and how it hangs unframed | Photograph at 45° |
+| Back | Signature, inscription, hardware — provenance | Photograph |
+| In scale | How big it is on a wall | **Generated** from the dimensions, as the scale diagram already is |
+
+The in-scale view needs no photography. The scale diagram on every work page
+is already drawn at true proportion against a 244 cm wall, a 213 cm sofa and a
+144.78 cm hanging line; it becomes the fifth view instead of a figure in the
+sidebar. Every work gets Baymard's most-missed image on day one.
+
+**A zero-script gallery, enhanced.** The views sit in a horizontal
+scroll-snap strip, so a phone swipes natively. The thumbnails are in-page links
+to each view: a rail on the left from 900 px, a row beneath below that, with the
+last one partly cut off. That works with no JavaScript at all. A short script
+then adds what links cannot: the current thumbnail marked with `aria-current`,
+no history entry per thumbnail, and arrow-key movement along the rail. The
+lightbox opens whichever view is showing. Only the front view carries the
+painting's transition name (@sec-soft).
+
+**One primary action.** *Buy* when a checkout link exists, *Enquire about this
+piece* when it does not, as today. *Save* and *Add to selection* sit beneath it
+as quiet outlined controls; neither may outweigh the price, which remains the
+boldest element (@sec-built).
+
+**Assurance from data, not copy.** Three lines under the actions, each true and
+each already argued in this document: the worldwide 14-day return
+(@sec-returns); how the work is packed and insured (@sec-shipping); and a link
+that estimates import duty for the buyer's country (@sec-duty) — which none of
+the reference shops offer, and which is the question an international buyer of a
+\$300 painting actually has.
+
+**Disclosures as native accordions.** `<details>` elements: Details, Shipping and
+packaging, Duty and import, Returns, Contact. No script, keyboard-operable, and
+readable with styles off.
+
+**Payment methods from the active entity.** On the launch route that is PayPal,
+Alipay and WeChat Pay and *no card marks*; card marks appear only when the
+Hong Kong entity is active. A card logo shown by a seller that cannot take cards
+is a misleading claim, so the list is generated, like the rest of the entity
+switch (@sec-switch).
+
+**Sharing that works in China.** A share button using the device's own share
+sheet where the browser supports it, and *Copy link* everywhere. Not a row of
+Facebook, X and Pinterest buttons, all three of which are unreachable in
+mainland China; WeChat builds its own link card from the Open Graph tags the
+site already publishes.
+
+: Reference features considered for the work page {#tbl-next-pdp-options}
+
+| Feature | Status | Why |
+|:------------------------------|:--------------------|:-----------------------------------------|
+| Thumbnail rail and five views | **Recommended** | The research, directly |
+| Generated in-scale view | **Recommended** | Answers the most consequential question with no photography |
+| Assurance lines and duty estimate | **Recommended** | True, already argued, and not offered by the references |
+| Accordions for disclosures | **Recommended** | Zero script; keeps the buy box short |
+| Payment methods from the entity | **Recommended** | Accuracy is a legal matter, not a style |
+| Device share sheet and copy link | **Recommended** | The only sharing that reaches both audiences |
+| More works, three at a time | **Recommended** | Available works only; the archive stays separate |
+| Breadcrumb | Optional | Useful once there are more sections; two levels today |
+| Short video of the surface in moving light | Optional | Heavy across the border; poster and on-demand loading only |
+| Web AR on the wall | Optional — *later* | Native Android AR viewers rely on Google Play services, largely absent in mainland China; in-browser AR needs a commercial platform |
+| Make an offer | Optional | The enquiry already does this; a form needs a back end |
+| Quantity stepper | Not recommended | One legal value |
+| "Hurry, only 1 left" | Not recommended | True, but pressure; *Unique work* already says it |
+| Instalment financing | Not recommended | Neither entity route has a lending partner |
+| Review score | Not recommended at launch | No reviews exist; inventing them is unlawful |
+
+### The shop bar {#sec-next-bar}
+
+The trio as requested would put three controls in the masthead, and on this
+site two of them would lead nowhere at launch: a search with six things to find,
+and an account with nothing behind it. The recommendation keeps the convention
+people look for in that corner, and gives each position something true to do.
+
+```{=latex}
+\Needspace*{20\baselineskip}
+```
+
+: The shop bar, as requested and as recommended {#tbl-next-bar}
+
+| Position | As requested | Recommended | Why |
+|:------------|:--------------------|:----------------------------------|:------------------------------------|
+| First | Search | **Search**, shown once the catalogue passes a threshold | Dead with six works; built from a static index when it earns its place |
+| Second | Account | **Saved** (收藏) — favourites kept on the device, no login | Saving without an account is what the research recommends; no personal data leaves the browser |
+| Third | Cart | **Selection** (选购) — gathers works into one enquiry | Matches how works are really sold; a real cart waits for a real multi-item checkout |
+
+**Selection, not cart.** Works added to the selection are listed on one page
+with their prices and a total, and one action sends a single enquiry — email or
+a WeChat message ready to paste — naming every work and asking for the delivery
+country, so shipping and duty can be quoted together. It states plainly that
+adding a work does not reserve it, and it checks `availability.json` when it
+opens, so a work sold in the meantime is shown as sold rather than silently
+kept. It becomes a true cart only if and when the entity and its provider can
+take one payment for several works (@sec-next-decisions).
+
+**Labels.** Like the language switch, 中文, the controls are words first. From 900 px each control carries its word beside its icon — *Search*,
+*Saved*, *Selection (2)*, and 搜索, 收藏, 选购 in Chinese. On phones the icons
+stand alone at 44 px with the count as text, and each accessible name matches
+what is shown.
+
+**Room on a phone.** The masthead was measured at true phone widths (see
+@sec-next-harness for why that needed saying).
+
+```{=latex}
+\Needspace*{12\baselineskip}
+```
+
+: The masthead's top row on a phone, measured {#tbl-next-budget}
+
+| Arrangement | 360 px (320 usable) | 390 px (350 usable) |
+|:---------------------------------------------------|---------:|---------:|
+| Today: full name, language switch | 306 | 306 |
+| Full name + two icons, language switch kept | 414 — *overflows* | 414 — *overflows* |
+| **Short name + two icons; language switch to the second row** | **256** | **256** |
+| Short name + three icons (search enabled) | 304 | 304 |
+
+The short name is the one the web manifest already uses, *Senso Comune*: 116 px
+against 178. The Chinese name, 常识画廊, is 67 px and keeps its full form. On
+the second row the language switch follows the four section links (226 px),
+without its divider below 400 px, where it would not fit.
+
+**Search, when it comes.** A small index written by the build — title, medium,
+year and section in both languages — searched in the browser. Substring matching
+serves Chinese without word segmentation, and for a catalogue of this size the
+index is a few kilobytes. It is switched on by one value in `site.json`; the
+proposal is when more than 24 works are available, which is four rows of the
+archive grid. That number is a judgement, and is listed as a decision.
+
+**Account, not now.** It would need a server, a login, password recovery and a
+privacy regime, to provide an order history the payment provider already keeps.
+It becomes reasonable only if the site ever moves to a hosted commerce platform
+that supplies accounts — which would reverse the architecture in @sec-build.
+
+## Decisions for Priscilla {#sec-next-decisions}
+
+```{=latex}
+\Needspace*{16\baselineskip}
+```
+
+: Needed before building {#tbl-next-decisions}
+
+| # | Decision | Recommended | Blocks |
+|:--|:----------------------------------------|:------------------------------|:----------|
+| D1 | The shop bar: the literal *search · account · cart*, or *search · saved · selection* | Saved and selection now; search at the threshold | Phase 4 |
+| D2 | Which views can be photographed for each work: detail, edge, back | All three, to the shot list in Phase 1 | Phase 2 |
+| D3 | Whether two works must be payable in one transaction | Not at launch: one enquiry for several works | Phase 6 |
+| D4 | The number of available works at which search appears | 24 | Phase 5 |
+| D5 | Whether a short surface video is wanted for any work | No, at launch | — |
+
+## Implementation scope {#sec-next-scope}
+
+Six phases, in order of dependency. Every item names the evidence that closes
+it; *done* means the check exists and passes, not that the page looks right.
+Sizes are relative: S is under a day, M a few days, L a week or more.
+
+```{=latex}
+\Needspace*{16\baselineskip}
+```
+
+### Phase 1 — Data, photography and images
+
+| ID | Work | Done when | Size |
+|:----|:-------------------------------------|:-------------------------------------|:-----|
+| 1.1 | `views[]` in `artworks.json`: kind, image, bilingual alt; the existing `image` becomes the front view | The build reads both shapes; every work has a front view | S |
+| 1.2 | Shot list and lighting brief for detail, edge and back | A one-page brief Priscilla can follow with a phone | S |
+| 1.3 | `build-images.mjs` takes `masters/<slug>/<kind>`; a 160 and 320 px thumbnail width | Every view resolves at every width; `check-links` covers them | M |
+| 1.4 | The in-scale view rendered from dimensions as an image | Its proportions checked against `widthCm` and `heightCm` | M |
+| 1.5 | `NEEDS-INPUT` audit covers views and their alt text in both languages | A missing view or alt is reported by name | S |
+
+```{=latex}
+\Needspace*{16\baselineskip}
+```
+
+### Phase 2 — The gallery
+
+| ID | Work | Done when | Size |
+|:----|:-------------------------------------|:-------------------------------------|:-----|
+| 2.1 | Scroll-snap strip and linked thumbnails, no script | Every view reachable with scripts off, by keyboard and by swipe | M |
+| 2.2 | Rail from 900 px; row with a partly cut-off last thumbnail below | Measured at 1440, 900, 390 and 360 px in `check-render` | S |
+| 2.3 | Enhancement: `aria-current`, no history per view, arrow keys | A review assertion for each; reduced motion honoured | S |
+| 2.4 | Lightbox opens the current view | One transition name per painting per page still holds (G-05) | S |
+| 2.5 | Front view eager; other views lazy | Only the front view is requested before interaction | S |
+| 2.6 | `check-render` extended to every view and thumbnail | No view distorted, rounded or transformed at any width | S |
+
+```{=latex}
+\Needspace*{18\baselineskip}
+```
+
+### Phase 3 — The buy box and disclosures
+
+| ID | Work | Done when | Size |
+|:----|:-------------------------------------|:-------------------------------------|:-----|
+| 3.1 | Reorder the aside; Save and Add to selection beneath the primary action | The price is still the boldest element (N-03) | S |
+| 3.2 | Assurance lines generated from `seller.json` | No assurance string typed into a template | S |
+| 3.3 | Duty estimate linked by destination | Every destination in @tbl-import reachable | M |
+| 3.4 | `<details>` disclosures | Operable by keyboard; content present with styles off | S |
+| 3.5 | Payment methods from the active entity | Built with `hk-sole-prop`, card marks appear; with `individual`, none | S |
+| 3.6 | Share sheet with copy-link fallback | Works with the API absent; no third-party share scripts | S |
+| 3.7 | More works: three available, never sold | A sold work never appears | S |
+
+```{=latex}
+\Needspace*{15\baselineskip}
+```
+
+### Phase 4 — Saved and selection
+
+| ID | Work | Done when | Size |
+|:----|:-------------------------------------|:-------------------------------------|:-----|
+| 4.1 | Masthead: short name and icons on phones; labels from 900 px | No overflow at 360 px; accessible names match labels (2.5.3) | M |
+| 4.2 | Saved: device storage, `/saved/` page in both locales | Works with storage blocked; nothing leaves the browser | M |
+| 4.3 | Selection: `/selection/` page, total, one composed enquiry | The enquiry lists every work; the page says nothing is reserved | M |
+| 4.4 | Both re-check `availability.json` on open | A work sold since saving is shown as sold | S |
+| 4.5 | Privacy page notes on-device storage | Reviewed against @sec-privacy | S |
+
+```{=latex}
+\Needspace*{11\baselineskip}
+```
+
+### Phase 5 — Search, at the threshold
+
+| ID | Work | Done when | Size |
+|:----|:-------------------------------------|:-------------------------------------|:-----|
+| 5.1 | Build-time index in both languages | Rebuilt with the site; size reported | S |
+| 5.2 | Search control and results page | Chinese and English queries both find titles and media | M |
+| 5.3 | The switch in `site.json` | The control is absent below the threshold, present above it | S |
+
+```{=latex}
+\Needspace*{13\baselineskip}
+```
+
+### Phase 6 — A real cart, only if D3 says so
+
+| ID | Work | Done when | Size |
+|:----|:-------------------------------------|:-------------------------------------|:-----|
+| 6.1 | Confirm the provider takes several line items in one hosted checkout | Written confirmation, as for item 5 in @tbl-open | — |
+| 6.2 | Selection becomes a cart | One payment covers every work in it | L |
+| 6.3 | Overselling defence extended to carts | A work in two carts cannot be paid for twice | M |
+| 6.4 | Order confirmation and withdrawal information per order | Reviewed against @sec-returns and @sec-disclosure | M |
+
+Throughout: the report updated with each phase, screenshots re-taken by
+`shots.sh`, and nothing marked done without its check.
+
+## A verification fault found while scoping {#sec-next-harness}
+
+Measuring the masthead for @tbl-next-budget turned up a fault in how this project
+had been checking phone layouts. **Headless Chrome will not lay a page out
+narrower than 500 px.** Asked for 390 px, it lays the page out at 500 and the
+screenshot simply crops the left 390. Every headless "390 px" result before
+this part — including the phone screenshot in @sec-built and the 390 px pass of
+`check-render.mjs` — was a 500 px layout.
+
+Phone widths are now measured inside an iframe of exactly that width, which is
+a true viewport, and `check-render` asserts the width it actually received. A
+second trap followed immediately: inside the iframe Chrome drew a 15 px desktop
+scrollbar, so "360 px" left 345 px for the page and appeared to show the
+language switch wrapping onto its own line. No phone has that scrollbar; with it
+hidden the masthead fits, and the check now measures *content* width so the
+same artefact would fail loudly instead of passing as a finding. `check-render`
+now covers 1440, 900, 390 and 360 px, and a defect confined to widths under
+400 px — which the old check could not see — fails it by name.
+
+[^baymard-thumbs]: Baymard Institute, [Always use thumbnails to represent additional product images](https://baymard.com/blog/always-use-thumbnails-additional-images).
+[^baymard-scale]: Baymard Institute, [Provide at least one "in scale" image](https://baymard.com/blog/in-scale-product-images).
+[^apg-carousel]: W3C, [ARIA Authoring Practices Guide: Carousel pattern](https://www.w3.org/WAI/ARIA/apg/patterns/carousel/).
+[^nng-icons]: Nielsen Norman Group, [Icon usability](https://www.nngroup.com/articles/icon-usability/).
+[^baymard-search]: Baymard Institute, [E-commerce search field design and its implications](https://baymard.com/blog/search-field-design).
+[^nng-wish]: Nielsen Norman Group, [Wishlist or shopping cart? Saving products for later](https://www.nngroup.com/articles/wishlist-or-cart/).
+[^ucpd]: Directive 2005/29/EC, Annex I, point 7.
+
 # Open items {#sec-open}
 
 Five places where the evidence is thinner than the recommendation resting on
@@ -940,6 +1336,7 @@ Three items that were open have been settled in the build itself.
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
 | No logo | A mark that carries no letterforms, so one file serves both locales, generated from a single geometry for the tab, the home screen, the masthead and this document | `scripts/mark.mjs` |
 | The report's own Chinese subset | Was built by hand, with `cjk-chars.txt` recording what somebody had built and nothing checking it still matched the prose. It is now derived from the `.qmd` on every build, and instanced to Regular first — subsetting the variable original silently yields **ExtraLight**, which is what the statutory quotations would have been set in | `docs/report/fonts.py` |
+| Phone-width verification | Headless Chrome lays out at no less than 500 px, so every "390 px" check and capture had been a cropped 500 px layout. Phone widths are now laid out in an iframe of the stated width and the received width is asserted (@sec-next-harness) | `scripts/check-render.mjs` |
 | The report's screenshots | Were taken by hand in a section that claims to show what the build produces. Now taken from `dist/` by script | `docs/report/shots.sh` |
 
 ## Content still outstanding
@@ -980,8 +1377,10 @@ accepted.
 from the HTSUS and the Federal Register. Article numbers are given so each can
 be checked.
 
-**Layout.** Verified by headless screenshot at 1440 px and 390 px, not by
-description. Three defects were found that way and are recorded in the commit
+**Layout.** Verified by headless screenshot at 1440 px and at phone widths,
+not by description. Before @sec-next-harness, headless captures labelled 390 px
+were 500 px layouts cropped to 390; phone widths are now laid out in an iframe
+of the stated width. Three defects were found that way and are recorded in the commit
 history. The captures in @sec-built are taken from `dist/` by
 `docs/report/shots.sh` as part of this document's build, so they cannot show a
 version of the site that is no longer shipping.

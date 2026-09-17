@@ -19,6 +19,14 @@
  *   - no border-radius: rounding a corner crops the object being sold;
  *   - no transform: a painting is never drawn scaled or skewed.
  *
+ * PHONE WIDTHS. Headless Chrome will not lay a window out narrower than 500px:
+ * --window-size=390 reports innerWidth 500 and a screenshot merely crops it.
+ * Every "390px" result taken that way was a 500px layout. So widths under 500
+ * are measured inside an iframe of exactly that width — an iframe's width IS
+ * its viewport, media queries included — and the probe reports up to the
+ * harness page. The viewport it actually got — the CONTENT width, after any
+ * scrollbar — is asserted, not assumed.
+ *
  * Needs Chrome. It is not part of `npm run check`, which must run anywhere;
  * CI runs it after the build. Set CHROME=/path/to/chrome if it is not on PATH.
  */
@@ -48,7 +56,8 @@ if (!existsSync(DIST)) {
 
 const works = JSON.parse(readFileSync(join(ROOT, 'src/data/artworks.json'), 'utf8')).works;
 const PAGES = ['/', '/zh/', '/archive/', ...works.map((w) => `/works/${w.slug}/`)];
-const WIDTHS = [1440, 900, 390];
+const WIDTHS = [1440, 900, 390, 360];
+const HEADLESS_MIN = 500;
 
 /* The probe runs inside the page, after layout, and writes its findings into
    the DOM, where --dump-dom can read them back. */
@@ -63,14 +72,26 @@ const PROBE = `<script>addEventListener('load',()=>setTimeout(()=>{
       fit:cs.objectFit, radius:cs.borderRadius, transform:cs.transform,
       lightbox:!!i.closest('dialog') };
   });
-  const p=document.createElement('pre'); p.id='render-probe'; p.textContent=JSON.stringify(out);
+  const payload=JSON.stringify({ viewport: document.documentElement.clientWidth, rows: out });
+  if (window.parent !== window) { parent.document.getElementById('render-probe').textContent = payload; return; }
+  const p=document.createElement('pre'); p.id='render-probe'; p.textContent=payload;
   document.body.append(p);
 },250));</script>`;
+
+/* The phone harness: one iframe at the exact width, nothing else. */
+const harness = (url, width) => `<!doctype html><body style="margin:0">
+<iframe src="${url}" style="border:0;width:${width}px;height:900px"></iframe>
+<pre id="render-probe"></pre></body>`;
 
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml',
   '.webp': 'image/webp', '.avif': 'image/avif', '.woff2': 'font/woff2', '.json': 'application/json' };
 
 const server = createServer((req, res) => {
+  const q = new URL(req.url, 'http://x');
+  if (q.pathname === '/__harness') {
+    res.writeHead(200, { 'content-type': 'text/html' });
+    return res.end(harness(q.searchParams.get('url'), Number(q.searchParams.get('w'))));
+  }
   let url = decodeURIComponent(req.url.split('?')[0]);
   if (BASE && url.startsWith(BASE)) url = url.slice(BASE.length) || '/';
   let file = join(DIST, url);
@@ -94,15 +115,23 @@ const problems = [];
 let measured = 0;
 for (const page of PAGES) {
   const doms = await Promise.all(WIDTHS.map((width) =>
-    run(CHROME, ['--headless', '--disable-gpu', '--no-sandbox', `--window-size=${width},900`,
-      '--virtual-time-budget=4000', `--user-data-dir=/tmp/check-render-${width}`, '--dump-dom', `${origin}${BASE}${page}`],
+    // --hide-scrollbars: a phone's scrollbar overlays the page and takes no
+    // width. Without it the iframe draws a desktop 15px bar, the page gets
+    // 345px at "360", and the harness reports defects no phone can have.
+    run(CHROME, ['--headless', '--disable-gpu', '--no-sandbox', '--hide-scrollbars',
+      `--window-size=${Math.max(width, HEADLESS_MIN)},900`,
+      '--virtual-time-budget=4000', `--user-data-dir=/tmp/check-render-${width}`, '--dump-dom',
+      width < HEADLESS_MIN
+        ? `${origin}/__harness?w=${width}&url=${encodeURIComponent(`${BASE}${page}`)}`
+        : `${origin}${BASE}${page}`],
       { encoding: 'utf8', timeout: 60000, maxBuffer: 32 * 1024 * 1024 })
       .then((r) => r.stdout, (e) => e.stdout || '')));
   for (const [k, width] of WIDTHS.entries()) {
     const dom = doms[k];
     const m = dom.match(/<pre id="render-probe">([\s\S]*?)<\/pre>/);
-    if (!m) { problems.push(`${page} @${width}: the page never finished layout`); continue; }
-    const rows = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+    if (!m || !m[1].trim()) { problems.push(`${page} @${width}: the page never finished layout`); continue; }
+    const { viewport, rows } = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+    if (viewport !== width) { problems.push(`${page} @${width}: laid out at ${viewport}px, not ${width}px`); continue; }
     for (const r of rows) {
       const at = `${page} @${width}px  ${r.src}`;
       // A closed lightbox is display:none and has no box to measure; its

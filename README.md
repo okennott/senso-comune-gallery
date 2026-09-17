@@ -425,7 +425,7 @@ reading it from the other.
 │   │   ├── fonts/                    inlined as base64 at build time
 │   │   └── build.sh
 │   └── report/                     the printable technical report
-│       ├── senso-comune-report.pdf   built: A4, indexed, 44 pages
+│       ├── senso-comune-report.pdf   built: A4, indexed, 58 pages
 │       ├── senso-comune-report.qmd   the source
 │       ├── preamble.tex              typesetting: fonts, heads, callouts, and
 │       │                             the mark, redrawn in TikZ for the footers
@@ -549,9 +549,15 @@ nothing reporting it.
 every painting in a mat — padding, a shadow and `border-box` inside layouts that
 already cap heights — and that is exactly where an image box can quietly stop
 matching the painting's proportions. It lays the built pages out in Chrome at
-1440, 900 and 390 px and fails if any painting's box drifts more than 1% from
+1440, 900, 390 and 360 px and fails if any painting's box drifts more than 1% from
 its own ratio, or carries a radius or a transform. It is kept out of
 `npm run check` so that one runs anywhere; CI runs it on every deploy.
+
+Headless Chrome never lays a window out narrower than 500px — ask for 390 and
+you get a 500px layout cropped to 390. Phone widths are therefore laid out in
+an iframe of exactly that width, with scrollbars hidden as a phone's are, and
+the check asserts the content width it actually received. `docs/report/shots.sh`
+takes the phone screenshot the same way.
 
 `check-review.mjs` holds one assertion per finding from the September 2026
 design review, written against the built site, so a fix that stops being
@@ -585,6 +591,10 @@ block people outright.
   outright), and it only turns to glass once content scrolls beneath it.
   Paintings are never rounded, zoomed or stretched. The report's Softness
   section lists every option considered, adopted and optional.
+- **The work page and the shop bar are scoped, not built.** Report Part 6 has
+  the research, the recommended views and shop bar, five decisions for
+  Priscilla (D1–D5) and a six-phase implementation scope with acceptance
+  checks. Nothing there should be built before D1–D3 are answered.
 - **Cloudflare Pages.** The only host with no bill, no pause and no terms
   problem. `vercel.app` and `workers.dev` measure 100% blocked from mainland
   China; `pages.dev` measures 0%.
