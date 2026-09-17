@@ -5,7 +5,11 @@
  *   node scripts/build-images.mjs
  *
  * Reads full-resolution masters from  masters/{slug}.{jpg,png,tif,webp}
- * Writes web derivatives to          public/img/{slug}-{width}.{avif,webp}
+ *                                    masters/{slug}-{detail|edge|back}.{jpg,…}
+ *                                    masters/{slug}-video.{mp4,mov,webm}
+ * Writes web derivatives to          public/img/{slug}[-{kind}]-{width}.{avif,webp}
+ *                                    public/video/{slug}.mp4
+ *                                    public/img/views.json  (true pixel sizes)
  *
  * If a master is missing, a clearly-marked placeholder is generated at the
  * work's true aspect ratio, so layout and CLS can be checked before the
@@ -35,7 +39,8 @@
  */
 
 import sharp from 'sharp';
-import { readFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,17 +49,24 @@ const MASTERS = join(ROOT, 'masters');
 const OUT = join(ROOT, 'public/img');
 
 const WIDTHS = [640, 960, 1280, 1600, 2000];
+/* Thumbnails for the gallery rail: 64-80 CSS px, at 1x and 2x+. */
+const THUMBS = [160, 320];
+const VIDEO_OUT = join(ROOT, 'public/video');
 const MAX_EDGE = 2000;
+/* AVIF effort 6 is for photographs of paintings, where the time is worth it.
+   A placeholder is a flat card with a label: effort 1 is indistinguishable and
+   keeps a placeholder-only build, as in CI, to a fraction of the time. */
+const effort = (isReal) => (isReal ? 6 : 1);
 const EXTS = ['.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp', '.avif'];
 
 const works = JSON.parse(readFileSync(join(ROOT, 'src/data/artworks.json'), 'utf8')).works;
 
 mkdirSync(OUT, { recursive: true });
 
-const findMaster = (slug) => {
+const findMaster = (slug, exts = EXTS) => {
   if (!existsSync(MASTERS)) return null;
   const files = readdirSync(MASTERS);
-  for (const ext of EXTS) {
+  for (const ext of exts) {
     const hit = files.find((f) => f.toLowerCase() === (slug + ext).toLowerCase());
     if (hit) return join(MASTERS, hit);
   }
@@ -62,9 +74,20 @@ const findMaster = (slug) => {
 };
 
 /** A placeholder that is obviously a placeholder, at the real aspect ratio. */
-async function placeholder(w, width) {
-  const height = Math.round((w.heightCm / w.widthCm) * width);
-  const label = `${w.slug}  ·  ${w.heightCm} × ${w.widthCm} cm`;
+/* Placeholder proportions for the extra views, until a photograph exists.
+   A real master always wins and keeps its own proportions: the build reads
+   the true size from views.json, so nothing downstream assumes these. */
+const VIEW_RATIO = {           // height / width
+  detail: () => 1,             // a square crop of the surface
+  edge:   () => 4 / 3,         // the side of the stretcher, shot at 45°
+  back:   (w) => w.heightCm / w.widthCm,
+  video:  () => 5 / 4,         // a phone held upright
+};
+
+async function placeholder(w, width, kind = '') {
+  const ratio = kind ? VIEW_RATIO[kind](w) : w.heightCm / w.widthCm;
+  const height = Math.round(ratio * width);
+  const label = kind ? `${w.slug}  ·  ${kind}` : `${w.slug}  ·  ${w.heightCm} × ${w.widthCm} cm`;
   const fs = Math.max(11, Math.round(width / 46));
   const svg = Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
@@ -82,12 +105,25 @@ async function placeholder(w, width) {
 
 let built = 0;
 const missing = [];
+const notes = [];
+const manifest = {};
+
+/* ffmpeg is needed only to turn a real video master into a web file and a
+   poster. Without it — CI has none — placeholders are used and the build says so. */
+const FFMPEG = (() => { try { execFileSync('ffmpeg', ['-version'], { stdio: 'ignore' }); return true; } catch { return false; } })();
+
+/** The first frame of a video master, as a still the image pipeline can size. */
+async function posterFrom(video, key) {
+  const out = join(ROOT, 'public/img', `.${key}-poster.png`);
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-ss', '0.5', '-i', video, '-frames:v', '1', out]);
+  return out;
+}
 
 for (const w of works) {
   const master = findMaster(w.image);
-  if (!master) missing.push(w.image);
+  if (!master) missing.push(`${w.image}.jpg`);
 
-  for (const width of WIDTHS) {
+  for (const width of [...THUMBS, ...WIDTHS]) {
     if (width > MAX_EDGE) continue;
 
     const input = master
@@ -100,38 +136,83 @@ for (const w of works) {
       .withIccProfile('srgb');          // transforms AND attaches; survives the default strip
 
     await base.clone()
-      .avif({ quality: 68, chromaSubsampling: '4:4:4', effort: 6 })
+      .avif({ quality: 68, chromaSubsampling: '4:4:4', effort: effort(master) })
       .toFile(join(OUT, `${w.image}-${width}.avif`));
 
     await base.clone()
-      .webp({ quality: 82, effort: 6 })
+      .webp({ quality: 82, effort: effort(master) })
       .toFile(join(OUT, `${w.image}-${width}.webp`));
 
     built += 2;
   }
 
-  // Detail crops, if any are declared.
-  for (const d of w.details ?? []) {
-    const dm = findMaster(d.image);
-    if (!dm) { missing.push(d.image); continue; }
-    for (const width of [640, 960]) {
-      const b = sharp(dm).rotate().resize({ width, withoutEnlargement: true })
+  manifest[w.image] = {
+    width: 2000, height: Math.round((w.heightCm / w.widthCm) * 2000), placeholder: !master,
+  };
+  if (master) {
+    const m = await sharp(master).rotate().metadata();
+    const scale = Math.min(1, MAX_EDGE / m.width);
+    manifest[w.image] = { width: Math.round(m.width * scale), height: Math.round(m.height * scale), placeholder: false };
+  }
+
+  // The extra views: detail, edge, back — and the video's poster.
+  for (const v of w.views ?? []) {
+    const key = `${w.image}-${v.kind}`;
+    let still = null, videoMaster = null;
+    if (v.kind === 'video') {
+      videoMaster = findMaster(key, ['.mp4', '.mov', '.webm', '.m4v']);
+      if (videoMaster && FFMPEG) still = await posterFrom(videoMaster, key);
+      if (videoMaster && !FFMPEG) notes.push(`${key}: master found, but ffmpeg is not installed — placeholder kept`);
+    } else {
+      still = findMaster(key);
+    }
+    if (!still) missing.push(`${key}.${v.kind === 'video' ? 'mp4' : 'jpg'}`);
+
+    for (const width of [...THUMBS, ...WIDTHS]) {
+      const input = still ? sharp(still).rotate() : sharp(await placeholder(w, width, v.kind));
+      const base = input.resize({ width, withoutEnlargement: true })
         .toColourspace('srgb').withIccProfile('srgb');
-      await b.clone().avif({ quality: 68, chromaSubsampling: '4:4:4', effort: 6 })
-        .toFile(join(OUT, `${d.image}-${width}.avif`));
-      await b.clone().webp({ quality: 82, effort: 6 })
-        .toFile(join(OUT, `${d.image}-${width}.webp`));
+      await base.clone().avif({ quality: 68, chromaSubsampling: '4:4:4', effort: effort(still) })
+        .toFile(join(OUT, `${key}-${width}.avif`));
+      await base.clone().webp({ quality: 82, effort: effort(still) })
+        .toFile(join(OUT, `${key}-${width}.webp`));
       built += 2;
+    }
+    let size = { width: 2000, height: Math.round(VIEW_RATIO[v.kind](w) * 2000) };
+    if (still) {
+      const m = await sharp(still).rotate().metadata();
+      const scale = Math.min(1, MAX_EDGE / m.width);
+      size = { width: Math.round(m.width * scale), height: Math.round(m.height * scale) };
+    }
+    manifest[key] = { ...size, placeholder: !still };
+
+    if (v.kind === 'video') {
+      if (videoMaster && FFMPEG) {
+        mkdirSync(VIDEO_OUT, { recursive: true });
+        // H.264 for every browser, including WeChat's; 1080px long edge; no
+        // audio track, since a studio clip's sound is room noise; faststart so
+        // the first frame arrives before the whole file.
+        execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', videoMaster,
+          '-vf', "scale='if(gt(iw,ih),min(1080,iw),-2)':'if(gt(iw,ih),-2,min(1080,ih))'",
+          '-c:v', 'libx264', '-crf', '26', '-preset', 'slow', '-pix_fmt', 'yuv420p',
+          '-movflags', '+faststart', '-an', join(VIDEO_OUT, `${w.image}.mp4`)]);
+        manifest[key].video = `/video/${w.image}.mp4`;
+      } else {
+        manifest[key].video = '/placeholders/work-video.mp4';
+      }
     }
   }
 }
 
+writeFileSync(join(OUT, 'views.json'), JSON.stringify(manifest, null, 2) + '\n');
+
 console.log(`\n  ${built} image files → public/img/`);
 if (missing.length) {
   console.log(`\n  ${missing.length} master${missing.length > 1 ? 's' : ''} missing — placeholders generated:`);
-  for (const m of missing) console.log(`    · masters/${m}.jpg`);
+  for (const m of missing) console.log(`    · masters/${m}`);
   console.log(`\n  Drop the full-resolution photographs into masters/ and re-run.`);
   console.log(`  That folder is gitignored: masters never go in the repo.\n`);
 } else {
   console.log('  all masters present.\n');
 }
+for (const n of notes) console.log(`  note: ${n}`);

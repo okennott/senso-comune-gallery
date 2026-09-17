@@ -94,6 +94,35 @@
   transition:transform var(--dur-settle) var(--ease-settle);
 }
 .nav__short{ display:none }
+
+/* ---------- shop bar ----------
+   Decision D1: search, account, cart, top right, as shoppers expect. Placeholder
+   destinations (site.json → placeholders). Each target is the site's 48px; the
+   icon is drawn in the bar's own text colour and checked with it. */
+.shopbar{
+  list-style:none; margin:0 0 0 var(--space-2); padding:0;
+  display:flex; align-items:center; gap:2px;
+  align-self:center;
+}
+.shopbar__link{
+  position:relative;
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:var(--target-min); min-height:var(--target-min);
+  color:var(--paper-deep);                         /* 10.74:1 on the bar */
+  transition:color var(--dur-quick) var(--ease-settle);
+}
+.shopbar__link:hover{ color:#fff }
+.shopbar__icon{ width:22px; height:22px; display:block }
+/* The count a cart script will fill; hidden while there is no cart. Ink on
+   paper, not accent on brown: sanguine on the bar is 2.03:1. */
+.shopbar__count{
+  position:absolute; top:7px; right:5px;
+  min-width:16px; height:16px; padding:0 4px; box-sizing:border-box;
+  border-radius:8px;
+  background:var(--paper); color:var(--ink);
+  font:600 10px/16px var(--font-body); text-align:center;
+}
+.wordmark__short{ display:none }
 .nav a:hover{ color:#fff }
 .nav a:hover::after{ transform:scaleX(1) }
 .nav a[aria-current]{ color:#fff }
@@ -482,9 +511,17 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
     align-items:center;
   }
   .wordmark{ font-size:var(--size-body); font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1 }
-  .lang-switch{ order:2; min-height:44px }
+  /* Two rows, measured at true 360 and 390px (report, the masthead budget):
+     row one is the name and the shop bar; a zero-height break; row two is the
+     sections and the language switch, which loses its divider here because
+     at 360px there is no room for it. */
+  .shopbar{ order:2; margin-left:auto }
+  .shopbar__link{ min-width:44px; min-height:44px }
+  .masthead__inner::after{ content:''; order:3; flex-basis:100%; height:0 }
+  .lang-rule{ display:none }
+  .lang-switch{ order:5; min-height:44px; margin-left:auto }
   .nav{
-    order:3; width:100%;
+    order:4; flex:0 1 auto; min-width:0;
     flex-wrap:nowrap; overflow-x:auto;
     gap:12px;
     scrollbar-width:none;
@@ -683,3 +720,81 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
 @media (min-width:560px){
   .contact__list{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-4) }
 }
+
+/* The full English name and three icons do not fit a phone's first row: the
+   manifest's short name does (178px → 116px). Chinese is short already. */
+@media (max-width:439px){
+  .wordmark__long{ display:none }
+  .wordmark__short{ display:inline }
+}
+
+/* ---------- work gallery ----------
+   The front and its extra views — detail, edge, back, video — in a scroll-snap
+   strip, with a thumbnail for each. Every view stays in its mount and keeps
+   its own proportions (check-render.mjs); nothing auto-advances. */
+.gallery{ display:grid; gap:var(--space-3); min-width:0 }
+.gallery__views{
+  list-style:none; margin:0; padding:0;
+  display:flex; overflow-x:auto; overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+}
+.gallery__views::-webkit-scrollbar{ display:none }
+.gallery__view{
+  flex:0 0 100%; min-width:0; box-sizing:border-box;
+  scroll-snap-align:center; scroll-snap-stop:always;
+  display:flex; align-items:center; justify-content:center;
+  /* room inside the scroll box for the mount shadow, which overflow clips */
+  padding:var(--space-2) var(--space-3) var(--space-5);
+}
+.gallery__view .work__figure{ width:100% }
+.gallery__view .work__img,
+.work__video{
+  display:block; margin-inline:auto;
+  width:auto; max-width:100%;
+  height:auto; max-height:min(76vh,860px);
+}
+.work__video{
+  box-sizing:border-box;
+  padding:var(--mat);
+  background:var(--paper-deep);
+  box-shadow:var(--shadow-mount);
+}
+
+.gallery__thumbs{
+  list-style:none; margin:0; padding:3px;
+  display:flex; gap:var(--space-1);
+  overflow-x:auto; scrollbar-width:none;
+}
+.gallery__thumbs::-webkit-scrollbar{ display:none }
+.gallery__thumb{
+  position:relative; display:block;
+  width:72px; height:72px;
+  background:var(--paper-deep);
+  outline:1px solid transparent; outline-offset:2px;
+  transition:outline-color var(--dur-quick) var(--ease-settle);
+}
+.gallery__thumb img{
+  width:100%; height:100%; box-sizing:border-box;
+  padding:6px; object-fit:contain; background:none;
+}
+.gallery__thumb:hover{ outline-color:var(--muted-ui) }
+.gallery__thumb[aria-current]{ outline-color:var(--ink) }
+/* the video's thumbnail carries a play mark, drawn, so it needs no font */
+.gallery__thumb--video::after{
+  content:''; position:absolute; inset:0; margin:auto;
+  width:0; height:0;
+  border-left:13px solid var(--paper);
+  border-block:8px solid transparent;
+  filter:drop-shadow(0 0 1.5px var(--bar));
+}
+@media (min-width:900px){
+  .gallery{ grid-template-columns:80px minmax(0,1fr); align-items:start }
+  .gallery__thumbs{ order:-1; flex-direction:column; overflow:visible; padding-top:var(--space-2) }
+}
+
+/* ---------- 404 ---------- */
+.notfound{ padding-block:var(--space-6) }
+.notfound h1{ display:grid; gap:var(--space-1) }
+.notfound__title{ display:block }
+

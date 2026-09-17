@@ -34,6 +34,14 @@ const seller    = read('src/data/seller.json');
 const artworksF = read('src/data/artworks.json');
 
 const works  = [...artworksF.works].sort((a, b) => a.order - b.order);
+
+/* True pixel sizes of every view, written by build-images.mjs. A real
+   photograph keeps its own proportions; a placeholder has the proportions the
+   pipeline gave it. Missing (images not built yet): fall back to squares, and
+   say so, rather than guess. */
+const VIEWS_FILE = join(ROOT, 'public/img/views.json');
+const VIEWS = existsSync(VIEWS_FILE) ? JSON.parse(readFileSync(VIEWS_FILE, 'utf8')) : {};
+if (!existsSync(VIEWS_FILE)) console.log('  note: public/img/views.json missing — run: npm run build:images');
 const LOCALES = Object.keys(site.locales);
 const ui = site.ui;
 const origin = process.env.SITE_URL || site.url;
@@ -95,6 +103,89 @@ function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100v
            width="${iw}" height="${ih}" alt="${esc(t(w.alt, loc))}"
            ${eager ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"'}>
     </picture>`;
+}
+
+/** An extra view — detail, edge or back — as a responsive image in the same
+ *  mount as the front. No transition name: only the front view carries the
+ *  painting between pages (G-05). */
+const VIEW_LABEL = { front: 'viewFront', detail: 'viewDetail', edge: 'viewEdge', back: 'viewBack', video: 'viewVideo' };
+function viewPicture(w, v, loc, sizes) {
+  const key = `${w.image}-${v.kind}`;
+  const m = VIEWS[key] ?? { width: 2000, height: 2000, placeholder: true };
+  const widths = [640, 960, 1280, 1600, 2000];
+  const srcset = (ext) => widths.map((x) => `${asset(`/img/${key}-${x}.${ext}`)} ${x}w`).join(', ');
+  return `<picture>
+      <source type="image/avif" srcset="${srcset('avif')}" sizes="${sizes}">
+      <img class="work__img work__img--view" src="${asset(`/img/${key}-1280.webp`)}" srcset="${srcset('webp')}" sizes="${sizes}"
+           width="${m.width}" height="${m.height}" alt="${esc(t(v.alt, loc))}" loading="lazy" decoding="async"${m.placeholder ? ' data-placeholder="view"' : ''}>
+    </picture>`;
+}
+
+/** The gallery on a work's own page: the front, then its extra views, in a
+ *  scroll-snap strip that a phone swipes natively, with a thumbnail for every
+ *  view. Works with no script: each thumbnail is a link to its view. gallery.js
+ *  adds the current-view marker, arrow keys and scrolling without history. */
+function gallery(w, loc) {
+  const sizes = '(min-width:900px) 55vw, calc(100vw - 40px)';
+  const views = [{ kind: 'front' }, ...(w.views ?? [])];
+  const id = (kind) => `view-${w.slug}-${kind}`;
+  const label = (kind) => t(ui[VIEW_LABEL[kind]], loc);
+  const n = views.length;
+
+  const slide = (v, i) => {
+    const pos = `${label(v.kind)}, ${i + 1} ${t(ui.viewOf, loc)} ${n}`;
+    if (v.kind === 'front') {
+      return `<li class="gallery__view" id="${id('front')}" aria-label="${esc(pos)}">
+        <figure class="work__figure" style="margin:0">
+          <button class="work__zoom" command="show-modal" commandfor="lb-${esc(w.slug)}"
+                  style="all:unset;display:block;cursor:zoom-in"
+                  aria-label="${esc(t(ui.viewFull, loc))}">
+            ${picture(w, { eager: true, sizes }, loc)}
+          </button>
+        </figure>
+      </li>`;
+    }
+    if (v.kind === 'video') {
+      const key = `${w.image}-video`;
+      const m = VIEWS[key] ?? { width: 2000, height: 2500, placeholder: true, video: '/placeholders/work-video.mp4' };
+      // preload="none": nothing is fetched until the visitor presses play,
+      // which matters across the border more than anywhere else on the site.
+      return `<li class="gallery__view" id="${id('video')}" aria-label="${esc(pos)}">
+        <video class="work__video" controls preload="none" playsinline width="${m.width}" height="${m.height}"
+               poster="${asset(`/img/${key}-1280.webp`)}" aria-label="${esc(`${label('video')}: ${t(v.alt, loc)}`)}"${m.placeholder ? ' data-placeholder="video"' : ''}>
+          <source src="${asset(m.video)}" type="video/mp4">
+          <p>${esc(t(v.alt, loc))}</p>
+        </video>
+      </li>`;
+    }
+    return `<li class="gallery__view" id="${id(v.kind)}" aria-label="${esc(pos)}">
+        <figure class="work__figure" style="margin:0">
+          <button class="work__zoom" command="show-modal" commandfor="lb-${esc(w.slug)}-${v.kind}"
+                  style="all:unset;display:block;cursor:zoom-in"
+                  aria-label="${esc(`${t(ui.viewFull, loc)}: ${label(v.kind)}`)}">
+            ${viewPicture(w, v, loc, sizes)}
+          </button>
+        </figure>
+      </li>`;
+  };
+
+  const thumb = (v) => {
+    const key = v.kind === 'front' ? w.image : `${w.image}-${v.kind}`;
+    return `<li><a class="gallery__thumb${v.kind === 'video' ? ' gallery__thumb--video' : ''}" href="#${id(v.kind)}">
+          <img src="${asset(`/img/${key}-160.webp`)}" srcset="${asset(`/img/${key}-160.webp`)} 160w, ${asset(`/img/${key}-320.webp`)} 320w"
+               sizes="80px" width="160" height="160" alt="" loading="lazy" decoding="async">
+          <span class="visually-hidden">${esc(label(v.kind))}</span>
+        </a></li>`;
+  };
+
+  return `<div class="gallery" data-gallery>
+      <ol class="gallery__views" aria-label="${esc(t(ui.views, loc))}" tabindex="0">
+      ${views.map(slide).join('\n      ')}
+      </ol>
+      <ol class="gallery__thumbs" aria-label="${esc(t(ui.chooseView, loc))}">
+        ${views.map(thumb).join('\n        ')}
+      </ol>
+    </div>`;
 }
 
 /** Which of the three media nouns the hero line should use for a work.
@@ -345,21 +436,7 @@ function renderWork(w, loc) {
 
   <div class="detail__grid">
     <div>
-      <figure class="work__figure" style="margin:0">
-        <button class="work__zoom" command="show-modal" commandfor="lb-${esc(w.slug)}"
-                style="all:unset;display:block;cursor:zoom-in"
-                aria-label="${esc(t(ui.viewFull, loc))}">
-          ${picture(w, { eager: true, sizes: '(min-width:900px) 60vw, calc(100vw - 40px)' }, loc)}
-        </button>
-      </figure>
-
-      ${w.details?.length ? `<div class="details-row">
-        ${w.details.map((d, n) => `<figure>
-          <img src="${asset(`/img/${esc(d.image)}-960.webp`)}" width="960" height="960" loading="lazy" decoding="async"
-               alt="${esc(t(d.alt, loc))}">
-          <figcaption>${esc(t(ui.detailCrop, loc))} ${n + 1}</figcaption>
-        </figure>`).join('\n        ')}
-      </div>` : ''}
+      ${gallery(w, loc)}
 
       ${desc ? `<div class="detail__desc prose" style="margin-top:var(--space-5)">
         ${desc.split(/\n{2,}/).map((p) => `<p>${esc(p)}</p>`).join('\n        ')}
@@ -398,6 +475,17 @@ function renderWork(w, loc) {
   <img src="${asset(`/img/${w.image}-2000.webp`)}" alt="${esc(t(w.alt, loc))}" width="2000"
        height="${Math.round((w.heightCm / w.widthCm) * 2000)}">
 </dialog>
+${(w.views ?? []).filter((v) => v.kind !== 'video').map((v) => {
+  const key = `${w.image}-${v.kind}`;
+  const m = VIEWS[key] ?? { width: 2000, height: 2000 };
+  return `<dialog class="lightbox" id="lb-${esc(w.slug)}-${v.kind}">
+  <form method="dialog" style="margin:0;position:relative">
+    <button class="lightbox__close" value="close">${esc(t(ui.closeDialog, loc))}</button>
+  </form>
+  <img src="${asset(`/img/${key}-2000.webp`)}" alt="${esc(t(v.alt, loc))}" width="${m.width}" height="${m.height}" loading="lazy">
+</dialog>`;
+}).join('\n')}
+<script src="${asset('/gallery.js')}" defer></script>
 
 ${jsonLd(w, site, seller, loc, origin)}`;
 
@@ -683,6 +771,29 @@ rmSync(DIST, { recursive: true, force: true });
 mkdirSync(DIST, { recursive: true });
 
 let pageCount = 0;
+/* The 404. GitHub Pages and Cloudflare Pages both serve /404.html for any
+   missing path, including the search, account and cart placeholders, before
+   anything knows the visitor's language — so it speaks both. Not indexed, no
+   canonical, not in the sitemap. */
+{
+  const NF = site.notFound;
+  const both = (field, tag, cls = '') => LOCALES.map((l) =>
+    `<${tag}${cls ? ` class="${cls}"` : ''} lang="${site.locales[l].lang}">${esc(t(field, l))}</${tag}>`).join('\n    ');
+  const body = `
+<section class="section wrap notfound">
+  <div class="prose measure">
+    <h1>${LOCALES.map((l) => `<span lang="${site.locales[l].lang}" class="notfound__title">${esc(t(NF.title, l))}</span>`).join(' ')}</h1>
+    ${both(NF.body, 'p')}
+    <p>${LOCALES.map((l) => `<a class="link-quiet" lang="${site.locales[l].lang}" href="${lpath(l, site, '/')}">${esc(t(NF.home, l))}</a>`).join('<br>')}</p>
+  </div>
+</section>`;
+  out('/404.html', layout({
+    site, seller, loc: 'en', title: `${t(NF.title, 'en')} · ${t(NF.title, 'zh')} — ${t(seller.artist.siteName, 'en')}`,
+    description: t(NF.body, 'en'), body, canonical: null, altLocales: altFor('/'),
+    bodyClass: 'prose-page', noindex: true,
+  }));
+}
+
 for (const loc of LOCALES) {
   out(join(lpath(loc, site, '/'), 'index.html'), renderIndex(loc)); pageCount++;
   for (const w of works) {
@@ -700,6 +811,11 @@ for (const loc of LOCALES) {
 
 /* client-side availability check */
 cpSync(join(ROOT, 'src/scripts/availability.js'), join(DIST, 'availability.js'));
+cpSync(join(ROOT, 'src/scripts/gallery.js'), join(DIST, 'gallery.js'));
+cpSync(join(ROOT, 'public/placeholders'), join(DIST, 'placeholders'), { recursive: true });
+if (existsSync(join(ROOT, 'public/video'))) {
+  cpSync(join(ROOT, 'public/video'), join(DIST, 'video'), { recursive: true });
+}
 
 /* one stylesheet, concatenated in cascade order. Font urls are rewritten for
    the deployment base so the same source works at a root and at a subpath. */

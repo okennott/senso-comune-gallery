@@ -58,9 +58,10 @@ const GROUNDS = {
    one is what the cascade uses — and a rule that set a good colour and then
    overrode it with a bad one was exactly the B-01 defect. */
 const BAR = T['bar'];
-const ON_BAR_SELECTORS = /^\s*(\.masthead|\.wordmark|\.nav\b|\.nav__|\.lang-switch|\.footer|\.legal-declaration)/;
+const ON_BAR_SELECTORS = /^\s*(\.masthead|\.wordmark|\.nav\b|\.nav__|\.lang-switch|\.shopbar|\.footer|\.legal-declaration)/;
 
 const barPairs = [];
+const ownGround = [];
 {
   const g = readFileSync(join(ROOT, 'src/styles/gallery.css'), 'utf8');
   // strip comments so a colour mentioned in prose is not read as a declaration
@@ -73,6 +74,13 @@ const barPairs = [];
     const token = colours.at(-1)[1];           // the one the cascade keeps
     if (!T[token]) continue;
     const isLarge = /wordmark/.test(selector);  // the wordmark is display size
+    // A rule that paints its own ground — the cart count's pill — is read
+    // against that ground, not against the bar it happens to sit over.
+    const ground = ([...m[2].matchAll(/(?:^|[;\s])background(?:-color)?:\s*var\(--([a-z0-9-]+)\)/g)].at(-1) ?? [])[1];
+    if (ground && T[ground]) {
+      ownGround.push([selector.replace(/\s+/g, ' ').slice(0, 38), token, ground, isLarge ? 3.0 : 4.5]);
+      continue;
+    }
     barPairs.push([selector.replace(/\s+/g, ' ').slice(0, 38), token, isLarge ? 3.0 : 4.5,
                    colours.length > 1 ? `overrides ${colours.length - 1} earlier declaration(s)` : '']);
   }
@@ -167,7 +175,7 @@ for (const [selector, token, min, note] of barPairs) {
     const hex = (c) => '#' + c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
     const composite = hex(rgb(BAR).map((v) => a * v + (1 - a) * 255));
     line(`  --bar at ${alphaDecl}% over #FFFFFF composites to ${composite.toUpperCase()}`);
-    const masthead = barPairs.filter(([sel]) => /^\s*(\.masthead|\.wordmark|\.nav\b|\.nav__|\.lang-switch)/.test(sel));
+    const masthead = barPairs.filter(([sel]) => /^\s*(\.masthead|\.wordmark|\.nav\b|\.nav__|\.lang-switch|\.shopbar)/.test(sel));
     if (!masthead.length) { line('  ✗ no masthead rules found'); failures++; }
     for (const [selector, token, min] of masthead) {
       const floor = min >= 4.5 ? 7.0 : 4.5;
@@ -177,6 +185,13 @@ for (const [selector, token, min, note] of barPairs) {
       line(`  ${ok ? '✓' : '✗'} ${selector.padEnd(38)} --${token.padEnd(12)} ${r.toFixed(2)}  floor ${floor.toFixed(1)}`);
     }
   }
+}
+
+for (const [selector, token, ground, min] of ownGround) {
+  const r = ratio(T[token], T[ground]);
+  const ok = r >= min;
+  if (!ok) failures++;
+  line(`  ${ok ? '✓' : '✗'} ${selector.padEnd(38)} --${token.padEnd(12)} ${r.toFixed(2)}  on its own --${ground}`);
 }
 
 line('');

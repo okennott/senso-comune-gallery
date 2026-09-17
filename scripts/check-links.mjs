@@ -38,6 +38,18 @@ const pages = [];
 
 const problems = [];
 const warnings = [];
+
+/* Decision D1: search, account and cart link to routes that are not built.
+   A link marked data-placeholder is the one kind of internal link that MUST
+   be dead — and must be a route declared in site.json. When a placeholder page
+   is built, the check fails until its marker and declaration are removed, so a
+   placeholder can never quietly become permanent, or quietly go live. */
+const siteData = JSON.parse(readFileSync(join(ROOT, 'src/data/site.json'), 'utf8'));
+const declared = new Set();
+for (const l of Object.values(siteData.locales)) {
+  for (const r of Object.values(siteData.placeholders?.routes ?? {})) declared.add((l.prefix + r).replace(/\/{2,}/g, '/'));
+}
+let placeholderLinks = 0;
 const rel = (p) => p.replace(DIST, '').replace(/\\/g, '/') || '/';
 
 /* A preview build under BASE_PATH (GitHub Pages serves a project site from
@@ -79,8 +91,20 @@ for (const page of pages) {
   /* --- skip link present and points somewhere real --- */
   if (!/class="skip-link"/.test(html)) warnings.push(`${where}: no skip link`);
 
+  /* --- placeholder links: declared, and still dead --- */
+  const placeholderHrefs = new Set();
+  for (const m of html.matchAll(/<a\b[^>]*\bhref="([^"]+)"[^>]*\bdata-placeholder="([a-z-]+)"[^>]*>/g)) {
+    const href = local(m[1]);
+    placeholderHrefs.add(m[1]);
+    placeholderLinks++;
+    if (!declared.has(href)) problems.push(`${where}: placeholder link → ${href} is not declared in site.json placeholders`);
+    const target = href.endsWith('/') ? join(DIST, href, 'index.html') : join(DIST, href);
+    if (existsSync(target)) problems.push(`${where}: placeholder link → ${href} now resolves — the page exists; remove its placeholder marker and declaration`);
+  }
+
   /* --- internal links resolve --- */
   for (const m of html.matchAll(/href="(\/[^"#]*)"/g)) {
+    if (placeholderHrefs.has(m[1])) continue;
     const href = local(m[1]);
     if (href.startsWith('//')) continue;
     const target = href.endsWith('/')
@@ -90,10 +114,10 @@ for (const page of pages) {
   }
 
   /* --- image sources resolve --- */
-  for (const m of html.matchAll(/(?:src|srcset)="([^"]+)"/g)) {
+  for (const m of html.matchAll(/(?:src|srcset|poster)="([^"]+)"/g)) {
     for (const cand of m[1].split(',')) {
       const url = local(cand.trim().split(/\s+/)[0]);
-      if (!url.startsWith('/img/') && !url.startsWith('/fonts/')) continue;
+      if (!/^\/(img|fonts|video|placeholders)\//.test(url)) continue;
       if (!existsSync(join(DIST, url))) problems.push(`${where}: missing asset → ${url}`);
     }
   }
@@ -166,6 +190,7 @@ function displayCjk() {
   for (const n of site.nav) { add(n.label); add(n.labelShort); }
   for (const w of arts.works) add(w.title);
   for (const v of Object.values(site.ui)) add(v);
+  add(site.notFound?.title);   // the 404's heading
   return out;
 }
 
@@ -201,7 +226,27 @@ function coveredCodepoints() {
 }
 
 /* --- report --- */
-console.log(`\n  checked ${pages.length} pages\n`);
+/* --- the 404: every placeholder click lands here, so it must work --- */
+{
+  const nf = join(DIST, '404.html');
+  if (!existsSync(nf)) problems.push('/404.html: missing — every placeholder link lands on it');
+  else {
+    const html = readFileSync(nf, 'utf8');
+    if (!/<meta name="robots" content="[^"]*noindex/.test(html)) problems.push('/404.html: must be noindex');
+    if (/rel="canonical"/.test(html)) problems.push('/404.html: must carry no canonical');
+    for (const l of Object.values(siteData.locales)) {
+      if (!html.includes(`lang="${l.lang}"`)) problems.push(`/404.html: says nothing in ${l.lang} — it is served before the locale is known`);
+    }
+    for (const m of html.matchAll(/href="(\/[^"#]*)"/g)) {
+      const href = local(m[1]);
+      if (declared.has(href) || href.startsWith('//')) continue;
+      const target = href.endsWith('/') ? join(DIST, href, 'index.html') : join(DIST, href);
+      if (!existsSync(target)) problems.push(`/404.html: dead link → ${href}`);
+    }
+  }
+}
+
+console.log(`\n  checked ${pages.length} pages and the 404; ${placeholderLinks} placeholder links, all declared and all still unbuilt\n`);
 for (const w of warnings) console.log(`  ! ${w}`);
 if (warnings.length) console.log('');
 for (const p of problems) console.log(`  ✗ ${p}`);

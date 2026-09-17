@@ -178,9 +178,29 @@ const favicon = (asset) => `<link rel="icon" href="${asset('/icon.svg')}" type="
    2.5.3 Label in Name. */
 const MASTHEAD_MARK = markSvg({ wall: 'outline', tokens: true, className: 'wordmark__mark' });
 
+/* The shop bar's icons: 24-unit, one stroke weight, drawn in currentColor so
+   they take the bar's text colour and are checked with it. */
+const icon = (d) => `<svg class="shopbar__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const SHOP_ICONS = {
+  search:  icon('<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>'),
+  account: icon('<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/>'),
+  cart:    icon('<path d="M5.5 8h13l-1.1 12H6.6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>'),
+};
+
+/* The long and short forms of the name, as the navigation does it (B-04):
+   both are in the markup, CSS shows one, and whichever is visible is the
+   link's accessible name. When the two are the same, as in Chinese, once. */
+const wordmarkName = (seller, loc) => {
+  const long = t(seller.artist.siteName, loc);
+  const short = t(seller.artist.siteNameShort ?? seller.artist.siteName, loc);
+  return long === short
+    ? esc(long)
+    : `<span class="wordmark__long">${esc(long)}</span><span class="wordmark__short">${esc(short)}</span>`;
+};
+
 /* ---------- document shell ---------- */
 export function layout({ site, seller, loc, title, description, body, ogImage, ogImageAlt,
-                         ogImageHeight, product, canonical, altLocales, bodyClass = '' }) {
+                         ogImageHeight, product, canonical, altLocales, bodyClass = '', noindex = false }) {
   const L = site.locales[loc];
   const ui = site.ui;
   const origin = process.env.SITE_URL || site.url;   // same source build.js uses for the sitemap
@@ -204,6 +224,20 @@ export function layout({ site, seller, loc, title, description, body, ogImage, o
     })
     .join('\n      ');
 
+  /* Decision D1: search, account and cart. The destinations do not exist yet,
+     so each link is marked data-placeholder and lands on the 404 page; the
+     routes are declared in site.json, and check-links fails the build if a
+     marked link starts resolving without the marker being removed. The icons
+     are aria-hidden: each link's name is the word, which is what a screen
+     reader announces and what voice control needs to match. */
+  const shopLinks = Object.entries(site.placeholders.routes).map(([role, route]) => {
+    const label = esc(t(ui[role], loc));
+    const count = role === 'cart'
+      ? `<span class="shopbar__count" data-cart-count hidden>0</span>` : '';
+    return `<li><a class="shopbar__link" href="${esc(path(loc, site, route))}" data-placeholder="${role}">` +
+           `${SHOP_ICONS[role]}<span class="visually-hidden">${label}</span>${count}</a></li>`;
+  }).join('\n      ');
+
   const other = loc === 'en' ? 'zh' : 'en';
   const otherHref = altLocales.find(([l]) => l === other)?.[1] ?? path(other, site, '/');
 
@@ -214,16 +248,16 @@ export function layout({ site, seller, loc, title, description, body, ogImage, o
 <html lang="${L.lang}" dir="${L.dir}">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">${PREVIEW ? '\n<meta name="robots" content="noindex, nofollow">' : ''}
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">${PREVIEW || noindex ? '\n<meta name="robots" content="noindex, nofollow">' : ''}
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
-<link rel="canonical" href="${esc(origin + canonical)}">
+${canonical ? `<link rel="canonical" href="${esc(origin + canonical)}">
   ${hreflang}
-<link rel="alternate" hreflang="x-default" href="${esc(origin + (altLocales.find(([l]) => l === 'en')?.[1] ?? '/'))}">
+<link rel="alternate" hreflang="x-default" href="${esc(origin + (altLocales.find(([l]) => l === 'en')?.[1] ?? '/'))}">` : ''}
 <meta property="og:type" content="${product ? 'product' : 'website'}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
-<meta property="og:url" content="${esc(origin + canonical)}">
+${canonical ? `<meta property="og:url" content="${esc(origin + canonical)}">` : ''}
 <meta property="og:site_name" content="${esc(t(seller.artist.siteName, loc))}">
 <meta property="og:locale" content="${ogLocale(L.lang)}">
 ${altLocales.filter(([l]) => l !== loc).map(([l]) => `<meta property="og:locale:alternate" content="${ogLocale(site.locales[l].lang)}">`).join('\n')}
@@ -249,12 +283,15 @@ ${loc === 'zh'
 
 <header class="masthead">
   <div class="wrap masthead__inner">
-    <a class="wordmark" href="${esc(path(loc, site, '/'))}">${MASTHEAD_MARK}<span class="wordmark__name">${esc(t(seller.artist.siteName, loc))}</span></a>
+    <a class="wordmark" href="${esc(path(loc, site, '/'))}">${MASTHEAD_MARK}<span class="wordmark__name">${wordmarkName(seller, loc)}</span></a>
     <nav class="nav" aria-label="${loc === 'zh' ? '主导航' : 'Main'}">
       ${nav}
     </nav>
     <span class="lang-rule" aria-hidden="true"></span>
     <a class="lang-switch" href="${esc(otherHref)}" lang="${site.locales[other].lang}" rel="alternate">${esc(t(ui.langSwitch, loc))}</a>
+    <ul class="shopbar">
+      ${shopLinks}
+    </ul>
   </div>
 </header>
 

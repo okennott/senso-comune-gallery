@@ -450,6 +450,97 @@ check('G-06', 'every boundary band joins the grounds actually either side of it'
   return { ok: bands >= 8 && !bad.length && breath, detail: bad.length ? bad.join('; ') : `${bands} bands, all seamless, the field breathes through at the centre ${breath}` };
 });
 
+/* ===================== H — shop bar and work views ===================== */
+/* Decisions of 17 September 2026 (report, Part 6): search, account and cart
+   shown now with placeholder destinations; detail, edge, back and video views
+   on every work page as placeholders until the photographs exist. */
+
+const siteJson = JSON.parse(src('src/data/site.json'));
+const artJson = JSON.parse(src('src/data/artworks.json'));
+const workPages = allHtml.filter(([p]) => /\/works\/[a-z0-9-]+\/index\.html$/.test(p));
+const notWorkPages = allHtml.filter(([p]) => !/\/works\//.test(p));
+
+check('H-01', 'search, account and cart, in that order, on every page', () => {
+  const bad = [];
+  for (const [p, html] of allHtml) {
+    const bar = (html.match(/<ul class="shopbar">([\s\S]*?)<\/ul>/) ?? [])[1] ?? '';
+    const roles = [...bar.matchAll(/data-placeholder="([a-z]+)"/g)].map((m) => m[1]).join(' ');
+    if (roles !== 'search account cart') bad.push(`${p}: ${roles || 'none'}`);
+  }
+  return { ok: !bad.length, detail: bad.length ? bad.slice(0, 3).join('; ') : `${allHtml.length} pages` };
+});
+
+check('H-01', 'each shop control is named by a word, in the page language', () => {
+  const want = { en: ['Search', 'Account', 'Cart'], zh: ['搜索', '账户', '购物车'] };
+  const got = (html) => [...html.matchAll(/data-placeholder="[a-z]+">[\s\S]*?<span class="visually-hidden">([^<]+)<\/span>/g)].map((m) => m[1]);
+  const en = got(home).join(), zh = got(zhHome).join();
+  const iconsHidden = [...home.matchAll(/<svg class="shopbar__icon"[^>]*>/g)].every((m) => /aria-hidden="true"/.test(m[0]));
+  return { ok: en === want.en.join() && zh === want.zh.join() && iconsHidden,
+           detail: `en ${en}, zh ${zh}, icons aria-hidden ${iconsHidden}` };
+});
+
+check('H-02', 'the placeholders land on a bilingual, unindexed 404', () => {
+  const nf = existsSync(join(DIST, '404.html')) ? read('404.html') : '';
+  const routes = Object.values(siteJson.placeholders.routes);
+  const unbuilt = routes.every((r) => !existsSync(join(DIST, r, 'index.html')));
+  const bilingual = /lang="en"/.test(nf) && /lang="zh-CN"/.test(nf);
+  const noindex = /name="robots" content="noindex/.test(nf);
+  const notInSitemap = !/404/.test(read('sitemap.xml'));
+  return { ok: !!nf && unbuilt && bilingual && noindex && notInSitemap,
+           detail: `404 ${!!nf}, routes unbuilt ${unbuilt}, bilingual ${bilingual}, noindex ${noindex}, not in sitemap ${notInSitemap}` };
+});
+
+check('H-03', 'every work page shows front, detail, edge, back and video, with a thumbnail each', () => {
+  const bad = [];
+  for (const [p, html] of workPages) {
+    const views = [...html.matchAll(/<li class="gallery__view" id="view-[a-z0-9-]+?-(front|detail|edge|back|video)"/g)].map((m) => m[1]).join(' ');
+    const thumbs = [...html.matchAll(/class="gallery__thumb[^"]*" href="#(view-[a-z0-9-]+)"/g)].map((m) => m[1]);
+    const ids = new Set([...html.matchAll(/id="(view-[a-z0-9-]+)"/g)].map((m) => m[1]));
+    if (views !== 'front detail edge back video') bad.push(`${p}: ${views}`);
+    if (thumbs.length !== 5 || !thumbs.every((t) => ids.has(t))) bad.push(`${p}: thumbnails ${thumbs.length}, all targets exist ${thumbs.every((t) => ids.has(t))}`);
+  }
+  return { ok: workPages.length > 0 && !bad.length, detail: bad.length ? bad.slice(0, 2).join('; ') : `${workPages.length} work pages, 5 views and 5 working thumbnail links each` };
+});
+
+check('H-04', 'video only on work pages; never preloaded, never autoplayed', () => {
+  const elsewhere = notWorkPages.filter(([, h]) => /<video\b/.test(h)).map(([p]) => p);
+  const vids = workPages.flatMap(([, h]) => [...h.matchAll(/<video\b[^>]*>/g)].map((m) => m[0]));
+  const quiet = vids.every((v) => /preload="none"/.test(v) && !/\bautoplay\b/.test(v) && /\bcontrols\b/.test(v) && /\bplaysinline\b/.test(v));
+  const named = vids.every((v) => /aria-label="[^"]+"/.test(v));
+  return { ok: !elsewhere.length && vids.length === workPages.length && quiet && named,
+           detail: `elsewhere ${elsewhere.length}, ${vids.length} videos, preload none + controls + no autoplay ${quiet}, named ${named}` };
+});
+
+check('H-04', 'a placeholder view is marked as one, and its alt text is still owed', () => {
+  const manifest = existsSync(join(ROOT, 'public/img/views.json')) ? JSON.parse(src('public/img/views.json')) : {};
+  let mismatch = 0, views = 0;
+  for (const [, html] of workPages) {
+    for (const m of html.matchAll(/<img class="work__img work__img--view"[^>]*src="[^"]*\/img\/([a-z0-9-]+)-1280\.webp"[^>]*>/g)) {
+      views++;
+      const flagged = /data-placeholder="view"/.test(m[0]);
+      if (flagged !== !!manifest[m[1]]?.placeholder) mismatch++;
+    }
+  }
+  const owed = artJson.works.every((w) => (w.views ?? []).every((v) => v.alt?.en && v.alt?.zh));
+  return { ok: views > 0 && !mismatch && owed, detail: `${views} view images, flag disagrees with the manifest ${mismatch}, every view has an alt field ${owed}` };
+});
+
+check('H-05', 'only the front view carries the painting between pages', () => {
+  const bad = workPages.filter(([, h]) => {
+    const names = [...h.matchAll(/view-transition-name:work-/g)].length;
+    const onView = /work__img--view"[^>]*view-transition-name/.test(h) || /<video[^>]*view-transition-name/.test(h);
+    return names !== 1 || onView;
+  }).map(([p]) => p);
+  return { ok: !bad.length, detail: bad.length ? bad.join(' ') : 'one name per work page, on the front view' };
+});
+
+check('H-06', 'purchase limits are declared per entity, and still owed', () => {
+  const seller = JSON.parse(src('src/data/seller.json'));
+  const ents = Object.entries(seller.entities);
+  const declared = ents.every(([, e]) => 'maxTransactionUSD' in e.checkout);
+  return { ok: declared, detail: ents.map(([k, e]) => `${k}: ${e.checkout.maxTransactionUSD}`).join(', ') };
+});
+
 /* ===================== cross-cutting ===================== */
 
 /* The first pass of the D-04 fix set font-size:var(--size-h1). No such token

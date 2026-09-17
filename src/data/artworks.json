@@ -49,7 +49,12 @@
       "alt":         { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "description": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "artistNote":  { "en": "", "zh": "" },
-      "details": []
+      "views": [
+        { "kind": "detail", "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "edge",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "back",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "video",  "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } }
+      ]
     },
     {
       "slug": "paper-study-morning",
@@ -71,7 +76,12 @@
       "alt":         { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "description": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "artistNote":  { "en": "", "zh": "" },
-      "details": []
+      "views": [
+        { "kind": "detail", "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "edge",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "back",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "video",  "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } }
+      ]
     },
     {
       "slug": "long-afternoon",
@@ -93,7 +103,12 @@
       "alt":         { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "description": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "artistNote":  { "en": "", "zh": "" },
-      "details": []
+      "views": [
+        { "kind": "detail", "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "edge",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "back",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "video",  "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } }
+      ]
     },
     {
       "slug": "graphite-study",
@@ -115,7 +130,12 @@
       "alt":         { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "description": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "artistNote":  { "en": "", "zh": "" },
-      "details": []
+      "views": [
+        { "kind": "detail", "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "edge",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "back",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "video",  "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } }
+      ]
     },
     {
       "slug": "tribute-i",
@@ -137,7 +157,12 @@
       "alt":         { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "description": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "artistNote":  { "en": "", "zh": "" },
-      "details": []
+      "views": [
+        { "kind": "detail", "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "edge",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "back",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "video",  "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } }
+      ]
     },
     {
       "slug": "tribute-ii",
@@ -159,7 +184,12 @@
       "alt":         { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "description": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
       "artistNote":  { "en": "", "zh": "" },
-      "details": []
+      "views": [
+        { "kind": "detail", "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "edge",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "back",   "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } },
+        { "kind": "video",  "alt": { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" } }
+      ]
     }
   ]
 }

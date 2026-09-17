@@ -84,6 +84,7 @@ def collect() -> str:
         add(w.get("title"))
     for v in site["ui"].values():
         add(v)
+    add(site.get("notFound", {}).get("title"))   # the 404's heading
 
     return "".join(sorted(chars))
 

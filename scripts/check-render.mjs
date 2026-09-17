@@ -19,6 +19,10 @@
  *   - no border-radius: rounding a corner crops the object being sold;
  *   - no transform: a painting is never drawn scaled or skewed.
  *
+ * The same pass covers the work videos, and the masthead: with search, account
+ * and cart added it must still fit a phone — no horizontal overflow, at most
+ * two rows below 720px, and every shop control at least 44px square.
+ *
  * PHONE WIDTHS. Headless Chrome will not lay a window out narrower than 500px:
  * --window-size=390 reports innerWidth 500 and a screenshot merely crops it.
  * Every "390px" result taken that way was a 500px layout. So widths under 500
@@ -63,7 +67,7 @@ const HEADLESS_MIN = 500;
    the DOM, where --dump-dom can read them back. */
 const PROBE = `<script>addEventListener('load',()=>setTimeout(()=>{
   const px=(v)=>parseFloat(v)||0;
-  const out=[...document.querySelectorAll('.work__img, .hero__work img, dialog.lightbox img')].map((i)=>{
+  const out=[...document.querySelectorAll('.work__img, .hero__work img, dialog.lightbox img, .work__video')].map((i)=>{
     const cs=getComputedStyle(i);
     const cw=i.clientWidth-px(cs.paddingLeft)-px(cs.paddingRight);
     const ch=i.clientHeight-px(cs.paddingTop)-px(cs.paddingBottom);
@@ -72,7 +76,12 @@ const PROBE = `<script>addEventListener('load',()=>setTimeout(()=>{
       fit:cs.objectFit, radius:cs.borderRadius, transform:cs.transform,
       lightbox:!!i.closest('dialog') };
   });
-  const payload=JSON.stringify({ viewport: document.documentElement.clientWidth, rows: out });
+  const inner=document.querySelector('.masthead__inner');
+  const tops=[...new Set([...inner.children].filter((c)=>c.offsetParent!==null&&getComputedStyle(c).display!=='none').map((c)=>Math.round(c.getBoundingClientRect().top/8)))];
+  const mast={ overflow: inner.scrollWidth > inner.clientWidth + 1 || document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    rows: tops.length,
+    small: [...document.querySelectorAll('.shopbar__link')].map((a)=>a.getBoundingClientRect()).filter((r)=>r.width<44||r.height<44).length };
+  const payload=JSON.stringify({ viewport: document.documentElement.clientWidth, rows: out, mast });
   if (window.parent !== window) { parent.document.getElementById('render-probe').textContent = payload; return; }
   const p=document.createElement('pre'); p.id='render-probe'; p.textContent=payload;
   document.body.append(p);
@@ -130,8 +139,11 @@ for (const page of PAGES) {
     const dom = doms[k];
     const m = dom.match(/<pre id="render-probe">([\s\S]*?)<\/pre>/);
     if (!m || !m[1].trim()) { problems.push(`${page} @${width}: the page never finished layout`); continue; }
-    const { viewport, rows } = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+    const { viewport, rows, mast } = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
     if (viewport !== width) { problems.push(`${page} @${width}: laid out at ${viewport}px, not ${width}px`); continue; }
+    if (mast.overflow) problems.push(`${page} @${width}px: the masthead overflows the viewport`);
+    if (width < 720 && mast.rows > 2) problems.push(`${page} @${width}px: the masthead wraps to ${mast.rows} rows`);
+    if (mast.small) problems.push(`${page} @${width}px: ${mast.small} shop control(s) under 44px`);
     for (const r of rows) {
       const at = `${page} @${width}px  ${r.src}`;
       // A closed lightbox is display:none and has no box to measure; its

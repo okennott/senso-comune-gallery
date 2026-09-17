@@ -917,10 +917,11 @@ outright. The checks are a floor, not a pass.
 \begin{finding}{Status of this part}
 ```
 
-Research and scope only. Nothing described here is built, except the
-verification fix in @sec-next-harness, which the scope depends on. Each
-recommendation is marked, and every decision that belongs to Priscilla is
-listed in @sec-next-decisions before any work begins.
+Written as research and scope; the decisions in @sec-next-decisions were then
+taken, and part of the scope was built. @sec-next-built records what was
+decided, where the decisions depart from the recommendations below, and what
+is built. The recommendations are left as written, so the reasoning behind
+each departure stays on the record.
 
 ```{=latex}
 \end{finding}
@@ -1187,6 +1188,74 @@ that supplies accounts — which would reverse the architecture in @sec-build.
 | D4 | The number of available works at which search appears | 24 | Phase 5 |
 | D5 | Whether a short surface video is wanted for any work | No, at launch | — |
 
+## Decisions taken, and what was built {#sec-next-built}
+
+: The decisions, as taken on 17 September 2026 {#tbl-next-taken}
+
+| # | Decision taken | Against the recommendation |
+|:--|:----------------------------------------|:----------------------------------------|
+| D1 | The literal **search · account · cart**, shown now, each linking to a placeholder route that lands on the 404 page | Departs: the recommendation was *saved · selection*, with search at a threshold |
+| D2 | **Detail, edge, back and video** views on every work, as placeholders until the files exist | As recommended, with video added; the generated in-scale view was not taken, and the scale diagram stays in the sidebar |
+| D3 | **Any number of works in one order**, limited only by availability and by the payment route's largest single transaction | Departs: the recommendation was one enquiry for several works until a multi-item checkout exists |
+| D4 | **No search threshold**, provided the query and the searchable text are correctly scoped | Departs: the recommendation was 24 works |
+| D5 | **Video on work pages only**, for now | As recommended in effect: nowhere else carries video |
+
+**What is built.**
+
+- **The shop bar.** Search, account and cart on every page, in both languages,
+  as icons whose accessible names are the words (*Search*, *Account*, *Cart*;
+  搜索, 账户, 购物车). The destinations are placeholders by decision: each link
+  is marked, its route is declared in `site.json`, and `check-links` fails the
+  build if a marked route ever resolves — so a page cannot be built without its
+  placeholder being retired in the same change. On phones the masthead takes the
+  two rows measured in @tbl-next-budget: the short name and the three icons, then
+  the sections and the language switch. `check-render` now fails on any masthead
+  overflow, on more than two rows below 720 px, or on a shop control under 44 px,
+  at 360 and 390 px in both languages.
+- **A bilingual 404.** Every placeholder lands on it, so it is built rather than
+  left to the host's default: both languages, no canonical, not indexed, not in
+  the sitemap.
+- **The five views.** Front, detail, edge, back and video on every work page, in
+  the zero-script gallery of @sec-next-recs, with thumbnails always visible. The
+  image pipeline makes a labelled placeholder at a sensible proportion for each
+  missing view — square for detail, 3:4 for the edge, the work's own ratio for the
+  back, 4:5 for video — and a real photograph replaces it on the next build and
+  keeps its own proportions, read from a size manifest rather than assumed. One
+  4.8 KB placeholder clip serves every work until its own video exists, so the
+  preview build needs no video tooling. Video is never preloaded and never plays
+  by itself.
+- **Checked in a browser.** The gallery script was driven headlessly: a
+  thumbnail scrolls its view into place, marks it current and adds no history
+  entry; Home and End work along the thumbnails. `check-render` now measures 164
+  painting and video boxes across the four widths, and eight new assertions
+  (H-01 to H-06) cover the rest; an autoplaying video and a built cart page each
+  fail them by name.
+
+**What is not built, and is specified instead.** The cart, search and account
+behind the placeholders. The README's *Scripting still needed* sets out each —
+state, availability checks, the transaction ceiling, the searchable fields and
+query rules, and why an account needs a back end — so the next build starts from
+a specification rather than from this discussion. The transaction ceiling is
+declared per entity as `maxTransactionUSD` and is `NEEDS-INPUT` on both routes:
+no figure for it has been established.
+
+**The shop bar is icons only at every width.** The research in
+@sec-next-research favours visible words beside icons; the reference Priscilla
+chose shows icons alone, and that is what was built. Only the magnifying glass
+is close to universal. If the account or cart icon proves ambiguous in use, the
+labels are one CSS change away: the words are already in the markup.
+
+: Scope status after the first build {#tbl-next-status}
+
+| Phase | Status |
+|:--------------------------------|:------------------------------------------------|
+| 1 Data, photography and images | Built: views data, placeholders, thumbnails, size manifest, video pipeline, alt text audited. The shot list is in the README |
+| 2 The gallery | Built, including the per-view lightbox and the extended render check |
+| 3 The buy box and disclosures | Not started |
+| 4 Saved and selection | Superseded by D1 and D3: the shop bar is built with placeholders; the cart is specified in the README |
+| 5 Search | Superseded by D4: specified in the README, with no threshold |
+| 6 A real cart | Specified in the README; still depends on the provider confirming multi-item checkout |
+
 ## Implementation scope {#sec-next-scope}
 
 Six phases, in order of dependency. Every item names the evidence that closes
@@ -1341,7 +1410,7 @@ Three items that were open have been settled in the build itself.
 
 ## Content still outstanding
 
-The build reports every placeholder; 48 fields are still `NEEDS-INPUT`. The
+The build reports every placeholder; 98 fields are still `NEEDS-INPUT`, 48 of them the alt text owed for the new views. The
 blocking ones are the photographs, the titles and descriptions, and the contact
 details — the email and phone are not optional, they are the consumer-law
 requirement in @sec-disclosure.

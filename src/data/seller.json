@@ -19,6 +19,8 @@
   "artist": {
     "name":   { "en": "Priscilla", "zh": "Priscilla" },
     "siteName": { "en": "Senso Comune Gallery", "zh": "常识画廊" },
+    "$siteNameShort": "Set on phones, where the masthead also carries search, account and cart. The same short name the web manifest uses.",
+    "siteNameShort": { "en": "Senso Comune", "zh": "常识画廊" },
     "instagram": "NEEDS-INPUT",
     "wechatId": "NEEDS-INPUT",
     "xiaohongshu": "NEEDS-INPUT"
@@ -86,6 +88,8 @@
         ],
         "provider": "manual",
         "methods": ["paypal", "alipay", "wechatpay"],
+        "$purchaseLimits": "Decision D3: a customer may buy as many works as they want in one order, limited only by availability and by the largest single transaction the provider and payment method accept. That ceiling is not established for this route.",
+        "maxTransactionUSD": "NEEDS-INPUT",
         "supportsCards": false,
         "collectsAddressAtCheckout": false,
         "note": {
@@ -128,6 +132,8 @@
       "checkout": {
         "provider": "airwallex",
         "methods": ["card", "paypal", "alipay", "wechatpay"],
+        "$purchaseLimits": "Decision D3: a customer may buy as many works as they want in one order, limited only by availability and by the largest single transaction the provider and payment method accept. That ceiling is not established for this route.",
+        "maxTransactionUSD": "NEEDS-INPUT",
         "supportsCards": true,
         "collectsAddressAtCheckout": true,
         "note": {
