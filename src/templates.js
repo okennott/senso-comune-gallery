@@ -150,8 +150,11 @@ export function layout({ site, seller, loc, title, description, body, ogImage, c
     .map(([l, href]) => `<link rel="alternate" hreflang="${site.locales[l].lang}" href="${esc(origin + href)}">`)
     .join('\n  ');
 
+  // Nav entries are either same-page anchors ("#works") or real paths
+  // ("/about/"). Anchors hang off the locale root; paths go through path().
+  const navHref = (h) => (h.startsWith('#') ? path(loc, site, '/') + h : path(loc, site, h));
   const nav = site.nav
-    .map((n) => `<a href="${esc(path(loc, site, '/') + n.href)}">${esc(t(n.label, loc))}</a>`)
+    .map((n) => `<a href="${esc(navHref(n.href))}">${esc(t(n.label, loc))}</a>`)
     .join('\n      ');
 
   const other = loc === 'en' ? 'zh' : 'en';
@@ -195,7 +198,7 @@ ${ogImage ? `<meta property="og:image" content="${esc(origin + ogImage)}">
   </div>
 </header>
 
-<main id="main" tabindex="-1">
+<main id="main" tabindex="-1" class="sheet">
 ${body}
 </main>
 

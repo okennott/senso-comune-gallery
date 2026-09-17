@@ -41,7 +41,7 @@
     },
     {
       "id": "about",
-      "href": "#about",
+      "href": "/about/",
       "label": {
         "en": "About",
         "zh": "关于"
@@ -49,7 +49,7 @@
     },
     {
       "id": "buy",
-      "href": "#buy",
+      "href": "/how-to-buy/",
       "label": {
         "en": "How to Buy",
         "zh": "购买方式"
@@ -281,6 +281,20 @@
       "zh": "所有作品版权归艺术家所有。"
     },
     "links": [
+      {
+        "href": "/about/",
+        "label": {
+          "en": "About",
+          "zh": "关于"
+        }
+      },
+      {
+        "href": "/how-to-buy/",
+        "label": {
+          "en": "How to Buy",
+          "zh": "购买方式"
+        }
+      },
       {
         "href": "/archive/",
         "label": {

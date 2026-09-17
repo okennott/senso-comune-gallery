@@ -40,7 +40,9 @@ html{
 
 body{
   margin:0;
-  background:var(--paper);
+  /* The sage is the field the page sits in; the reading surfaces are laid on
+     top of it. Nothing sets text on the sage. */
+  background:var(--field);
   color:var(--body);
   font-family:var(--font-body);
   font-size:var(--size-body);
@@ -51,7 +53,26 @@ body{
 }
 
 img,svg,video{ max-width:100%; height:auto; display:block }
-img{ background:var(--wash-warm) }   /* holds the box before bytes arrive */
+img{ background:var(--paper) }   /* holds the box before bytes arrive */
+
+/* ---------- the sheet ----------
+   The artist's mockup is sage from edge to edge with cream plates behind the
+   paintings. Text on that sage measures 1.93-2.35:1, so it cannot stay there.
+
+   Rather than reduce her green to a thin divider, the whole content column
+   becomes a cream SHEET mounted on the sage field — which is what a gallery
+   does to a work on paper anyway. The sage stays dominant at the margins, the
+   reading happens on cream, and the relationship between the two is the one
+   she drew. */
+.sheet{
+  max-width:1240px;
+  margin-inline:auto;
+  background:var(--wash-warm);
+  box-shadow:0 1px 0 rgba(58,43,34,.06), 0 18px 48px -32px rgba(58,43,34,.45);
+}
+@media (min-width:1320px){
+  .sheet{ margin-block:var(--space-5) }
+}
 
 /* ---------- layout ---------- */
 .wrap{
@@ -171,14 +192,15 @@ a{ color:var(--sanguine) }
   position:relative;
   pointer-events:none;
 }
-.edge--warm{   background:linear-gradient(in oklab,var(--paper) 0%,var(--wash-warm)   55%,var(--paper) 100%) }
-.edge--violet{ background:linear-gradient(in oklab,var(--paper) 0%,var(--wash-violet) 55%,var(--paper) 100%) }
-.edge--blue{   background:linear-gradient(in oklab,var(--paper) 0%,var(--wash-blue)   55%,var(--paper) 100%) }
+/* Inside the sheet these are tone transitions between reading surfaces —
+   the sfumato. The sage does its work outside the sheet, at the margins. */
+.edge--warm{   background:linear-gradient(in oklab,var(--wash-warm)   0%,var(--wash-violet) 100%) }
+.edge--violet{ background:linear-gradient(in oklab,var(--wash-warm)   0%,var(--wash-violet) 100%) }
+.edge--blue{   background:linear-gradient(in oklab,var(--wash-violet) 0%,var(--wash-blue)   100%) }
 
 @supports not (background:linear-gradient(in oklab,red,blue)){
-  .edge--warm{   background:linear-gradient(var(--paper),var(--wash-warm),var(--paper)) }
-  .edge--violet{ background:linear-gradient(var(--paper),var(--wash-violet),var(--paper)) }
-  .edge--blue{   background:linear-gradient(var(--paper),var(--wash-blue),var(--paper)) }
+  .edge--warm,.edge--violet{ background:linear-gradient(var(--wash-warm),var(--wash-violet)) }
+  .edge--blue{ background:linear-gradient(var(--wash-violet),var(--wash-blue)) }
 }
 
 /* Noise dither. ~1.4KB inline SVG, no network request, no repaint cost

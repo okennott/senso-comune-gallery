@@ -244,7 +244,8 @@ ${sold.length ? `<p class="wrap archive-link">
     <div class="section__head">
       <h2>${esc(t(S.about.title, loc))}</h2>
       <div class="prose measure">
-        ${t(site.about.paragraphs, loc).map((p) => `<p>${esc(p)}</p>`).join('\n        ')}
+        ${t(site.about.paragraphs, loc).slice(0, 2).map((p) => `<p>${esc(p)}</p>`).join('\n        ')}
+        <p><a class="link-quiet" href="${lpath(loc, site, '/about/')}">${loc === 'zh' ? '继续阅读' : 'Read the rest'}</a></p>
       </div>
     </div>
   </div>
@@ -258,8 +259,8 @@ ${sold.length ? `<p class="wrap archive-link">
         ${t(site.buy.steps, loc).map((s) => `<li><span>${esc(s)}</span></li>`).join('\n        ')}
       </ol>
       <p style="margin-top:var(--space-5)">${esc(t(entity.checkout.note, loc))}</p>
-      <p><strong>${esc(t(ui.returnsShort, loc))}.</strong> <a href="${lpath(loc, site, '/returns/')}">${loc === 'zh' ? '退货政策' : 'Returns policy'}</a> · <a href="${lpath(loc, site, '/shipping/')}">${loc === 'zh' ? '配送与关税' : 'Shipping &amp; duties'}</a></p>
-      <p>${esc(t(site.buy.accessNote, loc))}</p>
+      <p><strong>${esc(t(ui.returnsShort, loc))}.</strong></p>
+      <p><a class="link-quiet" href="${lpath(loc, site, '/how-to-buy/')}">${loc === 'zh' ? '完整购买说明' : 'Everything about buying'}</a></p>
     </div>
   </div>
 </section>`;
@@ -325,6 +326,9 @@ function renderWork(w, loc) {
       ${!w.sold ? `<p style="margin-top:var(--space-4)">
         <a class="link-quiet" href="mailto:${esc(seller.contact.email)}?subject=${encodeURIComponent(t(w.title, loc))}">${esc(t(ui.enquire, loc))}</a>
       </p>` : ''}
+      <p class="detail__buyinfo">
+        <a href="${lpath(loc, site, '/how-to-buy/')}">${esc(t(ui.returnsShort, loc))} · ${esc(t(site.sections.buy.title, loc))}</a>
+      </p>
     </aside>
   </div>
 
@@ -396,6 +400,67 @@ function renderArchive(loc) {
     ogImage: sold.length ? `/img/${sold[0].image}-1600.webp` : null,
     canonical: lpath(loc, site, '/archive/'),
     altLocales: altFor('/archive/'),
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * about + how to buy, promoted to real pages                          *
+ *                                                                     *
+ * They stay on the homepage as short sections, because at six works   *
+ * the single scroll is the right shape. But a buyer reading a work    *
+ * page could not see how buying works without going back, and neither *
+ * section could be linked or shared on its own. The homepage now      *
+ * carries a summary; the full text lives here. No duplication: the    *
+ * pages say more than the sections do.                                *
+ * ------------------------------------------------------------------ */
+function renderAbout(loc) {
+  const paras = t(site.about.paragraphs, loc);
+  const body = `
+<section class="page wrap">
+  <h1>${esc(t(site.sections.about.title, loc))}</h1>
+  <div class="prose measure">
+    ${paras.map((x) => `<p>${esc(x)}</p>`).join('\n    ')}
+    <p><a href="${lpath(loc, site, '/giving/')}">${loc === 'zh' ? '查看捐赠记录' : 'See the giving record'}</a> · <a href="${lpath(loc, site, '/how-to-buy/')}">${esc(t(site.sections.buy.title, loc))}</a></p>
+  </div>
+</section>`;
+  return layout({
+    site, seller, loc,
+    title: `${t(site.sections.about.title, loc)} — ${t(seller.artist.siteName, loc)}`,
+    description: paras[0].slice(0, 180),
+    body, ogImage: null,
+    canonical: lpath(loc, site, '/about/'),
+    altLocales: altFor('/about/'),
+  });
+}
+
+function renderHowToBuy(loc) {
+  const body = `
+<section class="page wrap">
+  <h1>${esc(t(site.sections.buy.title, loc))}</h1>
+  <div class="prose measure">
+    <ol class="steps">
+      ${t(site.buy.steps, loc).map((s) => `<li><span>${esc(s)}</span></li>`).join('\n      ')}
+    </ol>
+    <p style="margin-top:var(--space-5)">${esc(t(entity.checkout.note, loc))}</p>
+    <h2>${loc === 'zh' ? '退货' : 'Returns'}</h2>
+    <p>${loc === 'zh'
+        ? `所有作品均可在收到后 ${R.windowDays} 天内无理由退货，全球适用。`
+        : `Every work can be returned within ${R.windowDays} days of arriving, for any reason or none, anywhere in the world.`}
+      <a href="${lpath(loc, site, '/returns/')}">${loc === 'zh' ? '完整退货政策' : 'Full returns policy'}</a></p>
+    <h2>${loc === 'zh' ? '配送与关税' : 'Shipping and duties'}</h2>
+    <p>${esc(t(SH.usImportNote, loc))}
+      <a href="${lpath(loc, site, '/shipping/')}">${loc === 'zh' ? '完整配送说明' : 'Full shipping details'}</a></p>
+    <h2>${loc === 'zh' ? '无障碍协助' : 'If the site gets in your way'}</h2>
+    <p>${esc(t(site.buy.accessNote, loc))}</p>
+  </div>
+</section>`;
+  return layout({
+    site, seller, loc,
+    title: `${t(site.sections.buy.title, loc)} — ${t(seller.artist.siteName, loc)}`,
+    description: t(site.buy.steps, loc)[0].slice(0, 180),
+    body, ogImage: null,
+    canonical: lpath(loc, site, '/how-to-buy/'),
+    altLocales: altFor('/how-to-buy/'),
   });
 }
 
@@ -537,6 +602,8 @@ for (const loc of LOCALES) {
   if (works.some((w) => w.sold)) {
     out(join(lpath(loc, site, '/archive/'), 'index.html'), renderArchive(loc)); pageCount++;
   }
+  out(join(lpath(loc, site, '/about/'), 'index.html'), renderAbout(loc)); pageCount++;
+  out(join(lpath(loc, site, '/how-to-buy/'), 'index.html'), renderHowToBuy(loc)); pageCount++;
   for (const [p, def] of Object.entries(PAGES)) {
     out(join(lpath(loc, site, p), 'index.html'), renderPage(p, def, loc)); pageCount++;
   }
@@ -578,6 +645,7 @@ for (const loc of LOCALES) {
   urls.push(lpath(loc, site, '/'));
   works.forEach((w) => urls.push(lpath(loc, site, `/works/${w.slug}/`)));
   if (works.some((w) => w.sold)) urls.push(lpath(loc, site, '/archive/'));
+  urls.push(lpath(loc, site, '/about/'), lpath(loc, site, '/how-to-buy/'));
   Object.keys(PAGES).forEach((p) => urls.push(lpath(loc, site, p)));
 }
 writeFileSync(join(DIST, 'sitemap.xml'),

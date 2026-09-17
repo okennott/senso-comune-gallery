@@ -12,67 +12,88 @@
 
 :root{
 
-  /* --- ground ------------------------------------------------------------
-     The draft declares pure #FFFFFF. It READS warm, and the sfumato bands
-     below are warm, so the safe-grey trap applies: #767676 passes on pure
-     white by 0.04 and fails the moment the ground warms at all. Every text
-     token below is checked against --paper, not against white.            */
-  --paper:            #FFFFFF;
+  /* ======================================================================
+     PALETTE — adopted from the artist's own mockup, with the contrast fixed
+
+     She moved the site from white to a sage-green world: a dark brown
+     masthead bar, warm brown text, terracotta, and cream plates behind the
+     paintings. That direction is adopted here. Two of her decisions were
+     already right and are kept as-is: the warm browns, and a FILLED
+     terracotta button — she arrived at finding A-01 independently.
+
+     What could not be adopted as drawn is body text on the sage. Measured:
+
+       ink        on sage   4.70:1   ok, large text only
+       ink-soft   on sage   2.35:1   FAILS
+       terracotta on sage   1.93:1   FAILS — worse than the #A19E97 it replaced
+
+     The resolution was already in her own mockup: she puts the paintings on
+     light cream plates against the sage. So sage is the FIELD — the outer
+     ground and the bands between sections — and cream is the READING
+     SURFACE. Text lives on cream. Sage frames it and never carries a word.
+     ====================================================================== */
+
+  /* --- reading surfaces --------------------------------------------------
+     From her palette. Every foreground below is solved against --paper-deep,
+     the darker of the two, so nothing fails on either.                    */
+  --paper:            #F3EBDD;
+  --paper-deep:       #EDE4D3;
+
+  /* --- field -------------------------------------------------------------
+     Her sage. Carries no text: sand-on-sage is 2.44:1 and ink-on-sage is
+     4.70:1, which is fine for a heading and nothing else. Used for the
+     bands between sections and the page's outer ground.                   */
+  --field:            #969B7D;
+  --field-deep:       #737C61;
+
+  /* --- bar ---------------------------------------------------------------
+     Her dark brown masthead. Sand on it is 11.45:1 — the most legible
+     surface on the site, and it solves the sticky-header legibility
+     problem by inverting instead of blurring.                             */
+  --bar:              #3A2B22;
 
   /* --- ink ---------------------------------------------------------------
-     Unchanged from the draft. 14.99:1 and 7.55:1 on paper.                */
-  --ink:              #2B2620;   /* headings        14.99:1  AAA */
-  --body:             #5C5346;   /* running text     7.55:1  AAA */
+     Hers. Warmer and browner than the neutral it replaces, which is what
+     makes it sit correctly against sage and terracotta.                   */
+  --ink:              #3A2B22;   /* 11.45 / 10.74 */
+  --body:             #66594B;   /*  5.73 /  5.38 */
 
   /* --- accents -----------------------------------------------------------
-     --sanguine is the artist's own oxblood, unchanged. It happens to be,
-     within measurement error, red chalk — the medium Leonardo drew in
-     (sanguine measures 6.33:1; this measures 6.68:1). The homage was
-     arrived at by eye. Do not "correct" it.
-
-     --ultramarine is a verified Starry Night pigment, held in reserve for
-     the Tribute section only — the one part of the site that is itself
-     about admiration for other painters. It is the only blue on the site.
-
-     NOTE these are NOMINAL pigment values, not sampled from the paintings.
-     Sampled values land at 2.70–2.78:1, which is the original failure.    */
-  --sanguine:         #8B4A3C;   /* primary accent   6.68:1  AA  */
-  --sanguine-deep:    #6E3A2F;   /* hover            9.09:1  AAA */
-  --ultramarine:      #2E3A8C;   /* Tribute only    10.00:1  AAA */
+     Her latest terracotta is #98564B; this keeps #8B4A3C, which is the same
+     colour a shade deeper and carries more headroom on every ground
+     (5.64 vs 4.71 on paper; 6.68 vs 5.57 for white-on-fill). It is also,
+     within measurement error, sanguine — the red chalk Leonardo drew in.  */
+  --sanguine:         #8B4A3C;   /*  5.64 /  5.29 */
+  --sanguine-deep:    #63352B;   /*  8.55 /  8.02 */
+  --ultramarine:      #2E3A8C;   /*  8.45 /  7.92  — Tribute only */
 
   /* --- rules -------------------------------------------------------------
-     Van Gogh told Theo the Bedroom walls were "of a pale violet". They read
-     blue today because the red lake faded. The rules on this site are the
-     colour he said, not the colour that survived.
+     Van Gogh told Theo the Bedroom walls were "of a pale violet"; they read
+     blue today because the red lake faded. Re-solved for the new ground.  */
+  --rule:             #8E7B9C;   /* 3.02 worst */
+  --rule-soft:        #E0D6C2;   /* decorative — aged laid paper          */
 
-     Solved against the DARKEST ground (--wash-blue), not against white, so
-     it holds on every band: 3.43 / 3.21 / 3.07 / 3.03. Hue preserved at 276°.
-     --rule-soft is decorative only and is exempt from 1.4.11.             */
-  --rule:             #9684A2;   /* meaningful rule  3.03:1 worst  */
-  --rule-soft:        #E0DED9;   /* decorative — aged laid paper   */
+  /* --- muted -------------------------------------------------------------
+     Solved against --wash-blue, the DARKEST reading surface on the site.
+     Solving against --paper-deep instead gave 4.46 / 2.96 / 2.97 and the
+     contrast check blocked the build — the same warm-ground trap the report
+     flags, caught for the third time by measuring rather than by eye.      */
+  --muted:            #69655E;   /* 4.52 worst */
+  --muted-ui:         #858279;   /* 3.01 worst */
 
-  /* --- muted text --------------------------------------------------------
-     REPLACES the draft's #A19E97 (2.67:1, failed everything).
-
-     Solved against --wash-blue, the darkest ground on the site, NOT against
-     white. Solving against white gives #7A766E, which passes on paper at
-     4.52 and then fails on all three washes at 4.23 / 4.04 / 3.99 — the
-     exact warm-ground trap the build report flags. Worst case now 4.54.  */
-  --muted:            #716D66;   /* captions, meta   4.54:1 worst */
-  --muted-ui:         #8F8A83;   /* icon/border only 3.02:1 worst */
+  /* --- semantic ---------------------------------------------------------- */
+  --sold:             #63352B;   /* active content, must pass             */
 
   /* --- sfumato grounds ---------------------------------------------------
-     Section bands. Leonardo: lights and shadows united "senza tratti o
-     segni" — without strokes or lines. Body text measures 6.67–7.07:1 on
-     all three, so the quiet costs nothing.                                */
-  --wash-warm:        #FAF7F2;   /* Original Works */
-  --wash-violet:      #F4F1F6;   /* Tribute        */
-  --wash-blue:        #EEF1F5;   /* About          */
+     Three reading surfaces, a half-step apart, so sections separate without
+     a rule. All three are cream: text never sits on the sage.
 
-  /* --- semantic ----------------------------------------------------------
-     Sold is ACTIVE content, not an inactive control, so the 1.4.3
-     "incidental" exemption does not apply. It must pass.                  */
-  --sold:             #6E3A2F;   /* 9.09:1 */
+     Leonardo: lights and shadows united "senza tratti o segni" — without
+     strokes or lines. The bands BETWEEN them carry the sage, which is where
+     the artist's green actually belongs.                                  */
+  --wash-warm:        #F3EBDD;   /* Original Works */
+  --wash-violet:      #EDE4D3;   /* Tribute        */
+  --wash-blue:        #E9E3D6;   /* About          */
 
   /* ======================================================================
      TYPE — the Vitruvian scale

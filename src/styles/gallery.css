@@ -10,13 +10,14 @@
    =========================================================================== */
 
 /* ---------- masthead ---------- */
+/* Her dark brown bar, adopted. Sand on it is 11.45:1 — the most legible
+   surface on the site — and it solves the sticky-header legibility problem
+   by inverting rather than by blurring a translucent panel. */
 .masthead{
-  position:sticky; top:0; z-index:50;
-  background:color-mix(in oklab,var(--paper) 88%,transparent);
-  backdrop-filter:saturate(180%) blur(12px);
-  border-bottom:1px solid var(--rule-soft);
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:50;
+  background:var(--bar);
+  border-bottom:0;
 }
-@supports not (backdrop-filter:blur(1px)){ .masthead{ background:var(--paper) } }
 
 .masthead__inner{
   display:flex; align-items:baseline; gap:var(--space-4);
@@ -27,7 +28,7 @@
   font-family:var(--font-display);
   font-size:var(--size-mark);
   font-variation-settings:'opsz' 22.4,'SOFT' 0,'WONK' 1;
-  color:var(--ink); text-decoration:none;
+  color:var(--paper); text-decoration:none;   /* 11.45:1 on the bar */
   margin-right:auto;
 }
 .nav{ display:flex; gap:var(--space-4); flex-wrap:wrap; align-items:center }
@@ -38,22 +39,22 @@
   min-height:var(--target-min);
   font-size:var(--size-caption);
   letter-spacing:var(--track-label); text-transform:uppercase;
-  color:var(--body); text-decoration:none;
+  color:var(--paper-deep); text-decoration:none;   /* 10.74:1 on the bar */
   border-bottom:1px solid transparent;
   transition:color var(--dur-quick) var(--ease-settle),
              border-color var(--dur-quick) var(--ease-settle);
 }
-.nav a:hover{ color:var(--ink); border-bottom-color:var(--rule) }
-.nav a[aria-current]{ color:var(--ink); border-bottom-color:var(--sanguine) }
+.nav a:hover{ color:#fff; border-bottom-color:var(--paper-deep) }
+.nav a[aria-current]{ color:#fff; border-bottom-color:var(--paper) }
 
 .lang-switch{
   font-size:var(--size-caption);
   letter-spacing:var(--track-label);
-  color:var(--body); text-decoration:none;
+  color:var(--paper-deep); text-decoration:none;
   display:inline-flex; align-items:center; min-height:var(--target-min);
   padding-inline:var(--space-1);
 }
-.lang-switch:hover{ color:var(--sanguine) }
+.lang-switch:hover{ color:#fff }
 
 /* ---------- hero ---------- */
 .hero{ padding-block:var(--space-6) var(--space-5) }
@@ -97,10 +98,14 @@
 /* Intrinsic ratios, never normalised. Cropping an original painting into a
    uniform frame misrepresents the object being sold — and the varying heights
    are part of the editorial rhythm. width/height on the <img> give CLS 0. */
+/* Her mockup sets each painting on a light cream plate against the sage.
+   That is the move that makes the whole scheme work: it separates the object
+   from the field, and it is why text can live on cream while the sage frames.
+   Adopted. */
 .work__img{
   width:100%; height:auto;
   cursor:zoom-in;
-  background:var(--wash-warm);
+  background:var(--paper);
 }
 
 /* The counter. Award-winning scroll sites all supply a finiteness cue; a
@@ -291,17 +296,20 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
 }
 
 /* ---------- footer ---------- */
+/* The footer closes the page on the same dark bar the masthead opens it on. */
 .footer{
-  margin-top:var(--space-7);
+  margin-top:0;
   padding-block:var(--space-6);
-  border-top:1px solid var(--rule);
+  background:var(--bar);
+  color:var(--paper-deep);
+  border-top:0;
   font-size:var(--size-caption);
   color:var(--muted);
 }
 .footer__grid{ display:grid; gap:var(--space-4) }
 @media (min-width:760px){ .footer__grid{ grid-template-columns:2fr 1fr 1fr } }
-.footer a{ color:var(--body); text-decoration:none }
-.footer a:hover{ color:var(--sanguine); text-decoration:underline }
+.footer a{ color:var(--paper); text-decoration:none }
+.footer a:hover{ color:#fff; text-decoration:underline }
 .footer ul{ list-style:none; margin:0; padding:0; display:grid; gap:var(--space-1) }
 
 /* SAMR Order 37 Art. 12 self-declaration. Quoted verbatim from the rule;
@@ -309,14 +317,22 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
 .legal-declaration{
   margin-top:var(--space-4);
   padding-top:var(--space-4);
-  border-top:1px solid var(--rule-soft);
-  color:var(--muted);
+  border-top:1px solid rgba(243,235,221,.22);
+  color:var(--paper-deep);
   line-height:1.6;
 }
 
 /* ---------- prose pages ---------- */
 .page{ padding-block:var(--space-6) var(--space-7) }
-.page h2{ margin-bottom:var(--space-4) }
+.page h1{ margin-bottom:var(--space-5) }
+/* A prose-page h2 at full display size sits within 5px of the h1 and reads as
+   a sibling rather than a subhead. Stepped down to the next size. */
+.page h2{
+  font-size:var(--size-h3);
+  font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1;
+  margin:var(--space-6) 0 var(--space-3);
+}
+.page h2:first-of-type{ margin-top:var(--space-5) }
 .page h3{ font-size:var(--size-body); margin:var(--space-5) 0 var(--space-2) }
 .page .prose{ max-width:var(--measure) }
 .page .prose p{ color:var(--body) }
@@ -331,7 +347,10 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
    mitigated. And the nav becomes one non-wrapping row that scrolls itself if
    it has to, so the page never scrolls sideways. */
 @media (max-width:719px){
-  .masthead{ position:static; backdrop-filter:none; background:var(--paper) }
+  /* Was `background:var(--paper)` from when the masthead was light. With the
+     dark bar adopted that made light nav text invisible on a cream ground —
+     the bar keeps its own colour; only the stickiness is dropped. */
+  .masthead{ position:static }
   .masthead__inner{
     gap:var(--space-1) var(--space-3);
     padding-block:var(--space-2);
@@ -411,3 +430,16 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
 @media (min-width:760px){
   .section__head{ grid-template-columns:minmax(0,28ch) minmax(0,var(--measure)) }
 }
+
+/* A buyer on a work page should not have to go back to the homepage to find
+   out how buying works, what the return window is, or what duty they will
+   pay. This is the link that was missing. */
+.detail__buyinfo{
+  margin-top:var(--space-4);
+  padding-top:var(--space-4);
+  border-top:1px solid var(--rule);
+  font-size:var(--size-caption);
+}
+.detail__buyinfo a{ color:var(--body); text-decoration:underline;
+  text-decoration-color:var(--muted-ui); text-underline-offset:.25em }
+.detail__buyinfo a:hover{ color:var(--sanguine); text-decoration-color:currentColor }
