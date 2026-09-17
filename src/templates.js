@@ -40,6 +40,15 @@ export const money = (n, cur = 'USD') =>
  *  serves from a subpath rather than the origin root. */
 export const BASE = (process.env.BASE_PATH || '').replace(/\/$/, '');
 
+/* PREVIEW=1 marks a build that is not the shop: the GitHub Pages layout
+   preview. It must not be indexed — it is full of placeholders and its
+   canonicals point at github.io — and robots.txt cannot say so, because
+   crawlers only read it at the host root, never under /<repo>/. So every page
+   carries the meta tag instead. check-links.mjs asserts it is present exactly
+   when PREVIEW is set: a noindex that leaked into production would delist the
+   real site without a single error. */
+export const PREVIEW = process.env.PREVIEW === '1';
+
 /** Locale-aware path: en has no prefix, zh sits under /zh. */
 export const path = (loc, site, p = '/') => {
   const prefix = site.locales[loc].prefix;
@@ -205,7 +214,7 @@ export function layout({ site, seller, loc, title, description, body, ogImage, o
 <html lang="${L.lang}" dir="${L.dir}">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">${PREVIEW ? '\n<meta name="robots" content="noindex, nofollow">' : ''}
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${esc(origin + canonical)}">

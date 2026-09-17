@@ -441,7 +441,10 @@ reading it from the other.
 │       └── build.sh                  fonts → mark → shots → figures → quarto
 │                                     → tectonic ×2 → makeindex → tectonic
 │
-├── .github/workflows/pages.yml   preview deploy, for layout review only.
+├── .github/workflows/pages.yml   preview deploy, for layout review only, at
+│                                 okennott.github.io/senso-comune-gallery/.
+│                                 Built with PREVIEW=1, so every page is
+│                                 noindex; checked under the same variables.
 │                                 Production is Cloudflare Pages: GitHub's
 │                                 terms exclude commercial sites, and
 │                                 github.io is not somewhere to point a

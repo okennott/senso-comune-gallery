@@ -7,7 +7,7 @@
 #   - Cloudflare Pages measures 0% blocked from mainland China, where the
 #     artist is; github.io is not somewhere to point Chinese buyers.
 #
-# The repo can stay private; the published site is public either way.
+# The published preview is public and carries noindex on every page.
 
 name: Preview (GitHub Pages)
 
@@ -40,13 +40,22 @@ jobs:
 
       # BASE_PATH: a project site serves from /<repo>/, so every absolute URL
       # needs that prefix. SITE_URL feeds canonical, og:url and the sitemap.
+      # PREVIEW: every page gets noindex. This is a public placeholder build of
+      # a shop, and robots.txt is not read under a subpath.
+      # The same three variables go to the checks, so they test the build that
+      # was actually made rather than an unprefixed one that was not.
       - name: Build
         env:
           BASE_PATH: /${{ github.event.repository.name }}
           SITE_URL: https://${{ github.repository_owner }}.github.io
+          PREVIEW: '1'
         run: npm run build
 
       - name: Check
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io
+          PREVIEW: '1'
         run: npm run check
 
       # Pages will not serve paths beginning with an underscore unless this

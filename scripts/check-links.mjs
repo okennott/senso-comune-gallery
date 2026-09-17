@@ -16,6 +16,7 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { BASE, PREVIEW } from '../src/templates.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -38,6 +39,15 @@ const pages = [];
 const problems = [];
 const warnings = [];
 const rel = (p) => p.replace(DIST, '').replace(/\\/g, '/') || '/';
+
+/* A preview build under BASE_PATH (GitHub Pages serves a project site from
+   /<repo>/) writes every URL with that prefix, but dist/ itself is not nested
+   under it. Strip it before resolving. Without this every link read as dead —
+   and, worse, every image path failed the /img/ test below and was skipped,
+   so the asset check passed by checking nothing. */
+const local = (url) => (BASE && (url === BASE || url.startsWith(BASE + '/'))
+  ? url.slice(BASE.length) || '/'
+  : url);
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -71,7 +81,7 @@ for (const page of pages) {
 
   /* --- internal links resolve --- */
   for (const m of html.matchAll(/href="(\/[^"#]*)"/g)) {
-    const href = m[1];
+    const href = local(m[1]);
     if (href.startsWith('//')) continue;
     const target = href.endsWith('/')
       ? join(DIST, href, 'index.html')
@@ -82,7 +92,7 @@ for (const page of pages) {
   /* --- image sources resolve --- */
   for (const m of html.matchAll(/(?:src|srcset)="([^"]+)"/g)) {
     for (const cand of m[1].split(',')) {
-      const url = cand.trim().split(/\s+/)[0];
+      const url = local(cand.trim().split(/\s+/)[0]);
       if (!url.startsWith('/img/') && !url.startsWith('/fonts/')) continue;
       if (!existsSync(join(DIST, url))) problems.push(`${where}: missing asset → ${url}`);
     }
@@ -90,6 +100,11 @@ for (const page of pages) {
 
   /* --- placeholders must not reach production --- */
   if (html.includes('NEEDS-INPUT')) warnings.push(`${where}: still contains NEEDS-INPUT`);
+
+  /* --- indexing: preview builds are hidden, production builds never are --- */
+  const noindex = /<meta name="robots" content="[^"]*noindex/.test(html);
+  if (PREVIEW && !noindex) problems.push(`${where}: preview build without noindex — it would be indexed`);
+  if (!PREVIEW && noindex) problems.push(`${where}: PRODUCTION build carries noindex — the shop would be delisted`);
 
   /* --- canonical present --- */
   if (!/rel="canonical"/.test(html)) problems.push(`${where}: no canonical link`);
@@ -111,7 +126,8 @@ for (const page of pages) {
   const html = readFileSync(page, 'utf8');
   const alts = [...html.matchAll(/hreflang="[^"]+"\s+href="([^"]+)"/g)]
     .map((m) => m[1].replace(/^https?:\/\/[^/]+/, ''))
-    .filter((h) => h.startsWith('/'));
+    .filter((h) => h.startsWith('/'))
+    .map(local);
   for (const a of alts) {
     const target = a.endsWith('/') ? join(DIST, a, 'index.html') : join(DIST, a);
     if (!existsSync(target)) problems.push(`${rel(page)}: hreflang points at a page that does not exist → ${a}`);
