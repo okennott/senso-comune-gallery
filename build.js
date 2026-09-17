@@ -35,6 +35,24 @@ const artworksF = read('src/data/artworks.json');
 
 const works  = [...artworksF.works].sort((a, b) => a.order - b.order);
 
+/* The catalogue's structure (report, "The site's structure"). Series are rooms
+   at /works/series/{id}/; genres are facets. Both are declared in site.json,
+   and the build refuses a work that names something undeclared, or a slug that
+   would collide with a page under /works/. */
+const SERIES = site.series.items;
+const SERIES_IDS = new Set(SERIES.map((x) => x.id));
+const GENRES = new Set((site.genres?.items ?? []).map((g) => g.id));
+const RESERVED = new Set(['series', 'sold']);
+{
+  const bad = [];
+  for (const w of artworksF.works) {
+    if (RESERVED.has(w.slug)) bad.push(`${w.slug}: slug is reserved for a page under /works/`);
+    if (!SERIES_IDS.has(w.section)) bad.push(`${w.slug}: series "${w.section}" is not declared in site.json → series`);
+    for (const g of w.genres ?? []) if (!GENRES.has(g)) bad.push(`${w.slug}: genre "${g}" is not declared in site.json → genres`);
+  }
+  if (bad.length) { console.error('\n  catalogue structure:\n' + bad.map((b) => `    ✗ ${b}`).join('\n') + '\n'); process.exit(1); }
+}
+
 /* True pixel sizes of every view, written by build-images.mjs. A real
    photograph keeps its own proportions; a placeholder has the proportions the
    pipeline gave it. Missing (images not built yet): fall back to squares, and
@@ -91,7 +109,7 @@ const altFor = (p) => LOCALES.map((l) => [l, lpath(l, site, p)]);
  *  image defaults to 0×0, which can convince the browser everything is
  *  in-viewport and load every one at once. They are also the difference
  *  between CLS 0 and CLS 0.4. */
-function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100vw - 40px)' } = {}, loc) {
+function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100vw - 40px)', vt = true } = {}, loc) {
   const widths = [640, 960, 1280, 1600, 2000];
   const srcset = (ext) => widths.map((x) => `${asset(`/img/${w.image}-${x}.${ext}`)} ${x}w`).join(', ');
   // Intrinsic pixel dimensions of the largest variant, in the work's own ratio.
@@ -99,7 +117,7 @@ function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100v
   const ih = Math.round((w.heightCm / w.widthCm) * 2000);
   return `<picture>
       <source type="image/avif" srcset="${srcset('avif')}" sizes="${sizes}">
-      <img class="work__img" style="view-transition-name:work-${w.slug};view-transition-class:work" src="${asset(`/img/${w.image}-1280.webp`)}" srcset="${srcset('webp')}" sizes="${sizes}"
+      <img class="work__img"${vt ? ` style="view-transition-name:work-${w.slug};view-transition-class:work"` : ''} src="${asset(`/img/${w.image}-1280.webp`)}" srcset="${srcset('webp')}" sizes="${sizes}"
            width="${iw}" height="${ih}" alt="${esc(t(w.alt, loc))}"
            ${eager ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"'}>
     </picture>`;
@@ -291,36 +309,84 @@ function tombstone(w, loc, { linked = true, level = 'p' } = {}) {
 }
 
 /* ------------------------------------------------------------------ *
+ * catalogue pieces                                                    *
+ * ------------------------------------------------------------------ */
+
+/** Newest first, then the catalogue's own order. */
+const byNewest = (a, b) => (b.year - a.year) || (a.order - b.order);
+const seriesOf = (id) => SERIES.find((x) => x.id === id);
+const seriesPath = (id) => `/works/series/${id}/`;
+
+/** A grid of works: image in its mat, the tombstone beneath. The same card on
+ *  the homepage, the Works page and every series page. */
+function catalogue(list, loc, { level = 'h2', eagerFirst = false } = {}) {
+  return `<ol class="works works--catalogue">
+    ${list.map((w, i) => `<li class="work">
+      <figure class="work__figure">
+        <a href="${lpath(loc, site, `/works/${w.slug}/`)}" style="display:block">
+          ${picture(w, { eager: eagerFirst && i === 0, sizes: '(min-width:1100px) 340px, (min-width:600px) 45vw, calc(100vw - 60px)' }, loc)}
+        </a>
+      </figure>
+      ${tombstone(w, loc, { level })}
+    </li>`).join('\n    ')}
+  </ol>`;
+}
+
+/** Local navigation for the Works section: All, each series, Sold. Horizontal
+ *  while there are few enough tabs to read as one row (report: Baymard's
+ *  threshold for horizontal filtering is 6-8 types). */
+function worksNav(loc, active) {
+  const sold = works.filter((w) => w.sold).length;
+  const tabs = [
+    ['all', '/works/', t(site.sections.works.all, loc), works.filter((w) => !w.sold).length],
+    ...SERIES.map((x) => [x.id, seriesPath(x.id), t(x.title, loc), works.filter((w) => !w.sold && w.section === x.id).length]),
+    ...(sold ? [['sold', '/works/sold/', t(site.sections.archive.title, loc), sold]] : []),
+  ];
+  return `<nav class="localnav" aria-label="${esc(t(site.sections.works.title, loc))}">
+    <ul>
+      ${tabs.map(([id, href, label, n]) => `<li><a href="${lpath(loc, site, href)}"${id === active ? ' aria-current="page"' : ''}>${esc(label)} <span class="localnav__count">${n}</span></a></li>`).join('\n      ')}
+    </ul>
+  </nav>`;
+}
+
+/** Breadcrumbs from the second level down (report: NN/g — deeper pages).
+ *  The last item is the current page and is not a link. A work's canonical
+ *  path runs through its one series. */
+function breadcrumb(loc, trail) {
+  const items = [[t(ui.home, loc), '/'], ...trail];
+  const ld = {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: items.map(([name, href], i) => ({
+      '@type': 'ListItem', position: i + 1, name,
+      ...(href ? { item: origin + lpath(loc, site, href) } : {}),
+    })),
+  };
+  return `<nav class="breadcrumb" aria-label="${esc(t(ui.breadcrumb, loc))}">
+    <ol>
+      ${items.map(([name, href], i) => i < items.length - 1
+        ? `<li><a href="${lpath(loc, site, href)}">${esc(name)}</a></li>`
+        : `<li><span aria-current="page">${esc(name)}</span></li>`).join('\n      ')}
+    </ol>
+  </nav>
+  <script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`;
+}
+
+/* ------------------------------------------------------------------ *
  * index                                                               *
  * ------------------------------------------------------------------ */
 function renderIndex(loc) {
   const S = site.sections;
   const available = works.filter((w) => !w.sold);
-  const sold = works.filter((w) => w.sold);
 
-  const listFor = (group, startIndex) => `<ol class="works" start="${startIndex + 1}">
-      ${group.map((w, i) => {
-        const n = String(startIndex + i + 1).padStart(2, '0');
-        const total = String(works.length).padStart(2, '0');
-        return `<li class="work" id="work-${w.slug}">
-        <figure class="work__figure">
-          <span class="work__index" aria-hidden="true">${n} / ${total}</span>
-          <a href="${lpath(loc, site, `/works/${w.slug}/`)}" style="display:block">
-            ${picture(w, { eager: startIndex + i === 0 }, loc)}
-          </a>
-        </figure>
-        ${tombstone(w, loc, { level: 'h3' })}
-      </li>`;
-      }).join('\n      ')}
-    </ol>`;
+  // Finding A-01 stands: a painting in the hero. It is the first available
+  // work of the first series.
+  const heroWork = available.find((w) => w.section === SERIES[0].id) ?? available[0] ?? null;
 
-  const originals = available.filter((w) => w.section === 'originals');
-  const tributes  = available.filter((w) => w.section === 'tribute');
-
-  // Finding A-01. The first available original is lifted into the hero so the
-  // opening screen contains a painting; the list below it then starts at 02.
-  const heroWork = originals[0] ?? null;
-  const listed   = heroWork ? originals.slice(1) : originals;
+  // The homepage used to show every work at full size, one per screen — fine
+  // for six, impossible for sixty. It now shows the newest few, the series as
+  // rooms, and sends everything else to /works/ (report, "The site's structure").
+  const LATEST = 4;
+  const latest = available.filter((w) => w !== heroWork).sort(byNewest).slice(0, LATEST);
 
   const heroFigure = heroWork ? `
   <figure class="hero__work">
@@ -328,10 +394,26 @@ function renderIndex(loc) {
       ${picture(heroWork, { eager: true, sizes: '(min-width:900px) 40vw, calc(100vw - 40px)' }, loc)}
     </a>
     <figcaption>
-      <span class="work__index work__index--static" aria-hidden="true">01 / ${String(works.length).padStart(2, '0')}</span>
       ${tombstone(heroWork, loc, { level: 'h2' })}
     </figcaption>
   </figure>` : '';
+
+  const seriesCards = SERIES.map((x) => {
+    const inSeries = works.filter((w) => w.section === x.id);
+    const cover = inSeries.find((w) => !w.sold) ?? inSeries[0];
+    const n = inSeries.filter((w) => !w.sold).length;
+    return `<li class="series-card">
+      <a class="series-card__link" href="${lpath(loc, site, seriesPath(x.id))}">
+        ${cover ? `<span class="series-card__cover">${picture(cover, { vt: false, sizes: '(min-width:900px) 360px, calc(100vw - 60px)' }, loc)}</span>` : ''}
+        <span class="series-card__text">
+          <span class="series-card__title">${esc(t(x.title, loc))}</span>
+          <span class="series-card__count">${n} ${esc(t(S.works.count, loc))}</span>
+          <span class="series-card__intro">${esc(t(x.intro, loc))}</span>
+          <span class="link-quiet series-card__more">${esc(t(S.works.viewSeries, loc))}</span>
+        </span>
+      </a>
+    </li>`;
+  }).join('\n    ');
 
   const body = `
 <section class="hero wrap${heroWork ? ' hero--split' : ''}">
@@ -339,43 +421,36 @@ function renderIndex(loc) {
     <h1 class="visually-hidden">${esc(t(seller.artist.siteName, loc))}</h1>
     <p class="hero__motto">${esc(t(site.hero.title, loc))}</p>
     <p class="hero__standfirst">${esc(standfirst(loc))}<br>${esc(t(site.hero.standfirstTail, loc))}</p>
-    <a class="link-quiet" href="#works">${esc(t(site.hero.cta, loc))}</a>
+    <a class="link-quiet" href="${lpath(loc, site, site.hero.ctaHref)}">${esc(t(site.hero.cta, loc))}</a>
   </div>${heroFigure}
 </section>
 
 <!-- Every band is named by the two grounds it joins, and nothing sits on the
-     bare sheet between a band and its section: the archive link used to, and
-     it left two hard 10-level steps in what was meant to be a soft edge. -->
+     bare sheet between a band and its section. -->
 <div class="edge edge--warm-warm" aria-hidden="true"></div>
 
-<section class="section ground--warm" id="works">
+<section class="section ground--warm" id="latest">
   <div class="wrap">
     <div class="section__head">
-      <h2>${esc(t(S.works.title, loc))}</h2>
-      <p class="section__intro">${esc(t(S.works.intro, loc))}</p>
+      <h2>${esc(t(S.latest.title, loc))}</h2>
+      <p class="section__intro">${esc(t(S.latest.intro, loc))}</p>
     </div>
-    ${listFor(listed, heroWork ? 1 : 0)}
+    ${catalogue(latest, loc, { level: 'h3' })}
+    <p class="section__more"><a class="link-quiet" href="${lpath(loc, site, '/works/')}">${esc(t(S.works.allWorks, loc))} (${available.length})</a></p>
   </div>
 </section>
 
 <div class="edge edge--warm-violet" aria-hidden="true"></div>
 
-<section class="section ground--violet hatch" id="tribute">
+<section class="section ground--violet" id="series">
   <div class="wrap">
     <div class="section__head">
-      <h2>${esc(t(S.tribute.title, loc))}</h2>
-      <div>
-        <blockquote class="epigraph">
-          ${esc(t(S.tribute.epigraph.quote, loc))}
-          <cite>— ${esc(S.tribute.epigraph.attribution)}</cite>
-        </blockquote>
-        <p class="section__intro">${esc(t(S.tribute.intro, loc))}</p>
-      </div>
+      <h2>${esc(t(S.seriesIndex.title, loc))}</h2>
+      <p class="section__intro">${esc(t(S.seriesIndex.intro, loc))}</p>
     </div>
-    ${listFor(tributes, originals.length)}
-    ${sold.length ? `<p class="archive-link">
-      <a class="link-quiet" href="${lpath(loc, site, '/archive/')}">${esc(t(S.archive.linkLabel, loc))} (${sold.length})</a>
-    </p>` : ''}
+    <ul class="series-cards">
+    ${seriesCards}
+    </ul>
   </div>
 </section>
 
@@ -421,6 +496,114 @@ function renderIndex(loc) {
 }
 
 /* ------------------------------------------------------------------ *
+ * the catalogue: Works, each series, sold works                       *
+ * ------------------------------------------------------------------ */
+function renderWorks(loc) {
+  const S = site.sections;
+  const available = works.filter((w) => !w.sold).sort(byNewest);
+  const body = `
+<section class="section wrap catalogue-page">
+  <div class="section__head">
+    <h1>${esc(t(S.works.title, loc))}</h1>
+    <p class="section__intro">${esc(t(S.works.intro, loc))}</p>
+  </div>
+  ${worksNav(loc, 'all')}
+  ${catalogue(available, loc, { eagerFirst: true })}
+</section>`;
+  return layout({
+    site, seller, loc, current: 'works',
+    title: `${t(S.works.title, loc)} — ${t(seller.artist.siteName, loc)}`,
+    description: t(S.works.intro, loc), body,
+    ogImage: available[0] ? `/img/${available[0].image}-1600.webp` : null,
+    canonical: lpath(loc, site, '/works/'), altLocales: altFor('/works/'),
+  });
+}
+
+function renderSeries(x, loc) {
+  const inSeries = works.filter((w) => w.section === x.id);
+  const available = inSeries.filter((w) => !w.sold).sort(byNewest);
+  const sold = inSeries.filter((w) => w.sold).length;
+  // A series keeps its own character: the epigraph and texture that used to
+  // mark its homepage section now mark its room.
+  const body = `
+<section class="section wrap catalogue-page${x.texture === 'hatch' ? ' hatch' : ''}">
+  ${breadcrumb(loc, [[t(site.sections.works.title, loc), '/works/'], [t(x.title, loc), null]])}
+  <div class="section__head">
+    <h1>${esc(t(x.title, loc))}</h1>
+    <div>
+      ${x.epigraph ? `<blockquote class="epigraph">
+        ${esc(t(x.epigraph.quote, loc))}
+        <cite>— ${esc(x.epigraph.attribution)}</cite>
+      </blockquote>` : ''}
+      <p class="section__intro">${esc(t(x.intro, loc))}</p>
+    </div>
+  </div>
+  ${worksNav(loc, x.id)}
+  ${catalogue(available, loc, { eagerFirst: true })}
+  ${sold ? `<p class="section__more"><a class="link-quiet" href="${lpath(loc, site, '/works/sold/')}">${esc(t(site.sections.archive.linkLabel, loc))} (${sold})</a></p>` : ''}
+</section>`;
+  return layout({
+    site, seller, loc, current: 'works',
+    title: `${t(x.title, loc)} — ${t(seller.artist.siteName, loc)}`,
+    description: t(x.intro, loc), body,
+    ogImage: available[0] ? `/img/${available[0].image}-1600.webp` : null,
+    canonical: lpath(loc, site, seriesPath(x.id)), altLocales: altFor(seriesPath(x.id)),
+  });
+}
+
+/** Sold works — formerly /archive/. A reference list, deliberately smaller
+ *  than the selling grid (finding D-02): big means for sale. */
+function renderSold(loc) {
+  const S = site.sections;
+  const sold = works.filter((w) => w.sold).sort(byNewest);
+  const body = `
+<section class="section wrap catalogue-page" id="archive">
+  ${breadcrumb(loc, [[t(S.works.title, loc), '/works/'], [t(S.archive.title, loc), null]])}
+  <div class="section__head">
+    <h1>${esc(t(S.archive.title, loc))}</h1>
+    <p class="section__intro">${esc(t(S.archive.intro, loc))}</p>
+  </div>
+  ${worksNav(loc, 'sold')}
+  <ol class="works works--grid">
+    ${sold.map((w) => `<li class="work">
+      <figure class="work__figure">
+        <a href="${lpath(loc, site, `/works/${w.slug}/`)}" style="display:block">
+          ${picture(w, { sizes: '(min-width:900px) 22vw, (min-width:560px) 45vw, calc(100vw - 40px)' }, loc)}
+        </a>
+      </figure>
+      ${tombstone(w, loc, { level: 'h2' })}
+    </li>`).join('\n    ')}
+  </ol>
+</section>`;
+  return layout({
+    site, seller, loc, current: 'works',
+    title: `${t(S.archive.title, loc)} — ${t(seller.artist.siteName, loc)}`,
+    description: t(S.archive.intro, loc), body,
+    ogImage: sold.length ? `/img/${sold[0].image}-1600.webp` : null,
+    canonical: lpath(loc, site, '/works/sold/'), altLocales: altFor('/works/sold/'),
+  });
+}
+
+/** The old address of sold works. A static host cannot always send a real
+ *  redirect (GitHub Pages cannot; Cloudflare Pages reads _redirects), so this
+ *  page does it for both: an immediate refresh, a canonical to the new page,
+ *  and a visible link for anyone whose browser ignores the refresh. */
+function redirectStub(loc, to) {
+  const href = lpath(loc, site, to);
+  return `<!doctype html>
+<html lang="${site.locales[loc].lang}">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url=${href}">
+<link rel="canonical" href="${esc(origin + href)}">
+<title>${esc(t(site.sections.archive.title, loc))}</title>
+</head>
+<body><p><a href="${href}">${esc(t(site.sections.archive.title, loc))}</a></p></body>
+</html>`;
+}
+
+/* ------------------------------------------------------------------ *
  * work detail                                                         *
  * ------------------------------------------------------------------ */
 function renderWork(w, loc) {
@@ -432,7 +615,7 @@ function renderWork(w, loc) {
 
   const body = `
 <article class="detail wrap">
-  <p class="eyebrow"><a href="${lpath(loc, site, '/')}#works" style="color:inherit">${esc(t(ui.backToWorks, loc))}</a></p>
+  ${breadcrumb(loc, [[t(site.sections.works.title, loc), '/works/'], [t(seriesOf(w.section).title, loc), seriesPath(w.section)], [t(w.title, loc), null]])}
 
   <div class="detail__grid">
     <div>
@@ -490,6 +673,7 @@ ${(w.views ?? []).filter((v) => v.kind !== 'video').map((v) => {
 ${jsonLd(w, site, seller, loc, origin)}`;
 
   return layout({
+    current: 'works',
     site, seller, loc,
     title: `${t(w.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: desc ? desc.slice(0, 180) : `${t(w.medium, loc)}, ${w.year}. ${dims(w)}.`,
@@ -511,42 +695,6 @@ ${jsonLd(w, site, seller, loc, origin)}`;
  * The pages stay live with availability SoldOut and the price stays   *
  * visible: a sold price is quiet proof the work sold AT that number.  *
  * ------------------------------------------------------------------ */
-function renderArchive(loc) {
-  const S = site.sections;
-  const sold = works.filter((w) => w.sold);
-
-  const body = `
-<section class="section wrap" id="archive">
-  <div class="section__head">
-    <h1>${esc(t(S.archive.title, loc))}</h1>
-    <p class="section__intro">${esc(t(S.archive.intro, loc))}</p>
-  </div>
-  <ol class="works works--grid">
-    ${sold.map((w) => `<li class="work">
-      <figure class="work__figure">
-        <a href="${lpath(loc, site, `/works/${w.slug}/`)}" style="display:block">
-          ${picture(w, { sizes: '(min-width:900px) 22vw, (min-width:560px) 45vw, calc(100vw - 40px)' }, loc)}
-        </a>
-      </figure>
-      ${tombstone(w, loc, { level: 'h2' })}
-    </li>`).join('\n    ')}
-  </ol>
-  <p style="margin-top:var(--space-6)">
-    <a class="link-quiet" href="${lpath(loc, site, '/')}#works">${esc(t(ui.backToWorks, loc))}</a>
-  </p>
-</section>`;
-
-  return layout({
-    site, seller, loc,
-    title: `${t(S.archive.title, loc)} — ${t(seller.artist.siteName, loc)}`,
-    description: t(S.archive.intro, loc),
-    body,
-    ogImage: sold.length ? `/img/${sold[0].image}-1600.webp` : null,
-    canonical: lpath(loc, site, '/archive/'),
-    altLocales: altFor('/archive/'),
-  });
-}
-
 /* ------------------------------------------------------------------ *
  * about + how to buy, promoted to real pages                          *
  *                                                                     *
@@ -573,7 +721,7 @@ function renderAbout(loc) {
   </div>
 </section>`;
   return layout({
-    site, seller, loc,
+    site, seller, loc, current: 'about',
     title: `${t(site.sections.about.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: paras[0].slice(0, 180),
     body, ogImage: null, bodyClass: 'prose-page',
@@ -608,6 +756,25 @@ function contactPanel(loc) {
   </aside>`;
 }
 
+function renderContact(loc) {
+  const S = site.sections.contact;
+  const body = `
+<section class="page wrap">
+  <h1>${esc(t(S.title, loc))}</h1>
+  <div class="prose measure">
+    <p>${esc(t(S.intro, loc))}</p>
+  </div>
+  ${contactPanel(loc)}
+</section>`;
+  return layout({
+    site, seller, loc, current: 'contact',
+    title: `${t(S.title, loc)} — ${t(seller.artist.siteName, loc)}`,
+    description: t(S.intro, loc).slice(0, 180),
+    body, ogImage: null, bodyClass: 'prose-page',
+    canonical: lpath(loc, site, '/contact/'), altLocales: altFor('/contact/'),
+  });
+}
+
 function renderHowToBuy(loc) {
   const body = `
 <section class="page wrap">
@@ -631,7 +798,7 @@ function renderHowToBuy(loc) {
   ${contactPanel(loc)}
 </section>`;
   return layout({
-    site, seller, loc,
+    site, seller, loc, current: 'buy',
     title: `${t(site.sections.buy.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: t(site.buy.steps, loc)[0].slice(0, 180),
     body, ogImage: null, bodyClass: 'prose-page',
@@ -799,9 +966,16 @@ for (const loc of LOCALES) {
   for (const w of works) {
     out(join(lpath(loc, site, `/works/${w.slug}/`), 'index.html'), renderWork(w, loc)); pageCount++;
   }
-  if (works.some((w) => w.sold)) {
-    out(join(lpath(loc, site, '/archive/'), 'index.html'), renderArchive(loc)); pageCount++;
+  out(join(lpath(loc, site, '/works/'), 'index.html'), renderWorks(loc)); pageCount++;
+  for (const x of SERIES) {
+    out(join(lpath(loc, site, seriesPath(x.id)), 'index.html'), renderSeries(x, loc)); pageCount++;
   }
+  if (works.some((w) => w.sold)) {
+    out(join(lpath(loc, site, '/works/sold/'), 'index.html'), renderSold(loc)); pageCount++;
+  }
+  // the old address of sold works keeps working
+  out(join(lpath(loc, site, '/archive/'), 'index.html'), redirectStub(loc, '/works/sold/'));
+  out(join(lpath(loc, site, '/contact/'), 'index.html'), renderContact(loc)); pageCount++;
   out(join(lpath(loc, site, '/about/'), 'index.html'), renderAbout(loc)); pageCount++;
   out(join(lpath(loc, site, '/how-to-buy/'), 'index.html'), renderHowToBuy(loc)); pageCount++;
   for (const [p, def] of Object.entries(PAGES)) {
@@ -862,7 +1036,9 @@ const urls = [];
 for (const loc of LOCALES) {
   urls.push(lpath(loc, site, '/'));
   works.forEach((w) => urls.push(lpath(loc, site, `/works/${w.slug}/`)));
-  if (works.some((w) => w.sold)) urls.push(lpath(loc, site, '/archive/'));
+  urls.push(lpath(loc, site, '/works/'), lpath(loc, site, '/contact/'));
+  SERIES.forEach((x) => urls.push(lpath(loc, site, seriesPath(x.id))));
+  if (works.some((w) => w.sold)) urls.push(lpath(loc, site, '/works/sold/'));
   urls.push(lpath(loc, site, '/about/'), lpath(loc, site, '/how-to-buy/'));
   Object.keys(PAGES).forEach((p) => urls.push(lpath(loc, site, p)));
 }
@@ -885,6 +1061,11 @@ ${['GPTBot','ChatGPT-User','ClaudeBot','Claude-User','Google-Extended','Applebot
 
 Sitemap: ${origin}/sitemap.xml
 `);
+
+/* redirects — Cloudflare Pages reads this file and answers with a real 301.
+   GitHub Pages ignores it; the stub page at the old address covers that host. */
+writeFileSync(join(DIST, '_redirects'),
+  LOCALES.map((l) => `${lpath(l, site, '/archive/')} ${lpath(l, site, '/works/sold/')} 301`).join('\n') + '\n');
 
 /* headers — long, immutable caching on hashed assets */
 writeFileSync(join(DIST, '_headers'),

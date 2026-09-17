@@ -39,6 +39,14 @@ const pages = [];
 const problems = [];
 const warnings = [];
 
+/* A work page is /works/{slug}/ for a slug in artworks.json — not every path
+   under /works/, which also holds the catalogue, the series and sold works. */
+const SLUGS = new Set(JSON.parse(readFileSync(join(ROOT, 'src/data/artworks.json'), 'utf8')).works.map((w) => w.slug));
+const isWorkPage = (where) => { const m = where.match(/\/works\/([a-z0-9-]+)\/index\.html$/); return !!m && SLUGS.has(m[1]); };
+/* A redirect stub (an old address kept alive) is not a page: it must be
+   noindex, point its canonical at its target, and the target must exist. */
+const isStub = (html) => /<meta http-equiv="refresh"/.test(html);
+
 /* Decision D1: search, account and cart link to routes that are not built.
    A link marked data-placeholder is the one kind of internal link that MUST
    be dead — and must be a route declared in site.json. When a placeholder page
@@ -64,6 +72,15 @@ const local = (url) => (BASE && (url === BASE || url.startsWith(BASE + '/'))
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
   const where = rel(page);
+
+  if (isStub(html)) {
+    const to = local((html.match(/http-equiv="refresh" content="0; url=([^"]+)"/) ?? [])[1] ?? '');
+    const target = to.endsWith('/') ? join(DIST, to, 'index.html') : join(DIST, to);
+    if (!to || !existsSync(target)) problems.push(`${where}: redirect stub points at a page that does not exist → ${to}`);
+    if (!/<meta name="robots" content="noindex/.test(html)) problems.push(`${where}: redirect stub must be noindex`);
+    if (!new RegExp(`rel="canonical" href="[^"]*${to.replace(/[/.]/g, '\\$&')}"`).test(html)) problems.push(`${where}: redirect stub's canonical must be its target`);
+    continue;
+  }
 
   /* --- lang --- */
   const lang = html.match(/<html[^>]+lang="([^"]+)"/);
@@ -134,12 +151,12 @@ for (const page of pages) {
   if (!/rel="canonical"/.test(html)) problems.push(`${where}: no canonical link`);
 
   /* --- work pages carry structured data --- */
-  if (/\/works\//.test(where) && !/application\/ld\+json/.test(html)) {
+  if (isWorkPage(where) && !/"@type":\s*"VisualArtwork"/.test(html)) {
     problems.push(`${where}: work page with no VisualArtwork JSON-LD`);
   }
 
   /* --- og:image on pages that should preview as an image --- */
-  if ((/\/works\//.test(where) || where === '/index.html' || where === '/zh/index.html')
+  if ((isWorkPage(where) || where === '/index.html' || where === '/zh/index.html')
       && !/property="og:image"/.test(html)) {
     problems.push(`${where}: no og:image — link cards will not show the painting`);
   }
@@ -191,6 +208,7 @@ function displayCjk() {
   for (const w of arts.works) add(w.title);
   for (const v of Object.values(site.ui)) add(v);
   add(site.notFound?.title);   // the 404's heading
+  for (const x of site.series?.items ?? []) add(x.title);   // series pages and cards
   return out;
 }
 

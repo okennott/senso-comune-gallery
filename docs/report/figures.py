@@ -701,6 +701,59 @@ def pdp_wire():
     save(fig, "pdp-wire")
 
 
+# ------------------------------------------------ 10. the site's structure
+def structure():
+    """The site map before and after the restructure. Drawn from site.json so the
+    'after' tree is the navigation and series the build actually generates."""
+    import json
+    site = json.loads((ROOT / "src/data/site.json").read_text(encoding="utf-8"))
+    series = [x["title"]["en"] for x in site["series"]["items"]]
+    nav = [n["label"]["en"] for n in site["nav"]]
+
+    fig, (L, R) = plt.subplots(1, 2, figsize=(6.6, 3.9), gridspec_kw={"width_ratios": [1, 1.25], "wspace": .08})
+    for ax in (L, R):
+        ax.set_xlim(0, 10); ax.set_ylim(0, 10); ax.axis("off")
+
+    def node(ax, x, y, text, w=2.5, fc=PAPER, ec=MUTED, tc=INK, fs=5.0, dash=False, bold=False):
+        ax.add_patch(FancyBboxPatch((x - w / 2, y - .32), w, .64, boxstyle="round,pad=0.02,rounding_size=0.06",
+                     facecolor=fc, edgecolor=ec, linewidth=.7, linestyle="--" if dash else "-", zorder=3))
+        ax.text(x, y, text, ha="center", va="center", fontsize=fs, color=tc, zorder=4, weight="bold" if bold else "normal")
+    def edge(ax, x1, y1, x2, y2, c=MUTED, ls="-"):
+        ax.plot([x1, x1, x2, x2], [y1 - .32, (y1 + y2) / 2, (y1 + y2) / 2, y2 + .32], color=c, lw=.6, ls=ls, zorder=1)
+
+    # ---- before
+    L.text(0, 9.6, "Before", fontsize=8, weight="bold", color=INK)
+    node(L, 5, 8.6, "Home — every work, full size", w=7.4, bold=True)
+    for i, (lab, ls) in enumerate([("#works", "--"), ("#tribute", "--"), ("About", "-"), ("How to Buy", "-")]):
+        x = 1.3 + i * 2.47
+        node(L, x, 6.9, lab, w=2.35, dash=ls == "--", fc="#FBEAE8" if ls == "--" else PAPER, ec="#A81E14" if ls == "--" else MUTED)
+        edge(L, 5, 8.6, x, 6.9, c="#A81E14" if ls == "--" else MUTED, ls=ls)
+    L.text(5, 5.95, "two menu items were jumps down the homepage", ha="center", fontsize=5.2, color="#A81E14", style="italic")
+    node(L, 2.3, 4.6, "6 work pages", w=3.2); edge(L, 1.3, 6.9, 2.3, 4.6)
+    node(L, 7.0, 4.6, "Archive (footer only)", w=4.6, dash=True)
+    L.text(5, 3.5, "No page lists the works.\nNo room for a series\nor a genre to grow into.", ha="center", va="top", fontsize=5.4, color=BODY, linespacing=1.4)
+
+    # ---- after
+    R.text(0, 9.6, "After", fontsize=8, weight="bold", color=INK)
+    node(R, 5, 8.6, "Home — hero, latest four, series, about, buying", w=9.4, bold=True)
+    xs = [1.35, 3.8, 6.25, 8.7]
+    for x, lab in zip(xs, nav):
+        node(R, x, 6.9, lab, w=2.3, fc=T["paper-deep"])
+        edge(R, 5, 8.6, x, 6.9)
+    subs = ["All"] + series + ["Sold works"]
+    for i, lab in enumerate(subs):
+        y = 5.35 - i * .95
+        node(R, 2.4, y, lab, w=2.9, fc=PAPER, ec=SANG if lab in series else MUTED)
+        R.plot([.6, .6, 2.4 - 1.45], [6.58, y, y], color=MUTED, lw=.6, zorder=1)
+    R.text(4.1, 4.4, "a series is one entry in site.json:\nits page, tab and homepage card\nare generated", fontsize=5.2, color=SANG, va="center", linespacing=1.35)
+    wy = 5.35 - len(subs) * .95 - .25
+    node(R, 2.4, wy, "work pages — URLs unchanged", w=4.3, fc=PAPER)
+    R.plot([.6, .6, 2.4 - 2.15], [5.35 - (len(subs) - 1) * .95, wy, wy], color=MUTED, lw=.6, zorder=1)
+    R.text(4.9, 1.45, "search · account · cart → placeholder 404", fontsize=5.2, color=BODY, style="italic")
+    R.text(4.9, .9, "/archive/ → /works/sold/ (301 and stub)", fontsize=5.2, color=BODY, style="italic")
+    save(fig, "structure")
+
+
 def _cream_ramp():
     from matplotlib.colors import LinearSegmentedColormap
     return LinearSegmentedColormap.from_list("cream", [BAR, PAPER])
@@ -708,4 +761,4 @@ def _cream_ramp():
 
 if __name__ == "__main__":
     print("figures:")
-    palette(); sage_limit(); payments(); oversell(); duty(); shipping(); logo(); softness(); pdp_wire()
+    palette(); sage_limit(); payments(); oversell(); duty(); shipping(); logo(); softness(); pdp_wire(); structure()

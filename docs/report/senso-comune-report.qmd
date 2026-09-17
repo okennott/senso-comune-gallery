@@ -503,6 +503,164 @@ is 2.78:1; the *Sunflowers* chrome yellow 2.70:1. Both sit within a hair of the
 \end{openitem}
 ```
 
+## The site's structure {#sec-structure}
+
+The four menu items — *Original Works, Tribute, About, How to Buy* — looked
+like four pages and were not. Two were jumps down the homepage, two were pages,
+so the same menu did different things depending on where it was clicked, and
+from any work page *Original Works* reloaded the homepage and scrolled. There
+was no page that listed the works; sold works were reachable only from the
+footer; the homepage showed every painting at full size, one per screen; and
+the only way to group a work was a two-value field. None of that survives a
+catalogue growing past a few dozen works, or a new genre.
+
+### Method {#sec-structure-method}
+
+Six reference sites, chosen to cover the three models this site sits between:
+artists' own sites (David Hockney, Kehinde Wiley Studio), galleries (David
+Zwirner, Victoria Miro) and marketplaces for original work (Saatchi Art,
+Artfinder). Each was **rendered in headless Chrome**, not fetched as HTML: two
+of the six build their navigation and filters with scripts, and a plain fetch
+reported Saatchi as having no filters at all. Navigation, hierarchy, breadcrumbs
+and side columns were read from the rendered page and checked against a
+screenshot. Three first choices could not be used: Gerhard Richter's site was
+offline, Hauser & Wirth rate-limited the request, and Artsy refused it.
+
+One trap is worth recording. Counting `<aside>` elements suggested four of the
+six had sidebars; every one of them was a region-settings pop-up. Only the
+rendered layout was trusted.
+
+### What the six agree on {#sec-structure-consensus}
+
+Columns: **H** Hockney · **W** Kehinde Wiley · **Z** David Zwirner · **VM** Victoria Miro ·
+**S** Saatchi Art · **A** Artfinder.
+
+: The six reference sites, September 2026 {#tbl-structure-consensus}
+
+| Pattern | H | W | Z | VM | S | A | Majority |
+|:---------------------------------------------|:---:|:---:|:---:|:---:|:---:|:---:|:----------|
+| Works under one entry; no series beside About | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | **6 / 6** |
+| Buying reachable from the header | — | ✓ | ✓ | ✓ | ✓ | ✓ | **5 / 6** |
+| Contact reachable from the header | ✓ | ✓ | ✓ | ✓ | — | — | **4 / 6** |
+| A navigation sidebar | — | — | — | — | — | — | **0 / 6** |
+| Highlights or latest in a sidebar | — | — | — | — | — | — | **0 / 6** |
+| A filter sidebar | — | — | — | — | ✓ | ✓ | 2 / 6 |
+| Breadcrumbs | ✓ | — | — | — | ✓ | ✓ | 3 / 6 |
+| *How to buy* as a header page | — | — | — | — | — | — | 0 / 6 |
+
+Two things the table does not show. The filter sidebars both belong to
+marketplaces listing tens of thousands of works — Artfinder's showed *60 of
+25,000*. And where an artist's own site organises a large body of work, it does
+it one level down: Hockney's *Works* opens onto media, and within *Paintings* a
+horizontal row of decades.
+
+### The sidebar question {#sec-structure-sidebar}
+
+No. Not for navigation, highlights or anything latest.
+
+- **None of the six uses one for navigation or highlights.**
+- **Right-hand columns are not looked at.** Eye-tracking puts desktop attention
+  on right-rail content at 0.8% of fixations: people have learned that the side
+  column is where advertising lives, and avoid it whatever it holds.[^nng-rail]
+- **Local navigation is for large sections.** It earns its space when visitors
+  browse and compare many sibling pages, and is not needed for small ones; when
+  it is used it should be less prominent than the global navigation.[^nng-local]
+- **Filters belong beside the grid only when there are many of them.** Sidebar
+  filters are often overlooked because they sit where navigation and banners
+  usually are; a horizontal row above the results works for up to six to eight
+  filter types, and a sidebar is the better choice beyond that.[^baymard-filters]
+
+Where this site needs what a sidebar would carry, it gets it in the reading
+path instead: the *latest* works are a homepage section, each series is a room
+with its own page, and the Works section's rooms are one quiet row of tabs.
+
+### What was built {#sec-structure-built}
+
+![The site map before and after. The after tree is drawn from `site.json`, the same data the build generates the navigation and series from.](fig/structure.pdf){#fig-structure width=100%}
+
+- **The header goes to four real pages:** *Works, About, How to Buy, Contact*
+  (作品, 关于, 购买方式, 联系), and marks the one the visitor is in — `page` on
+  the section's own page, `true` beneath it. The stylesheet had styled that marker
+  since the first build; nothing had ever set it.
+- **Works is the catalogue.** `/works/` lists every available work, newest first,
+  with a row of tabs: *All, Original Works, Tribute, Sold works*, each with its
+  count. Each series is a room at `/works/series/{id}/`; sold works moved from
+  `/archive/` to `/works/sold/`.
+- **Series are data.** A series is one entry in `site.json`; its page, its tab and
+  its homepage card are generated from it, and the build refuses a work that names
+  an undeclared series or genre, or a slug that would collide with a page under
+  `/works/`.
+- **The homepage is a front door, not the catalogue:** the hero painting, the four
+  latest works with *All works (5)*, a card for each series, about, and buying.
+- **Breadcrumbs from the second level down,** with the current page as text and a
+  work's trail running through its one series (*Home / Works / Tribute / …*), and
+  published as structured data. The top level has none: there is nothing above it
+  to return to.
+- **Nothing that was shared breaks.** Work pages keep their addresses. `/archive/`
+  answers with a 301 on Cloudflare Pages and with a redirecting page on hosts that
+  cannot send one.
+
+### Where it stays personal {#sec-structure-personal}
+
+The consensus decides the shape; the site keeps its own character inside it.
+
+- **Tribute keeps its room.** The van Gogh epigraph and the hatch texture that
+  marked its homepage section now mark its series page — the room it belongs in —
+  and it has a card of its own on the homepage.
+- **The front door keeps the gallery's voice:** the motto, one painting, and the
+  sfumato bands between sections, each still joining the grounds either side of it.
+- **One departure from the six.** None of them puts *How to Buy* in the header, and
+  here it stays there. The six either take cards through an ordinary checkout or
+  sell to collectors who expect to enquire. This site sells across a border, without
+  cards, with import duty the buyer has to anticipate, and with its cart still a
+  placeholder; how buying works is a question a visitor has before they have chosen
+  anything. When the cart works, *How to Buy* moves to the footer and the cart
+  becomes the header's way in to buying — as five of the six have it.
+
+### How it grows {#sec-structure-growth}
+
+The depth is fixed at three levels below the homepage — *Works / series / work* —
+because more than a few levels is where visitors lose their way;[^nng-flat] growth
+is added across, not down.
+
+: Growth rules {#tbl-structure-growth}
+
+| When | Then |
+|:----------------------------------------------|:--------------------------------------------------|
+| A new series is added | One entry in `site.json`; page, tab and card follow. Asserted (I-03) |
+| Genres come into use: two or more among available works | A horizontal genre filter row on `/works/`. A genre is a filter, never a fourth level: a landscape in *Tribute* is in one room and matches two filters[^nng-poly] |
+| The Works tabs pass eight, or filter types pass eight | The Works navigation moves to a left column on desktop — the one case the research supports a sidebar. The eight-tab ceiling is asserted today (I-06), so the change cannot happen by accident |
+| More than six series | The homepage shows six series cards and a link to all |
+| About gains pages — CV, exhibitions, press | About gets its own row of tabs, as Works has |
+| The cart takes payments | *How to Buy* leaves the header for the footer |
+
+### How it is held {#sec-structure-held}
+
+Six assertions (I-01 to I-06): the header links to four real pages and marks the
+current one; every work is listed exactly once — on *Works*, on its series page, or
+among sold works; the homepage shows at most four and states how many there are; a
+series needs only data; deeper pages carry a breadcrumb whose last step is the page
+itself; the old address still arrives; and no navigation lives in a side column.
+
+Three existing assertions changed with the structure, each for a stated reason:
+*B-04* now tests the *How to Buy / Buy* label pair; *D-02* finds sold works at their
+new address and checks that selling pages use the larger card; and the counter
+assertion under *A-01* is **retired** — the homepage no longer lists the catalogue,
+so a running *01 / 06* has nothing to count, and the number is now stated outright.
+
+The render check now covers the catalogue, both series pages and sold works, and
+on its first run it caught a real defect: series-card covers drawn at 0.745 when
+the painting is 0.800, a fixed height squeezed by a narrow column. Running the
+checks with the preview's address prefix caught another — four of the new
+assertions matched root paths only, and would have passed on this machine and
+failed in CI.
+
+[^nng-rail]: Nielsen Norman Group, [Fight against "right-rail blindness"](https://www.nngroup.com/articles/fight-right-rail-blindness/) and [Banner blindness revisited](https://www.nngroup.com/articles/banner-blindness-old-and-new-findings/).
+[^nng-local]: Nielsen Norman Group, [Local navigation is a valuable orientation and wayfinding aid](https://www.nngroup.com/articles/local-navigation/).
+[^baymard-filters]: Baymard Institute, [Be careful with horizontal filtering toolbars](https://baymard.com/blog/horizontal-filtering-sorting-design).
+[^nng-flat]: Nielsen Norman Group, [Flat vs. deep website hierarchies](https://www.nngroup.com/articles/flat-vs-deep-hierarchy/).
+[^nng-poly]: Nielsen Norman Group, [Polyhierarchies improve findability for ambiguous IA categories](https://www.nngroup.com/articles/polyhierarchy/).
+
 ## The site as built {#sec-built}
 
 Four views, at the two widths the layout was verified at. The screenshots are

@@ -200,7 +200,7 @@ const wordmarkName = (seller, loc) => {
 
 /* ---------- document shell ---------- */
 export function layout({ site, seller, loc, title, description, body, ogImage, ogImageAlt,
-                         ogImageHeight, product, canonical, altLocales, bodyClass = '', noindex = false }) {
+                         ogImageHeight, product, canonical, altLocales, bodyClass = '', noindex = false, current = null }) {
   const L = site.locales[loc];
   const ui = site.ui;
   const origin = process.env.SITE_URL || site.url;   // same source build.js uses for the sitemap
@@ -218,7 +218,12 @@ export function layout({ site, seller, loc, title, description, body, ogImage, o
     .map((n) => {
       const long = esc(t(n.label, loc));
       const abbr = esc(t(n.labelShort ?? n.label, loc));
-      return `<a href="${esc(navHref(n.href))}">` +
+      // The section this page belongs to is marked: "page" on the section's own
+      // page, "true" beneath it (a work, a series). The CSS already styled
+      // aria-current; nothing ever set it.
+      const here = n.id === current
+        ? ` aria-current="${canonical === path(loc, site, n.href) ? 'page' : 'true'}"` : '';
+      return `<a href="${esc(navHref(n.href))}"${here}>` +
              `<span class="nav__long">${long}</span>` +
              `<span class="nav__short">${abbr}</span></a>`;
     })

@@ -85,6 +85,8 @@ def collect() -> str:
     for v in site["ui"].values():
         add(v)
     add(site.get("notFound", {}).get("title"))   # the 404's heading
+    for x in site.get("series", {}).get("items", []):
+        add(x.get("title"))                      # series pages and cards
 
     return "".join(sorted(chars))
 

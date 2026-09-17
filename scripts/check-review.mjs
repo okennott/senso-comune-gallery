@@ -14,6 +14,7 @@
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { BASE } from '../src/templates.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -25,7 +26,7 @@ const home = read('index.html');
 const zhHome = read('zh/index.html');
 const work = read('works/harbour-light/index.html');
 const buy = read('how-to-buy/index.html');
-const archive = read('archive/index.html');
+const archive = read('works/sold/index.html');   // formerly /archive/
 const cssRaw = read('styles.css');
 const css = cssRaw.replace(/\/\*[\s\S]*?\*\//g, '');  // rules only — a comment may name a selector it removed
 const flat = css.replace(/\s+/g, '');                    // whitespace-insensitive matching
@@ -63,18 +64,21 @@ check('A-01', 'a painting is in the hero, above the fold', () => {
   const hasSplit = /class="hero wrap hero--split"/.test(home);
   const heroFig = /<figure class="hero__work">/.test(home);
   const heroImg = /<figure class="hero__work">[\s\S]*?<img[^>]+fetchpriority="high"/.test(home);
-  // the lifted work must not also appear in the list below
-  const listed = [...home.matchAll(/<li class="work" id="work-([a-z0-9-]+)"/g)].map((m) => m[1]);
+  // the lifted work must not also appear among the latest works below it
+  const latest = (home.match(/<section class="section ground--warm" id="latest">([\s\S]*?)<\/section>/) ?? [])[1] ?? '';
+  const listed = [...latest.matchAll(/<div class="tombstone" data-work="([a-z0-9-]+)"/g)].map((m) => m[1]);
   const heroSlug = (home.match(/<figure class="hero__work">\s*<a href="[^"]*\/works\/([a-z0-9-]+)\//) ?? [])[1];
   const capped = /max-height:clamp\(260px,48vh,460px\)/.test(css);
   return {
     ok: hasSplit && heroFig && heroImg && heroSlug && !listed.includes(heroSlug) && capped,
-    detail: `hero work ${heroSlug}; list starts at ${listed[0]}; ${listed.length} in list; height-capped ${capped}`,
+    detail: `hero work ${heroSlug}; ${listed.length} latest works beneath, hero not repeated ${!listed.includes(heroSlug)}; height-capped ${capped}`,
   };
 });
 
-check('A-01', 'the list below the hero starts its count at 02', () =>
-  /<span class="work__index" aria-hidden="true">02 \/ 06<\/span>/.test(home));
+/* RETIRED 17 Sep 2026 with the structure change: "the list below the hero
+   starts its count at 02". The homepage no longer lists the catalogue, so a
+   running 01/06 counter has nothing to count; finiteness is now stated
+   outright — "All works (5)" — and asserted in I-02. */
 
 check('A-02', 'no mail link is labelled "Buy"', () => {
   const btns = [...home.matchAll(/<a class="btn"[^>]*href="(mailto:[^"]*)"[^>]*>([^<]*)/g)];
@@ -152,7 +156,7 @@ check('B-04', 'the narrow-screen nav is back at caption size', () => {
 });
 
 check('B-04', 'both nav labels ship so the visible name is the accessible name', () =>
-  /<span class="nav__long">Original Works<\/span><span class="nav__short">Works<\/span>/.test(home)
+  /<span class="nav__long">How to Buy<\/span><span class="nav__short">Buy<\/span>/.test(home)
   && /\.nav__short\{display:none\}/.test(flat)
   && /\.nav__short\{display:inline\}/.test(flat));
 
@@ -222,8 +226,9 @@ check('D-02', 'the archive is a grid, not a selling gallery', () => {
   const grid = /<ol class="works works--grid">/.test(archive);
   const rule = /\.works--grid\{display:grid;grid-template-columns:repeat\(auto-fill,minmax\(210px,1fr\)\)/
     .test(css.replace(/\n\s*/g, ''));
-  const home1 = /<ol class="works" start=/.test(home);
-  return { ok: grid && rule && home1, detail: `archive grid ${grid}, homepage list unchanged ${home1}` };
+  // selling pages use the larger catalogue card; only sold works get the reference grid
+  const selling = /<ol class="works works--catalogue">/.test(read('works/index.html')) && !/works--grid/.test(read('works/index.html'));
+  return { ok: grid && rule && selling, detail: `sold works grid ${grid}, selling pages use the catalogue card ${selling}` };
 });
 
 check('D-03', 'the language switch is divided from the navigation', () =>
@@ -360,7 +365,11 @@ const allHtml = (() => {
   (function walk(d) {
     for (const e of readdirSync(d, { withFileTypes: true })) {
       const p = join(d, e.name);
-      if (e.isDirectory()) walk(p); else if (e.name === 'index.html') out.push([p.slice(DIST.length), readFileSync(p, 'utf8')]);
+      if (e.isDirectory()) walk(p);
+      else if (e.name === 'index.html') {
+        const html = readFileSync(p, 'utf8');
+        if (!/<meta http-equiv="refresh"/.test(html)) out.push([p.slice(DIST.length), html]);   // stubs are not pages
+      }
     }
   })(DIST);
   return out;
@@ -457,8 +466,10 @@ check('G-06', 'every boundary band joins the grounds actually either side of it'
 
 const siteJson = JSON.parse(src('src/data/site.json'));
 const artJson = JSON.parse(src('src/data/artworks.json'));
-const workPages = allHtml.filter(([p]) => /\/works\/[a-z0-9-]+\/index\.html$/.test(p));
-const notWorkPages = allHtml.filter(([p]) => !/\/works\//.test(p));
+const SLUG_SET = new Set(artJson.works.map((w) => w.slug));
+const isWork = (p) => { const m = p.match(/\/works\/([a-z0-9-]+)\/index\.html$/); return !!m && SLUG_SET.has(m[1]); };
+const workPages = allHtml.filter(([p]) => isWork(p));
+const notWorkPages = allHtml.filter(([p]) => !isWork(p));
 
 check('H-01', 'search, account and cart, in that order, on every page', () => {
   const bad = [];
@@ -539,6 +550,111 @@ check('H-06', 'purchase limits are declared per entity, and still owed', () => {
   const ents = Object.entries(seller.entities);
   const declared = ents.every(([, e]) => 'maxTransactionUSD' in e.checkout);
   return { ok: declared, detail: ents.map(([k, e]) => `${k}: ${e.checkout.maxTransactionUSD}`).join(', ') };
+});
+
+/* ===================== I — the site's structure ===================== */
+/* 17 September 2026 (report, "The site's structure"): the structure the six
+   reference sites agree on, with one site-specific departure. Each assertion
+   names the finding it holds. */
+
+const seriesItems = siteJson.series.items;
+/* URLs in the built pages carry the deployment prefix on a preview build
+   (/senso-comune-gallery on GitHub Pages). Every path matched below goes
+   through this, or the assertions would pass locally and fail in CI. */
+const B = BASE.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+const byLoc = (p) => [['en', p], ['zh', `/zh${p}`]];
+
+check('I-01', 'the header navigates to four real pages, no in-page jumps', () => {
+  const nav = (html) => ((html.match(/<nav class="nav"[^>]*>([\s\S]*?)<\/nav>/) ?? [])[1] ?? '');
+  const hrefs = [...nav(home).matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+  const want = ['/works/', '/about/', '/how-to-buy/', '/contact/'];
+  const pages = hrefs.every((h) => !h.includes('#'));
+  const order = want.every((w, i) => hrefs[i]?.endsWith(w));
+  return { ok: hrefs.length === 4 && pages && order, detail: hrefs.join(' ') };
+});
+
+check('I-01', 'the header marks where the visitor is', () => {
+  const cur = (html) => (nav => [...nav.matchAll(/<a href="[^"]*"( aria-current="(page|true)")?>/g)].map((m) => m[2] ?? '-').join(','))(((html.match(/<nav class="nav"[^>]*>([\s\S]*?)<\/nav>/) ?? [])[1] ?? ''));
+  const worksPg = cur(read('works/index.html')), workPg = cur(workPages[0][1]), contact = cur(read('contact/index.html')), homePg = cur(home);
+  const ok = worksPg === 'page,-,-,-' && workPg === 'true,-,-,-' && contact === '-,-,-,page' && homePg === '-,-,-,-';
+  return { ok, detail: `works ${worksPg} · a work ${workPg} · contact ${contact} · home ${homePg}` };
+});
+
+check('I-02', 'every work is reachable, once, from the catalogue', () => {
+  const avail = artJson.works.filter((w) => !w.sold).map((w) => w.slug).sort();
+  const sold = artJson.works.filter((w) => w.sold).map((w) => w.slug).sort();
+  const listed = (html) => [...html.matchAll(/<div class="tombstone" data-work="([a-z0-9-]+)"/g)].map((m) => m[1]).sort();
+  const worksOk = listed(read('works/index.html')).join() === avail.join();
+  const soldOk = listed(read('works/sold/index.html')).join() === sold.join();
+  const seriesOk = seriesItems.every((x) => listed(read(`works/series/${x.id}/index.html`)).join() ===
+    artJson.works.filter((w) => !w.sold && w.section === x.id).map((w) => w.slug).sort().join());
+  return { ok: worksOk && soldOk && seriesOk, detail: `works page ${worksOk}, each series page ${seriesOk}, sold page ${soldOk}` };
+});
+
+check('I-02', 'the homepage shows a selection and says how many there are', () => {
+  const latest = (home.match(/id="latest">([\s\S]*?)<\/section>/) ?? [])[1] ?? '';
+  const n = [...latest.matchAll(/class="tombstone"/g)].length;
+  const avail = artJson.works.filter((w) => !w.sold).length;
+  const more = new RegExp(`href="${B}/works/">[^<]*\\(${avail}\\)<`).test(latest);
+  const cards = [...home.matchAll(/<li class="series-card">/g)].length;
+  return { ok: n > 0 && n <= 4 && more && cards === seriesItems.length,
+           detail: `${n} latest works (at most 4), link to all ${avail} ${more}, ${cards} series cards for ${seriesItems.length} series` };
+});
+
+check('I-03', 'a new series needs data only: a page, a tab and a card each', () => {
+  const missing = [];
+  for (const x of seriesItems) {
+    for (const [, p] of byLoc(`/works/series/${x.id}/`)) if (!existsSync(join(DIST, p, 'index.html'))) missing.push(p);
+    if (!new RegExp(`class="localnav"[\\s\\S]*?href="${B}/works/series/${x.id}/"`).test(read('works/index.html'))) missing.push(`tab ${x.id}`);
+    if (!new RegExp(`series-card__link" href="${B}/works/series/${x.id}/"`).test(home)) missing.push(`card ${x.id}`);
+  }
+  const build = src('build.js');
+  const noHardcoded = !/section === 'tribute'|section === 'originals'/.test(build);
+  return { ok: !missing.length && noHardcoded, detail: missing.length ? missing.join(', ') : `${seriesItems.length} series, all generated; no series id hard-coded in build.js ${noHardcoded}` };
+});
+
+check('I-04', 'deeper pages carry a breadcrumb whose last step is the page itself', () => {
+  const bad = [];
+  const pagesWithCrumb = [...workPages, ['/works/sold/', archive], ...seriesItems.map((x) => [`/works/series/${x.id}/`, read(`works/series/${x.id}/index.html`)])];
+  for (const [p, html] of pagesWithCrumb) {
+    const crumb = (html.match(/<nav class="breadcrumb"[^>]*>([\s\S]*?)<\/nav>/) ?? [])[1];
+    if (!crumb) { bad.push(`${p}: none`); continue; }
+    const items = [...crumb.matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+    if (!/aria-current="page"/.test(items.at(-1)) || /<a /.test(items.at(-1))) bad.push(`${p}: last step is a link`);
+    if (!/"@type":"BreadcrumbList"/.test(html)) bad.push(`${p}: no BreadcrumbList data`);
+  }
+  // a work's trail runs through its own series
+  const w = artJson.works[0];
+  const trail = new RegExp(`href="${B}/works/series/${w.section}/"`).test(read(`works/${w.slug}/index.html`).match(/<nav class="breadcrumb"[\s\S]*?<\/nav>/)?.[0] ?? '');
+  const shallow = !/class="breadcrumb"/.test(read('works/index.html')) && !/class="breadcrumb"/.test(home);
+  return { ok: !bad.length && trail && shallow, detail: bad.length ? bad.slice(0, 3).join('; ') : `${pagesWithCrumb.length} pages; a work's trail runs through its series ${trail}; none on top-level pages ${shallow}` };
+});
+
+check('I-05', 'the old address of sold works still arrives', () => {
+  const stub = readFileSync(join(DIST, 'archive/index.html'), 'utf8');
+  const refresh = new RegExp(`http-equiv="refresh" content="0; url=${B}/works/sold/"`).test(stub);
+  const canonical = /rel="canonical" href="[^"]*\/works\/sold\/"/.test(stub);
+  const r = existsSync(join(DIST, '_redirects')) ? readFileSync(join(DIST, '_redirects'), 'utf8') : '';
+  const cf = new RegExp(`^${B}/archive/ ${B}/works/sold/ 301$`, 'm').test(r) && new RegExp(`^${B}/zh/archive/ ${B}/zh/works/sold/ 301$`, 'm').test(r);
+  const sitemap = read('sitemap.xml');
+  const moved = !/\/archive\//.test(sitemap) && /\/works\/sold\//.test(sitemap);
+  return { ok: refresh && canonical && cf && moved, detail: `stub refresh ${refresh}, canonical ${canonical}, Cloudflare 301s ${cf}, sitemap moved ${moved}` };
+});
+
+check('I-06', 'no sidebar: local navigation is one horizontal row, within its threshold', () => {
+  // Every navigation region must be one of the known horizontal ones. An
+  // <aside> of related content (the buy box beside a painting) is not a
+  // sidebar; navigation placed in a side column is.
+  const KNOWN = /^(nav|localnav|breadcrumb|pager)$/;
+  const asides = [];
+  for (const [p, h] of allHtml) {
+    for (const m of h.matchAll(/<nav class="([a-z-]+)"/g)) if (!KNOWN.test(m[1])) asides.push(`${p} nav.${m[1]}`);
+    if (/<aside[^>]*>(?:(?!<\/aside>)[\s\S])*<nav\b/.test(h)) asides.push(`${p} navigation inside an aside`);
+  }
+  const tabs = [...read('works/index.html').matchAll(/<nav class="localnav"[\s\S]*?<\/nav>/g)][0]?.[0].match(/<li>/g)?.length ?? 0;
+  // Baymard: a horizontal row of filter types works to 6-8. Past 8 tabs the
+  // report's growth rule moves the Works navigation into a sidebar on desktop.
+  return { ok: !asides.length && tabs > 0 && tabs <= 8, detail: asides.length ? asides.slice(0, 3).join('; ') : `every navigation region is a known horizontal one; ${tabs} tabs (threshold 8)` };
 });
 
 /* ===================== cross-cutting ===================== */

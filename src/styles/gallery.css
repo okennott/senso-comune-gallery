@@ -212,17 +212,7 @@
   .hero__work:hover img{ box-shadow:var(--shadow-lift) }
 }
 
-/* The counter. Award-winning scroll sites all supply a finiteness cue; a
-   phone visitor otherwise scrolls many viewport-heights not knowing it ends. */
-.work__index{
-  position:absolute; top:0; left:0;
-  transform:translateY(-140%);
-  font-family:var(--font-body);
-  font-size:var(--size-caption);
-  letter-spacing:var(--track-label);
-  color:var(--muted);
-  font-variant-numeric:tabular-nums;
-}
+
 
 /* ---------- tombstone ----------
    N-03. Order is title → year → medium → dimensions → price, which is the
@@ -591,7 +581,6 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   color:var(--muted);
 }
 
-.archive-link{ margin:var(--space-6) 0 0 }
 
 /* "Original Works" was wrapping to two lines in a 22ch column. The display
    face needs more room than the body face at the same measure. */
@@ -641,7 +630,6 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   cursor:pointer;
 }
 .hero__work figcaption{ position:relative; margin-top:var(--space-4) }
-.work__index--static{ position:static; transform:none; display:block; margin-bottom:var(--space-2) }
 .hero__work .tombstone__row{ max-width:none }
 
 @media (min-width:900px){
@@ -797,4 +785,113 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
 .notfound{ padding-block:var(--space-6) }
 .notfound h1{ display:grid; gap:var(--space-1) }
 .notfound__title{ display:block }
+
+/* ---------- the catalogue ----------
+   Report, "The site's structure". Works, each series and sold works are real
+   pages under /works/, with one card design everywhere a work is listed. */
+.catalogue-page{ padding-block:var(--space-5) var(--space-6) }
+.works--catalogue{
+  display:grid; gap:var(--space-6) var(--space-5);
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));
+  align-items:end;
+}
+.works--catalogue .work{ gap:var(--space-3) }
+/* A fixed image height keeps a row's tombstones level; the width follows the
+   painting, so the mat hugs it — the archive grid's rule, at selling size. */
+.works--catalogue .work__figure{ display:flex; justify-content:center; align-items:flex-end; min-height:22rem }
+.works--catalogue .work__img{ width:auto; height:auto; max-width:100%; max-height:22rem; object-fit:contain }
+.works--catalogue .tombstone__title{ font-size:var(--size-h3) }
+.works--catalogue .tombstone__row{
+  flex-direction:column; align-items:flex-start; gap:var(--space-2);
+}
+@media (max-width:599px){
+  .works--catalogue .work__figure{ min-height:0 }
+  .works--catalogue .work__img{ height:auto; max-height:70vh }
+}
+.section__more{ margin:var(--space-5) 0 0 }
+
+/* Local navigation: the Works section's rooms, as one quiet row of tabs under
+   the page heading — horizontal, because there are few (NN/g: less salient
+   than the global navigation; Baymard: fine to 6-8, a sidebar beyond). */
+.localnav{ margin:0 0 var(--space-5); border-bottom:1px solid var(--rule-soft) }
+.localnav ul{
+  list-style:none; margin:0; padding:0;
+  display:flex; gap:var(--space-4);
+  overflow-x:auto; scrollbar-width:none;
+}
+.localnav ul::-webkit-scrollbar{ display:none }
+.localnav a{
+  position:relative;
+  display:inline-flex; align-items:center; gap:.4em;
+  min-height:var(--target-min); white-space:nowrap;
+  font-size:var(--size-caption); letter-spacing:var(--track-label); text-transform:uppercase;
+  color:var(--body); text-decoration:none;
+  transition:color var(--dur-quick) var(--ease-settle);
+}
+.localnav a::after{
+  content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px;
+  background:var(--ink); transform:scaleX(0); transform-origin:left center;
+  transition:transform var(--dur-settle) var(--ease-settle);
+}
+.localnav a:hover{ color:var(--ink) }
+.localnav a:hover::after{ transform:scaleX(1); background:var(--muted-ui) }
+.localnav a[aria-current]{ color:var(--ink) }
+.localnav a[aria-current]::after{ transform:scaleX(1); background:var(--ink) }
+.localnav__count{ color:var(--muted); font-variant-numeric:tabular-nums; letter-spacing:0 }
+
+/* Breadcrumbs: one line under the global navigation, from the second level
+   down. The current page is text, not a link. */
+.breadcrumb{ margin:0 0 var(--space-4) }
+.breadcrumb ol{
+  list-style:none; margin:0; padding:0;
+  display:flex; flex-wrap:wrap; align-items:center; gap:0 .5em;
+  font-size:var(--size-caption); letter-spacing:var(--track-label); text-transform:uppercase;
+}
+.breadcrumb li{ display:inline-flex; align-items:center; gap:.5em; color:var(--muted) }
+.breadcrumb li + li::before{ content:'/'; color:var(--muted-ui) }
+.breadcrumb a{
+  display:inline-flex; align-items:center; min-height:44px;
+  color:var(--sanguine); text-underline-offset:.25em;
+}
+.breadcrumb [aria-current]{ color:var(--body) }
+
+/* Series cards on the homepage: one room each, cover in its mat. */
+.series-cards{
+  list-style:none; margin:0; padding:0;
+  display:grid; gap:var(--space-5);
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));
+}
+.series-card__link{
+  display:grid; gap:var(--space-4); grid-template-columns:minmax(0,1fr);
+  color:inherit; text-decoration:none;
+}
+@media (min-width:600px){
+  .series-card__link{ grid-template-columns:minmax(0,11rem) minmax(0,1fr); align-items:start }
+}
+.series-card__cover{ display:flex; justify-content:center }
+/* Both dimensions capped, both left auto: a replaced element resolved that way
+   keeps its own ratio. A fixed height inside an 11rem column did not — the
+   render check measured a 0.80 painting drawn at 0.745. */
+.series-card__cover .work__img{ width:auto; height:auto; max-width:100%; max-height:14rem; object-fit:contain; cursor:pointer }
+.series-card__text{ display:grid; gap:var(--space-1); align-content:start }
+.series-card__title{
+  font-family:var(--font-display); font-size:var(--size-h3);
+  font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1;
+  line-height:var(--lh-head); color:var(--ink);
+}
+.series-card__count{ font-size:var(--size-caption); letter-spacing:var(--track-label); text-transform:uppercase; color:var(--muted) }
+.series-card__intro{ color:var(--body) }
+.series-card__more{ justify-self:start }
+@media (hover:hover) and (pointer:fine){
+  .series-card__link:hover .work__img{ box-shadow:var(--shadow-lift) }
+  .series-card__link:hover .series-card__more{ color:var(--sanguine); text-decoration-color:currentColor }
+}
+
+/* The homepage shows four latest works: four across, two across, or one — never
+   three, which would leave the fourth alone on its own row. */
+#latest .works--catalogue{ grid-template-columns:minmax(0,1fr) }
+@media (min-width:600px){ #latest .works--catalogue{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+@media (min-width:1100px){ #latest .works--catalogue{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--space-5) var(--space-4) } }
+#latest .works--catalogue .work__img{ max-height:17rem }
+#latest .works--catalogue .work__figure{ min-height:17rem }
 

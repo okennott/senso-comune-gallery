@@ -59,7 +59,8 @@ if (!existsSync(DIST)) {
 }
 
 const works = JSON.parse(readFileSync(join(ROOT, 'src/data/artworks.json'), 'utf8')).works;
-const PAGES = ['/', '/zh/', '/archive/', ...works.map((w) => `/works/${w.slug}/`)];
+const series = JSON.parse(readFileSync(join(ROOT, 'src/data/site.json'), 'utf8')).series.items;
+const PAGES = ['/', '/zh/', '/works/', '/works/sold/', ...series.map((x) => `/works/series/${x.id}/`), ...works.map((w) => `/works/${w.slug}/`)];
 const WIDTHS = [1440, 900, 390, 360];
 const HEADLESS_MIN = 500;
 

@@ -25,26 +25,14 @@
   "nav": [
     {
       "id": "works",
-      "href": "#works",
+      "href": "/works/",
       "label": {
-        "en": "Original Works",
-        "zh": "原作"
+        "en": "Works",
+        "zh": "作品"
       },
       "labelShort": {
         "en": "Works",
-        "zh": "原作"
-      }
-    },
-    {
-      "id": "tribute",
-      "href": "#tribute",
-      "label": {
-        "en": "Tribute",
-        "zh": "致敬"
-      },
-      "labelShort": {
-        "en": "Tribute",
-        "zh": "致敬"
+        "zh": "作品"
       }
     },
     {
@@ -69,6 +57,18 @@
       "labelShort": {
         "en": "Buy",
         "zh": "购买"
+      }
+    },
+    {
+      "id": "contact",
+      "href": "/contact/",
+      "label": {
+        "en": "Contact",
+        "zh": "联系"
+      },
+      "labelShort": {
+        "en": "Contact",
+        "zh": "联系"
       }
     }
   ],
@@ -96,40 +96,39 @@
     "standfirstTail": {
       "en": "Each one is the only one.",
       "zh": "每一件都是唯一的。"
-    }
+    },
+    "ctaHref": "/works/"
   },
   "sections": {
     "works": {
       "title": {
-        "en": "Original Works",
-        "zh": "原作"
+        "en": "Works",
+        "zh": "作品"
       },
       "intro": {
-        "en": "Each piece is a unique physical object. Click through for full dimensions, a detail of the surface, and how it looks on a wall.",
-        "zh": "每件作品都是独一无二的实物。点击可查看完整尺寸、表面细节，以及悬挂效果。"
-      }
-    },
-    "tribute": {
-      "title": {
-        "en": "Tribute",
-        "zh": "致敬"
+        "en": "Every work currently available, newest first. Each is a unique physical object — open one for its full dimensions, the surface, the edge and the back, and how it hangs on a wall.",
+        "zh": "目前在售的全部作品，按时间由新到旧排列。每件都是独一无二的实物——点开可查看完整尺寸、表面、侧边与背面，以及悬挂效果。"
       },
-      "intro": {
-        "en": "Studies in tribute to the artists who shaped my eye. Not original compositions, and priced lower than original works.",
-        "zh": "向塑造了我眼光的艺术家致敬的习作。非原创构图，定价低于原作。"
+      "all": {
+        "en": "All",
+        "zh": "全部"
       },
-      "epigraph": {
-        "$comment": "Moved here from the hero. This is the room it belongs in.",
-        "quote": {
-          "en": "I want to make drawings that move some people… Whether in figures or in landscapes, I would like to express not something sentimentally melancholic but deep sorrow.",
-          "zh": "我想画出能打动人的画……无论是人物还是风景，我想表达的不是伤感的忧郁，而是深沉的悲恸。"
-        },
-        "attribution": "Vincent van Gogh"
+      "count": {
+        "en": "works",
+        "zh": "件作品"
+      },
+      "viewSeries": {
+        "en": "View the series",
+        "zh": "查看系列"
+      },
+      "allWorks": {
+        "en": "All works",
+        "zh": "全部作品"
       }
     },
     "archive": {
       "title": {
-        "en": "Archive",
+        "en": "Sold works",
         "zh": "已售作品"
       },
       "intro": {
@@ -152,6 +151,36 @@
       "title": {
         "en": "How to Buy",
         "zh": "购买方式"
+      }
+    },
+    "latest": {
+      "title": {
+        "en": "Latest works",
+        "zh": "最新作品"
+      },
+      "intro": {
+        "en": "The most recent paintings still looking for a wall.",
+        "zh": "最新完成、仍在等待收藏的作品。"
+      }
+    },
+    "seriesIndex": {
+      "title": {
+        "en": "Series",
+        "zh": "系列"
+      },
+      "intro": {
+        "en": "The work falls into rooms of its own. Each series has its own page.",
+        "zh": "作品自成几个系列，每个系列都有独立的页面。"
+      }
+    },
+    "contact": {
+      "title": {
+        "en": "Contact",
+        "zh": "联系"
+      },
+      "intro": {
+        "en": "Questions about a work, a commission, shipping to your country, or anything else. For a specific painting, the enquiry button on its page names it for you.",
+        "zh": "关于作品、定制、寄送到您所在的国家或其他任何问题，都欢迎联系。若询问某一件作品，其页面上的咨询按钮会自动注明作品名称。"
       }
     }
   },
@@ -365,6 +394,14 @@
     "viewOf": {
       "en": "of",
       "zh": "/"
+    },
+    "breadcrumb": {
+      "en": "Breadcrumb",
+      "zh": "位置"
+    },
+    "home": {
+      "en": "Home",
+      "zh": "首页"
     }
   },
   "footer": {
@@ -373,6 +410,20 @@
       "zh": "所有作品版权归艺术家所有。"
     },
     "links": [
+      {
+        "href": "/works/",
+        "label": {
+          "en": "Works",
+          "zh": "作品"
+        }
+      },
+      {
+        "href": "/works/sold/",
+        "label": {
+          "en": "Sold works",
+          "zh": "已售作品"
+        }
+      },
       {
         "href": "/about/",
         "label": {
@@ -388,10 +439,10 @@
         }
       },
       {
-        "href": "/archive/",
+        "href": "/contact/",
         "label": {
-          "en": "Archive",
-          "zh": "已售作品"
+          "en": "Contact",
+          "zh": "联系"
         }
       },
       {
@@ -452,5 +503,59 @@
       "en": "Back to the gallery",
       "zh": "返回画廊"
     }
+  },
+  "series": {
+    "$comment": [
+      "THE SERIES. Each is a room of the catalogue at /works/series/{id}/, a tab in the",
+      "Works navigation and a card on the homepage — all generated from this list.",
+      "A work belongs to exactly one series: its `section` field in artworks.json holds",
+      "the id. A NEW SERIES IS AN ENTRY HERE AND NOTHING ELSE: no template changes.",
+      "Genres (landscape, portrait, still life...) are NOT series: they cut across",
+      "series, so they are facets on the Works page, not rooms. See `genres` below.",
+      "The ids 'series' and 'sold' are reserved and may not be used as work slugs."
+    ],
+    "items": [
+      {
+        "id": "originals",
+        "title": {
+          "en": "Original Works",
+          "zh": "原作"
+        },
+        "intro": {
+          "en": "Each piece is a unique physical object. Click through for full dimensions, a detail of the surface, and how it looks on a wall.",
+          "zh": "每件作品都是独一无二的实物。点击可查看完整尺寸、表面细节，以及悬挂效果。"
+        }
+      },
+      {
+        "id": "tribute",
+        "title": {
+          "en": "Tribute",
+          "zh": "致敬"
+        },
+        "intro": {
+          "en": "Studies in tribute to the artists who shaped my eye. Not original compositions, and priced lower than original works.",
+          "zh": "向塑造了我眼光的艺术家致敬的习作。非原创构图，定价低于原作。"
+        },
+        "epigraph": {
+          "$comment": "Moved here from the hero. This is the room it belongs in.",
+          "quote": {
+            "en": "I want to make drawings that move some people… Whether in figures or in landscapes, I would like to express not something sentimentally melancholic but deep sorrow.",
+            "zh": "我想画出能打动人的画……无论是人物还是风景，我想表达的不是伤感的忧郁，而是深沉的悲恸。"
+          },
+          "attribution": "Vincent van Gogh"
+        },
+        "texture": "hatch"
+      }
+    ]
+  },
+  "genres": {
+    "$comment": [
+      "Subject genres, for growth. Empty today. A work may list several in `genres`",
+      "(artworks.json). The Works page shows a genre filter only once at least two",
+      "genres are in use among available works — one genre is not a choice. Until",
+      "then this list is documentation of the vocabulary, and the build checks that",
+      "every genre a work names is declared here."
+    ],
+    "items": []
   }
 }

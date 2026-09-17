@@ -74,6 +74,7 @@ sizes all read from here.
   "slug": "harbour-light",
   "order": 1,
   "section": "originals",
+  "genres": [],
   "title":   { "en": "Harbour Light", "zh": "港口的光" },
   "year": 2026,
   "medium":  { "en": "Oil on canvas", "zh": "布面油画" },
@@ -90,19 +91,25 @@ sizes all read from here.
   "alt":         { "en": "…", "zh": "…" },
   "description": { "en": "…", "zh": "…" },
   "artistNote":  { "en": "", "zh": "" },
-  "details": []
+  "views": [
+    { "kind": "detail", "alt": { "en": "…", "zh": "…" } },
+    { "kind": "edge",   "alt": { "en": "…", "zh": "…" } },
+    { "kind": "back",   "alt": { "en": "…", "zh": "…" } },
+    { "kind": "video",  "alt": { "en": "…", "zh": "…" } }
+  ]
 }
 ```
 
 | Field | What it means |
 |:--|:--|
-| `slug` | **Permanent.** It is the web address. Changing it breaks any link already shared. |
-| `order` | Position on the page, 1 first. |
-| `section` | `originals` or `tribute`. |
+| `slug` | **Permanent.** It is the web address. Changing it breaks any link already shared. `series` and `sold` are reserved. |
+| `order` | Tie-break within a year: works are listed newest first, then by this. |
+| `section` | The series the work belongs to — an `id` from `site.json` → `series`. Exactly one. |
+| `genres` | Subject genres, from `site.json` → `genres`. Any number, or none. |
 | `widthCm` / `heightCm` | Measured to the canvas or sheet edge, not to a frame. Inches are calculated. |
 | `sold` | See §1.5. Never delete a sold work. |
 | `checkoutUrl` | A payment link, once there is one. Empty sends buyers to email instead. |
-| `details` | Optional close-up crops — see §1.2. |
+| `views` | The extra views on the work's page — see §1.2. |
 
 **Step 3 — rebuild.**
 
@@ -111,7 +118,43 @@ npm run build
 ```
 
 It prints every field still marked `NEEDS-INPUT`, so the site cannot quietly go
-live with placeholders in it.
+live with placeholders in it. The new work appears on its series page, on
+*Works*, and — if it is among the four newest — on the homepage.
+
+### Adding a series
+
+A series is a room of the catalogue: *Original Works* and *Tribute* today. To
+add one, add an entry to `series.items` in `src/data/site.json` and set
+`section` on its works. Its page at `/works/series/{id}/`, its tab on *Works* and
+its card on the homepage are all generated; no template changes.
+
+```json
+{ "id": "landscapes",
+  "title": { "en": "Landscapes", "zh": "风景" },
+  "intro": { "en": "…", "zh": "…" } }
+```
+
+A series may also carry an `epigraph` and a `texture` (Tribute has both). Adding
+Chinese text in a title means running `npm run fonts` so the display face covers it.
+
+**A genre is not a series.** Landscape, portrait, still life cut across series: a
+landscape made in tribute to van Gogh belongs to *Tribute* and is a landscape.
+Declare genres in `site.json` → `genres` and list them on works. The build refuses
+a work that names an undeclared series or genre.
+
+### How the structure grows
+
+Decided from six reference sites and published usability research (report,
+"The site's structure"). The depth stays at *Works / series / work*; growth goes
+across.
+
+| When | Then |
+|:--|:--|
+| Two or more genres are in use | Add a horizontal genre filter row to *Works* |
+| The Works tabs, or filter types, pass eight | Move the Works navigation to a left column on desktop. Until then there is no sidebar, and a check fails at nine tabs so it cannot happen unnoticed |
+| More than six series | The homepage shows six series cards and a link to all |
+| About gains pages (CV, exhibitions, press) | Give About a row of tabs, as Works has |
+| The cart takes payments | Move *How to Buy* from the header to the footer |
 
 ## 1.2 Photographing the work
 
@@ -595,6 +638,13 @@ block people outright.
 
 ## 2.6 Decisions already made
 
+- **Works is the catalogue; series are rooms; there is no sidebar.** The header
+  goes to four real pages — Works, About, How to Buy, Contact — and never jumps down
+  the homepage. Every available work is on `/works/`, each series has a page, and
+  sold works are at `/works/sold/` (the old `/archive/` redirects). The homepage
+  shows four latest works and a card per series, not the whole catalogue. Six
+  reference sites agree on all of this except *How to Buy* in the header, which
+  stays until the cart works.
 - **The logo carries no letterforms.** The wordmark translates — *Senso Comune
   Gallery* and 常识画廊 — and a favicon is chosen by origin, not by page, so a
   monogram can only ever serve one of the two audiences. The mark is a work
