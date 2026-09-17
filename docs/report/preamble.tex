@@ -24,9 +24,12 @@
 \usepackage{xeCJK}
 \setCJKmainfont{NotoSerifSC-report.otf}[Path=fonts/]
 \xeCJKsetup{CJKmath=false}
-% Default CJK/Latin glue is ~0.25em, which reads loose inside bracket pairs
-% such as 〔2020〕. Tightened.
-\xeCJKsetup{xCJKecglue={\hskip 0.08em plus 0.04em minus 0.02em}}
+% CJK/Latin glue. An earlier attempt set this to 0.08em to tighten bracket
+% pairs such as 〔2020〕, which instead swallowed the word space in
+% "文物before", "号Art." and "外汇under". 0.2em is the conventional value and
+% keeps those readable; the slight looseness inside brackets is the lesser
+% of the two problems.
+\xeCJKsetup{xCJKecglue={\hskip 0.2em plus 0.06em minus 0.03em}}
 % Keep Latin text in the Latin face; only CJK codepoints switch.
 \xeCJKDeclareSubCJKBlock{CJK}{"3000 -> "303F, "3400 -> "4DBF, "4E00 -> "9FFF, "FF00 -> "FFEF}
 
@@ -76,17 +79,25 @@
   colback=paper, colframe=sanguine, boxrule=0.6pt, arc=1pt,
   left=7pt, right=7pt, top=6pt, bottom=6pt,
   fonttitle=\bfseries\small, title={#1}, coltitle=white,
-  colbacktitle=sanguine, breakable}
+  colbacktitle=sanguine}
 \newtcolorbox{blocker}[1]{
   colback=white, colframe=crit, boxrule=0.8pt, arc=1pt,
   left=7pt, right=7pt, top=6pt, bottom=6pt,
   fonttitle=\bfseries\small, title={#1}, coltitle=white,
-  colbacktitle=crit, breakable}
+  colbacktitle=crit}
 \newtcolorbox{openitem}[1]{
   colback=white, colframe=warn, boxrule=0.6pt, arc=1pt,
   left=7pt, right=7pt, top=6pt, bottom=6pt,
   fonttitle=\bfseries\small, title={#1}, coltitle=white,
-  colbacktitle=warn, breakable}
+  colbacktitle=warn}
+
+% Callouts are unbreakable. They are all short, and a box that splits leaves a
+% stranded fragment with no title bar on the next page — which happened, and
+% read as damage. An unbreakable box simply moves whole.
+\tcbset{beforeafter skip=6pt}
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
 
 \setlist[itemize]{topsep=3pt,itemsep=1.5pt,parsep=0pt,leftmargin=13pt}
 \setlist[enumerate]{topsep=3pt,itemsep=1.5pt,parsep=0pt,leftmargin=15pt}

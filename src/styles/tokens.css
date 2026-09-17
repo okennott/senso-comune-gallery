@@ -106,7 +106,16 @@
      The opsz values matter: Fraunces' optical-size axis is kept live in
      the font build precisely so each size gets its own drawing.
      ====================================================================== */
-  --font-display: 'Fraunces', Georgia, 'Songti SC', 'Times New Roman', serif;
+  /* Fraunces covers Latin; 'NotoSerifSC Subset' covers the ~100 CJK glyphs
+     that appear in display positions and is gated by unicode-range, so an
+     English page never fetches it. Anything outside the subset — a Chinese
+     title the artist adds before the next build — falls through to the system
+     face rather than rendering as tofu. */
+  --font-display: 'Fraunces', 'NotoSerifSC Subset', Georgia,
+                  'Songti SC', 'Times New Roman', serif;
+
+  /* Chinese body prose is deliberately NOT webfont-served. The system face is
+     native, already on the device, and costs nothing across a border. */
   --font-body:    'Inter', system-ui, -apple-system, 'PingFang SC',
                   'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 

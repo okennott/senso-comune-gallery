@@ -31,7 +31,7 @@ format:
     linestretch: 1.15
     pdf-engine: tectonic
     keep-tex: false
-    fig-pos: "H"
+    fig-pos: "htbp"
 ---
 
 ```{=latex}
@@ -256,6 +256,10 @@ is 2.78:1; the *Sunflowers* chrome yellow 2.70:1. Both sit within a hair of the
 ```
 
 ## The site as built {#sec-built}
+
+Four views, at the two widths the layout was verified at. The screenshots are
+of the built pages, not mockups: what is shown is what `npm run build`
+produces.
 
 ![The homepage. Cream sheet mounted on the sage field, dark brown bar. The motto has the hero to itself; the factual line beneath it is generated from the work data and cannot drift.](fig/cap-home.png){#fig-home width=100%}
 
@@ -595,6 +599,10 @@ Findings had to be implementable to reach this report. These are the places
 where the evidence beneath a recommendation is thinner than the recommendation,
 listed so nothing is built on them unchecked.
 
+Five remain. Every one of them needs a person outside this project — a
+customs broker, a tax adviser, a carrier, Airwallex — and none can be settled
+by writing more code.
+
 : Unresolved, in rough order of cost if wrong {#tbl-open}
 
 | # | Item | Status | What to do |
@@ -604,9 +612,18 @@ listed so nothing is built on them unchecked.
 | 3 | Carrier costs and insurance from China | No verified figures | Needed before the shipping page is final |
 | 4 | Export declaration for a \$300 painting | Not established | Also determines what supports the bank's FX check |
 | 5 | Airwallex + HK sole proprietorship | Entity list verified for account opening only | Ask before incorporating |
-| 6 | CJK webfont strategy | Deferred to a system stack | 5–10 MB vs 80 KB; decide before translating |
-| 7 | Leonardo's hatching angle | Original measurement, not a citation | Present as measured |
-| 8 | Mona Lisa glaze layer count | Not measurable by XRF; the authors say so | Never write "thirty layers" |
+
+## Closed since the first draft {#sec-closed}
+
+Three items that were open have been settled in the build itself.
+
+: Closed, and where {#tbl-closed}
+
+| Item | Resolution | Where |
+|:--|:--|:--|
+| CJK webfont strategy | The display face is subset to the ~100 characters that appear in headings, work titles and UI labels: **34 KB, from a 24 MB face.** `unicode-range` gates the fetch, so an English page never downloads it, and a character added before the next build falls through to the system face rather than rendering as tofu. Chinese body prose is deliberately not webfont-served. | `scripts/build-fonts-cjk.py` |
+| Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
+| Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
 
 ## Content still outstanding
 
@@ -640,6 +657,7 @@ history.
 ```{=latex}
 \cleardoublepage
 \phantomsection
-\addcontentsline{toc}{chapter}{Index}
+\renewcommand{\indexname}{Index}
+\addcontentsline{toc}{part}{Index}
 \printindex
 ```

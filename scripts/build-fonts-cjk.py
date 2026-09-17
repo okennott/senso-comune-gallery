@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+"""
+Build the Chinese webfonts, subset to the characters the site actually uses.
+
+    python3 scripts/build-fonts-cjk.py
+
+CLOSES open item 6 in the build report, which read "CJK webfont strategy —
+deferred to a system stack; 5-10 MB vs 80 KB".
+
+A full CJK face is 5-10 MB against 80 KB for the Latin pair, which is why it
+was deferred. But the site's Chinese content is small and enumerable: it lives
+in three JSON files. Subsetting to exactly those characters brings it to a few
+kilobytes.
+
+THE PART THAT MATTERS: the subset is not a closed set. When the artist adds a
+Chinese title or description, that character will not be in the font. This is
+safe rather than broken, because the @font-face is declared with a
+`unicode-range` covering only the glyphs it really has, and the CSS stack falls
+through to the system CJK face (PingFang / Hiragino / Microsoft YaHei) for
+anything else. New text renders in the system face until the next build, and
+the next build picks it up. Nothing 404s and nothing renders as tofu.
+
+Requires: pip install "fonttools[woff]" brotli zopfli
+"""
+import json
+import pathlib
+import re
+import subprocess
+import sys
+import tempfile
+import urllib.request
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+OUT = ROOT / "public/fonts"
+OUT.mkdir(parents=True, exist_ok=True)
+
+# Only the DISPLAY face is shipped. Chinese body text renders in the system
+# face (PingFang / Hiragino / Microsoft YaHei), which is native, already on the
+# device, and costs nothing. Subsetting the display face to headings alone
+# takes it from 24 MB to about 30 KB; subsetting it to every character on the
+# site would be 146 KB, most of it body text the system face handles better.
+SOURCES = {
+    "serif": ("NotoSerifSC", "ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf"),
+}
+BASE = "https://raw.githubusercontent.com/google/fonts/main/"
+
+# CJK ideographs, CJK punctuation, and fullwidth forms.
+CJK = re.compile(r"[⺀-⻿　-〿㐀-䶿一-鿿"
+                 r"豈-﫿︰-﹏＀-￯]")
+
+
+def collect() -> str:
+    """The CJK characters that appear in DISPLAY positions.
+
+    Not every character on the site — only the ones set in the display face:
+    the wordmark, the hero motto, section headings, navigation labels, work
+    titles and the UI strings. Body prose is deliberately excluded; it renders
+    in the system face.
+    """
+    chars = set()
+
+    def add(v):
+        if isinstance(v, str):
+            chars.update(CJK.findall(v))
+        elif isinstance(v, dict):
+            add(v.get("zh", ""))
+
+    site = json.loads((ROOT / "src/data/site.json").read_text(encoding="utf-8"))
+    seller = json.loads((ROOT / "src/data/seller.json").read_text(encoding="utf-8"))
+    arts = json.loads((ROOT / "src/data/artworks.json").read_text(encoding="utf-8"))
+
+    add(seller["artist"]["siteName"])
+    add(site["hero"]["title"])
+    for s in site["sections"].values():
+        add(s.get("title"))
+    for n in site["nav"]:
+        add(n.get("label"))
+    for w in arts["works"]:
+        add(w.get("title"))
+    for v in site["ui"].values():
+        add(v)
+
+    return "".join(sorted(chars))
+
+
+def unicode_range(chars: str) -> str:
+    """A CSS unicode-range listing exactly the codepoints in the subset."""
+    cps = sorted(ord(c) for c in chars)
+    spans, start, prev = [], None, None
+    for cp in cps:
+        if start is None:
+            start = prev = cp
+        elif cp == prev + 1:
+            prev = cp
+        else:
+            spans.append((start, prev))
+            start = prev = cp
+    if start is not None:
+        spans.append((start, prev))
+    return ", ".join(f"U+{a:04X}" if a == b else f"U+{a:04X}-{b:04X}"
+                     for a, b in spans)
+
+
+def main() -> int:
+    chars = collect()
+    if not chars:
+        print("  no CJK content found in src/data — nothing to build")
+        return 0
+
+    print(f"  {len(chars)} distinct CJK characters in display positions")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        charfile = tmp / "chars.txt"
+        charfile.write_text(chars, encoding="utf-8")
+
+        results = []
+        for kind, (name, path) in SOURCES.items():
+            src = tmp / f"{name}.ttf"
+            print(f"  fetching {name}")
+            urllib.request.urlretrieve(BASE + path, src)
+
+            dst = OUT / f"{name.lower()}-subset.woff2"
+            subprocess.run([
+                sys.executable, "-m", "fontTools.subset", str(src),
+                f"--output-file={dst}",
+                "--flavor=woff2", "--with-zopfli",
+                f"--text-file={charfile}",
+                "--layout-features=",       # CJK needs no Latin feature set
+                "--no-hinting", "--desubroutinize",
+            ], check=True, stdout=subprocess.DEVNULL)
+            results.append((kind, name, dst, dst.stat().st_size,
+                            src.stat().st_size))
+
+        ur = unicode_range(chars)
+        css = ["/* Generated by scripts/build-fonts-cjk.py — do not edit.",
+               " *",
+               " * Subset to the CJK characters currently in src/data. The",
+               " * unicode-range is exactly the glyphs present, so anything the",
+               " * artist adds before the next build falls through to the system",
+               " * CJK face in the stack rather than rendering as tofu.",
+               " */"]
+        for kind, name, dst, size, full in results:
+            css.append(
+                f"@font-face{{\n"
+                f"  font-family:'{name} Subset';\n"
+                f"  src:url('/fonts/{dst.name}') format('woff2');\n"
+                f"  font-weight:400 700;\n"
+                f"  font-style:normal;\n"
+                f"  font-display:swap;\n"
+                f"  unicode-range:{ur};\n"
+                f"}}")
+        (OUT / "fonts-cjk.css").write_text("\n".join(css) + "\n", encoding="utf-8")
+
+        print()
+        for kind, name, dst, size, full in results:
+            print(f"  {dst.name:34s} {size:7,} bytes   "
+                  f"(full face {full/1024/1024:.1f} MB)")
+        print(f"  {'fonts-cjk.css':34s} "
+              f"{(OUT / 'fonts-cjk.css').stat().st_size:7,} bytes")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

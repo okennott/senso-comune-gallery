@@ -614,15 +614,20 @@ cpSync(join(ROOT, 'src/scripts/availability.js'), join(DIST, 'availability.js'))
 
 /* one stylesheet, concatenated in cascade order. Font urls are rewritten for
    the deployment base so the same source works at a root and at a subpath. */
-const css = ['tokens', 'base', 'gallery']
-  .map((f) => readFileSync(join(ROOT, `src/styles/${f}.css`), 'utf8'))
+const cjkCss = existsSync(join(ROOT, 'public/fonts/fonts-cjk.css'))
+  ? readFileSync(join(ROOT, 'public/fonts/fonts-cjk.css'), 'utf8')
+  : '';
+const css = [cjkCss, ...['tokens', 'base', 'gallery']
+    .map((f) => readFileSync(join(ROOT, `src/styles/${f}.css`), 'utf8'))]
   .join('\n')
   .replace(/url\('\/fonts\//g, `url('${asset('/fonts/')}`);
 writeFileSync(join(DIST, 'styles.css'), css);
 
 /* fonts */
 mkdirSync(join(DIST, 'fonts'), { recursive: true });
-for (const f of ['fraunces-latin.woff2', 'inter-latin.woff2', 'OFL-Fraunces.txt', 'OFL-Inter.txt']) {
+for (const f of ['fraunces-latin.woff2', 'inter-latin.woff2',
+                 'notoserifsc-subset.woff2',
+                 'OFL-Fraunces.txt', 'OFL-Inter.txt']) {
   const src = join(ROOT, 'public/fonts', f);
   if (existsSync(src)) cpSync(src, join(DIST, 'fonts', f));
 }

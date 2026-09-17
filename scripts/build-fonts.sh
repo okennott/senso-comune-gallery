@@ -60,6 +60,9 @@ pyftsubset "$TMP/in.ttf" --output-file="$OUT/inter-latin.woff2" \
   --flavor=woff2 --with-zopfli --unicodes="$LATIN" \
   --layout-features="$FEATURES" --no-hinting --desubroutinize
 
+echo "==> Chinese display face"
+python3 "$(dirname "$0")/build-fonts-cjk.py"
+
 echo
 for f in "$OUT/fraunces-latin.woff2" "$OUT/inter-latin.woff2"; do
   printf '%-28s %7d bytes  %5.1f KB\n' "$(basename "$f")" \
