@@ -1,0 +1,69 @@
+# Preview deployment to GitHub Pages.
+#
+# This is for LAYOUT REVIEW ONLY. The production target is Cloudflare Pages:
+#   - GitHub's Terms exclude using Pages "to run your online business,
+#     e-commerce site, or any other website that is primarily directed at
+#     either facilitating commercial transactions", which this site is.
+#   - Cloudflare Pages measures 0% blocked from mainland China, where the
+#     artist is; github.io is not somewhere to point Chinese buyers.
+#
+# The repo can stay private; the published site is public either way.
+
+name: Preview (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # sharp ships prebuilt binaries for linux-x64; no system libvips needed.
+      - run: npm ci || npm install
+
+      # BASE_PATH: a project site serves from /<repo>/, so every absolute URL
+      # needs that prefix. SITE_URL feeds canonical, og:url and the sitemap.
+      - name: Build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io
+        run: npm run build
+
+      - name: Check
+        run: npm run check
+
+      # Pages will not serve paths beginning with an underscore unless this
+      # file is present. The site has none today, but the guard is free.
+      - run: touch dist/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

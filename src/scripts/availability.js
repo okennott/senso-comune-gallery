@@ -49,10 +49,15 @@
     if (live) live.textContent = root.dataset.soldAnnounce || 'This work has just sold.';
   };
 
+  // Derive the deployment base from this script's own URL, so the same file
+  // works at a domain root and at a GitHub Pages project subpath.
+  const base = (document.currentScript || document.querySelector('script[src$="availability.js"]'))
+    ?.getAttribute('src')?.replace(/availability\.js$/, '') || '/';
+
   const check = () => {
     // cache:'no-store' plus a short max-age on the file itself — this endpoint
     // is deliberately the one uncached thing on the site.
-    fetch('/availability.json', { cache: 'no-store' })
+    fetch(base + 'availability.json', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data) Object.keys(data).forEach((s) => swap(s, data[s])); })
       .catch(() => { /* offline or blocked: leave the page as built */ });

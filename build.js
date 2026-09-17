@@ -22,7 +22,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, existsSync } fr
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  esc, t, dims, money, path as lpath, scaleSvg, jsonLd, layout,
+  esc, t, dims, money, path as lpath, asset, BASE, scaleSvg, jsonLd, layout,
 } from './src/templates.js';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
@@ -36,7 +36,7 @@ const artworksF = read('src/data/artworks.json');
 const works  = [...artworksF.works].sort((a, b) => a.order - b.order);
 const LOCALES = Object.keys(site.locales);
 const ui = site.ui;
-const origin = site.url;
+const origin = process.env.SITE_URL || site.url;
 const entity = seller.entities[seller.activeEntity];
 
 /* ------------------------------------------------------------------ *
@@ -60,8 +60,13 @@ scan(artworksF, 'artworks');
 if (site.url.includes('example')) todo.push('site.url');
 
 /* ------------------------------------------------------------------ */
+/* URLs carry the deployment base, but the built files must sit at the artifact
+   root — a Pages project site serves the artifact AT /<repo>/, it does not
+   expect the files to be nested inside another copy of that folder. */
+const stripBase = (p) => (BASE && p.startsWith(BASE) ? p.slice(BASE.length) || '/' : p);
+
 const out = (rel, html) => {
-  const file = join(DIST, rel);
+  const file = join(DIST, stripBase(rel));
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, html);
 };
@@ -74,13 +79,13 @@ const altFor = (p) => LOCALES.map((l) => [l, lpath(l, site, p)]);
  *  between CLS 0 and CLS 0.4. */
 function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100vw - 40px)' } = {}, loc) {
   const widths = [640, 960, 1280, 1600, 2000];
-  const srcset = (ext) => widths.map((x) => `/img/${w.image}-${x}.${ext} ${x}w`).join(', ');
+  const srcset = (ext) => widths.map((x) => `${asset(`/img/${w.image}-${x}.${ext}`)} ${x}w`).join(', ');
   // Intrinsic pixel dimensions of the largest variant, in the work's own ratio.
   const iw = 2000;
   const ih = Math.round((w.heightCm / w.widthCm) * 2000);
   return `<picture>
       <source type="image/avif" srcset="${srcset('avif')}" sizes="${sizes}">
-      <img class="work__img" src="/img/${w.image}-1280.webp" srcset="${srcset('webp')}" sizes="${sizes}"
+      <img class="work__img" src="${asset(`/img/${w.image}-1280.webp`)}" srcset="${srcset('webp')}" sizes="${sizes}"
            width="${iw}" height="${ih}" alt="${esc(t(w.alt, loc))}"
            ${eager ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"'}>
     </picture>`;
@@ -260,7 +265,7 @@ function renderWork(w, loc) {
 
       ${w.details?.length ? `<div class="details-row">
         ${w.details.map((d, n) => `<figure>
-          <img src="/img/${esc(d.image)}-960.webp" width="960" height="960" loading="lazy" decoding="async"
+          <img src="${asset(`/img/${esc(d.image)}-960.webp`)}" width="960" height="960" loading="lazy" decoding="async"
                alt="${esc(t(d.alt, loc))}">
           <figcaption>${esc(t(ui.detailCrop, loc))} ${n + 1}</figcaption>
         </figure>`).join('\n        ')}
@@ -297,7 +302,7 @@ function renderWork(w, loc) {
   <form method="dialog" style="margin:0;position:relative">
     <button class="lightbox__close" value="close">${esc(t(ui.closeDialog, loc))}</button>
   </form>
-  <img src="/img/${w.image}-2000.webp" alt="${esc(t(w.alt, loc))}" width="2000"
+  <img src="${asset(`/img/${w.image}-2000.webp`)}" alt="${esc(t(w.alt, loc))}" width="2000"
        height="${Math.round((w.heightCm / w.widthCm) * 2000)}">
 </dialog>
 
@@ -457,10 +462,12 @@ for (const loc of LOCALES) {
 /* client-side availability check */
 cpSync(join(ROOT, 'src/scripts/availability.js'), join(DIST, 'availability.js'));
 
-/* one stylesheet, concatenated in cascade order */
+/* one stylesheet, concatenated in cascade order. Font urls are rewritten for
+   the deployment base so the same source works at a root and at a subpath. */
 const css = ['tokens', 'base', 'gallery']
   .map((f) => readFileSync(join(ROOT, `src/styles/${f}.css`), 'utf8'))
-  .join('\n');
+  .join('\n')
+  .replace(/url\('\/fonts\//g, `url('${asset('/fonts/')}`);
 writeFileSync(join(DIST, 'styles.css'), css);
 
 /* fonts */

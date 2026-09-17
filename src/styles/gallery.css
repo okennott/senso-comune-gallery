@@ -320,3 +320,48 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
 .page h3{ font-size:var(--size-body); margin:var(--space-5) 0 var(--space-2) }
 .page .prose{ max-width:var(--measure) }
 .page .prose p{ color:var(--body) }
+
+/* ---------- narrow screens ----------
+   Found by screenshotting at 390px: the nav wrapped to three rows and the
+   sticky masthead grew to ~280px — a third of a phone viewport, and enough to
+   break the scroll-padding-top that SC 2.4.11 depends on.
+
+   Two changes. The masthead stops being sticky, so the paintings get the whole
+   screen and the focus-obscured risk disappears entirely rather than being
+   mitigated. And the nav becomes one non-wrapping row that scrolls itself if
+   it has to, so the page never scrolls sideways. */
+@media (max-width:719px){
+  .masthead{ position:static; backdrop-filter:none; background:var(--paper) }
+  .masthead__inner{
+    gap:var(--space-1) var(--space-3);
+    padding-block:var(--space-2);
+    align-items:center;
+  }
+  .wordmark{ font-size:var(--size-body); font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1 }
+  .lang-switch{ order:2; min-height:44px }
+  .nav{
+    order:3; width:100%;
+    flex-wrap:nowrap; overflow-x:auto;
+    gap:12px;
+    scrollbar-width:none;
+    /* keep the focus ring from being clipped by the scroll container */
+    padding-block:2px;
+  }
+  .nav::-webkit-scrollbar{ display:none }
+  /* Tightened just enough that all four items fit a 390px screen without
+     scrolling — a cut-off last item with no scroll affordance is worse than
+     slightly smaller type. It still scrolls if the labels are translated
+     longer, and the 44px touch target is unchanged. */
+  .nav a{ min-height:44px; white-space:nowrap; font-size:11.5px; letter-spacing:.055em }
+
+  html{ scroll-padding-top:var(--space-4) }
+  [id]{ scroll-margin-top:var(--space-4) }
+
+  .hero{ padding-block:var(--space-6) var(--space-5) }
+  .section{ padding-block:var(--space-5) }
+  .works{ gap:var(--space-6) }
+  :root{ --edge-height:5rem }
+
+  /* the aside is not sticky when it is stacked under the image */
+  .detail__aside{ position:static }
+}

@@ -33,11 +33,20 @@ export const dims = (w) =>
 export const money = (n, cur = 'USD') =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: cur, maximumFractionDigits: 0 }).format(n);
 
+/** Deployment base path. Empty for a domain root (the production target);
+ *  set to e.g. "/senso-comune-gallery" for a GitHub Pages project site, which
+ *  serves from a subpath rather than the origin root. */
+export const BASE = (process.env.BASE_PATH || '').replace(/\/$/, '');
+
 /** Locale-aware path: en has no prefix, zh sits under /zh. */
 export const path = (loc, site, p = '/') => {
   const prefix = site.locales[loc].prefix;
-  return (prefix + p).replace(/\/{2,}/g, '/') || '/';
+  const joined = (BASE + prefix + p).replace(/\/{2,}/g, '/');
+  return joined || '/';
 };
+
+/** Absolute-from-root asset URL, base-aware. */
+export const asset = (p) => (BASE + p).replace(/\/{2,}/g, '/');
 
 /* ---------- scale diagram (N-06) ----------
    Artsy's production "View in Room" is ~120 lines of CSS compositing with no
@@ -81,8 +90,8 @@ export function scaleSvg(w, ui, loc) {
     <line x1="${W - 50}" y1="${floor - WALL_CM * PX_PER_CM}" x2="${W - 38}" y2="${floor - WALL_CM * PX_PER_CM}"/>
     <line x1="${W - 50}" y1="${floor}" x2="${W - 38}" y2="${floor}"/>
   </g>
-  <text x="${W - 34}" y="${floor - WALL_CM * PX_PER_CM / 2}" font-size="11"
-        fill="currentColor" opacity=".7" font-family="var(--font-body)">244 cm</text>
+  <text x="${W - 56}" y="${floor - WALL_CM * PX_PER_CM / 2}" font-size="11" text-anchor="end"
+        fill="currentColor" opacity=".7" font-family="var(--font-body)">244 cm · 8 ft</text>
   <rect x="${px}" y="${py}" width="${pw}" height="${ph}"
         fill="var(--wash-warm)" stroke="var(--sanguine)" stroke-width="1.5"/>
   <g stroke="var(--sanguine)" opacity=".55" stroke-width="1">
@@ -169,9 +178,9 @@ export function layout({ site, seller, loc, title, description, body, ogImage, c
 ${ogImage ? `<meta property="og:image" content="${esc(origin + ogImage)}">
 <meta property="og:image:width" content="1600">
 <meta name="twitter:card" content="summary_large_image">` : '<meta name="twitter:card" content="summary">'}
-<link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css">
+<link rel="preload" href="${asset('/fonts/fraunces-latin.woff2')}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="${asset('/fonts/inter-latin.woff2')}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="${asset('/styles.css')}">
 </head>
 <body class="${bodyClass}">
 <a class="skip-link" href="#main">${esc(t(ui.skipToContent, loc))}</a>
@@ -214,7 +223,7 @@ ${body}
   ${decl ? `<div class="wrap"><p class="legal-declaration" lang="zh-CN">${esc(decl.zh)}</p>
   <p class="legal-declaration" style="border:0;margin-top:0;padding-top:0">${esc(decl.en)}</p></div>` : ''}
 </footer>
-<script src="/availability.js" defer></script>
+<script src="${asset('/availability.js')}" defer></script>
 </body>
 </html>`;
 }
