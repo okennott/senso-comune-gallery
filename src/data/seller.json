@@ -17,7 +17,7 @@
   "activeEntity": "individual",
 
   "artist": {
-    "name":   { "en": "NEEDS-INPUT", "zh": "NEEDS-INPUT" },
+    "name":   { "en": "Priscilla", "zh": "Priscilla" },
     "siteName": { "en": "Senso Comune Gallery", "zh": "常识画廊" },
     "instagram": "NEEDS-INPUT",
     "wechatId": "NEEDS-INPUT",
@@ -61,8 +61,8 @@
 
       "invoicing": {
         "$comment": [
-          "Without a business licence she cannot self-issue 发票. Art. 16 of the",
-          "Invoice Management Measures allows 代开 at the tax bureau on request."
+          "Without a business licence Priscilla cannot self-issue 发票. Art. 16 of",
+          "the Invoice Management Measures allows 代开 at the tax bureau on request."
         ],
         "canSelfIssueFapiao": false,
         "note": {

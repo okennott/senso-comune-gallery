@@ -12,7 +12,7 @@ was deferred. But the site's Chinese content is small and enumerable: it lives
 in three JSON files. Subsetting to exactly those characters brings it to a few
 kilobytes.
 
-THE PART THAT MATTERS: the subset is not a closed set. When the artist adds a
+THE PART THAT MATTERS: the subset is not a closed set. When Priscilla adds a
 Chinese title or description, that character will not be in the font. This is
 safe rather than broken, because the @font-face is declared with a
 `unicode-range` covering only the glyphs it really has, and the CSS stack falls

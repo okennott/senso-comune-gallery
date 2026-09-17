@@ -56,7 +56,7 @@ img,svg,video{ max-width:100%; height:auto; display:block }
 img{ background:var(--paper) }   /* holds the box before bytes arrive */
 
 /* ---------- the sheet ----------
-   The artist's mockup is sage from edge to edge with cream plates behind the
+   Priscilla's mockup is sage from edge to edge with cream plates behind the
    paintings. Text on that sage measures 1.93-2.35:1, so it cannot stay there.
 
    Rather than reduce her green to a thin divider, the whole content column
@@ -284,7 +284,7 @@ a{ color:var(--sanguine) }
 }
 
 /* ---------- view transitions ----------
-   N-02. Makes seven documents feel like the one page the artist drew.
+   N-02. Makes seven documents feel like the one page Priscilla drew.
    Browsers without support navigate normally; no errors. */
 @view-transition{ navigation:auto }
 

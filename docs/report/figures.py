@@ -64,12 +64,12 @@ def palette():
     # role: text needs 4.5:1, a rule or border needs 3:1.  Flagging a rule red
     # for missing a threshold that does not apply to it would be a lie.
     rows = [
-        ("Bar / masthead",    BAR,   None,    None, "Her dark brown. Sand on it: 11.45:1"),
+        ("Bar / masthead",    BAR,   None,    None, "Priscilla's dark brown. Sand on it: 11.45:1"),
         ("Field / sage",      FIELD, None,    None, "Frames the sheet. Carries no text"),
         ("Paper / reading",   PAPER, None,    None, "All foregrounds solved against this family"),
         ("Ink / headings",    INK,   "paper", 4.5,  "Hers. Warmer than the neutral it replaced"),
         ("Body",              BODY,  "paper", 4.5,  "Hers"),
-        ("Sanguine / accent", SANG,  "paper", 4.5,  "Red chalk. The artist chose it by eye"),
+        ("Sanguine / accent", SANG,  "paper", 4.5,  "Red chalk. Priscilla chose it by eye"),
         ("Muted / captions",  MUTED, "paper", 4.5,  "Re-solved; the white-ground value failed"),
         ("Rule",              RULE,  "paper", 3.0,  "Van Gogh's stated violet. Needs 3:1, not 4.5"),
     ]

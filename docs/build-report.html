@@ -138,7 +138,7 @@ a:hover{text-decoration-thickness:2px}
 <header class="masthead">
   <p class="doctype">Technical review · rev. 2 · draft <code style="font-size:11px">index.pdf</code> · 17 September 2026</p>
   <h1>Senso Comune Build Report</h1>
-  <p class="standfirst">A nine-page PDF draft, examined against current research on commerce back-ends, gallery navigation, accessibility and imaging — then re-examined once two facts landed: the artist is based in mainland China and selling to both markets, and the design is to carry a quiet debt to Leonardo and to van Gogh. Both change the build. Neither changes the look.</p>
+  <p class="standfirst">A nine-page PDF draft, examined against current research on commerce back-ends, gallery navigation, accessibility and imaging — then re-examined once two facts landed: Priscilla is based in mainland China and selling to both markets, and the design is to carry a quiet debt to Leonardo and to van Gogh. Both change the build. Neither changes the look.</p>
 
   <dl class="meta-grid">
     <div class="meta-cell"><dt>Subject</dt><dd>Solo artist gallery, 6 unique works</dd></div>
@@ -262,7 +262,7 @@ a:hover{text-decoration-thickness:2px}
     <div class="f-top"><span class="f-id">D-01</span><span class="sev sev-adopt">Adopt</span></div>
     <div class="f-body">
       <p class="f-title">The Leonardo reference is already in the draft — it just needs naming</p>
-      <p>Sanguine, the red chalk Leonardo drew in for most of his life, computes to <strong>6.33:1</strong> on white. The oxblood the artist independently chose computes to <strong>6.68:1</strong>. They are, for practical purposes, the same colour.</p>
+      <p>Sanguine, the red chalk Leonardo drew in for most of his life, computes to <strong>6.33:1</strong> on white. The oxblood Priscilla independently chose computes to <strong>6.68:1</strong>. They are, for practical purposes, the same colour.</p>
       <p><strong>The recommendation is therefore to change nothing and document it.</strong> Keep <code>#8B4A3C</code> exactly as drafted; record in the design tokens that it is the sanguine note. This is the single subtlest move available, because the homage was arrived at by eye rather than applied afterwards — which is what makes it credible.</p>
       <p>Add <strong>ultramarine <code>#2E3A8C</code> at 10:1 as the secondary accent</strong>, held in reserve for exactly one job (the Tribute section, which is itself about admiration for other artists). Two accents, one warm and one cold, is the complementary pairing van Gogh wrote about constantly — and it is the only place blue appears on the site.</p>
       <p class="ev"><b>Verified:</b> <i>Starry Night</i> pigment analysis — "the sky was painted with ultramarine and cobalt blue, and for the stars and the moon, van Gogh employed the rare pigment indian yellow together with zinc yellow." Contrast values computed this session.</p>
@@ -367,7 +367,7 @@ a:hover{text-decoration-thickness:2px}
       <p><strong>And he knew.</strong> From Arles, on his own palette — the chromes, Prussian blue, emerald, the crimson lakes:</p>
       <blockquote><p>All the colours that the Impressionists have brought into fashion are unstable, so there is all the more reason not to be afraid to lay them on too crudely — time will tone them down only too much.</p></blockquote>
       <p>That is the whole argument of this site in one sentence by someone else: a painting is a physical object that keeps changing after it leaves the studio, and that is a reason to be bolder rather than more careful. It belongs on the About page far more than any biographical note about ears or asylums.</p>
-      <p>It also earns the single true sentence about why the artist photographs and colour-manages carefully — connecting the homage to finding I-01 rather than leaving it as ornament.</p>
+      <p>It also earns the single true sentence about why Priscilla photographs and colour-manages carefully — connecting the homage to finding I-01 rather than leaving it as ornament.</p>
       <p class="ev"><b>Verified:</b> van Gogh to Theo, letter 476 (old numbering), Arles; and his own description of the <i>Bedroom</i> walls as "pale violet". The letters are fully published and need no myth.</p>
     </div>
     <dl class="scope">
@@ -438,7 +438,7 @@ a:hover{text-decoration-thickness:2px}
 <!-- ===================== 03 ===================== -->
 <section id="reach">
   <div class="sec-head"><span class="sec-num">03</span><h2>Reaching both markets</h2></div>
-  <p class="sec-intro">The artist is in mainland China and wants the domestic and international audiences weighted equally. Most of this section is measurement rather than opinion — reachability from inside China is testable, and was tested.</p>
+  <p class="sec-intro">Priscilla is in mainland China and wants the domestic and international audiences weighted equally. Most of this section is measurement rather than opinion — reachability from inside China is testable, and was tested.</p>
 
   <div class="finding">
     <div class="f-top"><span class="f-id">B-01</span><span class="sev sev-block">Blocking</span></div>
@@ -498,7 +498,7 @@ a:hover{text-decoration-thickness:2px}
       </div>
       <p>Vercel was already disqualified in rev. 1 on its non-commercial Hobby terms; it is now disqualified twice. <strong>Cloudflare Pages is the recommendation</strong>, with one terms subtlety that matters for a gallery: Cloudflare's CDN terms reserve the right to limit use for serving <em>"a disproportionate percentage of pictures"</em> without a paid service — but they name the Developer Platform (Pages/Workers/R2) as the sanctioned route. Hosting <em>on</em> Pages is compliant; proxying an image host through the free CDN is the risky configuration.</p>
       <p><strong>No ICP filing is needed</strong>, because nothing is hosted inside mainland China. This matters more than it sounds: individual 备案 explicitly forbids profit-generating sites, and the commercial 经营性ICP licence cannot be held by an individual at all. Hosting overseas is what keeps the door open.</p>
-      <p><strong>Two consequences for the workflow.</strong> GitHub at 71% disrupted means the artist cannot be put on a git-based editing workflow from China — the content path must not require her to reach github.com. And Google Analytics is blocked outright, so use Cloudflare Web Analytics.</p>
+      <p><strong>Two consequences for the workflow.</strong> GitHub at 71% disrupted means Priscilla cannot be put on a git-based editing workflow from China — the content path must not require her to reach github.com. And Google Analytics is blocked outright, so use Cloudflare Web Analytics.</p>
     </div>
     <dl class="scope">
       <div><dt>Effort</dt><dd>1 hour</dd></div><div><dt>Cost</dt><dd>$0/mo + ~$11/yr</dd></div>
@@ -653,7 +653,7 @@ a:hover{text-decoration-thickness:2px}
     <div class="f-body">
       <p class="f-title">The price should be the boldest thing in the block, and the year belongs beside the title</p>
       <p>Read from Artsy's production source: the grid card sets artist name in default ink, italic title and medium in grey, and — the only bold, full-ink element — the price or "Sold". The draft has this reversed: large quiet image, small quiet price, smallest quietest Buy.</p>
-      <p>Across Artsy, David Zwirner, MoMA, Saatchi and Tappan the order is <strong>title → year → medium → dimensions → price</strong>. The draft's <code>Oil on canvas · 40×50cm · 2026</code> puts the year last, against convention everywhere surveyed. Italicise the title, drop the artist name (it belongs in the masthead on a one-artist site), give dimensions in both units with the true <code>×</code>, and add "Unique work" and "Frame not included" — silence about framing is treated as a bug in the trade.</p>
+      <p>Across Artsy, David Zwirner, MoMA, Saatchi and Tappan the order is <strong>title → year → medium → dimensions → price</strong>. The draft's <code>Oil on canvas · 40×50cm · 2026</code> puts the year last, against convention everywhere surveyed. Italicise the title, drop Priscilla name (it belongs in the masthead on a one-artist site), give dimensions in both units with the true <code>×</code>, and add "Unique work" and "Frame not included" — silence about framing is treated as a bug in the trade.</p>
       <p class="ev"><b>Flagged:</b> no authoritative written tombstone standard exists — strong observed convention across five major sites, not a published rule.</p>
     </div>
     <dl class="scope">
@@ -776,7 +776,7 @@ a:hover{text-decoration-thickness:2px}
       <p>The asymmetry decides it. Every modern browser assumes an untagged image is sRGB. So a tagged <strong>sRGB</strong> file that loses its profile renders <em>correctly</em>; a <strong>Display P3</strong> file that loses its profile renders as heavily oversaturated sRGB. <strong>sRGB fails safe; P3 fails loud.</strong> Oil, watercolour and graphite pigments fall overwhelmingly inside sRGB anyway.</p>
       <p>The trap: <code>sharp</code> — under Astro, Next and most image CDNs — states <em>"By default all metadata will be removed."</em> Force it:</p>
       <pre><code>sharp(input).toColourspace('srgb').withIccProfile('srgb')</code></pre>
-      <p>This is where finding D-04 earns its keep. A site whose rule colour is van Gogh's stated violet, on a page that explains why the artist colour-manages carefully, is making the homage do actual work.</p>
+      <p>This is where finding D-04 earns its keep. A site whose rule colour is van Gogh's stated violet, on a page that explains why Priscilla colour-manages carefully, is making the homage do actual work.</p>
     </div>
     <dl class="scope">
       <div><dt>Effort</dt><dd>2 build lines</dd></div><div><dt>Cost</dt><dd>$0</dd></div>

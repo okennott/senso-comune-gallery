@@ -1,7 +1,7 @@
 ---
 title: "Senso Comune Gallery"
 subtitle: "Design, commerce and compliance report"
-author: "Prepared for the artist"
+author: "Prepared for Priscilla"
 date: "17 September 2026"
 abstract: |
   This report documents the design and build of a small gallery site for a solo
@@ -91,7 +91,7 @@ bill, no pause, no terms problem and no ICP filing\index{ICP filing}.
 **Self-host the fonts.** 79.8 KB for both families, built from the variable
 originals.
 
-**Adopt the artist's sage palette**, with text moved onto cream.
+**Adopt Priscilla's sage palette**, with text moved onto cream.
 
 ```{=latex}
 \end{finding}
@@ -119,14 +119,14 @@ Payment processing is separate and depends on the entity decision; see
 
 ## Where the design came from
 
-The artist supplied a nine-page draft and, later, a live mockup with a revised
+Priscilla supplied a nine-page draft and, later, a live mockup with a revised
 palette. Both were treated as the brief. The work here was not to redesign but
 to find where the drawing and the medium disagree — and they disagreed mostly
 about contrast.
 
 ## The palette {#sec-palette}
 
-The artist's mockup moves the site from white to a sage-green world: a dark
+Priscilla's mockup moves the site from white to a sage-green world: a dark
 brown masthead bar, warm brown text, terracotta, and cream plates behind the
 paintings. Two of her decisions were already right and are kept exactly as
 drawn — the warm browns, and a **filled** terracotta button.
@@ -138,7 +138,7 @@ drawn — the warm browns, and a **filled** terracotta button.
 Body text on the sage does not pass, and the accent on sage is worse than the
 value it was replacing.
 
-![Why the sage carries no text. The three red bars are the artist's mockup as drawn; the draft's original failure is included for scale.](fig/sage-limit.pdf){#fig-sage width=100%}
+![Why the sage carries no text. The three red bars are Priscilla's mockup as drawn; the draft's original failure is included for scale.](fig/sage-limit.pdf){#fig-sage width=100%}
 
 ```{=latex}
 \begin{finding}{The resolution was already in her own mockup}
@@ -191,7 +191,7 @@ the optical sizing the design depends on. And Fraunces' `WONK` axis defaults to
 Not the golden ratio. The one proportional system in Leonardo's own hand, on
 the *Vitruvian Man* sheet, is whole-number fractions of height.
 
-: Type scale, and how close the artist's draft already was {#tbl-scale}
+: Type scale, and how close Priscilla's draft already was {#tbl-scale}
 
 | Role             | Fraction         | Computed | Draft used |
 |:-----------------|:-----------------|---------:|-----------:|
@@ -212,7 +212,7 @@ work should feel recognised.*
 ### What was adopted
 
 - **The accent is sanguine**\index{sanguine}. Red chalk, the medium Leonardo
-  drew in, measures 6.33:1 on white; the oxblood the artist chose by eye
+  drew in, measures 6.33:1 on white; the oxblood Priscilla chose by eye
   measures 6.68:1. They are the same colour. The recommendation was to change
   nothing and record why.
 - **No hard edges.** Leonardo's instruction to paint *"without strokes or
@@ -311,7 +311,7 @@ Six works at \$60–\$440 is roughly CNY 19,000 — an order of magnitude below 
 registration ceiling.
 
 ```{=latex}
-\begin{blocker}{What she must not do}
+\begin{blocker}{What Priscilla must not do}
 ```
 
 Route sale proceeds as a gift or family remittance; split transactions to stay

@@ -13,7 +13,7 @@
 :root{
 
   /* ======================================================================
-     PALETTE — adopted from the artist's own mockup, with the contrast fixed
+     PALETTE — adopted from Priscilla's own mockup, with the contrast fixed
 
      She moved the site from white to a sage-green world: a dark brown
      masthead bar, warm brown text, terracotta, and cream plates behind the
@@ -90,7 +90,7 @@
 
      Leonardo: lights and shadows united "senza tratti o segni" — without
      strokes or lines. The bands BETWEEN them carry the sage, which is where
-     the artist's green actually belongs.                                  */
+     Priscilla's green actually belongs.                                  */
   --wash-warm:        #F3EBDD;   /* Original Works */
   --wash-violet:      #EDE4D3;   /* Tribute        */
   --wash-blue:        #E9E3D6;   /* About          */
@@ -109,7 +109,7 @@
   /* Fraunces covers Latin; 'NotoSerifSC Subset' covers the ~100 CJK glyphs
      that appear in display positions and is gated by unicode-range, so an
      English page never fetches it. Anything outside the subset — a Chinese
-     title the artist adds before the next build — falls through to the system
+     title Priscilla adds before the next build — falls through to the system
      face rather than rendering as tofu. */
   --font-display: 'Fraunces', 'NotoSerifSC Subset', Georgia,
                   'Songti SC', 'Times New Roman', serif;
