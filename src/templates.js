@@ -183,7 +183,7 @@ export function layout({ site, seller, loc, title, description, body, ogImage, o
                          ogImageHeight, product, canonical, altLocales, bodyClass = '' }) {
   const L = site.locales[loc];
   const ui = site.ui;
-  const origin = site.url;
+  const origin = process.env.SITE_URL || site.url;   // same source build.js uses for the sitemap
 
   const hreflang = altLocales
     .map(([l, href]) => `<link rel="alternate" hreflang="${site.locales[l].lang}" href="${esc(origin + href)}">`)
