@@ -234,66 +234,6 @@ function gallery(w, loc) {
     </div>`;
 }
 
-/** Which of the three media nouns the hero line should use for a work.
- *
- *  The nouns are a closed set because they are translated copy, not data —
- *  each one is a string in site.json with an English and a Chinese form. A
- *  medium outside the set is therefore not something this can guess at, and
- *  guessing is how "Gouache on panel" ends up announced as an oil painting.
- *  Unrecognised media are collected and reported by the build instead; adding
- *  one means adding its noun to `ui` and its pattern here, together. */
-const MEDIA = [
-  [/\boil\b|油画/i,             'mediaOil'],
-  [/watercolou?r|水彩/i,        'mediaWater'],
-  [/graphite|pencil|铅笔/i,     'mediaPaper'],
-];
-const unknownMedia = new Set();
-function classifyMedium(w) {
-  const text = `${t(w.medium, 'en')} ${t(w.medium, 'zh')}`;
-  for (const [re, key] of MEDIA) if (re.test(text)) return ui[key];
-  unknownMedia.add(`${w.slug}: "${t(w.medium, 'en')}"`);
-  return ui.mediaOil;
-}
-
-/** The hero's factual line, generated rather than typed: the count, the media
- *  and the span of years all come from artworks.json, so they cannot drift
- *  from what is actually on the site. This is what replaced the category
- *  eyebrow — it grounds the motto instead of labelling it. */
-function standfirst(loc) {
-  // Spelled out to twelve, then numerals: "Thirteen paintings" is a mouthful
-  // and a catalogue that large reads better as a figure anyway. The table is
-  // the only place the count is written down, and it is not a limit.
-  const NUM_EN = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
-                  'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
-  const NUM_ZH = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
-  const n = works.length;
-  const count = loc === 'zh'
-    ? `${NUM_ZH[n] || n}${t(ui.paintings, loc)}`
-    : `${NUM_EN[n] || n} ${t(n === 1 ? ui.painting : ui.paintings, loc)}`;
-
-  // Distinct media, in the order they first appear. classifyMedium reports
-  // anything it does not recognise rather than quietly calling it oil.
-  const media = [];
-  for (const w of works) {
-    const s = t(classifyMedium(w), loc);
-    if (!media.includes(s)) media.push(s);
-  }
-  // CJK sets no spaces around a conjunction; Latin does.
-  const join = loc === 'zh' ? '、' : ', ';
-  const and = loc === 'zh' ? t(ui.andWord, loc) : ` ${t(ui.andWord, loc)} `;
-  const mediaStr = media.length > 1
-    ? media.slice(0, -1).join(join) + and + media.at(-1)
-    : media[0];
-
-  const years = works.map((w) => w.year);
-  const lo = Math.min(...years), hi = Math.max(...years);
-  const span = lo === hi ? `${lo}` : `${lo}–${hi}`;
-
-  return loc === 'zh'
-    ? `${count}，${mediaStr}，${span}。`
-    : `${count}, ${mediaStr}, ${span}.`;
-}
-
 /** The tombstone. Order: title → year → medium → dimensions → price. */
 function tombstone(w, loc, { linked = true, level = 'p' } = {}) {
   const title = esc(t(w.title, loc));
@@ -427,14 +367,17 @@ function renderIndex(loc) {
   const latest = available.filter((w) => w !== heroWork).sort(byNewest).slice(0, LATEST);
 
   const heroFigure = heroWork ? `
-  <figure class="hero__work">
-    <a href="${lpath(loc, site, `/works/${heroWork.slug}/`)}">
-      ${picture(heroWork, { eager: true, sizes: '(min-width:900px) 40vw, calc(100vw - 40px)' }, loc)}
-    </a>
-    <figcaption>
-      ${tombstone(heroWork, loc, { level: 'h2' })}
-    </figcaption>
-  </figure>` : '';
+  <section class="hero__feature" aria-labelledby="featured-h">
+    <h2 id="featured-h" class="hero__label">${esc(t(S.featured.title, loc))}</h2>
+    <figure class="hero__work">
+      <a href="${lpath(loc, site, `/works/${heroWork.slug}/`)}">
+        ${picture(heroWork, { eager: true, sizes: '(min-width:900px) 40vw, calc(100vw - 40px)' }, loc)}
+      </a>
+      <figcaption>
+        ${tombstone(heroWork, loc, { level: 'h3' })}
+      </figcaption>
+    </figure>
+  </section>` : '';
 
   const seriesCards = SERIES.map((x) => {
     const inSeries = works.filter((w) => w.section === x.id);
@@ -457,8 +400,10 @@ function renderIndex(loc) {
 <section class="hero wrap${heroWork ? ' hero--split' : ''}">
   <div class="hero__lede">
     <h1 class="visually-hidden">${esc(t(seller.artist.siteName, loc))}</h1>
-    <p class="hero__motto">${esc(t(site.hero.title, loc))}</p>
-    <p class="hero__standfirst">${esc(standfirst(loc))}<br>${esc(t(site.hero.standfirstTail, loc))}</p>
+    <figure class="hero__quote">
+      <blockquote><p class="hero__motto">${t(site.hero.title, loc).split('\n').map(esc).join('<br>')}</p></blockquote>
+      <figcaption class="hero__cite">— ${esc(t(site.hero.attribution, loc))}</figcaption>
+    </figure>
     <a class="link-quiet" href="${lpath(loc, site, site.hero.ctaHref)}">${esc(t(site.hero.cta, loc))}</a>
   </div>${heroFigure}
 </section>
@@ -1124,12 +1069,6 @@ console.log(`  ${works.length} works · ${LOCALES.length} locales · entity: ${s
 if (!entity.checkout.supportsCards) {
   console.log(`  note: '${seller.activeEntity}' cannot take cards. Switch activeEntity to`);
   console.log(`        'hk-sole-prop' in src/data/seller.json when the HK entity exists.`);
-}
-if (unknownMedia.size) {
-  console.log(`\n  ${unknownMedia.size} work${unknownMedia.size > 1 ? 's use a medium' : ' uses a medium'} the hero line does not know:`);
-  for (const m of unknownMedia) console.log(`    · ${m}`);
-  console.log(`  It is being described as oil. Add the noun to site.json 'ui' and`);
-  console.log(`  its pattern to MEDIA in build.js, in both locales.`);
 }
 console.log(READY.ready
   ? `\n  readiness: READY — ${READY.rules} rules pass${READY.waived.length ? `, ${READY.waived.length} waived` : ''}`

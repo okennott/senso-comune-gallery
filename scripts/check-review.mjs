@@ -239,7 +239,8 @@ check('D-03', 'the language switch is divided from the navigation', () =>
 
 check('D-04', 'the homepage names a subject in its h1', () => {
   const h1 = home.match(/<h1[^>]*>([^<]*)<\/h1>/);
-  const motto = /<p class="hero__motto">What is done with love is done well\.<\/p>/.test(home);
+  // the motto is set with its line breaks as written, and attributed (17 Sep 2026)
+  const motto = /<p class="hero__motto">What is done<br>with love<br>is done well\.<\/p><\/blockquote>\s*<figcaption class="hero__cite">— Vincent van Gogh<\/figcaption>/.test(home);
   const zh = /<h1 class="visually-hidden">常识画廊<\/h1>/.test(zhHome);
   return { ok: h1 && h1[1] === 'Senso Comune Gallery' && motto && zh, detail: `h1 "${h1?.[1]}", motto kept ${motto}` };
 });

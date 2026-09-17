@@ -21,7 +21,9 @@
  *
  * The same pass covers the work videos, and the masthead: with search, account
  * and cart added it must still fit a phone — no horizontal overflow, at most
- * two rows below 720px, and every shop control at least 44px square.
+ * two rows below 720px, and every shop control at least 44px square — and the
+ * homepage motto: set as written, its attribution flush with its right edge,
+ * and read before the featured work.
  *
  * PHONE WIDTHS. Headless Chrome will not lay a window out narrower than 500px:
  * --window-size=390 reports innerWidth 500 and a screenshot merely crops it.
@@ -61,7 +63,7 @@ if (!existsSync(DIST)) {
 const works = JSON.parse(readFileSync(join(ROOT, 'src/data/artworks.json'), 'utf8')).works;
 const series = JSON.parse(readFileSync(join(ROOT, 'src/data/site.json'), 'utf8')).series.items;
 const PAGES = ['/', '/zh/', '/works/', '/works/sold/', ...series.map((x) => `/works/series/${x.id}/`), ...works.map((w) => `/works/${w.slug}/`)];
-const WIDTHS = [1440, 900, 390, 360];
+const WIDTHS = [1440, 900, 390, 360, 320];
 const HEADLESS_MIN = 500;
 
 /* The probe runs inside the page, after layout, and writes its findings into
@@ -90,7 +92,21 @@ const PROBE = `<script>addEventListener('load',()=>setTimeout(()=>{
   const mast={ overflow: inner.scrollWidth > inner.clientWidth + 1 || document.documentElement.scrollWidth > document.documentElement.clientWidth,
     rows: tops.length,
     small: [...document.querySelectorAll('.shopbar__link')].map((a)=>a.getBoundingClientRect()).filter((r)=>r.width<44||r.height<44).length };
-  const payload=JSON.stringify({ viewport: document.documentElement.clientWidth, rows: out, mast });
+  // The motto is set as written and the attribution sits flush with its real
+  // right edge: no line the browser wrapped, no gap, and the motto before the
+  // featured work in reading order at every width.
+  const motto=document.querySelector('.hero__motto'), cite=document.querySelector('.hero__cite');
+  let quote=null;
+  if (motto && cite) {
+    const r=document.createRange(); r.selectNodeContents(motto);
+    const lines=[...r.getClientRects()]; const written=motto.querySelectorAll('br').length+1;
+    const c=document.createRange(); c.selectNodeContents(cite);
+    const feature=document.querySelector('.hero__feature');
+    quote={ wrapped: new Set(lines.map((x)=>Math.round(x.top))).size !== written,
+      gap: Math.round(Math.max(...lines.map((x)=>x.right)) - c.getBoundingClientRect().right),
+      first: !feature || motto.getBoundingClientRect().top <= feature.getBoundingClientRect().top };
+  }
+  const payload=JSON.stringify({ viewport: document.documentElement.clientWidth, rows: out, mast, quote });
   if (window.parent !== window) { parent.document.getElementById('render-probe').textContent = payload; return; }
   const p=document.createElement('pre'); p.id='render-probe'; p.textContent=payload;
   document.body.append(p);
@@ -148,8 +164,13 @@ for (const page of PAGES) {
     const dom = doms[k];
     const m = dom.match(/<pre id="render-probe">([\s\S]*?)<\/pre>/);
     if (!m || !m[1].trim()) { problems.push(`${page} @${width}: the page never finished layout`); continue; }
-    const { viewport, rows, mast } = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+    const { viewport, rows, mast, quote } = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
     if (viewport !== width) { problems.push(`${page} @${width}: laid out at ${viewport}px, not ${width}px`); continue; }
+    if (quote) {
+      if (quote.wrapped) problems.push(`${page} @${width}px: the motto was re-wrapped by the browser`);
+      if (Math.abs(quote.gap) > 1) problems.push(`${page} @${width}px: the attribution is ${quote.gap}px off the motto's right edge`);
+      if (!quote.first) problems.push(`${page} @${width}px: the featured work comes before the motto`);
+    }
     if (mast.overflow) problems.push(`${page} @${width}px: the masthead overflows the viewport`);
     if (width < 720 && mast.rows > 2) problems.push(`${page} @${width}px: the masthead wraps to ${mast.rows} rows`);
     if (mast.small) problems.push(`${page} @${width}px: ${mast.small} shop control(s) under 44px`);

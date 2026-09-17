@@ -543,23 +543,26 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   .detail__aside{ position:static }
 }
 
-/* ---------- hero, after the reorganisation ----------
-   The category eyebrow is gone. What replaced it is a generated factual line
-   — count, media, years, straight out of artworks.json — which grounds the
-   motto rather than labelling it, and cannot drift from the actual work.
-
-   The motto keeps the whole hero to itself; the attributed van Gogh quote now
-   opens Tribute, which is the section actually about the artists who shaped
-   her eye. Two quotes stacked, one attributed and one not, read as a mistake. */
-.hero__standfirst{
-  max-width:44ch;
-  margin:var(--space-4) 0 var(--space-5);
-  color:var(--body);
-  /* Caption size under a 38px headline is too big a jump; body size gives the
-     cascade 38.4 -> 16.8 -> 12.6 (the CTA) instead of 38.4 -> 12.6. */
-  font-size:var(--size-body);
-  line-height:1.65;
+/* ---------- hero: the motto, attributed ----------
+   The motto is set with its line breaks as written and never re-wrapped, and
+   the quote shrinks to its longest line (width:max-content). That is what lets
+   the attribution sit flush with the motto's real right edge at every width —
+   a browser cannot shrink a box to the longest line of text it has wrapped
+   itself. On a screen too narrow for the longest line it wraps, and the
+   attribution aligns to the column instead. */
+.hero__quote{
+  margin:0 0 var(--space-5);
+  width:max-content; max-width:100%;
 }
+.hero__quote blockquote{ margin:0 }
+.hero__cite{
+  margin-top:var(--space-3);
+  text-align:right;
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label);
+  color:var(--muted);
+}
+.hero__label{ margin:0 0 var(--space-4) }
 
 /* ---------- epigraph ----------
    Set smaller and quieter than the hero motto so Tribute opens with a breath
@@ -618,8 +621,6 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   line-height:var(--lh-tight);
   color:var(--ink);
   margin:0;
-  max-width:var(--measure-sm);
-  text-wrap:balance;
 }
 .hero__work{ margin:0 }
 .hero__work img{
@@ -642,12 +643,12 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
     column-gap:var(--space-6);
     max-width:62rem;
   }
-  .hero--split .hero__work{ justify-self:end }
+  .hero--split .hero__feature{ justify-self:end }
 }
-/* Stacked, the painting leads — a visitor on a phone should see the work
-   before the prose about it. */
+/* Stacked, the motto leads and the featured work follows under its heading,
+   in the same order the page reads at every width. */
 @media (max-width:899px){
-  .hero--split{ display:flex; flex-direction:column-reverse; gap:var(--space-5) }
+  .hero--split{ display:flex; flex-direction:column; gap:var(--space-5) }
 }
 
 /* ---------- archive grid ----------
@@ -913,5 +914,28 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   border:1px dashed var(--muted-ui);
   box-shadow:none; transform:none;
   cursor:not-allowed;
+}
+
+/* ---------- the narrowest phones (under 360px) ----------
+   Found when the render check gained a 320px pass. Two things did not fit.
+
+   The masthead wrapped to four rows: the short name, three 44px shop controls
+   and their gaps come to 304px, and a 320px screen has 280 to give. Here the
+   mark stands alone — which is what it was drawn to do (report, "The mark") —
+   the name stays in the link for screen readers, and the language switch
+   joins the shop controls on the first row, leaving the sections a row of
+   their own.
+
+   And the Chinese motto's longest line wrapped, pulling the attribution off
+   its right edge; one type step down keeps both languages as written.
+   (These rules sit last so they win over the rules they adjust.) */
+@media (max-width:359px){
+  .wordmark__name{
+    position:absolute; width:1px; height:1px; overflow:hidden;
+    clip-path:inset(50%); white-space:nowrap;
+  }
+  .lang-switch{ order:2; margin-left:auto }
+  .shopbar{ order:2; margin-left:0 }
+  .hero__motto{ font-size:calc(var(--size-hero) * .85) }
 }
 

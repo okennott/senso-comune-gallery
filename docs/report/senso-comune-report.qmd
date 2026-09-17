@@ -669,7 +669,7 @@ produces — `docs/report/shots.sh` takes them from `dist/` over a real origin,
 so this section cannot quietly describe a version of the site that no longer
 exists.
 
-![The homepage. Cream sheet mounted on the sage field, dark brown bar, the mark at the head of the wordmark. The first painting sits in the hero beside the motto rather than below the fold; the factual line under the motto is generated from the work data and cannot drift.](fig/cap-home.png){#fig-home width=100%}
+![The homepage. Cream sheet mounted on the sage field, dark brown bar, the mark at the head of the wordmark. The motto — a paraphrase of van Gogh's letter 143 to Theo, attributed beneath it and aligned to its longest line — sits beside the featured work under its own heading; on a phone the motto leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
 
 ![A work page, the painting in its mat. The price is the boldest element in the block — the single change with the best evidence behind it. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
 

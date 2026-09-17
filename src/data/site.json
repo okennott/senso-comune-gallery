@@ -74,30 +74,31 @@
   ],
   "hero": {
     "title": {
-      "en": "What is done with love is done well.",
-      "zh": "以爱完成之事，方为善成。"
+      "en": "What is done\nwith love\nis done well.",
+      "zh": "以爱完成之事，\n方为善成。"
     },
     "cta": {
       "en": "View works",
       "zh": "浏览作品"
     },
     "$comment": [
-      "The motto stays as the h1. It is a van Gogh line Priscilla has adopted,",
-      "and a motto does not carry an attribution - that is what makes it a motto.",
+      "The motto, attributed. It paraphrases van Gogh, letter 143 to Theo, Amsterdam,",
+      "3 April 1878: 'that which is done with love is well done' (vangoghletters.org,",
+      "let143). The attribution sits right-aligned under the motto's longest line.",
       "",
-      "What was removed: an eyebrow reading 'Original Oil & Paper Works', which is",
-      "an inventory category label and sat oddly above a poetic statement; and the",
-      "second, attributed van Gogh quote, which now opens Tribute - the section",
-      "that is actually about the artists who shaped her eye.",
+      "`title` may contain a line break (\\n). The motto is set as written, never",
+      "re-wrapped by the browser, so the attribution can align to its real right",
+      "edge; a browser cannot shrink a box to the longest line of wrapped text.",
       "",
-      "`standfirst` is generated from artworks.json, so the count and the years",
-      "cannot drift from the work on the site."
+      "What was removed: a generated line under the motto (count, media, years),",
+      "replaced by the attribution; and before that an 'Original Oil & Paper Works'",
+      "eyebrow."
     ],
-    "standfirstTail": {
-      "en": "Each one is the only one.",
-      "zh": "每一件都是唯一的。"
-    },
-    "ctaHref": "/works/"
+    "ctaHref": "/works/",
+    "attribution": {
+      "en": "Vincent van Gogh",
+      "zh": "文森特·梵高"
+    }
   },
   "sections": {
     "works": {
@@ -181,6 +182,12 @@
       "intro": {
         "en": "Questions about a work, a commission, shipping to your country, or anything else. For a specific painting, the enquiry button on its page names it for you.",
         "zh": "关于作品、定制、寄送到您所在的国家或其他任何问题，都欢迎联系。若询问某一件作品，其页面上的咨询按钮会自动注明作品名称。"
+      }
+    },
+    "featured": {
+      "title": {
+        "en": "Featured work",
+        "zh": "精选作品"
       }
     }
   },
@@ -317,30 +324,6 @@
     "langSwitch": {
       "en": "中文",
       "zh": "English"
-    },
-    "mediaOil": {
-      "en": "oil",
-      "zh": "油画"
-    },
-    "mediaWater": {
-      "en": "watercolour",
-      "zh": "水彩"
-    },
-    "mediaPaper": {
-      "en": "graphite",
-      "zh": "铅笔"
-    },
-    "paintings": {
-      "en": "paintings",
-      "zh": "件作品"
-    },
-    "painting": {
-      "en": "painting",
-      "zh": "件作品"
-    },
-    "andWord": {
-      "en": "and",
-      "zh": "与"
     },
     "enquireToBuy": {
       "$comment": "Finding A-02. Used instead of ui.buy whenever a work has no checkoutUrl, so the label matches what the control actually does.",
