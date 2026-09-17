@@ -41,3 +41,7 @@ desktop.ini
 .dropbox
 .dropbox.attr
 ~$*
+
+# python bytecode
+__pycache__/
+*.pyc

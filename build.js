@@ -169,7 +169,9 @@ function tombstone(w, loc, { linked = true, level = 'p' } = {}) {
     ? `<a class="link-quiet" href="mailto:${esc(seller.contact.email)}?subject=${encodeURIComponent(t(w.title, loc))}">${esc(t(ui.soldEnquire, loc))}</a>`
     : w.checkoutUrl
       ? `<a class="btn" data-enquire-href="mailto:${esc(seller.contact.email)}" href="${esc(w.checkoutUrl)}" rel="noopener">${esc(t(ui.buy, loc))}<span class="visually-hidden"> — ${title}, ${money(w.priceUSD)}</span></a>`
-      : `<a class="btn" href="mailto:${esc(seller.contact.email)}?subject=${encodeURIComponent(t(w.title, loc))}">${esc(t(ui.buy, loc))}<span class="visually-hidden"> — ${title}, ${money(w.priceUSD)}</span></a>`;
+      // Finding A-02. With no checkout link this control opens a mail client,
+      // so it must not say "Buy". Same button, honest promise.
+      : `<a class="btn" href="mailto:${esc(seller.contact.email)}?subject=${encodeURIComponent(t(w.title, loc))}">${esc(t(ui.enquireToBuy, loc))}<span class="visually-hidden"> — ${title}, ${money(w.priceUSD)}</span></a>`;
 
   const priceEl = w.sold
     ? `<p class="price price--sold"><span class="price__struck">${money(w.priceUSD)}</span>${esc(t(ui.sold, loc))}</p>`
@@ -218,11 +220,30 @@ function renderIndex(loc) {
   const originals = available.filter((w) => w.section === 'originals');
   const tributes  = available.filter((w) => w.section === 'tribute');
 
+  // Finding A-01. The first available original is lifted into the hero so the
+  // opening screen contains a painting; the list below it then starts at 02.
+  const heroWork = originals[0] ?? null;
+  const listed   = heroWork ? originals.slice(1) : originals;
+
+  const heroFigure = heroWork ? `
+  <figure class="hero__work">
+    <a href="${lpath(loc, site, `/works/${heroWork.slug}/`)}">
+      ${picture(heroWork, { eager: true, sizes: '(min-width:900px) 40vw, calc(100vw - 40px)' }, loc)}
+    </a>
+    <figcaption>
+      <span class="work__index work__index--static" aria-hidden="true">01 / ${String(works.length).padStart(2, '0')}</span>
+      ${tombstone(heroWork, loc, { level: 'h2' })}
+    </figcaption>
+  </figure>` : '';
+
   const body = `
-<section class="hero wrap">
-  <h1>${esc(t(site.hero.title, loc))}</h1>
-  <p class="hero__standfirst">${esc(standfirst(loc))}<br>${esc(t(site.hero.standfirstTail, loc))}</p>
-  <a class="link-quiet" href="#works">${esc(t(site.hero.cta, loc))}</a>
+<section class="hero wrap${heroWork ? ' hero--split' : ''}">
+  <div class="hero__lede">
+    <h1 class="visually-hidden">${esc(t(seller.artist.siteName, loc))}</h1>
+    <p class="hero__motto">${esc(t(site.hero.title, loc))}</p>
+    <p class="hero__standfirst">${esc(standfirst(loc))}<br>${esc(t(site.hero.standfirstTail, loc))}</p>
+    <a class="link-quiet" href="#works">${esc(t(site.hero.cta, loc))}</a>
+  </div>${heroFigure}
 </section>
 
 <div class="edge edge--warm" aria-hidden="true"></div>
@@ -233,7 +254,7 @@ function renderIndex(loc) {
       <h2>${esc(t(S.works.title, loc))}</h2>
       <p class="section__intro">${esc(t(S.works.intro, loc))}</p>
     </div>
-    ${listFor(originals, 0)}
+    ${listFor(listed, heroWork ? 1 : 0)}
   </div>
 </section>
 
@@ -376,6 +397,9 @@ ${jsonLd(w, site, seller, loc, origin)}`;
     description: desc ? desc.slice(0, 180) : `${t(w.medium, loc)}, ${w.year}. ${dims(w)}.`,
     body,
     ogImage: `/img/${w.image}-1600.webp`,
+    ogImageAlt: t(w.alt, loc),
+    ogImageHeight: Math.round((w.heightCm / w.widthCm) * 1600),
+    product: { amount: w.priceUSD, currency: artworksF.currency, sold: w.sold },
     canonical: lpath(loc, site, `/works/${w.slug}/`),
     altLocales: altFor(`/works/${w.slug}/`),
   });
@@ -399,11 +423,11 @@ function renderArchive(loc) {
     <h1>${esc(t(S.archive.title, loc))}</h1>
     <p class="section__intro">${esc(t(S.archive.intro, loc))}</p>
   </div>
-  <ol class="works">
+  <ol class="works works--grid">
     ${sold.map((w) => `<li class="work">
       <figure class="work__figure">
         <a href="${lpath(loc, site, `/works/${w.slug}/`)}" style="display:block">
-          ${picture(w, {}, loc)}
+          ${picture(w, { sizes: '(min-width:900px) 22vw, (min-width:560px) 45vw, calc(100vw - 40px)' }, loc)}
         </a>
       </figure>
       ${tombstone(w, loc, { level: 'h2' })}
@@ -454,10 +478,36 @@ function renderAbout(loc) {
     site, seller, loc,
     title: `${t(site.sections.about.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: paras[0].slice(0, 180),
-    body, ogImage: null,
+    body, ogImage: null, bodyClass: 'prose-page',
     canonical: lpath(loc, site, '/about/'),
     altLocales: altFor('/about/'),
   });
+}
+
+/* Finding A-03. How to Buy asked the reader to get in touch three times and
+   gave no address; the only contact details were in the footer. Every value
+   here comes from seller.contact, so there is one source of truth and the
+   NEEDS-INPUT audit still sees them. */
+function contactPanel(loc) {
+  const C = site.buy.contact;
+  const A = seller.artist;
+  const rows = [
+    [t(C.emailLabel, loc),  seller.contact.email, `mailto:${seller.contact.email}`],
+    [t(C.phoneLabel, loc),  seller.contact.phone, `tel:${String(seller.contact.phone).replace(/[^+\d]/g, '')}`],
+    [t(C.wechatLabel, loc), A.wechatId, null],
+    [t(C.xhsLabel, loc),    A.xiaohongshu, null],
+  ].filter(([, v]) => v);
+
+  return `<aside class="contact" aria-labelledby="contact-h">
+    <h2 id="contact-h">${esc(t(C.title, loc))}</h2>
+    <p class="contact__intro">${esc(t(C.intro, loc))}</p>
+    <dl class="contact__list">
+      ${rows.map(([label, value, href]) => `<div>
+        <dt>${esc(label)}</dt>
+        <dd>${href ? `<a href="${esc(href)}">${esc(value)}</a>` : esc(value)}</dd>
+      </div>`).join('\n      ')}
+    </dl>
+  </aside>`;
 }
 
 function renderHowToBuy(loc) {
@@ -480,12 +530,13 @@ function renderHowToBuy(loc) {
     <h2>${loc === 'zh' ? '无障碍协助' : 'If the site gets in your way'}</h2>
     <p>${esc(t(site.buy.accessNote, loc))}</p>
   </div>
+  ${contactPanel(loc)}
 </section>`;
   return layout({
     site, seller, loc,
     title: `${t(site.sections.buy.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: t(site.buy.steps, loc)[0].slice(0, 180),
-    body, ogImage: null,
+    body, ogImage: null, bodyClass: 'prose-page',
     canonical: lpath(loc, site, '/how-to-buy/'),
     altLocales: altFor('/how-to-buy/'),
   });
@@ -609,6 +660,7 @@ function renderPage(p, def, loc) {
     description: t(def.blocks(loc)[0].p, loc).slice(0, 180),
     body,
     ogImage: null,
+    bodyClass: 'prose-page',
     canonical: lpath(loc, site, p),
     altLocales: altFor(p),
   });
@@ -657,6 +709,14 @@ for (const f of ['fraunces-latin.woff2', 'inter-latin.woff2',
                  'OFL-Fraunces.txt', 'OFL-Inter.txt']) {
   const src = join(ROOT, 'public/fonts', f);
   if (existsSync(src)) cpSync(src, join(DIST, 'fonts', f));
+}
+
+/* Finding C-01. The icon set, built by scripts/build-icons.sh. Copied by name
+   rather than by globbing public/, so a stray file there cannot ship. */
+for (const f of ['icon.svg', 'favicon.ico', 'apple-touch-icon.png', 'site.webmanifest']) {
+  const src = join(ROOT, 'public', f);
+  if (existsSync(src)) cpSync(src, join(DIST, f));
+  else console.log(`  note: public/${f} missing — run: npm run icons`);
 }
 
 /* images, if the build has produced any yet */

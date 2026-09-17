@@ -74,6 +74,19 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
   .sheet{ margin-block:var(--space-5) }
 }
 
+/* Finding C-02. Below 720px the sheet used to run edge to edge and the sage —
+   the one gesture that makes the site recognisable in a screenshot — vanished
+   entirely. It is the phone screenshot that gets shared, so the mount stays at
+   every width. 14px costs almost no reading width at 390px. */
+@media (max-width:719px){
+  .sheet{ margin-inline:14px }
+}
+
+/* Finding D-01. Prose pages set one column at ~65ch inside a 1240px sheet,
+   leaving 54% of the mount empty, which reads as unfinished rather than
+   generous. The mount comes in close around the measure instead. */
+.prose-page .sheet{ max-width:860px }
+
 /* ---------- layout ---------- */
 .wrap{
   max-width:var(--col-max);

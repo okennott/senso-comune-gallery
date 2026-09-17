@@ -333,14 +333,16 @@ carries a penalty onto a personal credit file.
 ```bash
 npm install
 npm run build        # images, then every page → dist/
-npm run check        # contrast + structural invariants; both block the build
+npm run check        # contrast, structure, design review; all three block the build
 npm run preview      # one built page as a single self-contained file
 npm run fonts        # rebuild the webfonts, Latin and Chinese
+npm run icons        # rebuild the favicon, home-screen icon and manifest
 npm run report       # rebuild both reports (report:pdf, report:html)
 ```
 
-`build` and `check` are the two that matter. `check` is not advisory — both
-scripts exit non-zero and have each caught real regressions, listed in §2.5.
+`build` and `check` are the two that matter. `check` is not advisory — all
+three scripts exit non-zero and have each caught real regressions, listed in
+§2.5.
 
 ## 2.2 Repository layout
 
@@ -383,14 +385,23 @@ reading it from the other.
 │   ├── build-fonts.sh              Latin subsets — 79.8 KB for both families
 │   ├── build-fonts-cjk.py          Chinese display face, subset to the ~100
 │   │                               glyphs that appear, 34 KB from 24 MB
-│   ├── check-contrast.mjs          every token against its worst-case ground
+│   ├── build-icons.sh              favicon, home-screen icon and manifest —
+│   │                               the mark is real Fraunces outlines, so it
+│   │                               survives being rendered without webfonts
+│   ├── check-contrast.mjs          every token against its worst-case ground,
+│   │                               including the dark bar, read from the CSS
 │   ├── check-links.mjs             dead links, missing alt, missing width or
-│   │                               height, heading order, landmarks, hreflang
+│   │                               height, heading order, landmarks, hreflang,
+│   │                               CJK subset coverage
+│   ├── check-review.mjs            one assertion per design-review finding
 │   └── preview.mjs                 one page as a single self-contained file
 │
 ├── public/                       copied to the site as-is
-│   └── fonts/                      the subset woff2 files, their @font-face
-│                                   CSS, and both OFL licences
+│   ├── fonts/                      the subset woff2 files, their @font-face
+│   │                               CSS, and both OFL licences
+│   └── icon.svg                    built by build-icons.sh, alongside
+│                                   favicon.ico, apple-touch-icon.png and
+│                                   site.webmanifest
 │
 ├── docs/                         one folder per document, each with its
 │   │                             own build
@@ -492,18 +503,34 @@ that adds an unaudited third party able to inject arbitrary CSS.
 
 ## 2.5 Checks
 
-Both block the build, and both have earned it.
+All three block the build, and all three have earned it.
 
 `check-contrast.mjs` recomputes every colour token against **the darkest ground
 it is ever painted on**. Checking against white instead is the trap that caught
 this project three times, twice in tokens written specifically to avoid it.
 
-`check-links.mjs` verifies dead links, missing `alt`, missing `width`/`height`,
-heading order, landmark counts and hreflang reciprocity.
+It reads the pairs the stylesheet actually paints rather than a hand-kept list,
+and takes the **last** colour declaration in each rule, because that is what
+the cascade uses. A rule that set a good colour and then overrode it with a bad
+one is exactly how the footer shipped at 2.34:1.
+
+`check-links.mjs` verifies dead links, missing `alt`, missing `width` or
+`height`, heading order, landmark counts, hreflang reciprocity, and that the
+CJK subset still covers every character set in the display face — a new Chinese
+work title otherwise renders one glyph in the system font, mid-heading, with
+nothing reporting it.
+
+`check-review.mjs` holds one assertion per finding from the September 2026
+design review, written against the built site, so a fix that stops being
+applied fails here rather than being noticed in a screenshot months later. It
+also asserts that every `var(--token)` in the stylesheet resolves: a fix that
+referenced a token which did not exist fell back to inherited size, and a test
+that only matched the CSS text called it green.
 
 Between them they caught a muted grey that passed on white and failed on the
-darkest wash, work pages shipping with no `<h1>` at all, and a mobile override
-that made the navigation invisible once the dark bar was adopted.
+darkest wash, work pages shipping with no `<h1>` at all, a mobile override
+that made the navigation invisible once the dark bar was adopted, and the
+footer contrast failure above.
 
 They are a floor, not a pass. Automated testing decides roughly 13–30% of
 accessibility criteria and catches almost none of the focus-order failures that

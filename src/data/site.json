@@ -29,12 +29,20 @@
       "label": {
         "en": "Original Works",
         "zh": "原作"
+      },
+      "labelShort": {
+        "en": "Works",
+        "zh": "原作"
       }
     },
     {
       "id": "tribute",
       "href": "#tribute",
       "label": {
+        "en": "Tribute",
+        "zh": "致敬"
+      },
+      "labelShort": {
         "en": "Tribute",
         "zh": "致敬"
       }
@@ -45,6 +53,10 @@
       "label": {
         "en": "About",
         "zh": "关于"
+      },
+      "labelShort": {
+        "en": "About",
+        "zh": "关于"
       }
     },
     {
@@ -53,6 +65,10 @@
       "label": {
         "en": "How to Buy",
         "zh": "购买方式"
+      },
+      "labelShort": {
+        "en": "Buy",
+        "zh": "购买"
       }
     }
   ],
@@ -171,6 +187,33 @@
       "$comment": "Finding B-06. Satisfies the CRD, the UK anticipatory duty, and the US alternative-access expectation - and lets a blind collector actually buy the painting.",
       "en": "If any part of this site stops you buying a painting, email me. I'll describe the work to you, take your order, and arrange payment and shipping personally — usually within two working days.",
       "zh": "如果本网站的任何部分妨碍了您购买作品，请给我发邮件。我会为您描述作品、接受订单，并亲自安排付款与寄送——通常在两个工作日内。"
+    },
+    "contact": {
+      "$comment": "Finding A-03. The page asks the reader to get in touch three times; this is where it tells them how. Values come from seller.contact.",
+      "title": {
+        "en": "Reach me directly",
+        "zh": "直接联系我"
+      },
+      "intro": {
+        "en": "Any of these reaches me. I answer in English or Chinese, usually within two working days.",
+        "zh": "以下任一方式都可以联系到我。中英文皆可，通常在两个工作日内回复。"
+      },
+      "emailLabel": {
+        "en": "Email",
+        "zh": "邮箱"
+      },
+      "phoneLabel": {
+        "en": "Phone",
+        "zh": "电话"
+      },
+      "wechatLabel": {
+        "en": "WeChat",
+        "zh": "微信"
+      },
+      "xhsLabel": {
+        "en": "小红书",
+        "zh": "小红书"
+      }
     }
   },
   "ui": {
@@ -273,6 +316,11 @@
     "andWord": {
       "en": "and",
       "zh": "与"
+    },
+    "enquireToBuy": {
+      "$comment": "Finding A-02. Used instead of ui.buy whenever a work has no checkoutUrl, so the label matches what the control actually does.",
+      "en": "Enquire about this piece",
+      "zh": "咨询这件作品"
     }
   },
   "footer": {

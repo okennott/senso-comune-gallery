@@ -118,6 +118,72 @@ for (const page of pages) {
   }
 }
 
+/* --- finding E-01: the CJK subset must still cover what is set in it -------
+ *
+ * The Chinese display face is subset to exactly the characters in src/data,
+ * and fonts-cjk.css carries a unicode-range drawn to match. But the subset is
+ * rebuilt by `npm run fonts`, which `npm run build` does not call, and until
+ * now nothing verified it. The first Chinese work title using a character
+ * outside the range would render that one glyph in the system face, mid-title,
+ * beside Noto Serif SC — in the most brand-critical text on the site, with the
+ * build reporting nothing.
+ *
+ * KEEP IN SYNC with collect() in scripts/build-fonts-cjk.py. */
+const CJK_RE = /[\u2E80-\u2EFF\u3000-\u303F\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF]/gu;
+
+function displayCjk() {
+  const site  = JSON.parse(readFileSync(join(ROOT, 'src/data/site.json'), 'utf8'));
+  const sell  = JSON.parse(readFileSync(join(ROOT, 'src/data/seller.json'), 'utf8'));
+  const arts  = JSON.parse(readFileSync(join(ROOT, 'src/data/artworks.json'), 'utf8'));
+  const out = new Set();
+  // Only the zh side of a locale pair, exactly as collect() does. The en side
+  // can legitimately hold CJK — ui.langSwitch is 中文 on the English page — but
+  // that is set in the BODY stack, not the display face, so it needs no subset
+  // coverage. Taking both sides here would block the build on a non-issue.
+  const add = (v) => {
+    if (typeof v === 'string') for (const c of v.match(CJK_RE) ?? []) out.add(c);
+    else if (v && typeof v === 'object') add(v.zh ?? '');
+  };
+  add(sell.artist.siteName);
+  add(site.hero.title);
+  for (const s of Object.values(site.sections)) add(s.title);
+  for (const n of site.nav) { add(n.label); add(n.labelShort); }
+  for (const w of arts.works) add(w.title);
+  for (const v of Object.values(site.ui)) add(v);
+  return out;
+}
+
+function coveredCodepoints() {
+  const css = readFileSync(join(ROOT, 'public/fonts/fonts-cjk.css'), 'utf8');
+  const m = css.match(/unicode-range:([^;]+);/);
+  if (!m) return null;
+  const set = new Set();
+  for (const part of m[1].split(',')) {
+    const r = part.trim().replace(/^U\+/i, '');
+    if (r.includes('-')) {
+      const [a, b] = r.split('-').map((x) => parseInt(x, 16));
+      for (let i = a; i <= b; i++) set.add(i);
+    } else set.add(parseInt(r, 16));
+  }
+  return set;
+}
+
+{
+  const covered = coveredCodepoints();
+  if (!covered) {
+    problems.push('fonts-cjk.css has no unicode-range — run: npm run fonts');
+  } else {
+    const missing = [...displayCjk()].filter((c) => !covered.has(c.codePointAt(0)));
+    if (missing.length) {
+      problems.push(
+        `${missing.length} CJK character${missing.length > 1 ? 's' : ''} set in the display face ` +
+        `but outside the shipped subset: ${missing.join(' ')} — these render in the system ` +
+        `face mid-heading. Run: npm run fonts`
+      );
+    }
+  }
+}
+
 /* --- report --- */
 console.log(`\n  checked ${pages.length} pages\n`);
 for (const w of warnings) console.log(`  ! ${w}`);

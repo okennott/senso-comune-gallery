@@ -56,6 +56,10 @@ def collect() -> str:
     the wordmark, the hero motto, section headings, navigation labels, work
     titles and the UI strings. Body prose is deliberately excluded; it renders
     in the system face.
+
+    KEEP IN SYNC with displayCjk() in scripts/check-links.mjs, which recomputes
+    this from the same fields and fails the build when the shipped subset no
+    longer covers it (finding E-01).
     """
     chars = set()
 
@@ -75,6 +79,7 @@ def collect() -> str:
         add(s.get("title"))
     for n in site["nav"]:
         add(n.get("label"))
+        add(n.get("labelShort"))   # finding B-04: shown in the bar below 720px
     for w in arts["works"]:
         add(w.get("title"))
     for v in site["ui"].values():

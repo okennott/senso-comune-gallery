@@ -47,6 +47,37 @@ const GROUNDS = {
   blue:   T['wash-blue'],
 };
 
+/* Finding B-02. The grounds above are the cream family. The dark bar carries
+   the masthead, the navigation, the footer and every legal disclosure, and it
+   was not among them — which is how a 2.34:1 footer shipped through a build
+   that blocks on contrast.
+   
+   Rather than add the bar to a hand-maintained list, this reads the stylesheet
+   and checks the pairs that are actually painted. For each rule that lands on
+   the bar it takes the LAST colour declaration in the block, because the last
+   one is what the cascade uses — and a rule that set a good colour and then
+   overrode it with a bad one was exactly the B-01 defect. */
+const BAR = T['bar'];
+const ON_BAR_SELECTORS = /^\s*(\.masthead|\.wordmark|\.nav\b|\.nav__|\.lang-switch|\.footer|\.legal-declaration)/;
+
+const barPairs = [];
+{
+  const g = readFileSync(join(ROOT, 'src/styles/gallery.css'), 'utf8');
+  // strip comments so a colour mentioned in prose is not read as a declaration
+  const src = g.replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of src.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selector = m[1].trim();
+    if (!ON_BAR_SELECTORS.test(selector)) continue;
+    const colours = [...m[2].matchAll(/(?:^|[;\s])color:\s*var\(--([a-z0-9-]+)\)/g)];
+    if (!colours.length) continue;
+    const token = colours.at(-1)[1];           // the one the cascade keeps
+    if (!T[token]) continue;
+    const isLarge = /wordmark/.test(selector);  // the wordmark is display size
+    barPairs.push([selector.replace(/\s+/g, ' ').slice(0, 38), token, isLarge ? 3.0 : 4.5,
+                   colours.length > 1 ? `overrides ${colours.length - 1} earlier declaration(s)` : '']);
+  }
+}
+
 /**
  * Each entry: [token, minimum, which grounds it is painted on, why]
  * AA text = 4.5, AA large text / non-text UI = 3.0
@@ -69,6 +100,8 @@ const ON_FILL = [
   ['paper', 'sanguine',      4.5, 'button hover label'],
   ['paper', 'sanguine-deep', 4.5, 'button active label'],
 ];
+
+/* ---------- rendered after the token table; see below ---------- */
 
 /* SC 1.4.1 / technique G183: a link distinguished from surrounding prose by
    colour ALONE needs 3:1 against that prose. None of these reach it, which is
@@ -97,6 +130,18 @@ for (const [token, min, grounds, why] of CHECKS) {
       if (r < min) line(`      └─ fails on ${g}: ${r.toFixed(2)} (need ${min.toFixed(1)})`);
     }
   }
+}
+
+line('\n  ON THE DARK BAR — every colour the stylesheet actually paints there\n');
+if (!barPairs.length) { line('  ✗ no bar rules found — the selector list is stale'); failures++; }
+for (const [selector, token, min, note] of barPairs) {
+  const r = ratio(T[token], BAR);
+  const ok = r >= min;
+  if (!ok) failures++;
+  line(
+    `  ${ok ? '✓' : '✗'} ${selector.padEnd(38)} --${token.padEnd(12)} ` +
+    `${r.toFixed(2)}  min ${min.toFixed(1)}${note ? `  (${note})` : ''}`
+  );
 }
 
 line('');

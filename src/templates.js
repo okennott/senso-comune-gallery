@@ -79,30 +79,38 @@ export function scaleSvg(w, ui, loc) {
 
   const label = t(ui.scaleCaption, loc);
 
+  /* Finding B-03. This is the answer to Baymard's finding that 42% of buyers
+     try to judge size from the page images — and it was drawn at 1.73:1 on
+     cream, with 11px labels at 3.05:1. Both are below the floor for an
+     informational graphic (SC 1.4.11 wants 3:1) and well below what anyone
+     reads on a phone outdoors.
+
+     The opacities are gone. Every value is now a token the contrast check
+     already asserts: --muted-ui at 3.24:1 for structure, --muted at 4.90:1 for
+     labels, --sanguine at 5.64:1 for the painting itself, which is the one
+     thing in the drawing that should draw the eye. Type and family come from
+     the stylesheet, because var() in an SVG presentation attribute is not
+     reliable across engines. */
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}" class="scale__svg">
-  <g stroke="currentColor" fill="none" stroke-width="1" opacity=".38">
+  <g class="scale__struct" fill="none">
     <line x1="20" y1="${floor}" x2="${W - 20}" y2="${floor}"/>
     <path d="M${sofaX} ${floor} V${sofaY + 26} q0 -10 10 -10 H${sofaX + sofaW - 10} q10 0 10 10 V${floor}
              M${sofaX + 14} ${sofaY + 26} V${floor - 14} H${sofaX + sofaW - 14} V${sofaY + 26}"/>
-  </g>
-  <g stroke="currentColor" opacity=".5" stroke-width="1">
     <line x1="${W - 44}" y1="${floor - WALL_CM * PX_PER_CM}" x2="${W - 44}" y2="${floor}"/>
     <line x1="${W - 50}" y1="${floor - WALL_CM * PX_PER_CM}" x2="${W - 38}" y2="${floor - WALL_CM * PX_PER_CM}"/>
     <line x1="${W - 50}" y1="${floor}" x2="${W - 38}" y2="${floor}"/>
   </g>
-  <text x="${W - 56}" y="${floor - WALL_CM * PX_PER_CM / 2}" font-size="11" text-anchor="end"
-        fill="currentColor" opacity=".7" font-family="var(--font-body)">244 cm · 8 ft</text>
-  <rect x="${px}" y="${py}" width="${pw}" height="${ph}"
-        fill="var(--wash-warm)" stroke="var(--sanguine)" stroke-width="1.5"/>
-  <g stroke="var(--sanguine)" opacity=".55" stroke-width="1">
+  <text class="scale__label" x="${W - 56}" y="${floor - WALL_CM * PX_PER_CM / 2}" text-anchor="end">244 cm · 8 ft</text>
+  <rect class="scale__work" x="${px}" y="${py}" width="${pw}" height="${ph}"/>
+  <g class="scale__dim" fill="none">
     <line x1="${px - 16}" y1="${py}" x2="${px - 16}" y2="${py + ph}"/>
     <line x1="${px - 21}" y1="${py}" x2="${px - 11}" y2="${py}"/>
     <line x1="${px - 21}" y1="${py + ph}" x2="${px - 11}" y2="${py + ph}"/>
   </g>
-  <text x="${px - 26}" y="${py + ph / 2}" font-size="11" text-anchor="end"
-        fill="var(--sanguine)" font-family="var(--font-body)">${w.heightCm} cm</text>
+  <text class="scale__label scale__label--work" x="${px - 26}" y="${py + ph / 2}" text-anchor="end">${w.heightCm} cm</text>
 </svg>`;
 }
+
 
 /* ---------- structured data (N-01) ----------
    schema.org/VisualArtwork carries both the art metadata and the sale.
@@ -140,8 +148,22 @@ export function jsonLd(w, site, seller, loc, origin) {
   return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
 }
 
+/* Open Graph wants language_TERRITORY, not a BCP-47 tag: "zh-CN" -> "zh_CN",
+   and a bare "en" has no territory to give, so it takes the common default. */
+const OG_LOCALE = { en: 'en_US', 'zh-CN': 'zh_CN' };
+const ogLocale = (lang) => OG_LOCALE[lang] ?? lang.replace('-', '_');
+
+/* Finding C-01. The tab, the home-screen icon and the browser chrome were all
+   defaults. The SVG mark is the wordmark's initials in the display face on the
+   dark bar - the only lockup that survives at 16px. */
+const favicon = (asset) => `<link rel="icon" href="${asset('/icon.svg')}" type="image/svg+xml">
+<link rel="icon" href="${asset('/favicon.ico')}" sizes="32x32">
+<link rel="apple-touch-icon" href="${asset('/apple-touch-icon.png')}">
+<link rel="manifest" href="${asset('/site.webmanifest')}">`;
+
 /* ---------- document shell ---------- */
-export function layout({ site, seller, loc, title, description, body, ogImage, canonical, altLocales, bodyClass = '' }) {
+export function layout({ site, seller, loc, title, description, body, ogImage, ogImageAlt,
+                         ogImageHeight, product, canonical, altLocales, bodyClass = '' }) {
   const L = site.locales[loc];
   const ui = site.ui;
   const origin = site.url;
@@ -153,8 +175,16 @@ export function layout({ site, seller, loc, title, description, body, ogImage, c
   // Nav entries are either same-page anchors ("#works") or real paths
   // ("/about/"). Anchors hang off the locale root; paths go through path().
   const navHref = (h) => (h.startsWith('#') ? path(loc, site, '/') + h : path(loc, site, h));
+  // Finding B-04. Both labels ship; CSS shows one and hides the other, so the
+  // accessible name is whichever is visible and SC 2.5.3 holds at either width.
   const nav = site.nav
-    .map((n) => `<a href="${esc(navHref(n.href))}">${esc(t(n.label, loc))}</a>`)
+    .map((n) => {
+      const long = esc(t(n.label, loc));
+      const abbr = esc(t(n.labelShort ?? n.label, loc));
+      return `<a href="${esc(navHref(n.href))}">` +
+             `<span class="nav__long">${long}</span>` +
+             `<span class="nav__short">${abbr}</span></a>`;
+    })
     .join('\n      ');
 
   const other = loc === 'en' ? 'zh' : 'en';
@@ -173,15 +203,27 @@ export function layout({ site, seller, loc, title, description, body, ogImage, c
 <link rel="canonical" href="${esc(origin + canonical)}">
   ${hreflang}
 <link rel="alternate" hreflang="x-default" href="${esc(origin + (altLocales.find(([l]) => l === 'en')?.[1] ?? '/'))}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="${product ? 'product' : 'website'}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(origin + canonical)}">
-<meta property="og:locale" content="${L.lang.replace('-', '_')}">
+<meta property="og:site_name" content="${esc(t(seller.artist.siteName, loc))}">
+<meta property="og:locale" content="${ogLocale(L.lang)}">
+${altLocales.filter(([l]) => l !== loc).map(([l]) => `<meta property="og:locale:alternate" content="${ogLocale(site.locales[l].lang)}">`).join('\n')}
+${product ? `<meta property="product:price:amount" content="${product.amount}">
+<meta property="product:price:currency" content="${esc(product.currency)}">
+<meta property="product:availability" content="${product.sold ? 'oos' : 'instock'}">` : ''}
 ${ogImage ? `<meta property="og:image" content="${esc(origin + ogImage)}">
 <meta property="og:image:width" content="1600">
-<meta name="twitter:card" content="summary_large_image">` : '<meta name="twitter:card" content="summary">'}
-<link rel="preload" href="${asset('/fonts/fraunces-latin.woff2')}" as="font" type="font/woff2" crossorigin>
+<meta property="og:image:height" content="${ogImageHeight ?? 1600}">
+<meta property="og:image:alt" content="${esc(ogImageAlt ?? description)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="${esc(ogImageAlt ?? description)}">` : '<meta name="twitter:card" content="summary">'}
+${favicon(asset)}
+<meta name="theme-color" content="#3A2B22">
+${loc === 'zh'
+  ? `<link rel="preload" href="${asset('/fonts/notoserifsc-subset.woff2')}" as="font" type="font/woff2" crossorigin>`
+  : `<link rel="preload" href="${asset('/fonts/fraunces-latin.woff2')}" as="font" type="font/woff2" crossorigin>`}
 <link rel="preload" href="${asset('/fonts/inter-latin.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="${asset('/styles.css')}">
 </head>
@@ -194,6 +236,7 @@ ${ogImage ? `<meta property="og:image" content="${esc(origin + ogImage)}">
     <nav class="nav" aria-label="${loc === 'zh' ? '主导航' : 'Main'}">
       ${nav}
     </nav>
+    <span class="lang-rule" aria-hidden="true"></span>
     <a class="lang-switch" href="${esc(otherHref)}" lang="${site.locales[other].lang}" rel="alternate">${esc(t(ui.langSwitch, loc))}</a>
   </div>
 </header>

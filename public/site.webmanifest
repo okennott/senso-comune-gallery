@@ -1,0 +1,12 @@
+{
+  "name": "Senso Comune Gallery",
+  "short_name": "Senso Comune",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "theme_color": "#3A2B22",
+  "background_color": "#969B7D",
+  "display": "browser",
+  "start_url": "/"
+}
