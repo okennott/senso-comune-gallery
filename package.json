@@ -12,9 +12,11 @@
     "build:site": "node build.js",
     "build:images": "node scripts/build-images.mjs",
     "check": "node scripts/check-contrast.mjs && node scripts/check-links.mjs",
-    "serve": "node scripts/serve.mjs",
+    "preview": "node scripts/preview.mjs",
     "fonts": "bash scripts/build-fonts.sh",
-    "report": "bash scripts/build-report.sh"
+    "report": "npm run report:pdf && npm run report:html",
+    "report:pdf": "bash docs/report/build.sh",
+    "report:html": "bash docs/build-report/build.sh"
   },
   "devDependencies": {
     "sharp": "^0.33.5"

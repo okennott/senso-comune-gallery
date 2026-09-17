@@ -1,8 +1,9 @@
 # Senso Comune Gallery
 
-Priscilla's gallery site: six unique original works, sold to both an
-international and a Chinese domestic audience, run by Priscilla herself from
-mainland China.
+Priscilla's gallery site: unique original works, sold to both an international
+and a Chinese domestic audience, run by Priscilla herself from mainland China.
+Six are catalogued today; the site takes as many as `src/data/artworks.json`
+lists, and nothing in the build caps that.
 
 **Phase 1 (complete):** research and review — see the reports.
 **Phase 2 (in progress):** the site is built and passing its checks. What
@@ -22,14 +23,24 @@ alphabetical index. This is the one to print, share, or hand to an accountant
 or a lawyer.
 
 ```bash
-./docs/report/build.sh
+npm run report:pdf
 ```
 
 Figures regenerate from `src/styles/tokens.css` on every build, so the palette
 in the document cannot drift from the palette in the site.
 
-**[`docs/build-report.html`](docs/build-report.html)** — the same findings as a
-web page, for reading on screen.
+**[`docs/build-report/index.html`](docs/build-report/index.html)** — the same
+findings as a web page, for reading on screen. One self-contained file, no
+external requests, so it opens offline and from behind the Great Firewall.
+
+```bash
+npm run report:html
+```
+
+**[`docs/brief/`](docs/brief/)** — Priscilla's original nine-page draft,
+retired. Nothing builds from it; it is kept because several measurements in the
+codebase were taken from it. See [`docs/brief/README.md`](docs/brief/README.md)
+for what was taken and what superseded it.
 
 ---
 
@@ -336,7 +347,7 @@ src/
   styles/              tokens.css · base.css · gallery.css
   scripts/             availability.js (client-side sold check)
   templates.js         document shell, tombstone, scale diagram, JSON-LD
-build.js               28 pages from three data files
+build.js               every page, generated from the three data files
 scripts/
   build-fonts.sh       Latin webfonts, 79.8 KB for both families
   build-fonts-cjk.py   Chinese display face, subset to ~100 glyphs, 34 KB
@@ -345,9 +356,13 @@ scripts/
   check-links.mjs      dead links, missing alt, heading order, landmarks
   preview.mjs          one page as a single self-contained file
 docs/
-  build-report.html    findings, as a web page
-  report/              the printable PDF and its sources
+  brief/               Priscilla's original draft — retired, kept for provenance
+  build-report/        the findings as a web page, and its source and fonts
+  report/              the printable PDF, and its sources, figures and fonts
 masters/               full-resolution photographs — gitignored, never committed
+
+Each folder under `docs/` holds exactly one document and everything that
+builds it.
 ```
 
 ## 2.2 The entity switch
@@ -470,8 +485,8 @@ Five items, and every one needs a person outside this project.
 5. **Airwallex and a HK sole proprietorship.** The entity list verified covers
    account opening only. Ask before incorporating.
 
-**Content** is the other outstanding half: the six photographs, titles,
-descriptions, and the contact details. The email and phone are not optional —
+**Content** is the other outstanding half: a photograph, title and description
+for each catalogued work, and the contact details. The email and phone are not optional —
 they are the consumer-law requirement. `npm run build` lists every field.
 
 ---

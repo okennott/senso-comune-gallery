@@ -23,8 +23,10 @@
  * 2. AVIF at 4:4:4, never subsampled. The AVIF spec leaves chroma upsampling
  *    decoder-dependent, so 4:2:0 can render with visible colour-edge
  *    distortion depending on the viewer's decoder — which lands exactly on
- *    glazes, craquelure and low-contrast gradients. With six images, file
- *    size is not the constraint; quality is.
+ *    glazes, craquelure and low-contrast gradients. At this catalogue size
+ *    file size is not the constraint; quality is. THRESHOLD: past roughly
+ *    fifty works, revisit — the whole-site payload starts to matter more
+ *    than the last increment of chroma fidelity.
  *
  * 3. 2000px cap. This is the only image protection that actually works. It
  *    covers a 1000–1200 CSS-px hero at 2x, while the best true-300-DPI print

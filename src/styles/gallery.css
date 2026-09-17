@@ -109,7 +109,7 @@
 }
 
 /* The counter. Award-winning scroll sites all supply a finiteness cue; a
-   phone visitor otherwise scrolls six viewport-heights not knowing it ends. */
+   phone visitor otherwise scrolls many viewport-heights not knowing it ends. */
 .work__index{
   position:absolute; top:0; left:0;
   transform:translateY(-140%);

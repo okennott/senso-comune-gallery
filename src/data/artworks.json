@@ -1,6 +1,6 @@
 {
   "$comment": [
-    "THE SINGLE SOURCE OF TRUTH FOR THE SIX WORKS.",
+    "THE SINGLE SOURCE OF TRUTH FOR THE WORKS.",
     "",
     "Every number here is used more than once - the caption, the scale diagram,",
     "the JSON-LD Offer, the Open Graph card and the image srcset all derive from",
@@ -8,6 +8,12 @@
     "",
     "Titles, descriptions and alt text are placeholders and are reported as",
     "NEEDS-INPUT by the build until Priscilla replaces them.",
+    "",
+    "THE NUMBER OF WORKS IS NOT FIXED. Six are listed today, but nothing in the",
+    "build depends on that: the hero count, the 01/06 counter, the navigation,",
+    "the sitemap and the year span all derive from this array. Add or remove an",
+    "entry and rebuild. Two things do NOT derive, and the build reports both:",
+    "a medium outside oil / watercolour / graphite, and any NEEDS-INPUT field.",
     "",
     "FIELD NOTES",
     "  slug        permanent. Changing it breaks any shared link to that work.",

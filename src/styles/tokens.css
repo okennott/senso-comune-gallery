@@ -175,7 +175,7 @@
   --target-min: 48px;
 }
 
-/* Honour the OS setting. Scroll-triggered movement on six viewport-heights
+/* Honour the OS setting. Scroll-triggered movement on many viewport-heights
    of large paintings is a vestibular risk, not a flourish. */
 @media (prefers-reduced-motion: reduce){
   :root{ --dur-quick: 1ms; --dur-settle: 1ms; }

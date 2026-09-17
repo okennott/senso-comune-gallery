@@ -75,7 +75,7 @@ const altFor = (p) => LOCALES.map((l) => [l, lpath(l, site, p)]);
 
 /** Responsive image. width/height are non-negotiable: without them a lazy
  *  image defaults to 0×0, which can convince the browser everything is
- *  in-viewport and load all six at once. They are also the difference
+ *  in-viewport and load every one at once. They are also the difference
  *  between CLS 0 and CLS 0.4. */
 function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100vw - 40px)' } = {}, loc) {
   const widths = [640, 960, 1280, 1600, 2000];
@@ -91,11 +91,35 @@ function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100v
     </picture>`;
 }
 
+/** Which of the three media nouns the hero line should use for a work.
+ *
+ *  The nouns are a closed set because they are translated copy, not data —
+ *  each one is a string in site.json with an English and a Chinese form. A
+ *  medium outside the set is therefore not something this can guess at, and
+ *  guessing is how "Gouache on panel" ends up announced as an oil painting.
+ *  Unrecognised media are collected and reported by the build instead; adding
+ *  one means adding its noun to `ui` and its pattern here, together. */
+const MEDIA = [
+  [/\boil\b|油画/i,             'mediaOil'],
+  [/watercolou?r|水彩/i,        'mediaWater'],
+  [/graphite|pencil|铅笔/i,     'mediaPaper'],
+];
+const unknownMedia = new Set();
+function classifyMedium(w) {
+  const text = `${t(w.medium, 'en')} ${t(w.medium, 'zh')}`;
+  for (const [re, key] of MEDIA) if (re.test(text)) return ui[key];
+  unknownMedia.add(`${w.slug}: "${t(w.medium, 'en')}"`);
+  return ui.mediaOil;
+}
+
 /** The hero's factual line, generated rather than typed: the count, the media
  *  and the span of years all come from artworks.json, so they cannot drift
  *  from what is actually on the site. This is what replaced the category
  *  eyebrow — it grounds the motto instead of labelling it. */
 function standfirst(loc) {
+  // Spelled out to twelve, then numerals: "Thirteen paintings" is a mouthful
+  // and a catalogue that large reads better as a figure anyway. The table is
+  // the only place the count is written down, and it is not a limit.
   const NUM_EN = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
                   'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
   const NUM_ZH = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
@@ -104,13 +128,11 @@ function standfirst(loc) {
     ? `${NUM_ZH[n] || n}${t(ui.paintings, loc)}`
     : `${NUM_EN[n] || n} ${t(n === 1 ? ui.painting : ui.paintings, loc)}`;
 
-  // Distinct media, in the order they first appear.
+  // Distinct media, in the order they first appear. classifyMedium reports
+  // anything it does not recognise rather than quietly calling it oil.
   const media = [];
   for (const w of works) {
-    const m = /watercolour|水彩/i.test(t(w.medium, 'en') + t(w.medium, 'zh')) ? ui.mediaWater
-            : /graphite|铅笔/i.test(t(w.medium, 'en') + t(w.medium, 'zh'))    ? ui.mediaPaper
-            : ui.mediaOil;
-    const s = t(m, loc);
+    const s = t(classifyMedium(w), loc);
     if (!media.includes(s)) media.push(s);
   }
   // CJK sets no spaces around a conjunction; Latin does.
@@ -406,12 +428,17 @@ function renderArchive(loc) {
 /* ------------------------------------------------------------------ *
  * about + how to buy, promoted to real pages                          *
  *                                                                     *
- * They stay on the homepage as short sections, because at six works   *
+ * They stay on the homepage as short sections, because at this size   *
  * the single scroll is the right shape. But a buyer reading a work    *
  * page could not see how buying works without going back, and neither *
  * section could be linked or shared on its own. The homepage now      *
  * carries a summary; the full text lives here. No duplication: the    *
  * pages say more than the sections do.                                *
+ *                                                                     *
+ * THRESHOLD: this holds while the homepage stays one comfortable      *
+ * scroll. Past roughly a dozen works, cut the sections to a line and  *
+ * a link, and let /works/ carry the grid. Nothing here caps the       *
+ * count — the decision is editorial, not structural.                  *
  * ------------------------------------------------------------------ */
 function renderAbout(loc) {
   const paras = t(site.about.paragraphs, loc);
@@ -692,6 +719,12 @@ console.log(`  ${works.length} works · ${LOCALES.length} locales · entity: ${s
 if (!entity.checkout.supportsCards) {
   console.log(`  note: '${seller.activeEntity}' cannot take cards. Switch activeEntity to`);
   console.log(`        'hk-sole-prop' in src/data/seller.json when the HK entity exists.`);
+}
+if (unknownMedia.size) {
+  console.log(`\n  ${unknownMedia.size} work${unknownMedia.size > 1 ? 's use a medium' : ' uses a medium'} the hero line does not know:`);
+  for (const m of unknownMedia) console.log(`    · ${m}`);
+  console.log(`  It is being described as oil. Add the noun to site.json 'ui' and`);
+  console.log(`  its pattern to MEDIA in build.js, in both locales.`);
 }
 if (todo.length) {
   console.log(`\n  ${todo.length} field${todo.length > 1 ? 's' : ''} still NEEDS-INPUT:`);

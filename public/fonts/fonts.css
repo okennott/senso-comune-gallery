@@ -29,7 +29,8 @@
 
 :root{
   /* The draft drives Fraunces' optical-size axis from the font size.
-     These are the six sizes measured out of index.pdf. */
+     These are the six sizes measured out of the draft
+     (docs/brief/senso-comune-draft.pdf). */
   --fr-opsz-hero: 38.4;
   --fr-opsz-h2:   30.4;
   --fr-opsz-h3:   27.2;

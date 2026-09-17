@@ -8,7 +8,8 @@
 # removes the failure mode and is faster everywhere (no second origin).
 #
 # Axis choices are derived from the original design, not guessed:
-#   - index.pdf sets Fraunces opsz at 16.0, 16.8, 21.6, 27.2, 30.4 and 38.4,
+#   - the draft (docs/brief/senso-comune-draft.pdf) sets Fraunces opsz at
+#     16.0, 16.8, 21.6, 27.2, 30.4 and 38.4,
 #     so the opsz axis is KEPT and narrowed to 14-40. Pinning it would flatten
 #     the optical sizing the design depends on.
 #   - Fraunces WONK defaults to 1 (not 0). Pinning it to 0 silently changes the
