@@ -13,6 +13,7 @@
     "build:images": "node scripts/build-images.mjs",
     "icons": "bash scripts/build-icons.sh",
     "check": "node scripts/check-contrast.mjs && node scripts/check-links.mjs && node scripts/check-review.mjs",
+    "check:render": "node scripts/check-render.mjs",
     "preview": "node scripts/preview.mjs",
     "fonts": "bash scripts/build-fonts.sh",
     "report": "npm run report:pdf && npm run report:html",

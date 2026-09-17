@@ -154,6 +154,14 @@
      That is why the band is tall and shallow rather than a tight fade.    */
   --edge-height: 9rem;
 
+  /* How far the sage field breathes through a section boundary, at the
+     band's centre. The washes the bands used to fade between differ by
+     dE 0.8-2.6 in OKLab — at or under the eye's threshold across 9rem, so a
+     boundary was only ever seen where it broke into a hard seam. The field
+     at 20% is dE 5.3 from the warm ground: plainly there as you scroll, and
+     still only a fifth of the way to the sage itself (dE 26.7).          */
+  --edge-breath: 20%;
+
   /* ======================================================================
      MOTION
 
@@ -168,6 +176,49 @@
   --ease-enter:  cubic-bezier(.22,1,.36,1);
   --dur-quick:   140ms;
   --dur-settle:  320ms;
+  --dur-lift:    220ms;   /* hover elevation: between the two, felt not seen */
+
+  /* ======================================================================
+     SOFTNESS — edges, elevation, glass
+
+     Added with the softness pass (report, "Softness"). Not one colour here is
+     new: every shadow is --bar at a few percent, and the glass is --bar at
+     --glass-bar-opacity. A shadow tinted with the palette's own brown sits
+     IN the paper; a neutral black shadow sits on top of it and reads grey.
+     ====================================================================== */
+
+  /* Radii. Deliberately small. A mount board, a museum label and a canvas
+     have square corners; the softening is of the pixel-hard edge, not a
+     change of shape. Paintings take no radius at all: rounding a corner
+     crops the object being sold. */
+  --radius-ui:    2px;    /* buttons, panels, the focus ring */
+  --radius-sheet: 3px;    /* the cream sheet on the sage     */
+
+  /* Elevation. Three layers each: a contact shadow, a near penumbra and a
+     long soft ambient, which is how a sheet of paper actually shadows. One
+     large blur alone reads as a glow. */
+  --shadow-sheet: 0 1px 0 color-mix(in srgb,var(--bar) 6%,transparent),
+                  0 4px 10px -4px color-mix(in srgb,var(--bar) 10%,transparent),
+                  0 28px 64px -36px color-mix(in srgb,var(--bar) 42%,transparent);
+  --shadow-mount: 0 1px 1px color-mix(in srgb,var(--bar) 7%,transparent),
+                  0 3px 6px -1px color-mix(in srgb,var(--bar) 8%,transparent),
+                  0 14px 28px -10px color-mix(in srgb,var(--bar) 22%,transparent);
+  --shadow-lift:  0 1px 1px color-mix(in srgb,var(--bar) 8%,transparent),
+                  0 6px 12px -2px color-mix(in srgb,var(--bar) 12%,transparent),
+                  0 24px 44px -14px color-mix(in srgb,var(--bar) 30%,transparent);
+
+  /* The passe-partout. Scales with the viewport so a phone thumbnail does not
+     become mostly mat. */
+  --mat: clamp(8px,1.4vw,18px);
+
+  /* Glass. The masthead text is caption-size, so it needs 4.5:1 against
+     whatever passes beneath — and the worst case is a white passage of a
+     painting. Measured over pure white:
+        100%  10.74    88%  7.39    80%  5.70    70%  4.11 FAIL    60%  3.06 FAIL
+     The usual 60-70% "glassmorphism" fails outright. 88% holds 7:1, a full
+     AAA margin, and is the floor check-contrast.mjs enforces.             */
+  --glass-bar-opacity: 88%;
+  --glass-blur:        14px;
 
   /* --- targets -----------------------------------------------------------
      48px clears WCAG 2.5.8 (24px AA), 2.5.5 (44px AAA) and Android's 48dp

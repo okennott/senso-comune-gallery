@@ -73,7 +73,13 @@ const out = (rel, html) => {
 
 const altFor = (p) => LOCALES.map((l) => [l, lpath(l, site, p)]);
 
-/** Responsive image. width/height are non-negotiable: without them a lazy
+/** Responsive image. Every call site is a work's MAIN image — the one in the
+ *  list, the hero, the archive or on its own page — so each carries the
+ *  view-transition name that lets the painting travel between those pages.
+ *  The lightbox copy is written separately and deliberately unnamed: two
+ *  elements with one name on a page abort the transition.
+ *
+ *  width/height are non-negotiable: without them a lazy
  *  image defaults to 0×0, which can convince the browser everything is
  *  in-viewport and load every one at once. They are also the difference
  *  between CLS 0 and CLS 0.4. */
@@ -85,7 +91,7 @@ function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100v
   const ih = Math.round((w.heightCm / w.widthCm) * 2000);
   return `<picture>
       <source type="image/avif" srcset="${srcset('avif')}" sizes="${sizes}">
-      <img class="work__img" src="${asset(`/img/${w.image}-1280.webp`)}" srcset="${srcset('webp')}" sizes="${sizes}"
+      <img class="work__img" style="view-transition-name:work-${w.slug};view-transition-class:work" src="${asset(`/img/${w.image}-1280.webp`)}" srcset="${srcset('webp')}" sizes="${sizes}"
            width="${iw}" height="${ih}" alt="${esc(t(w.alt, loc))}"
            ${eager ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"'}>
     </picture>`;
@@ -246,7 +252,10 @@ function renderIndex(loc) {
   </div>${heroFigure}
 </section>
 
-<div class="edge edge--warm" aria-hidden="true"></div>
+<!-- Every band is named by the two grounds it joins, and nothing sits on the
+     bare sheet between a band and its section: the archive link used to, and
+     it left two hard 10-level steps in what was meant to be a soft edge. -->
+<div class="edge edge--warm-warm" aria-hidden="true"></div>
 
 <section class="section ground--warm" id="works">
   <div class="wrap">
@@ -258,7 +267,7 @@ function renderIndex(loc) {
   </div>
 </section>
 
-<div class="edge edge--violet" aria-hidden="true"></div>
+<div class="edge edge--warm-violet" aria-hidden="true"></div>
 
 <section class="section ground--violet hatch" id="tribute">
   <div class="wrap">
@@ -273,14 +282,13 @@ function renderIndex(loc) {
       </div>
     </div>
     ${listFor(tributes, originals.length)}
+    ${sold.length ? `<p class="archive-link">
+      <a class="link-quiet" href="${lpath(loc, site, '/archive/')}">${esc(t(S.archive.linkLabel, loc))} (${sold.length})</a>
+    </p>` : ''}
   </div>
 </section>
 
-${sold.length ? `<p class="wrap archive-link">
-  <a class="link-quiet" href="${lpath(loc, site, '/archive/')}">${esc(t(S.archive.linkLabel, loc))} (${sold.length})</a>
-</p>` : ''}
-
-<div class="edge edge--blue" aria-hidden="true"></div>
+<div class="edge edge--violet-blue" aria-hidden="true"></div>
 
 <section class="section ground--blue" id="about">
   <div class="wrap">
@@ -294,7 +302,9 @@ ${sold.length ? `<p class="wrap archive-link">
   </div>
 </section>
 
-<section class="section wrap" id="buy">
+<div class="edge edge--blue-warm" aria-hidden="true"></div>
+
+<section class="section ground--warm wrap" id="buy">
   <div class="section__head">
     <h2>${esc(t(S.buy.title, loc))}</h2>
     <div class="prose measure">

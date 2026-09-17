@@ -68,7 +68,14 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
   max-width:1240px;
   margin-inline:auto;
   background:var(--wash-warm);
-  box-shadow:0 1px 0 rgba(58,43,34,.06), 0 18px 48px -32px rgba(58,43,34,.45);
+  box-shadow:var(--shadow-sheet);
+  border-radius:var(--radius-sheet);
+}
+/* The sheet floats on the sage — a mounted object, not a page that starts at
+   the bar. It used to float only from 1320px, so on a 1280px laptop, the most
+   common desktop width, it ran straight into the masthead. */
+@media (min-width:900px){
+  .sheet{ margin-block:var(--space-4) var(--space-5) }
 }
 @media (min-width:1320px){
   .sheet{ margin-block:var(--space-5) }
@@ -148,7 +155,7 @@ a{ color:var(--sanguine) }
   outline:2px solid var(--sanguine);
   outline-offset:2px;
   box-shadow:0 0 0 4px var(--paper);
-  border-radius:1px;
+  border-radius:var(--radius-ui);   /* never transitioned: focus must be instant */
 }
 @supports not selector(:focus-visible){
   :focus{ outline:2px solid var(--sanguine); outline-offset:2px }
@@ -163,16 +170,24 @@ a{ color:var(--sanguine) }
   min-height:var(--target-min);
   padding-inline:var(--space-4);
   background:var(--ink); color:var(--paper);
-  border:1px solid var(--ink); border-radius:0;
+  border:1px solid var(--ink); border-radius:var(--radius-ui);
   font-family:var(--font-body);
   font-size:var(--size-caption); font-weight:500;
   letter-spacing:var(--track-label); text-transform:uppercase;
   text-decoration:none;
   transition:background var(--dur-quick) var(--ease-settle),
-             border-color var(--dur-quick) var(--ease-settle);
+             border-color var(--dur-quick) var(--ease-settle),
+             box-shadow var(--dur-lift) var(--ease-settle),
+             transform var(--dur-lift) var(--ease-settle);
 }
 .btn:hover{ background:var(--sanguine); border-color:var(--sanguine) }
 .btn:active{ background:var(--sanguine-deep); border-color:var(--sanguine-deep) }
+/* Lift only where there is a real pointer: on touch, :hover sticks after a tap
+   and the button would stay raised. One pixel, no overshoot. */
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-lift) }
+  .btn:active{ transform:none; box-shadow:none; transition-duration:var(--dur-quick) }
+}
 
 /* Quiet secondary action — a real link, not a ghost button. */
 .link-quiet{
@@ -205,15 +220,42 @@ a{ color:var(--sanguine) }
   position:relative;
   pointer-events:none;
 }
-/* Inside the sheet these are tone transitions between reading surfaces —
-   the sfumato. The sage does its work outside the sheet, at the margins. */
-.edge--warm{   background:linear-gradient(in oklab,var(--wash-warm)   0%,var(--wash-violet) 100%) }
-.edge--violet{ background:linear-gradient(in oklab,var(--wash-warm)   0%,var(--wash-violet) 100%) }
-.edge--blue{   background:linear-gradient(in oklab,var(--wash-violet) 0%,var(--wash-blue)   100%) }
+/* Softness pass. A band now joins two grounds THROUGH the field: it leaves the
+   section above, lets the sage breathe in to --edge-breath at its centre, and
+   arrives at the section below. Each band is named by what it joins, and its
+   endpoints ARE those grounds, so a boundary cannot break into a seam — which
+   three of the four did, because a band's colours were chosen independently
+   of the sections around it.
 
+   The sage belongs here. It is the wall the works hang on — the same field
+   the mark draws — seen for a moment between rooms. No text ever sits on a
+   band, so the contrast rules that keep the sage off reading surfaces are
+   untouched. */
+.edge--warm-warm{   --edge-from:var(--wash-warm);   --edge-to:var(--wash-warm) }
+.edge--warm-violet{ --edge-from:var(--wash-warm);   --edge-to:var(--wash-violet) }
+.edge--violet-blue{ --edge-from:var(--wash-violet); --edge-to:var(--wash-blue) }
+.edge--blue-warm{   --edge-from:var(--wash-blue);   --edge-to:var(--wash-warm) }
+
+.edge{
+  /* The breath follows a raised cosine, (1 - cos 2πx) / 2, sampled at nine
+     stops. Fewer, evenly weighted stops draw a peaked polyline in OKLab, and a
+     peak reads as a crease — the thing a soft edge exists to avoid. Under the
+     breath, the ground itself moves linearly from the section above to the
+     section below. figures.py reads these stops back out of this rule to plot
+     the profile, so the figure cannot describe a different curve. */
+  --edge-1: color-mix(in oklab,var(--field) calc(var(--edge-breath) * 0.21),color-mix(in oklab,var(--edge-from) 85%,var(--edge-to)));
+  --edge-2: color-mix(in oklab,var(--field) calc(var(--edge-breath) * 0.65),color-mix(in oklab,var(--edge-from) 70%,var(--edge-to)));
+  --edge-3: color-mix(in oklab,var(--field) calc(var(--edge-breath) * 0.94),color-mix(in oklab,var(--edge-from) 58%,var(--edge-to)));
+  --edge-mid: color-mix(in oklab,var(--field) var(--edge-breath),color-mix(in oklab,var(--edge-from),var(--edge-to)));
+  --edge-5: color-mix(in oklab,var(--field) calc(var(--edge-breath) * 0.94),color-mix(in oklab,var(--edge-from) 42%,var(--edge-to)));
+  --edge-6: color-mix(in oklab,var(--field) calc(var(--edge-breath) * 0.65),color-mix(in oklab,var(--edge-from) 30%,var(--edge-to)));
+  --edge-7: color-mix(in oklab,var(--field) calc(var(--edge-breath) * 0.21),color-mix(in oklab,var(--edge-from) 15%,var(--edge-to)));
+  background:linear-gradient(in oklab,
+    var(--edge-from) 0%, var(--edge-1) 15%, var(--edge-2) 30%, var(--edge-3) 42%, var(--edge-mid) 50%,
+    var(--edge-5) 58%, var(--edge-6) 70%, var(--edge-7) 85%, var(--edge-to) 100%);
+}
 @supports not (background:linear-gradient(in oklab,red,blue)){
-  .edge--warm,.edge--violet{ background:linear-gradient(var(--wash-warm),var(--wash-violet)) }
-  .edge--blue{ background:linear-gradient(var(--wash-violet),var(--wash-blue)) }
+  .edge{ background:linear-gradient(var(--edge-from),var(--edge-to)) }
 }
 
 /* Noise dither. ~1.4KB inline SVG, no network request, no repaint cost
@@ -307,4 +349,24 @@ a{ color:var(--sanguine) }
     animation-duration:var(--dur-settle);
     animation-timing-function:var(--ease-enter);
   }
+
+  /* The masthead is its own transition group, so it holds perfectly still
+     while the sheet beneath it cross-fades. Without this the whole page —
+     wordmark, navigation and all — dissolves and re-forms on every click,
+     which reads as a reload rather than as moving within one gallery. */
+  .masthead{ view-transition-name:masthead }
+  ::view-transition-group(masthead){ animation:none }
+
+  /* A painting is named by its slug on the page that lists it and on its own
+     page, so opening a work carries the image from the list into place
+     rather than cutting to it. build.js sets the name; only one element per
+     page may carry it, so the lightbox copy does not. */
+  ::view-transition-group(.work){
+    animation-duration:var(--dur-settle);
+    animation-timing-function:var(--ease-settle);
+  }
+  /* Scale the snapshot rather than cross-fading two copies of it: a painting
+     should never be seen as a double exposure of itself. */
+  ::view-transition-old(.work){ animation:none; opacity:0 }
+  ::view-transition-new(.work){ animation:none }
 }

@@ -144,6 +144,41 @@ for (const [selector, token, min, note] of barPairs) {
   );
 }
 
+/* ---------- the glass bar ----------
+   Softness pass. On desktop the sticky masthead becomes --bar at
+   --glass-bar-opacity once content scrolls beneath it. Its text is then read
+   against the bar COMPOSITED over whatever is passing under, and a painting
+   can put pure white there — the worst case for light text on a dark glass.
+   Browsers composite in sRGB, so that is what is modelled.
+
+   The floor here is a design floor, not WCAG's: 7:1 for navigation-size text
+   (AAA) and 4.5:1 for the display-size wordmark. WCAG's 4.5:1 would allow the
+   bar down to 73%; the site chose a full AAA margin, and this is what holds it
+   there. Only masthead rules are affected — the footer does not float. */
+{
+  const alphaDecl = (readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8')
+    .match(/--glass-bar-opacity:\s*([\d.]+)%/) ?? [])[1];
+  line('\n  THE GLASS BAR — masthead text over a white passage of a painting\n');
+  if (!alphaDecl) {
+    line('  ✗ --glass-bar-opacity not found in tokens.css'); failures++;
+  } else {
+    const a = Number(alphaDecl) / 100;
+    const rgb = (h) => [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16));
+    const hex = (c) => '#' + c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+    const composite = hex(rgb(BAR).map((v) => a * v + (1 - a) * 255));
+    line(`  --bar at ${alphaDecl}% over #FFFFFF composites to ${composite.toUpperCase()}`);
+    const masthead = barPairs.filter(([sel]) => /^\s*(\.masthead|\.wordmark|\.nav\b|\.nav__|\.lang-switch)/.test(sel));
+    if (!masthead.length) { line('  ✗ no masthead rules found'); failures++; }
+    for (const [selector, token, min] of masthead) {
+      const floor = min >= 4.5 ? 7.0 : 4.5;
+      const r = ratio(T[token], composite);
+      const ok = r >= floor;
+      if (!ok) failures++;
+      line(`  ${ok ? '✓' : '✗'} ${selector.padEnd(38)} --${token.padEnd(12)} ${r.toFixed(2)}  floor ${floor.toFixed(1)}`);
+    }
+  }
+}
+
 line('');
 for (const [fg, bg, min, why] of ON_FILL) {
   const r = ratio(T[fg], T[bg]);

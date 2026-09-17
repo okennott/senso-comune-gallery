@@ -305,6 +305,151 @@ that the mark contributes no accessible name of its own, that it is identical
 in both locales, that it spends no accent, and that the hanging figure is the
 one the work pages cite.
 
+## Softness {#sec-soft}
+
+The site as first built was correct and a little hard: square sheet, flat
+works, a colour swap for a hover and hard stops where sections met. This pass
+asked for something softer and more elegant — without making it less
+professional, and without changing a single colour.
+
+Those two constraints do most of the design work. Every familiar softening
+technique reaches for new colour (a white card, a black shadow, a coloured
+glow) or for lower contrast (translucency), and this site has already argued,
+with measurements, against both.
+
+### What limits it {#sec-soft-limits}
+
+Three commitments made earlier in this document bound what "soft" may mean
+here.
+
+- **Quietness is bought with size and whitespace, never with contrast.**
+  Anything translucent puts text over a ground that is no longer a token, so
+  its contrast has to be measured against the worst thing that can pass
+  beneath it — which, on a site of paintings, is white.
+- **Edges dissolve rather than rule** (@sec-masters). A softer site should
+  have *fewer* lines, not decorative new ones.
+- **A painting is never altered.** Rounding its corner crops it. Zooming it on
+  hover implies it was cropped to fit. Stretching it misrepresents the object
+  for sale.
+
+Motion has its own limit, already recorded in the stylesheet: many
+viewport-heights of large images make scroll-triggered movement a vestibular
+risk, and every animation must stand down when the reader has asked for
+reduced motion.
+
+### Research notes {#sec-soft-research}
+
+![Left: how translucent the masthead may be, measured as navigation text over a white passage of a painting. Right: the lightness of a section boundary from top to bottom, before and after. Both panels are computed from the live token file.](fig/softness.pdf){#fig-softness width=100% fig-pos="H"}
+
+**Glass has a hard floor, and it is high.** The usual glassmorphism panel runs
+at 60–70% opacity. Over a white passage that puts the navigation at
+3.06–4.11:1: a failure at caption size. WCAG's 4.5:1 is reached at 73%; a full
+AAA margin of 7:1 needs 87%. The glass that is legal here is subtle by
+necessity, and the right-hand side of @fig-softness is why it is still worth
+having: a painting passing under a solid bar is cut off by a slab, while under
+88% it is *felt* as a soft blur of its own colour.
+
+**Glass at rest would repaint the brand.** Prototyping showed a problem no
+contrast figure reveals: a translucent bar at the top of the page sits over the
+sage, so every page would show a greyed, greenish masthead instead of
+Priscilla's brown. Glass is only wanted once there is something beneath it.
+
+**The old section boundaries were invisible and hard at once.** The washes the
+sfumato bands faded between differ by ΔE 0.8–2.6 in OKLab — at or under the
+threshold of perception when spread across 9 rem. A boundary was therefore only
+ever seen where it broke. Sampling the rendered homepage row by row found four
+such breaks, each a 10-level hard step (@tbl-seams). The "soft edge" was being
+read as a faint line.
+
+: Where the homepage's soft edges were hard, before this pass {#tbl-seams}
+
+| Boundary | Seam | Cause |
+|:----------------------|:----------------------------|:---------------------------------------------|
+| Hero → Works | `#ECE3D2 → #F3EBDD` | The band faded to violet; the section below is warm |
+| Tribute → archive link | `#EDE4D3 → #F3EBDD` | The link sat outside Tribute, on the bare sheet |
+| Archive link → About | `#F3EBDD → #ECE3D3` | …so the next band started violet against warm |
+| About → How to Buy | `#E9E3D6 → #F3EBDD` | No band at all |
+
+**A peak reads as a crease.** A boundary that rises and falls through a few
+evenly weighted stops draws a pointed profile, and the eye finds the point. The
+adopted band follows a raised cosine across nine stops, which is what the
+right-hand panel of @fig-softness plots — read back out of the stylesheet rather
+than redrawn.
+
+**Motion on this site must settle, not perform.** The motion tokens already
+say *leave quickly, settle slowly, never overshoot*. Cross-document view
+transitions let a painting carry from the list into its own page. They need a
+unique name per element on each page; two elements sharing a name abort the
+whole transition, which rules out naming the lightbox copy.
+
+### Options {#sec-soft-options}
+
+Every option considered is listed. **Adopted** items are built. **Optional**
+items remain available for a later pass, and where one fails a measured limit
+the reason says so.
+
+```{=latex}
+\Needspace*{16\baselineskip}
+```
+
+: Softness options, by area {#tbl-soft-options}
+
+| Area | Option | Status | Why |
+|:--------------|:-------------------------------|:-------------------|:-----------------------------------|
+| Edges | 2 px on controls and panels, 3 px on the sheet | **Adopted** | Softens the pixel-hard corner without changing shape; a mount board is square |
+| Edges | 8–16 px radii | Optional | Reads as an app, not a gallery |
+| Edges | Rounded corners on the paintings | Optional — *crops the work* | Rounding a corner removes part of the object being sold |
+| Elevation | Three-layer shadows tinted with `--bar` | **Adopted** | A brown shadow sits *in* the paper; a black one sits on it and reads grey |
+| Elevation | Single large neutral shadow | Optional | Reads as a glow |
+| Margins | Passe-partout: a `--paper-deep` mat, no outline | **Adopted** | What a gallery does to a work; defined by tone and shadow, not a line |
+| Margins | `--paper` mat with a hairline | Optional | Crisper and more card-like, but adds the line the site avoids |
+| Margins | Shadow only, no mat | Optional | Softer still; loses the mounted look |
+| Margins | Sheet floating from 900 px, not 1320 px | **Adopted** | On a 1280 px laptop the sheet used to run into the bar |
+| Glass | Masthead at 88%, scroll-driven, desktop | **Adopted** | 7.39:1 over white; solid at rest; nothing passes under it on a phone |
+| Glass | Masthead at 60–70% | Optional — *fails 4.5:1* | 3.06–4.11:1 over a white passage |
+| Glass | Translucent reading panels over the sage | Optional — *unbounded contrast* | The sheet is the reading surface; text on glass over a painting has no worst case to solve against |
+| Boundaries | The field breathing through each band at 20% | **Adopted** | ΔE 5.3: plainly there when scrolling, a fifth of the way to the sage |
+| Boundaries | Bands named by, and fading between, their actual neighbours | **Adopted** | Removes all four seams in @tbl-seams |
+| Boundaries | Each section its own sheet, with sage between | Optional | The most emphatic; replaces one mounted sheet with several and doubles the shadows |
+| Boundaries | The mark set small at the centre of a band | Optional | A signpost that repeats the logo on every scroll |
+| Boundaries | A hairline or short sanguine rule | Optional — *adds a line and spends the accent* | Contradicts both principles above |
+| Motion | Nav underline drawn in from the left | **Adopted** | A transform, so nothing reflows and the 48 px target is unchanged |
+| Motion | One-pixel button lift, pointer devices only | **Adopted** | On touch, `:hover` sticks after a tap |
+| Motion | Mount shadow deepens when a work is hovered | **Adopted** | Elevation without touching the painting |
+| Motion | Lightbox fades and settles 8 px | **Adopted** | No scale: a painting drawn at 99.5% is drawn wrong |
+| Motion | Zoom a painting on hover | Optional — *alters the work* | Implies cropping; no hover on touch |
+| Motion | Scroll-triggered reveals, parallax | Optional — *vestibular risk* | Also invisible in a link-card thumbnail and the first frame |
+| Motion | Animated focus ring | Optional — *not recommended* | A focus indicator must be present the instant focus arrives |
+| Navigation | Masthead held still across page changes | **Adopted** | Without it the whole bar dissolves and re-forms, which reads as a reload |
+| Navigation | The painting carried from list to page | **Adopted** | Chromium and Safari; elsewhere navigation is simply instant |
+| Navigation | Smooth scrolling for in-page jumps | Optional | A long glide past many large images; already declined |
+
+### What was built {#sec-soft-built}
+
+![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: a section boundary between Original Works and Tribute.](fig/cap-soft.png){#fig-soft width=100%}
+
+Nothing in the palette changed. All nine new softness tokens — two radii, three
+shadows, the mat, the glass opacity and blur, and the boundary breath — are
+expressed through colours that already existed, and a check fails the build if
+a literal colour appears among them.
+
+### How it is held {#sec-soft-held}
+
+- `check-contrast.mjs` composites the bar at `--glass-bar-opacity` over pure
+  white and fails the build below 7:1 for navigation text. Set to the usual 70%,
+  it names three failures.
+- `check-render.mjs` is new, and the first check that needs a browser. It lays
+  the built pages out in Chrome at 1440, 900 and 390 px and asserts that every
+  painting's box keeps the painting's own proportions to within 1%, with no
+  radius and no transform. It is not part of `npm run check`, which must run
+  anywhere; CI runs it on every deploy. Forcing the hero full-width under its
+  height cap makes it report a 17% distortion by name.
+- Six assertions in `check-review.mjs` (G-01 to G-06) cover the rest: no
+  literal colour in the new tokens, a mat and nothing that alters a painting,
+  glass solid at rest and gated, all new motion standing down for reduced
+  motion, one transition name per painting per page, and every band joining the
+  grounds actually either side of it. Each was mutation-tested.
+
 ## The two masters {#sec-masters}
 
 The brief asked for a debt to Leonardo\index{Leonardo da Vinci} and to van Gogh\index{van Gogh, Vincent}, carried without ever
@@ -368,7 +513,7 @@ exists.
 
 ![The homepage. Cream sheet mounted on the sage field, dark brown bar, the mark at the head of the wordmark. The first painting sits in the hero beside the motto rather than below the fold; the factual line under the motto is generated from the work data and cannot drift.](fig/cap-home.png){#fig-home width=100%}
 
-![A work page. The price is the boldest element in the block — the single change with the best evidence behind it. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
+![A work page, the painting in its mat. The price is the boldest element in the block — the single change with the best evidence behind it. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
 
 ![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.png){#fig-sold width=100%}
 
@@ -677,7 +822,7 @@ src/templates.js
 build.js        28 pages, two locales
 scripts/        mark.mjs          the logo geometry, shared with the report
                 build-fonts · build-fonts-cjk · build-images · build-icons
-                check-contrast · check-links · check-review
+                check-contrast · check-links · check-review · check-render
                 preview.mjs       one page, inlined, for review
 docs/           brief/ · build-report/ · report/     one document each
 ```
@@ -712,7 +857,8 @@ payment stands and the second is refunded in full within 24 hours.*
 
 ## Checks that block the build {#sec-checks}
 
-Three, and `npm run check` runs all three.
+Four. `npm run check` runs the first three anywhere; the fourth needs a
+browser and runs in CI.
 
 `check-contrast.mjs` recomputes every token against its worst-case ground. It
 also resolves the *cascade*: where several rules set a colour on the dark bar,
@@ -723,10 +869,15 @@ it takes the declaration that actually wins and measures that one.
 shipped Chinese subset still covers every CJK character the build puts in a
 display position.
 
-`check-review.mjs` is newer and differently shaped: **41 assertions over the
-24 findings** of @sec-review, written against the built pages rather than the
-source, so a fix that silently stops being applied fails the build instead of
-being noticed in a screenshot months later.
+`check-review.mjs` is newer and differently shaped: **47 assertions over 30
+findings** — the design review (@sec-review), the mark and the softness pass —
+written against the built pages rather than the source, so a fix that silently
+stops being applied fails the build instead of being noticed in a screenshot
+months later.
+
+`check-render.mjs` lays the built pages out in headless Chrome and fails if any
+painting is drawn out of its own proportions, rounded or transformed
+(@sec-soft-held).
 
 Between them they caught a muted grey that passed
 on white and failed on the darkest wash, work pages shipping with no `<h1>` at

@@ -44,3 +44,7 @@ shoot work "/works/harbour-light/"          1440 900  2
 shoot sold "/works/long-afternoon/"         1440 620  2
 shoot buy  "/how-to-buy/"                   1440 900  2
 shoot mob  "/"                               390 844  2
+
+# The softness plate needs a painting to show a mat, a mount shadow or glass
+# on, and forced states a plain screenshot cannot reach. See soft_shots.mjs.
+node "$HERE/soft_shots.mjs" "http://127.0.0.1:$PORT"

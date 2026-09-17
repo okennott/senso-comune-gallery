@@ -11,7 +11,7 @@
  * The review is published at claude.ai/artifact/WS9N9YP9Qr13NL1imYwoQX
  */
 
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -345,6 +345,109 @@ check('F-04', 'the hanging datum is the figure the work pages are drawn to', () 
   const fromWork = /144\.78/.test(work) || /144\.78/.test(src('src/templates.js'));
   const declared = Math.abs(MARK.hang - 144.78 / 244) < 1e-9;
   return { ok: fromWork && declared, detail: `work page cites 144.78 ${fromWork}, mark uses ${(MARK.hang * 100).toFixed(2)}%` };
+});
+
+/* ===================== G — softness ===================== */
+/* Added with the softness pass: soft edges, elevation, glass, motion and
+   section boundaries, with the palette unchanged. The paintings' own promise —
+   never distorted, rounded or transformed — needs a browser and lives in
+   check-render.mjs; these are the parts the built files can prove. */
+
+const rulesFor = (selRe) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+  .filter((m) => selRe.test(m[1])).map((m) => m[2]);
+const allHtml = (() => {
+  const out = [];
+  (function walk(d) {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) walk(p); else if (e.name === 'index.html') out.push([p.slice(DIST.length), readFileSync(p, 'utf8')]);
+    }
+  })(DIST);
+  return out;
+})();
+
+check('G-01', 'softness adds no colour: shadows, glass and bands are palette tokens', () => {
+  const tokens = src('src/styles/tokens.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const soft = [...tokens.matchAll(/--(shadow-[a-z]+|glass-[a-z-]+|mat|radius-[a-z]+|edge-breath)\s*:([^;]+);/g)];
+  const literal = soft.filter(([, , v]) => /#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(v)).map(([, n]) => n);
+  const shadowsUseBar = soft.filter(([, n]) => n.startsWith('shadow-')).every(([, , v]) => /var\(--bar\)/.test(v));
+  const edgeRules = rulesFor(/\.edge\b/).join(';');
+  const edgeLiteral = /#[0-9a-f]{3,8}\b|rgba?\(/i.test(edgeRules);
+  return { ok: soft.length >= 8 && !literal.length && shadowsUseBar && !edgeLiteral,
+           detail: `${soft.length} softness tokens, literals ${literal.join(' ') || 'none'}, shadows tinted --bar ${shadowsUseBar}, bands literal-free ${!edgeLiteral}` };
+});
+
+check('G-02', 'paintings carry a mat, and nothing that rounds, scales or stretches them', () => {
+  const mount = rulesFor(/\.work__img|\.hero__work img/);
+  const joined = mount.join(';');
+  const mat = /padding:var\(--mat\)/.test(joined) && /box-sizing:border-box/.test(joined);
+  const contain = /object-fit:contain/.test(joined);
+  const radius = /border-radius/.test(joined);
+  const transform = /transform/.test(joined);
+  return { ok: mat && contain && !radius && !transform,
+           detail: `mat ${mat}, contain ${contain}, radius ${radius}, transform ${transform}` };
+});
+
+check('G-03', 'the glass bar is solid at rest, scroll-driven, desktop only', () => {
+  const gated = /@media\(min-width:720px\)and\(prefers-reduced-motion:no-preference\)\{@supports\(animation-timeline:scroll\(\)\)/.test(flat);
+  const fromSolid = /@keyframesmasthead-glass\{from\{background-color:var\(--bar\)\}to\{background-color:color-mix\(insrgb,var\(--bar\)var\(--glass-bar-opacity\),transparent\)\}\}/.test(flat);
+  const restSolid = /\.masthead\{position:sticky;[^}]*background:var\(--bar\)/.test(flat);
+  const range = /animation-range:096px/.test(flat);
+  return { ok: gated && fromSolid && restSolid && range,
+           detail: `gated ${gated}, keyframes solid→glass ${fromSolid}, base solid ${restSolid}, first 96px ${range}` };
+});
+
+check('G-04', 'new motion stands down for reduced motion; focus is never animated', () => {
+  const noPref = [...flat.matchAll(/@media\(prefers-reduced-motion:no-preference\)\{/g)].length;
+  const lightboxGated = /@media\(prefers-reduced-motion:no-preference\)\{dialog\.lightbox,dialog\.lightbox::backdrop\{transition/.test(flat);
+  const vtGated = /@media\(prefers-reduced-motion:no-preference\)\{::view-transition-old\(root\)/.test(flat);
+  const neutraliser = /@media\(prefers-reduced-motion:reduce\)\{\*,\*::before,\*::after\{animation-duration:1ms!important/.test(flat);
+  const focus = rulesFor(/:focus-visible\s*$/).join(';');
+  const focusStill = !/transition|animation/.test(focus);
+  return { ok: lightboxGated && vtGated && neutraliser && focusStill,
+           detail: `lightbox gated ${lightboxGated}, page transitions gated ${vtGated}, global neutraliser ${neutraliser}, focus unanimated ${focusStill}` };
+});
+
+check('G-05', 'every page names each painting once, and the lightbox copy not at all', () => {
+  const dupes = [], lightboxNamed = [];
+  let named = 0;
+  for (const [p, html] of allHtml) {
+    const names = [...html.matchAll(/view-transition-name:(work-[a-z0-9-]+)/g)].map((m) => m[1]);
+    named += names.length;
+    const seen = new Set();
+    for (const n of names) { if (seen.has(n)) dupes.push(`${p} ${n}`); seen.add(n); }
+    if (/<dialog[\s\S]*?view-transition-name[\s\S]*?<\/dialog>/.test(html)) lightboxNamed.push(p);
+  }
+  const masthead = /\.masthead\{view-transition-name:masthead\}/.test(flat);
+  return { ok: named > 0 && !dupes.length && !lightboxNamed.length && masthead,
+           detail: `${named} names over ${allHtml.length} pages, duplicates ${dupes.length}, lightbox named ${lightboxNamed.length}, masthead held ${masthead}` };
+});
+
+check('G-06', 'every boundary band joins the grounds actually either side of it', () => {
+  // A band's endpoints must BE its neighbours, or the soft edge breaks into a
+  // hard seam — three of four did before this pass. The hero sits on the bare
+  // sheet, which is --wash-warm.
+  const bad = [];
+  let bands = 0;
+  for (const [p, html] of [['/', home], ['/zh/', zhHome]]) {
+    const seq = [...html.matchAll(/<(section|div)\s+class="([^"]*)"/g)]
+      .map((m) => m[2]).filter((c) => /\b(hero|edge|section)\b/.test(c) && !/section__/.test(c));
+    seq.forEach((c, i) => {
+      const m = c.match(/\bedge--([a-z]+)-([a-z]+)\b/);
+      if (!m) return;
+      bands++;
+      const ground = (cls) => (cls && /\bhero\b/.test(cls) ? 'warm' : (cls?.match(/\bground--([a-z]+)/) ?? [])[1]);
+      const before = ground(seq[i - 1]), after = ground(seq[i + 1]);
+      if (before !== m[1] || after !== m[2]) bad.push(`${p} edge--${m[1]}-${m[2]} sits between ${before} and ${after}`);
+    });
+    // and the CSS for each band must fade between the grounds its name says
+    for (const [, a, b] of html.matchAll(/\bedge--([a-z]+)-([a-z]+)\b/g)) {
+      const rule = new RegExp(`\\.edge--${a}-${b}\\{--edge-from:var\\(--wash-${a}\\);--edge-to:var\\(--wash-${b}\\)\\}`);
+      if (!rule.test(flat)) bad.push(`CSS for edge--${a}-${b} does not fade ${a} → ${b}`);
+    }
+  }
+  const breath = /--edge-mid:color-mix\(inoklab,var\(--field\)var\(--edge-breath\)/.test(flat);
+  return { ok: bands >= 8 && !bad.length && breath, detail: bad.length ? bad.join('; ') : `${bands} bands, all seamless, the field breathes through at the centre ${breath}` };
 });
 
 /* ===================== cross-cutting ===================== */

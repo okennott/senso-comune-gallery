@@ -337,6 +337,7 @@ npm run check        # contrast, structure, design review; all three block the b
 npm run preview      # one built page as a single self-contained file
 npm run fonts        # rebuild the webfonts, Latin and Chinese
 npm run icons        # rebuild the favicon, home-screen icon and manifest
+npm run check:render # paintings keep their proportions in a real browser (needs Chrome)
 npm run report       # rebuild both reports (report:pdf, report:html)
 ```
 
@@ -398,8 +399,11 @@ reading it from the other.
 │   ├── check-links.mjs             dead links, missing alt, missing width or
 │   │                               height, heading order, landmarks, hreflang,
 │   │                               CJK subset coverage
-│   ├── check-review.mjs            41 assertions over the design-review
-│   │                               findings, written against the built pages
+│   ├── check-review.mjs            47 assertions: the design review, the mark
+│   │                               and the softness pass, against built pages
+│   ├── check-render.mjs            lays pages out in headless Chrome; fails if
+│   │                               a painting is distorted, rounded or
+│   │                               transformed. Needs Chrome, so CI runs it
 │   └── preview.mjs                 one page as a single self-contained file
 │
 ├── public/                       copied to the site as-is
@@ -421,7 +425,7 @@ reading it from the other.
 │   │   ├── fonts/                    inlined as base64 at build time
 │   │   └── build.sh
 │   └── report/                     the printable technical report
-│       ├── senso-comune-report.pdf   built: A4, indexed, 38 pages
+│       ├── senso-comune-report.pdf   built: A4, indexed, 44 pages
 │       ├── senso-comune-report.qmd   the source
 │       ├── preamble.tex              typesetting: fonts, heads, callouts, and
 │       │                             the mark, redrawn in TikZ for the footers
@@ -432,6 +436,8 @@ reading it from the other.
 │       ├── scale_mark.py             reads scripts/mark.mjs, and fails the
 │       │                             build if preamble.tex has drifted from it
 │       ├── shots.sh                  the page screenshots, taken from dist/
+│       ├── soft_shots.mjs            the softness plate: forced hover and glass
+│       │                             states, on a synthetic stand-in canvas
 │       │                             (cjk-chars.txt is an intermediate and is
 │       │                              not in the repo; the staleness test is
 │       │                              the committed font's own coverage, so a
@@ -539,6 +545,14 @@ CJK subset still covers every character set in the display face — a new Chines
 work title otherwise renders one glyph in the system font, mid-heading, with
 nothing reporting it.
 
+`check-render.mjs` is the only check that needs a browser. The softness pass put
+every painting in a mat — padding, a shadow and `border-box` inside layouts that
+already cap heights — and that is exactly where an image box can quietly stop
+matching the painting's proportions. It lays the built pages out in Chrome at
+1440, 900 and 390 px and fails if any painting's box drifts more than 1% from
+its own ratio, or carries a radius or a transform. It is kept out of
+`npm run check` so that one runs anywhere; CI runs it on every deploy.
+
 `check-review.mjs` holds one assertion per finding from the September 2026
 design review, written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
@@ -564,6 +578,13 @@ block people outright.
   brown, crossed by a sage datum at the museum hanging height of 144.78 cm on a
   244 cm wall. One geometry in `scripts/mark.mjs` generates the icon set, the
   masthead lockup and the report's footer mark. `npm run icons` rebuilds it.
+- **Softness without new colour.** Mats, radii, shadows, glass and section
+  boundaries are all expressed through existing tokens; shadows are `--bar` at
+  a few percent. The masthead's glass stops at 88% because the navigation must
+  hold 7:1 over a white passage of a painting (the usual 60–70% fails WCAG
+  outright), and it only turns to glass once content scrolls beneath it.
+  Paintings are never rounded, zoomed or stretched. The report's Softness
+  section lists every option considered, adopted and optional.
 - **Cloudflare Pages.** The only host with no bill, no pause and no terms
   problem. `vercel.app` and `workers.dev` measure 100% blocked from mainland
   China; `pages.dev` measures 0%.

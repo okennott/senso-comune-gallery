@@ -19,6 +19,37 @@
   border-bottom:0;
 }
 
+/* Glass, within that decision rather than against it. The inversion still
+   does the legibility work: the bar never drops below --glass-bar-opacity
+   (88%), which holds the navigation at 7.39:1 even over a pure-white passage
+   of a painting, and check-contrast.mjs fails the build below 7:1. What the
+   last 12% buys is that a work passing under the bar is felt through it as a
+   soft blur of its own colour, instead of being cut off by a hard slab.
+
+   It is scroll-driven, and that matters. At rest the bar sits over the sage,
+   and a translucent bar there would repaint the brand colour on every page.
+   So the bar is solid --bar at the top and becomes glass over the first
+   96px of scroll, only once there is something beneath it to see.
+
+   Desktop only: below 720px the masthead is static and nothing passes under
+   it. Where scroll timelines or backdrop-filter are missing, or the reader
+   has asked for reduced motion, the bar simply stays solid. */
+@media (min-width:720px) and (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:scroll()) and ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .masthead{
+      -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.1);
+              backdrop-filter:blur(var(--glass-blur)) saturate(1.1);
+      animation:masthead-glass linear both;
+      animation-timeline:scroll(root block);
+      animation-range:0 96px;
+    }
+    @keyframes masthead-glass{
+      from{ background-color:var(--bar) }
+      to{   background-color:color-mix(in srgb,var(--bar) var(--glass-bar-opacity),transparent) }
+    }
+  }
+}
+
 .masthead__inner{
   display:flex; align-items:baseline; gap:var(--space-4);
   flex-wrap:wrap;
@@ -50,13 +81,23 @@
   font-size:var(--size-caption);
   letter-spacing:var(--track-label); text-transform:uppercase;
   color:var(--paper-deep); text-decoration:none;   /* 10.74:1 on the bar */
-  border-bottom:1px solid transparent;
-  transition:color var(--dur-quick) var(--ease-settle),
-             border-color var(--dur-quick) var(--ease-settle);
+  position:relative;
+  transition:color var(--dur-quick) var(--ease-settle);
+}
+/* The underline draws in from the left on hover and settles; the current
+   page's is simply drawn. It is a transform, so nothing reflows and the
+   48px target does not move. The rule sits where the old 1px border did. */
+.nav a::after{
+  content:''; position:absolute; left:0; right:0; bottom:0; height:1px;
+  background:currentColor;
+  transform:scaleX(0); transform-origin:left center;
+  transition:transform var(--dur-settle) var(--ease-settle);
 }
 .nav__short{ display:none }
-.nav a:hover{ color:#fff; border-bottom-color:var(--paper-deep) }
-.nav a[aria-current]{ color:#fff; border-bottom-color:var(--paper) }
+.nav a:hover{ color:#fff }
+.nav a:hover::after{ transform:scaleX(1) }
+.nav a[aria-current]{ color:#fff }
+.nav a[aria-current]::after{ transform:scaleX(1); background:var(--paper) }
 
 /* Finding D-03. Sitting in the bar at nav size and colour, this read as a
    fifth section link. It changes the whole site, so it gets a divider and its
@@ -113,6 +154,33 @@
   width:100%; height:auto;
   cursor:zoom-in;
   background:var(--paper);
+}
+
+/* ---------- the mount ----------
+   Softness pass. Every work sits in a passe-partout: a --paper-deep mat, one
+   step darker than the sheet, and a shadow tinted with the bar's own brown.
+   No outline — the mat is defined by tone and shadow alone, which is the
+   site's rule that edges dissolve rather than rule.
+
+   Three constraints, all about not altering the object being sold:
+     - no border-radius on a painting, ever: rounding a corner crops it;
+     - no transform on hover: a zoom implies the image was cropped to fit,
+       and on touch there is no hover to undo it;
+     - object-fit:contain, so if any box ever disagrees with a painting's
+       ratio the painting is letterboxed inside its mat, never stretched.
+   border-box keeps the mat inside the height caps the layout already sets. */
+.work__img,
+.hero__work img{
+  box-sizing:border-box;
+  padding:var(--mat);
+  background:var(--paper-deep);
+  object-fit:contain;
+  box-shadow:var(--shadow-mount);
+  transition:box-shadow var(--dur-lift) var(--ease-settle);
+}
+@media (hover:hover) and (pointer:fine){
+  .work__figure:hover .work__img,
+  .hero__work:hover img{ box-shadow:var(--shadow-lift) }
 }
 
 /* The counter. Award-winning scroll sites all supply a finiteness cue; a
@@ -275,12 +343,42 @@ dialog.lightbox::backdrop{
   dialog.lightbox::backdrop{ background:rgba(250,247,242,.94) }
 }
 dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
+/* The lightbox is for looking closely, so the painting gets the whole frame:
+   no mat (its <img> is not a .work__img), only the mount shadow. */
+dialog.lightbox img{ box-shadow:var(--shadow-mount) }
+
+/* Enter slowly, leave quickly, never overshoot — the motion tokens' rule.
+   8px and a fade; no scale, because a painting briefly drawn at 99.5% is a
+   painting briefly drawn wrong. Browsers without @starting-style or
+   transition-behavior open and close instantly, as before. */
+@media (prefers-reduced-motion:no-preference){
+  dialog.lightbox,
+  dialog.lightbox::backdrop{
+    transition:opacity var(--dur-quick) var(--ease-settle),
+               transform var(--dur-quick) var(--ease-settle),
+               overlay var(--dur-quick) allow-discrete,
+               display var(--dur-quick) allow-discrete;
+    opacity:0;
+  }
+  dialog.lightbox{ transform:translateY(4px) }
+  dialog.lightbox[open],
+  dialog.lightbox[open]::backdrop{
+    opacity:1; transform:none;
+    transition-duration:var(--dur-settle);
+    transition-timing-function:var(--ease-enter);
+  }
+  @starting-style{
+    dialog.lightbox[open]{ opacity:0; transform:translateY(8px) }
+    dialog.lightbox[open]::backdrop{ opacity:0 }
+  }
+}
 .lightbox__close{
   position:absolute; top:calc(var(--space-3) * -1 - var(--target-min));
   right:0;
   min-height:var(--target-min); min-width:var(--target-min);
   display:inline-flex; align-items:center; justify-content:center;
   background:none; border:1px solid var(--muted-ui); color:var(--ink);
+  border-radius:var(--radius-ui);
   font-family:var(--font-body); font-size:var(--size-caption);
   letter-spacing:var(--track-label); text-transform:uppercase;
   cursor:pointer;
@@ -456,7 +554,7 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
   color:var(--muted);
 }
 
-.archive-link{ margin-top:var(--space-6) }
+.archive-link{ margin:var(--space-6) 0 0 }
 
 /* "Original Works" was wrapping to two lines in a 22ch column. The display
    face needs more room than the body face at the same measure. */
@@ -536,7 +634,11 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
   grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
   gap:var(--space-5) var(--space-4);
 }
-.works--grid .work__img{ width:100%; height:16rem; object-fit:contain; object-position:bottom }
+/* A fixed height keeps the row's baselines aligned. The width follows the
+   painting, so the mat hugs it: a full-width box would letterbox a portrait
+   work inside a wide band of mat — at 390px, a 0.75 painting in a 1.67 box,
+   which reads as a badly cut board. object-fit:contain stays as the guard. */
+.works--grid .work__img{ width:auto; max-width:100%; height:16rem; object-fit:contain }
 .works--grid .tombstone__title{ font-size:var(--size-body) }
 .works--grid .price{ font-size:var(--size-body) }
 /* In a 210px cell the sold label wraps, and .link-quiet is an inline-flex
@@ -559,6 +661,8 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
   background:var(--paper-deep);
   padding:var(--space-4) var(--space-4) var(--space-5);
   max-width:var(--measure);
+  border-radius:var(--radius-ui);
+  box-shadow:var(--shadow-mount);
 }
 .contact h2{ margin-top:0; font-size:var(--size-h3) }
 .contact__intro{ color:var(--body); margin-bottom:var(--space-4) }

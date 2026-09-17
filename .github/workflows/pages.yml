@@ -58,6 +58,15 @@ jobs:
           PREVIEW: '1'
         run: npm run check
 
+      # Lays the pages out in the runner's Chrome and fails if any painting is
+      # drawn out of proportion, rounded or transformed — the one promise of
+      # the softness pass that only a browser can check.
+      - name: Check rendering
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+          PREVIEW: '1'
+        run: npm run check:render
+
       # Pages will not serve paths beginning with an underscore unless this
       # file is present. The site has none today, but the guard is free.
       - run: touch dist/.nojekyll

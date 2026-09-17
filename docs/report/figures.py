@@ -503,6 +503,106 @@ def logo():
     save(fig, "logo")
 
 
+# ----------------------------------------------------- 8. the softness limits
+def softness():
+    """Two measured limits, both read from tokens.css. Left: how translucent the
+    masthead may be before its text fails over a white passage of a painting.
+    Right: the lightness profile down a section boundary, before and after."""
+    import math
+    css_all = (ROOT / "src/styles/tokens.css").read_text()
+    glass = float(re.search(r"--glass-bar-opacity:\s*([\d.]+)%", css_all).group(1)) / 100
+    breath = float(re.search(r"--edge-breath:\s*([\d.]+)%", css_all).group(1)) / 100
+    PD, WARM, VIOLET, BLUE = T["paper-deep"], T["wash-warm"], T["wash-violet"], T["wash-blue"]
+
+    def rgb(h): return [int(h.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)]
+    def hexc(c): return "#" + "".join(f"{round(v):02X}" for v in c)
+    def over_white(a): return hexc([a * v + (1 - a) * 255 for v in rgb(BAR)])
+
+    # OKLab, for the boundary panel: lightness is what the eye reads as a band
+    def lin(c):
+        c /= 255
+        return c / 12.92 if c <= 0.04045 else ((c + .055) / 1.055) ** 2.4
+    def oklab(h):
+        r, g, b = (lin(v) for v in rgb(h))
+        l = (.4122214708 * r + .5363325363 * g + .0514459929 * b) ** (1 / 3)
+        m = (.2119034982 * r + .6806995451 * g + .1073969566 * b) ** (1 / 3)
+        s_ = (.0883024619 * r + .2817188376 * g + .6299787005 * b) ** (1 / 3)
+        return (.2104542553 * l + .7936177850 * m - .0040720468 * s_,
+                1.9779984951 * l - 2.4285922050 * m + .4505937099 * s_,
+                .0259040371 * l + .7827717662 * m - .8086757660 * s_)
+    def mix(a, b, t): return tuple(x * (1 - t) + y * t for x, y in zip(a, b))
+    def dE(a, b): return 100 * math.dist(a, b)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6.6, 2.75),
+                                   gridspec_kw={"width_ratios": [1, 1.12], "wspace": .34})
+
+    # ---- left: glass opacity vs worst-case contrast
+    alphas = [a / 100 for a in range(50, 101)]
+    ax1.axhspan(0, 4.5, color="#A81E14", alpha=.07, lw=0)
+    ax1.plot([a * 100 for a in alphas], [ratio(PD, over_white(a)) for a in alphas],
+             color=INK, lw=1.3)
+    for t, c, ls, lab in ((4.5, "#A81E14", "--", "4.5:1  WCAG AA"), (7.0, INK, ":", "7:1  the site's floor")):
+        ax1.axhline(t, color=c, lw=.8, ls=ls)
+        ax1.text(51, t + .18, lab, fontsize=6.3, color=c)
+    r_glass = ratio(PD, over_white(glass))
+    ax1.plot([glass * 100], [r_glass], "o", color=SANG, ms=4.5, zorder=5)
+    ax1.annotate(f"{glass * 100:.0f}%: {r_glass:.2f}:1", xy=(glass * 100, r_glass),
+                 xytext=(glass * 100 - 25, r_glass + 1.7), fontsize=6.8, color=SANG,
+                 arrowprops=dict(arrowstyle="-", color=SANG, lw=.6))
+    ax1.axvspan(60, 70, color=MUTED, alpha=.10, lw=0)
+    ax1.text(65, 1.0, "usual\nglass", ha="center", fontsize=6.0, color=BODY, linespacing=1.1)
+    ax1.set_xlim(50, 100); ax1.set_ylim(0, 11.5)
+    ax1.set_xlabel("bar opacity, %", fontsize=7)
+    ax1.set_ylabel("nav text over white", fontsize=7)
+    ax1.set_title("How glassy the bar may be", fontsize=7.8, loc="left", color=INK)
+
+    # ---- right: lightness down a boundary, 0 = section above, 1 = section below
+    xs = [i / 200 for i in range(201)]
+    # before: the old warm band faded warm -> violet, then the Works ground
+    # snapped back to warm; the plotted seam is where the band ended.
+    before = [dE(oklab(WARM), mix(oklab(WARM), oklab(VIOLET), x)) for x in xs] + [0.0]
+    xb = xs + [1.0]
+    # after: the stops exactly as base.css declares them, read out of the rule
+    edge = (ROOT / "src/styles/base.css").read_text()
+    weights = {n: (float(k), 1 - float(f) / 100) for n, k, f in re.findall(
+        r"--edge-(\d):\s*color-mix\(in oklab,var\(--field\) calc\(var\(--edge-breath\) \* ([\d.]+)\),"
+        r"color-mix\(in oklab,var\(--edge-from\) (\d+)%", edge)}
+    weights["mid"] = (1.0, .5)
+    grad = re.search(r"\.edge\{.*?background:linear-gradient\(in oklab,(.*?)\);", edge, re.S).group(1)
+    F = oklab(FIELD)
+    stops = []
+    for name, pct in re.findall(r"var\(--edge-([a-z0-9]+)\)\s+(\d+)%", grad):
+        x = int(pct) / 100
+        k = 0.0 if name in ("from", "to") else weights[name][0]
+        stops.append((x, mix(oklab(WARM), F, breath * k)))   # a warm -> warm band
+    if len(stops) != 9:
+        raise SystemExit(f"  expected nine boundary stops in base.css, read {len(stops)}")
+    def at(x):
+        for (x0, c0), (x1, c1) in zip(stops, stops[1:]):
+            if x0 <= x <= x1: return mix(c0, c1, (x - x0) / (x1 - x0))
+    after = [dE(oklab(WARM), at(x)) for x in xs]
+
+    ax2.axhspan(0, 2, color=MUTED, alpha=.10, lw=0)
+    ax2.text(.02, 1.15, "under ~2: not seen", fontsize=6.0, color=BODY)
+    ax2.plot(xb, before, color="#A81E14", lw=1.1, label="before")
+    ax2.plot([1, 1], [before[-2], 0], color="#A81E14", lw=2.2, solid_capstyle="butt")
+    ax2.annotate("hard seam", xy=(1, before[-2] / 2), xytext=(.63, 3.2), fontsize=6.4,
+                 color="#A81E14", arrowprops=dict(arrowstyle="-", color="#A81E14", lw=.6))
+    ax2.plot(xs, after, color=FIELD, lw=2.0, label=f"after: the field at {breath * 100:.0f}%")
+    peak = max(after)
+    ax2.text(.57, peak - .1, f"dE {peak:.1f}", ha="left", fontsize=6.6, color=T["field-deep"])
+    ax2.set_xlim(0, 1.04); ax2.set_ylim(0, 7.8)
+    ax2.set_xticks([0, .5, 1]); ax2.set_xticklabels(["section above", "band", "section below"])
+    ax2.set_ylabel("dE from the ground (OKLab)", fontsize=7)
+    ax2.set_title("A section boundary, top to bottom", fontsize=7.8, loc="left", color=INK)
+    ax2.legend(fontsize=6.2, frameon=False, loc="upper left", bbox_to_anchor=(0, 1.0))
+
+    for ax in (ax1, ax2):
+        for sp in ("top", "right"): ax.spines[sp].set_visible(False)
+        ax.tick_params(labelsize=6.4)
+    save(fig, "softness")
+
+
 def _cream_ramp():
     from matplotlib.colors import LinearSegmentedColormap
     return LinearSegmentedColormap.from_list("cream", [BAR, PAPER])
@@ -510,4 +610,4 @@ def _cream_ramp():
 
 if __name__ == "__main__":
     print("figures:")
-    palette(); sage_limit(); payments(); oversell(); duty(); shipping(); logo()
+    palette(); sage_limit(); payments(); oversell(); duty(); shipping(); logo(); softness()
