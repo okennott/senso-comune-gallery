@@ -12,8 +12,9 @@
 #   3. makeindex        -> .ind
 #   4. tectonic pass 2  -> resolves cross-references and sets the index
 #
-# Figures are regenerated first so the palette in the document can never drift
-# from the palette in the site.
+# Fonts and figures are built first: the fonts because XeTeX cannot drive the
+# variable axes the site uses and needs static instances, the figures so the
+# palette in the document can never drift from the palette in the site.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -21,6 +22,9 @@ ROOT="$(cd "$HERE/../.." && pwd)"
 DOC=senso-comune-report
 
 cd "$HERE"
+
+echo "==> fonts"
+python3 fonts.py
 
 echo "==> figures"
 python3 figures.py

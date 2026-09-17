@@ -10,3 +10,6 @@
 *.ind
 *.tex
 cjk-chars.txt
+
+# preamble.tex is a source file, not an intermediate
+!preamble.tex

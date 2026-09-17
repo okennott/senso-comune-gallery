@@ -3,12 +3,6 @@ title: "Senso Comune Gallery"
 subtitle: "Design, commerce and compliance report"
 author: "Prepared for Priscilla"
 date: "17 September 2026"
-abstract: |
-  This report documents the design and build of a small gallery site for a solo
-  painter, and the commercial and regulatory decisions it rests on. It is written
-  to be acted on: every finding carries a cost, an effort and the specific change
-  it implies. Where the evidence does not support a recommendation, the report
-  says so rather than rounding up.
 lang: en
 toc: true
 toc-depth: 3
@@ -52,17 +46,12 @@ across the Chinese border, ships physical objects internationally, satisfies
 two consumer-law regimes at once and loads acceptably on both sides of the
 Great Firewall is not.
 
-**Reading it.** Part 1 is this summary and the decisions already taken.
-Part 2 covers the design. Part 3 covers money — paying, shipping, duty, tax.
-Part 4 covers law and accessibility. Part 5 is the build. Part 6 lists what is
-still unresolved, which is the part to read before spending anything.
-
 ## The seven findings that would have sunk it {#sec-blockers}
 
 : Blocking findings, in the order they must be dealt with {#tbl-blockers}
 
 | Ref | Finding |
-|:--|:------------------------------------------------|
+|:-----|:------------------------------------------------|
 | A-01 | Every call to action was `#A19E97` — **2.67:1**, failing both the body-text and the large-text floor. No font size rescues it. |
 | B-01 | **Stripe**\index{Stripe} is unavailable to a mainland-China seller — the whole account, not merely PayPal. **Airwallex**\index{Airwallex} excludes mainland entities from card acquiring and opens no individual accounts at all. |
 | B-03 | `vercel.app` and `workers.dev` measure **100% blocked** from mainland China. `pages.dev` measures 0%. |
@@ -85,8 +74,8 @@ foreign-exchange quota consumed, no balance-of-payments filing and no VAT.
 **Host on Cloudflare Pages**\index{Cloudflare Pages}. The only option with no
 bill, no pause, no terms problem and no ICP filing\index{ICP filing}.
 
-**Seven documents per language, not one.** The editorial scroll is kept;
-`@view-transition` restores the single-page feel in two lines of CSS.
+**Seven documents per language, not one.** The editorial scroll is kept; two
+lines of CSS (`@view-transition`) restore the single-page feel.
 
 **Self-host the fonts.** 79.8 KB for both families, built from the variable
 originals.
@@ -204,7 +193,7 @@ the *Vitruvian Man* sheet, is whole-number fractions of height.
 
 ## The two masters {#sec-masters}
 
-The brief asked for a debt to Leonardo and to van Gogh, carried without ever
+The brief asked for a debt to Leonardo\index{Leonardo da Vinci} and to van Gogh\index{van Gogh, Vincent}, carried without ever
 announcing itself. The test applied throughout: *a visitor who knows nothing
 should feel only that the site is calm and well made; a visitor who knows the
 work should feel recognised.*
@@ -279,11 +268,11 @@ produces.
 \begin{blocker}{B-01 \textperiodcentered{} Stripe is not available}
 ```
 
-Mainland China is absent from Stripe's supported business countries. Hong Kong,
+Mainland China is absent from Stripe's\index{Stripe} supported business countries. Hong Kong,
 Singapore and Japan are present. This is not the narrower finding about
 PayPal — it is the whole account.
 
-Airwallex looked like the answer and is more restricted than it appears. A
+Airwallex\index{Airwallex} looked like the answer and is more restricted than it appears. A
 mainland entity can open an account for Global Accounts, foreign exchange and
 transfers, but card acquiring is excluded in Airwallex's own Chinese-language
 terms, and it opens no personal accounts at all.
@@ -296,7 +285,7 @@ terms, and it opens no personal accounts at all.
 
 ### Route A — launch as an individual {#sec-individual}
 
-Chinese law is unusually accommodating at this scale.
+At this turnover, four obligations that would normally apply do not.
 
 : What the individual route does not require {#tbl-individual}
 
@@ -325,7 +314,7 @@ penalty on the offender's PBOC credit file.
 
 ### Route B — a Hong Kong sole proprietorship {#sec-hk}
 
-A Business Registration certificate is sufficient — no incorporation. That
+A Business Registration certificate\index{Hong Kong entity} is sufficient — no incorporation. That
 unlocks the free Airwallex plan with no-code payment links, international cards
 at 3.60% + HK\$2.35, **and Alipay**\index{Alipay} **and WeChat
 Pay**\index{WeChat Pay} as merchant methods, which is how the domestic half of
@@ -375,8 +364,7 @@ stiffens and can crack below freezing, which matters for winter shipping.
 \end{finding}
 ```
 
-One reassurance worth stating plainly: the much-discussed "\$1,000 artwork cap"
-does not bind here. FedEx caps declared value on art at \$1,000 or \$9.07/lb,
+The much-discussed "\$1,000 artwork cap" does not bind here. FedEx caps declared value on art at \$1,000 or \$9.07/lb,
 whichever is greater; USPS additional insurance for artwork caps around \$1,000.
 Every one of those caps sits above this entire inventory.
 
@@ -390,11 +378,11 @@ Original paintings under HS 9701\index{HS heading 9701} carry a **Free** base
 rate, which is where the belief comes from. For a **China-origin** shipment in
 2026 it is wrong.
 
-- **Section 301 List 4A applies.** HTSUS 9903.88.15 imposes **+7.5%** on
+- **Section 301 List 4A applies.**\index{Section 301} HTSUS 9903.88.15 imposes **+7.5%** on
   products of China, and US note 20(s)(i) enumerates `9701.91.00` —
   contemporary paintings — among the covered subheadings. The exclusion that
   once covered paintings is expired.
-- **De minimis is suspended.** The \$800 exemption no longer applies, so every
+- **De minimis is suspended.**\index{de minimis} The \$800 exemption no longer applies, so every
   painting needs a customs entry.
 - **The IEEPA tariffs are gone** — struck down and revoked in February 2026 —
   and artworks were separately carved out of them as "informational materials".
@@ -409,7 +397,7 @@ rate, which is where the belief comes from. For a **China-origin** shipment in
 : Import treatment by destination {#tbl-import}
 
 | Destination | Duty | VAT / tax | Confidence |
-|:---|:---|:---|:---|
+|:------|:---------|:-------|:-----|
 | United States | **+7.5%** Section 301 | — | Verified |
 | United Kingdom | **0%**, ERGA OMNES (origin-neutral) | Reduced art rate | Verified |
 | European Union | 0% expected | Reduced art rate per member state | **Unverified — see @sec-open** |
@@ -441,12 +429,12 @@ excludes only goods made to the consumer's order, perishables, unsealed digital
 media and delivered periodicals. The 2024 Implementing Regulations Art. 19 then
 expressly forbid a trader expanding that list, and ban pre-ticked exclusion.
 
-**European Union.** CRD Art. 16(c) excepts goods "made to the consumer's
+**European Union.** CRD\index{Consumer Rights Directive} Art. 16(c) excepts goods "made to the consumer's
 specifications or clearly personalised". **Uniqueness is not personalisation** —
 the test is whether the *buyer* specified it. A pre-existing painting chosen
 from a catalogue of six fails that test.
 
-A "governed by PRC law" clause does not help: Rome I Art. 6(2) prevents a choice
+A "governed by PRC law" clause does not help: Rome I\index{Rome I Regulation} Art. 6(2) prevents a choice
 of law from depriving a consumer of protections that cannot be derogated from
 under their home law, where the trader directs activity there. Offering EU
 shipping at checkout is directing activity.
@@ -455,7 +443,7 @@ shipping at checkout is directing activity.
 \end{blocker}
 ```
 
-**One worldwide 14-day policy** over-satisfies the Chinese seven days, removes
+**One worldwide 14-day policy**\index{returns} over-satisfies the Chinese seven days, removes
 any need to geo-detect buyers, and avoids a seven-day policy reading as an
 attempt to shorten the EU right. Commissions are the one genuine exception under
 both regimes.
@@ -473,8 +461,9 @@ That string is quoted verbatim from the rule and must not be paraphrased.
 
 ## Privacy {#sec-privacy}
 
-PIPL\index{PIPL} applies, and the burden is smaller than expected. Processing
-necessary to conclude and perform the sale needs **no consent checkbox** — a
+PIPL\index{PIPL} applies, and costs a privacy page and a one-page impact
+assessment — no more. Processing necessary to conclude and perform the sale
+needs **no consent checkbox** — a
 just-in-time notice at the email field is the correct pattern, and consent is
 reserved for the newsletter. No PRC representative and no regulator filing are
 required, because those provisions bind handlers *outside* China. The overseas
@@ -533,9 +522,9 @@ wrong description is worse than none, because it burns trust in the channel.
 
 ## Shape
 
-Plain Node, no framework — which is what the evidence concluded and what the
-design's own argument implies. Twenty-eight pages generated from three data
-files.
+Plain Node, no framework. Twenty-eight pages generated from three data files,
+with `sharp` the only runtime dependency — which is the only architecture
+consistent with a design whose argument is restraint.
 
 ```
 src/data/       seller.json · artworks.json · site.json
@@ -573,10 +562,11 @@ payment stands and the second is refunded in full within 24 hours.*
 ## Checks that block the build {#sec-checks}
 
 `check-contrast.mjs` recomputes every token against its worst-case ground.
-`check-links.mjs` verifies dead links, missing `alt`, missing `width`/`height`,
-heading order, landmark counts and hreflang reciprocity.
 
-They have earned their place. Between them they caught a muted grey that passed
+`check-links.mjs` verifies dead links, missing `alt`, missing `width` or
+`height`, heading order, landmark counts and hreflang reciprocity.
+
+Between them they caught a muted grey that passed
 on white and failed on the darkest wash, work pages shipping with no `<h1>` at
 all, and a mobile override that made the navigation invisible once the dark bar
 was adopted.
@@ -595,18 +585,14 @@ outright. The checks are a floor, not a pass.
 
 # Open items {#sec-open}
 
-Findings had to be implementable to reach this report. These are the places
-where the evidence beneath a recommendation is thinner than the recommendation,
-listed so nothing is built on them unchecked.
-
-Five remain. Every one of them needs a person outside this project — a
-customs broker, a tax adviser, a carrier, Airwallex — and none can be settled
-by writing more code.
+Five places where the evidence is thinner than the recommendation resting on
+it. Every one needs a person outside this project — a customs broker, a tax
+adviser, a carrier, Airwallex — and none can be closed by writing more code.
 
 : Unresolved, in rough order of cost if wrong {#tbl-open}
 
 | # | Item | Status | What to do |
-|:--|:--|:--|:--|
+|:--|:-------|:----------|:----------|
 | 1 | Cultural-relics export appraisal | **Not established.** Chinese government sources unreachable | Confirm a living artist's new work is not 文物 before the first export |
 | 2 | EU reduced art VAT rates | **Unverified.** Directive (EU) 2022/542 changed art VAT from 2025 | Do not publish per-country rates yet |
 | 3 | Carrier costs and insurance from China | No verified figures | Needed before the shipping page is final |
@@ -620,7 +606,7 @@ Three items that were open have been settled in the build itself.
 : Closed, and where {#tbl-closed}
 
 | Item | Resolution | Where |
-|:--|:--|:--|
+|:-----|:----------|:---------|
 | CJK webfont strategy | The display face is subset to the ~100 characters that appear in headings, work titles and UI labels: **34 KB, from a 24 MB face.** `unicode-range` gates the fetch, so an English page never downloads it, and a character added before the next build falls through to the system face rather than rendering as tofu. Chinese body prose is deliberately not webfont-served. | `scripts/build-fonts-cjk.py` |
 | Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
@@ -631,7 +617,15 @@ The build reports every placeholder. The blocking ones are the six photographs,
 the titles and descriptions, and the contact details — the email and phone are
 not optional, they are the consumer-law requirement in @sec-disclosure.
 
+```{=latex}
+\clearpage
+```
+
 # Appendix: sources and method {.unnumbered #sec-method}
+
+```{=latex}
+\markboth{Appendix: sources and method}{Appendix: sources and method}
+```
 
 **Colour.** Ratios computed with the WCAG 2 relative-luminance formula. The
 draft's values were extracted from the PDF content stream rather than sampled
@@ -659,5 +653,6 @@ history.
 \phantomsection
 \renewcommand{\indexname}{Index}
 \addcontentsline{toc}{part}{Index}
+
 \printindex
 ```

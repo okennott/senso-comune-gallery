@@ -1,5 +1,38 @@
 \usepackage{makeidx}
 \makeindex
+
+% --- typefaces -----------------------------------------------------------
+% The report is set in the gallery's own faces, so the document and the thing
+% it documents are the same object. fonts.py instances the variable originals
+% to static cuts first: XeTeX cannot drive variable axes, and handed the raw
+% file it would take Fraunces' default instance, which is wght 900.
+\usepackage{fontspec}
+% NOTE: Path must be scoped PER FACE. Setting it in \defaultfontfeatures makes
+% every lookup relative to fonts/, including the math font the template loads,
+% which then fails with "latinmodern-math cannot be found".
+\setmainfont{Inter-Regular.ttf}[
+  Path          = fonts/,
+  BoldFont      = Inter-SemiBold.ttf,
+  ItalicFont    = Inter-Italic.ttf,
+  BoldItalicFont= Inter-SemiBoldItalic.ttf,
+  Ligatures     = TeX,
+  Numbers       = Lining,
+]
+
+% Fraunces at a DISPLAY optical size, for headings and the title page.
+\newfontfamily\displayfont{Fraunces-Display-Regular.ttf}[
+  Path       = fonts/,
+  BoldFont   = Fraunces-Display-SemiBold.ttf,
+  ItalicFont = Fraunces-Display-Italic.ttf,
+  Ligatures  = TeX,
+]
+% Fraunces at a TEXT optical size, for the abstract and quoted material.
+\newfontfamily\quotefont{Fraunces-Text-Regular.ttf}[
+  Path       = fonts/,
+  ItalicFont = Fraunces-Text-Italic.ttf,
+  Ligatures  = TeX,
+]
+\newfontfamily\uifont{Inter-Medium.ttf}[Path=fonts/, Ligatures=TeX]
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -29,7 +62,7 @@
 % "文物before", "号Art." and "外汇under". 0.2em is the conventional value and
 % keeps those readable; the slight looseness inside brackets is the lesser
 % of the two problems.
-\xeCJKsetup{xCJKecglue={\hskip 0.2em plus 0.06em minus 0.03em}}
+\xeCJKsetup{xCJKecglue={\hskip 0.26em plus 0.06em minus 0.03em}}
 % Keep Latin text in the Latin face; only CJK codepoints switch.
 \xeCJKDeclareSubCJKBlock{CJK}{"3000 -> "303F, "3400 -> "4DBF, "4E00 -> "9FFF, "FF00 -> "FFEF}
 
@@ -45,6 +78,10 @@
 \definecolor{crit}{HTML}{A81E14}
 \definecolor{ok}{HTML}{14653F}
 \definecolor{warn}{HTML}{8A5600}
+% The site's masthead bar. Same value as ink; named separately because that is
+% what it is on the site, and because TikZ reads a colour called `bar` as one
+% of its own keys.
+\definecolor{barink}{HTML}{3A2B22}
 
 % hyperref is loaded by the template after this file, so defer both.
 \AtBeginDocument{%
@@ -53,41 +90,121 @@
               filecolor=sanguine}%
 }
 
-% --- running heads
+% --- running heads and feet ---------------------------------------------
+% Header: where you are. Footer: what this is, and the page.
+% The rule is the sage the site's sheet sits on.
+\usepackage{lastpage}
 \pagestyle{fancy}
 \fancyhf{}
-\renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\headrule}{\hbox to\headwidth{\color{field}\leaders\hrule height \headrulewidth\hfill}}
-\fancyhead[LE,RO]{\small\color{muted}\thepage}
-\fancyhead[LO]{\small\color{muted}\nouppercase{\leftmark}}
-\fancyhead[RE]{\small\color{muted}Senso Comune Gallery}
-\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}%
-  \fancyfoot[C]{\small\color{muted}\thepage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancyhead[L]{\uifont\footnotesize\color{muted}\nouppercase{\leftmark}}
+\fancyhead[R]{\uifont\footnotesize\color{muted}\scfolio}
+\fancyfoot[L]{\uifont\scriptsize\color{muted}Senso Comune Gallery}
+\fancyfoot[R]{\uifont\scriptsize\color{muted}Prepared for Priscilla\quad\textperiodcentered\quad Not legal advice}
+
+% A hairline under the header, in the field colour.
+\renewcommand{\headrule}{%
+  \vskip2pt\hbox to\headwidth{\color{field}\leaders\hrule height .5pt\hfill}}
+\renewcommand{\headrulewidth}{.5pt}
+
+% Chapter openers carry the foot but no head.
+% The index sets its own marks inside the \twocolumn box that opens it, which
+% leaves \leftmark empty and the head rule stranded above nothing. Give it a
+% fixed head, applied after the environment has opened its page.
+\usepackage{etoolbox}
+\usepackage{needspace}
+% Mono tokens (file names, CSS at-rules) have no break points; give the
+% line breaker a last-resort allowance rather than let one push past the measure.
+\setlength{\emergencystretch}{2em}
+% Keep floats inside the part that argues them: without this, design figures
+% drift forward and land under the Money running head.
+\usepackage[section]{placeins}
+% Float-only pages sit at the top like any other page rather than floating to
+% the optical centre, which reads as a mistake next to a running head.
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{12pt plus 1fil}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+\apptocmd{\theindex}{\thispagestyle{scindex}\pagestyle{scindex}}{}{%
+  \GenericWarning{}{could not set the index page style}}
+\fancypagestyle{scindex}{%
+  \fancyhf{}%
+  \fancyhead[L]{\uifont\footnotesize\color{muted}Index}%
+  \fancyhead[R]{\uifont\footnotesize\color{muted}\scfolio}%
+  \fancyfoot[L]{\uifont\scriptsize\color{muted}Senso Comune Gallery}%
+  \fancyfoot[R]{\uifont\scriptsize\color{muted}Prepared for Priscilla\quad\textperiodcentered\quad Not legal advice}}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}\renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[L]{\uifont\scriptsize\color{muted}Senso Comune Gallery}%
+  \fancyfoot[R]{\uifont\footnotesize\color{muted}\scfolio}}
+
+% --- the mark in the margin ----------------------------------------------
+% Not a stamped watermark. The site is a cream sheet mounted on a sage field;
+% the page repeats that, as a narrow sage band down the outer edge with a
+% single hatch stroke at Leonardo's 45 degrees. It is almost subliminal at
+% print size and disappears entirely in greyscale, which is the intent: it
+% should not compete with a painting on the facing page.
+\usepackage{eso-pic}
+\usepackage{tikz}
+% The geometry is two-sided (inner 28mm, outer 24mm), so the band belongs on
+% the OUTER edge and has to swap sides with the page parity. Suppressed on the
+% title page, which carries its own field.
+\newif\ifscmark \scmarktrue
+\AddToShipoutPictureBG{%
+  \ifscmark
+  \begin{tikzpicture}[remember picture,overlay]
+    \ifodd\value{page}
+      \fill[fill=field!30]
+        ([xshift=-9mm]current page.north east) rectangle (current page.south east);
+      \foreach \y in {38,50,...,244}{%
+        \draw[draw=field!55,line width=.35pt]
+          ([xshift=-9mm,yshift=-\y mm]current page.north east)
+          -- ([xshift=-3mm,yshift=-\y mm-6mm]current page.north east);}
+    \else
+      \fill[fill=field!30]
+        (current page.north west) rectangle ([xshift=9mm]current page.south west);
+      \foreach \y in {38,50,...,244}{%
+        \draw[draw=field!55,line width=.35pt]
+          ([xshift=3mm,yshift=-\y mm]current page.north west)
+          -- ([xshift=9mm,yshift=-\y mm-6mm]current page.north west);}
+    \fi
+  \end{tikzpicture}%
+  \fi}
 
 % --- headings in the accent
-\titleformat{\chapter}[display]
-  {\normalfont\huge\bfseries\color{ink}}
-  {\color{sanguine}\normalsize\MakeUppercase{Part \thechapter}}
-  {8pt}{\Huge}
-\titlespacing*{\chapter}{0pt}{0pt}{26pt}
-\titleformat{\section}{\normalfont\large\bfseries\color{ink}}{\color{sanguine}\thesection}{0.6em}{}
-\titleformat{\subsection}{\normalfont\normalsize\bfseries\color{ink}}{\color{sanguine}\thesubsection}{0.6em}{}
-\titleformat{\subsubsection}{\normalfont\small\bfseries\color{body}}{\color{sanguine}\thesubsubsection}{0.6em}{}
+%
+% Pandoc sets this document's top-level headings as \section, not \chapter, so
+% the part openers are styled here. They carry the eyebrow and the sage rule;
+% \Needspace stops one stranding at the foot of a page above its own body.
+\titleformat{\section}[display]
+  {\Needspace*{5\baselineskip}\displayfont\LARGE\color{ink}}
+  {\uifont\footnotesize\color{sanguine}\MakeUppercase{Part \thesection}}
+  {6pt}{}[{\vskip5pt\color{field}\titlerule[1pt]}]
+\titlespacing*{\section}{0pt}{0pt}{1.1\baselineskip}
+% Each part opens a page. A part starting halfway down carried the running head
+% for the material above it, and the openers are weighted to lead a page.
+\pretocmd{\section}{\clearpage}{}{\GenericWarning{}{could not break before parts}}
+\titleformat{\subsection}{\needspace{3\baselineskip}\displayfont\large\color{ink}}{\color{sanguine}\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\needspace{3\baselineskip}\uifont\small\color{body}}{\color{sanguine}\thesubsubsection}{0.6em}{}
 
 % --- callouts
 \newtcolorbox{finding}[1]{
   colback=paper, colframe=sanguine, boxrule=0.6pt, arc=1pt,
-  left=7pt, right=7pt, top=6pt, bottom=6pt,
+  left=7pt, right=7pt, top=6pt, bottom=6pt, parbox=false,
   fonttitle=\bfseries\small, title={#1}, coltitle=white,
   colbacktitle=sanguine}
 \newtcolorbox{blocker}[1]{
   colback=white, colframe=crit, boxrule=0.8pt, arc=1pt,
-  left=7pt, right=7pt, top=6pt, bottom=6pt,
+  left=7pt, right=7pt, top=6pt, bottom=6pt, parbox=false,
   fonttitle=\bfseries\small, title={#1}, coltitle=white,
   colbacktitle=crit}
 \newtcolorbox{openitem}[1]{
   colback=white, colframe=warn, boxrule=0.6pt, arc=1pt,
-  left=7pt, right=7pt, top=6pt, bottom=6pt,
+  left=7pt, right=7pt, top=6pt, bottom=6pt, parbox=false,
   fonttitle=\bfseries\small, title={#1}, coltitle=white,
   colbacktitle=warn}
 
@@ -106,4 +223,53 @@
 
 % --- front matter in roman, body in arabic, which `report` does not do itself
 \AtBeginDocument{\pagenumbering{roman}}
-\newcommand{\startbody}{\clearpage\pagenumbering{arabic}}
+\newif\ifscfolioarabic
+\newcommand{\startbody}{\clearpage\pagenumbering{arabic}\scfolioarabictrue}
+\newcommand{\scfolio}{\ifscfolioarabic\thepage\,/\,\pageref{LastPage}\else\thepage\fi}
+
+% --- title page ----------------------------------------------------------
+% Set like the site: a dark bar, the wordmark, the cream sheet, a sanguine
+% rule. Pandoc's \maketitle is replaced rather than decorated, because the
+% default stacks four centred lines and says nothing.
+\usepackage{titling}
+\renewcommand{\maketitle}{%
+  \begin{titlepage}%
+  \thispagestyle{empty}\scmarkfalse%
+  \begin{tikzpicture}[remember picture,overlay]
+    % the bar the site opens on
+    \fill[fill=barink] ([yshift=-0mm]current page.north west)
+      rectangle ([yshift=-38mm]current page.north east);
+    \node[anchor=west,text=paper,inner sep=0pt]
+      at ([xshift=28mm,yshift=-19mm]current page.north west)
+      {\displayfont\LARGE Senso Comune Gallery};
+    % the field below it
+    \fill[fill=field!45] ([yshift=-38mm]current page.north west)
+      rectangle (current page.south east);
+    % the sheet
+    \fill[fill=paper] ([xshift=18mm,yshift=-56mm]current page.north west)
+      rectangle ([xshift=-18mm,yshift=42mm]current page.south east);
+  \end{tikzpicture}%
+  \vspace*{58mm}\par
+  {\uifont\footnotesize\color{sanguine}\MakeUppercase{Technical report}\par}
+  \vspace{7mm}
+  {\displayfont\fontsize{30}{34}\selectfont\color{ink}\thetitle\par}
+  \vspace{3mm}
+  {\displayfont\Large\color{body}Design, commerce and compliance\par}
+  \vspace{6mm}
+  {\color{sanguine}\rule{34mm}{1.2pt}\par}
+  \vspace{8mm}
+  {\quotefont\normalsize\color{body}\itshape
+   \begin{minipage}{0.86\linewidth}\setlength{\parskip}{0pt}%
+   Six unique works, sold from mainland China to buyers at home and abroad.
+   What follows is what that costs, what it requires, and what is still
+   unresolved.\end{minipage}\par}
+  \vfill
+  {\uifont\footnotesize\color{muted}%
+   \begin{tabular}{@{}ll@{}}
+     Prepared for & Priscilla\\[2pt]
+     Date         & \thedate\\[2pt]
+     Repository   & \texttt{senso-comune-gallery}\\
+   \end{tabular}\par}
+  \vspace{14mm}
+  \end{titlepage}\scmarktrue%
+}
