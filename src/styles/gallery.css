@@ -56,7 +56,7 @@
 .lang-switch:hover{ color:var(--sanguine) }
 
 /* ---------- hero ---------- */
-.hero{ padding-block:var(--space-7) var(--space-6) }
+.hero{ padding-block:var(--space-6) var(--space-5) }
 .hero h1{ max-width:var(--measure-sm); margin-bottom:var(--space-4) }
 .hero blockquote{
   margin:0 0 var(--space-5);
@@ -364,4 +364,50 @@ dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
 
   /* the aside is not sticky when it is stacked under the image */
   .detail__aside{ position:static }
+}
+
+/* ---------- hero, after the reorganisation ----------
+   The category eyebrow is gone. What replaced it is a generated factual line
+   — count, media, years, straight out of artworks.json — which grounds the
+   motto rather than labelling it, and cannot drift from the actual work.
+
+   The motto keeps the whole hero to itself; the attributed van Gogh quote now
+   opens Tribute, which is the section actually about the artists who shaped
+   her eye. Two quotes stacked, one attributed and one not, read as a mistake. */
+.hero__standfirst{
+  max-width:44ch;
+  margin:var(--space-4) 0 var(--space-5);
+  color:var(--body);
+  /* Caption size under a 38px headline is too big a jump; body size gives the
+     cascade 38.4 -> 16.8 -> 12.6 (the CTA) instead of 38.4 -> 12.6. */
+  font-size:var(--size-body);
+  line-height:1.65;
+}
+
+/* ---------- epigraph ----------
+   Set smaller and quieter than the hero motto so Tribute opens with a breath
+   rather than competing with the top of the page. */
+.epigraph{
+  margin:0 0 var(--space-4);
+  font-family:var(--font-display);
+  font-size:var(--size-body);
+  font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1;
+  font-style:italic;
+  color:var(--body);
+  border-left:1px solid var(--rule);
+  padding-left:var(--space-4);
+}
+.epigraph cite{
+  display:block; margin-top:var(--space-2);
+  font-family:var(--font-body); font-style:normal;
+  font-size:var(--size-caption); letter-spacing:.02em;
+  color:var(--muted);
+}
+
+.archive-link{ margin-top:var(--space-6) }
+
+/* "Original Works" was wrapping to two lines in a 22ch column. The display
+   face needs more room than the body face at the same measure. */
+@media (min-width:760px){
+  .section__head{ grid-template-columns:minmax(0,28ch) minmax(0,var(--measure)) }
 }

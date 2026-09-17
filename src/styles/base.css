@@ -199,16 +199,33 @@ a{ color:var(--sanguine) }
 /* ---------- Leonardo hatch ----------
    D-03. Left-handed: the stroke runs upper-left to lower-right. Measured at
    43.8° by structure-tensor analysis of his sheets; use 45°.
-   ONE use only — behind the Tribute eyebrow. Never a page background. */
+
+   First attempt put this behind the Tribute heading. Screenshotting showed it
+   reading as a highlighter mark around the word — noticeable, unexplained, and
+   exactly the costume the brief rules out. It now runs as a near-subliminal
+   texture across the Tribute ground only: present if you look, invisible if
+   you don't, which is the whole point.
+
+   ONE section. Never a page background, never behind body text. */
 .hatch{
+  position:relative;
+  isolation:isolate;
+}
+.hatch::before{
+  content:'';
+  position:absolute; inset:0;
+  z-index:-1;
+  pointer-events:none;
   background-image:repeating-linear-gradient(
     45deg,
-    color-mix(in oklab,var(--sanguine) 20%,transparent) 0 1px,
-    transparent 1px 7px
+    color-mix(in oklab,var(--sanguine) 7%,transparent) 0 1px,
+    transparent 1px 9px
   );
 }
 @supports not (color:color-mix(in oklab,red,blue)){
-  .hatch{ background-image:repeating-linear-gradient(45deg,rgba(139,74,60,.2) 0 1px,transparent 1px 7px) }
+  .hatch::before{
+    background-image:repeating-linear-gradient(45deg,rgba(139,74,60,.07) 0 1px,transparent 1px 9px);
+  }
 }
 
 /* ---------- utilities ---------- */

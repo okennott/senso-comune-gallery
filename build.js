@@ -91,6 +91,44 @@ function picture(w, { eager = false, sizes = '(min-width:900px) 900px, calc(100v
     </picture>`;
 }
 
+/** The hero's factual line, generated rather than typed: the count, the media
+ *  and the span of years all come from artworks.json, so they cannot drift
+ *  from what is actually on the site. This is what replaced the category
+ *  eyebrow — it grounds the motto instead of labelling it. */
+function standfirst(loc) {
+  const NUM_EN = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
+                  'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
+  const NUM_ZH = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+  const n = works.length;
+  const count = loc === 'zh'
+    ? `${NUM_ZH[n] || n}${t(ui.paintings, loc)}`
+    : `${NUM_EN[n] || n} ${t(n === 1 ? ui.painting : ui.paintings, loc)}`;
+
+  // Distinct media, in the order they first appear.
+  const media = [];
+  for (const w of works) {
+    const m = /watercolour|水彩/i.test(t(w.medium, 'en') + t(w.medium, 'zh')) ? ui.mediaWater
+            : /graphite|铅笔/i.test(t(w.medium, 'en') + t(w.medium, 'zh'))    ? ui.mediaPaper
+            : ui.mediaOil;
+    const s = t(m, loc);
+    if (!media.includes(s)) media.push(s);
+  }
+  // CJK sets no spaces around a conjunction; Latin does.
+  const join = loc === 'zh' ? '、' : ', ';
+  const and = loc === 'zh' ? t(ui.andWord, loc) : ` ${t(ui.andWord, loc)} `;
+  const mediaStr = media.length > 1
+    ? media.slice(0, -1).join(join) + and + media.at(-1)
+    : media[0];
+
+  const years = works.map((w) => w.year);
+  const lo = Math.min(...years), hi = Math.max(...years);
+  const span = lo === hi ? `${lo}` : `${lo}–${hi}`;
+
+  return loc === 'zh'
+    ? `${count}，${mediaStr}，${span}。`
+    : `${count}, ${mediaStr}, ${span}.`;
+}
+
 /** The tombstone. Order: title → year → medium → dimensions → price. */
 function tombstone(w, loc, { linked = true, level = 'p' } = {}) {
   const title = esc(t(w.title, loc));
@@ -160,12 +198,8 @@ function renderIndex(loc) {
 
   const body = `
 <section class="hero wrap">
-  <p class="eyebrow">${esc(t(site.hero.eyebrow, loc))}</p>
   <h1>${esc(t(site.hero.title, loc))}</h1>
-  <blockquote>
-    ${esc(t(site.hero.quote, loc))}
-    <cite>— ${esc(site.hero.attribution)}</cite>
-  </blockquote>
+  <p class="hero__standfirst">${esc(standfirst(loc))}<br>${esc(t(site.hero.standfirstTail, loc))}</p>
   <a class="link-quiet" href="#works">${esc(t(site.hero.cta, loc))}</a>
 </section>
 
@@ -183,23 +217,25 @@ function renderIndex(loc) {
 
 <div class="edge edge--violet" aria-hidden="true"></div>
 
-<section class="section ground--violet" id="tribute">
+<section class="section ground--violet hatch" id="tribute">
   <div class="wrap">
     <div class="section__head">
-      <h2><span class="hatch" style="padding:.1em .3em;margin:-.1em -.3em">${esc(t(S.tribute.title, loc))}</span></h2>
-      <p class="section__intro">${esc(t(S.tribute.intro, loc))}</p>
+      <h2>${esc(t(S.tribute.title, loc))}</h2>
+      <div>
+        <blockquote class="epigraph">
+          ${esc(t(S.tribute.epigraph.quote, loc))}
+          <cite>— ${esc(S.tribute.epigraph.attribution)}</cite>
+        </blockquote>
+        <p class="section__intro">${esc(t(S.tribute.intro, loc))}</p>
+      </div>
     </div>
     ${listFor(tributes, originals.length)}
   </div>
 </section>
 
-${sold.length ? `<section class="section wrap" id="archive">
-  <div class="section__head">
-    <h2>${esc(t(S.archive.title, loc))}</h2>
-    <p class="section__intro">${esc(t(S.archive.intro, loc))}</p>
-  </div>
-  ${listFor(sold, originals.length + tributes.length)}
-</section>` : ''}
+${sold.length ? `<p class="wrap archive-link">
+  <a class="link-quiet" href="${lpath(loc, site, '/archive/')}">${esc(t(S.archive.linkLabel, loc))} (${sold.length})</a>
+</p>` : ''}
 
 <div class="edge edge--blue" aria-hidden="true"></div>
 
@@ -316,6 +352,50 @@ ${jsonLd(w, site, seller, loc, origin)}`;
     ogImage: `/img/${w.image}-1600.webp`,
     canonical: lpath(loc, site, `/works/${w.slug}/`),
     altLocales: altFor(`/works/${w.slug}/`),
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * archive — sold works, on their own page                             *
+ *                                                                     *
+ * Off the homepage because it interrupts the shape of what is for     *
+ * sale, and because it is the one section that grows without limit.   *
+ * The pages stay live with availability SoldOut and the price stays   *
+ * visible: a sold price is quiet proof the work sold AT that number.  *
+ * ------------------------------------------------------------------ */
+function renderArchive(loc) {
+  const S = site.sections;
+  const sold = works.filter((w) => w.sold);
+
+  const body = `
+<section class="section wrap" id="archive">
+  <div class="section__head">
+    <h1>${esc(t(S.archive.title, loc))}</h1>
+    <p class="section__intro">${esc(t(S.archive.intro, loc))}</p>
+  </div>
+  <ol class="works">
+    ${sold.map((w) => `<li class="work">
+      <figure class="work__figure">
+        <a href="${lpath(loc, site, `/works/${w.slug}/`)}" style="display:block">
+          ${picture(w, {}, loc)}
+        </a>
+      </figure>
+      ${tombstone(w, loc, { level: 'h2' })}
+    </li>`).join('\n    ')}
+  </ol>
+  <p style="margin-top:var(--space-6)">
+    <a class="link-quiet" href="${lpath(loc, site, '/')}#works">${esc(t(ui.backToWorks, loc))}</a>
+  </p>
+</section>`;
+
+  return layout({
+    site, seller, loc,
+    title: `${t(S.archive.title, loc)} — ${t(seller.artist.siteName, loc)}`,
+    description: t(S.archive.intro, loc),
+    body,
+    ogImage: sold.length ? `/img/${sold[0].image}-1600.webp` : null,
+    canonical: lpath(loc, site, '/archive/'),
+    altLocales: altFor('/archive/'),
   });
 }
 
@@ -454,6 +534,9 @@ for (const loc of LOCALES) {
   for (const w of works) {
     out(join(lpath(loc, site, `/works/${w.slug}/`), 'index.html'), renderWork(w, loc)); pageCount++;
   }
+  if (works.some((w) => w.sold)) {
+    out(join(lpath(loc, site, '/archive/'), 'index.html'), renderArchive(loc)); pageCount++;
+  }
   for (const [p, def] of Object.entries(PAGES)) {
     out(join(lpath(loc, site, p), 'index.html'), renderPage(p, def, loc)); pageCount++;
   }
@@ -494,6 +577,7 @@ const urls = [];
 for (const loc of LOCALES) {
   urls.push(lpath(loc, site, '/'));
   works.forEach((w) => urls.push(lpath(loc, site, `/works/${w.slug}/`)));
+  if (works.some((w) => w.sold)) urls.push(lpath(loc, site, '/archive/'));
   Object.keys(PAGES).forEach((p) => urls.push(lpath(loc, site, p)));
 }
 writeFileSync(join(DIST, 'sitemap.xml'),
