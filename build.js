@@ -91,10 +91,30 @@ if (site.url.includes('example')) todo.push('site.url');
    expect the files to be nested inside another copy of that folder. */
 const stripBase = (p) => (BASE && p.startsWith(BASE) ? p.slice(BASE.length) || '/' : p);
 
+/* Placeholders still owed are marked where a reader can see them: in page
+   text only. Inside a tag (alt, aria-label, a meta description), a <title>,
+   a script (the structured data) or a style, a <mark> would be broken markup
+   or literal text, so those are left alone — and the build's NEEDS-INPUT
+   report above still lists every one of them. Because the mark is wrapped
+   around the placeholder word itself, supplying the field removes it. */
+const FLAG = 'NEEDS-INPUT';
+function flagPlaceholders(html) {
+  let skip = null;                                  // inside title/script/style
+  return html.split(/(<[^>]*>)/).map((part) => {
+    if (part.startsWith('<')) {
+      const m = part.match(/^<(\/?)(title|script|style|textarea)\b/i);
+      if (m) skip = m[1] ? null : m[2].toLowerCase();
+      return part;
+    }
+    return skip || !part.includes(FLAG) ? part
+      : part.replaceAll(FLAG, `<mark class="needs-input">${FLAG}</mark>`);
+  }).join('');
+}
+
 const out = (rel, html) => {
   const file = join(DIST, stripBase(rel));
   mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, html);
+  writeFileSync(file, flagPlaceholders(html));
 };
 
 const altFor = (p) => LOCALES.map((l) => [l, lpath(l, site, p)]);

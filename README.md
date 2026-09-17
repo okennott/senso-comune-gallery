@@ -118,7 +118,11 @@ npm run build
 ```
 
 It prints every field still marked `NEEDS-INPUT`, so the site cannot quietly go
-live with placeholders in it. The new work appears on its series page, on
+live with placeholders in it. On the pages themselves, every `NEEDS-INPUT` a
+reader could see is flagged **in red on a pink ground**; fill in the field and
+rebuild, and its flag is gone — nothing to switch off. Placeholders inside alt
+text, page titles and link previews cannot be highlighted, and are covered by
+the build's list. The new work appears on its series page, on
 *Works*, and — if it is among the four newest — on the homepage.
 
 ### Adding a series

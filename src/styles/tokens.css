@@ -84,6 +84,18 @@
   /* --- semantic ---------------------------------------------------------- */
   --sold:             #63352B;   /* active content, must pass             */
 
+  /* --- placeholder flag --------------------------------------------------
+     NOT brand colours. Every NEEDS-INPUT still showing on a page is marked in
+     red on its own pink ground, so it can be seen from across the room and
+     cannot ship unnoticed. The flag is added by the build around the literal
+     placeholder text, so it disappears by itself when the field is filled.
+     Its own ground is what makes it work on the cream AND the dark bar: red
+     on the bar alone would be unreadable. The outline carries it on cream,
+     where the pink differs from the paper by only 1.1:1.                  */
+  --flag-ink:         #9B1C16;   /* on --flag-ground: 5.91                */
+  --flag-ground:      #F8D3CD;
+  --flag-rule:        #B3261E;
+
   /* --- sfumato grounds ---------------------------------------------------
      Three reading surfaces, a half-step apart, so sections separate without
      a rule. All three are cream: text never sits on the sage.

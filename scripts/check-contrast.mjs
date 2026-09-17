@@ -107,6 +107,7 @@ const ON_FILL = [
   ['paper', 'ink',           4.5, 'primary button label'],
   ['paper', 'sanguine',      4.5, 'button hover label'],
   ['paper', 'sanguine-deep', 4.5, 'button active label'],
+  ['flag-ink', 'flag-ground', 4.5, 'NEEDS-INPUT flag, on its own ground'],
 ];
 
 /* ---------- rendered after the token table; see below ---------- */

@@ -657,6 +657,36 @@ check('I-06', 'no sidebar: local navigation is one horizontal row, within its th
   return { ok: !asides.length && tabs > 0 && tabs <= 8, detail: asides.length ? asides.slice(0, 3).join('; ') : `every navigation region is a known horizontal one; ${tabs} tabs (threshold 8)` };
 });
 
+/* ===================== J — placeholders you can see ===================== */
+/* 17 September 2026: every NEEDS-INPUT still on a page is flagged in red, and
+   the flag goes when the field is filled — because the build wraps the
+   placeholder word itself, never a field that has content. */
+
+check('J-01', 'every visible NEEDS-INPUT is flagged, and nothing else is', () => {
+  let flagged = 0, unflagged = 0, broken = 0, wrongPlace = 0;
+  const pages = [...allHtml, ['/404.html', read('404.html')]];
+  for (const [, html] of pages) {
+    const parts = html.split(/(<[^>]*>)/);
+    let skip = null;
+    parts.forEach((part, i) => {
+      if (part.startsWith('<')) {
+        const m = part.match(/^<(\/?)(title|script|style|textarea)\b/i);
+        if (m) skip = m[1] ? null : m[2].toLowerCase();
+        if (/="[^"]*<mark/.test(part)) broken++;          // a mark inside an attribute
+        return;
+      }
+      if (!part.includes('NEEDS-INPUT')) return;
+      if (skip) { if (/needs-input/.test(parts[i - 1] ?? '')) wrongPlace++; return; }
+      if (part === 'NEEDS-INPUT' && parts[i - 1] === '<mark class="needs-input">' && parts[i + 1] === '</mark>') flagged++;
+      else unflagged++;
+    });
+  }
+  // and a mark is only ever around the placeholder word
+  const stray = pages.filter(([, h]) => /<mark class="needs-input">(?!NEEDS-INPUT<\/mark>)/.test(h)).length;
+  return { ok: flagged > 0 && !unflagged && !broken && !wrongPlace && !stray,
+           detail: `${flagged} flagged, ${unflagged} unflagged, ${broken} inside attributes, ${wrongPlace} in title/script, ${stray} pages with a stray mark` };
+});
+
 /* ===================== cross-cutting ===================== */
 
 /* The first pass of the D-04 fix set font-size:var(--size-h1). No such token

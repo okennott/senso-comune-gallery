@@ -305,6 +305,19 @@ a{ color:var(--sanguine) }
   }
 }
 
+/* ---------- placeholders still owed ----------
+   The build wraps every visible NEEDS-INPUT in <mark class="needs-input">.
+   Supply the field and rebuild: the text is gone, so the mark is too. */
+.needs-input{
+  color:var(--flag-ink);
+  background:var(--flag-ground);
+  outline:1px solid var(--flag-rule); outline-offset:0;
+  border-radius:var(--radius-ui);
+  padding:0 .25em;
+  font-style:normal; font-weight:600;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+}
+
 /* ---------- utilities ---------- */
 .visually-hidden{
   position:absolute; width:1px; height:1px;

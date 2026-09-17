@@ -1568,7 +1568,7 @@ Three items that were open have been settled in the build itself.
 
 ## Content still outstanding
 
-The build reports every placeholder; 98 fields are still `NEEDS-INPUT`, 48 of them the alt text owed for the new views. The
+The build reports every placeholder; 98 fields are still `NEEDS-INPUT`, 48 of them the alt text owed for the new views. Every one a reader could see is also flagged on the page in red on its own pink ground — its own ground, because red directly on the dark footer would be unreadable (5.91:1 as flagged) — and the flag is added around the placeholder word itself, so filling the field removes it with no other change. Supplying one title took that work's page from ten flags to seven. Placeholders in alt text, page titles and link previews cannot carry a mark and stay on the build's list; assertion J-01 checks that every visible one is flagged and that no mark lands inside an attribute. The
 blocking ones are the photographs, the titles and descriptions, and the contact
 details — the email and phone are not optional, they are the consumer-law
 requirement in @sec-disclosure.
