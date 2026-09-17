@@ -332,40 +332,117 @@ carries a penalty onto a personal credit file.
 
 ```bash
 npm install
-npm run build        # images, then 28 pages → dist/
+npm run build        # images, then every page → dist/
 npm run check        # contrast + structural invariants; both block the build
+npm run preview      # one built page as a single self-contained file
 npm run fonts        # rebuild the webfonts, Latin and Chinese
-npm run report       # rebuild the HTML report
+npm run report       # rebuild both reports (report:pdf, report:html)
 ```
 
-```
-src/
-  data/
-    seller.json        identity, entity profiles, returns, donation, shipping
-    artworks.json      the works — the single source of truth
-    site.json          navigation, copy, UI strings, both locales
-  styles/              tokens.css · base.css · gallery.css
-  scripts/             availability.js (client-side sold check)
-  templates.js         document shell, tombstone, scale diagram, JSON-LD
-build.js               every page, generated from the three data files
-scripts/
-  build-fonts.sh       Latin webfonts, 79.8 KB for both families
-  build-fonts-cjk.py   Chinese display face, subset to ~100 glyphs, 34 KB
-  build-images.mjs     sRGB + AVIF 4:4:4 + WebP, capped at 2000px
-  check-contrast.mjs   every token against its worst-case ground
-  check-links.mjs      dead links, missing alt, heading order, landmarks
-  preview.mjs          one page as a single self-contained file
-docs/
-  brief/               Priscilla's original draft — retired, kept for provenance
-  build-report/        the findings as a web page, and its source and fonts
-  report/              the printable PDF, and its sources, figures and fonts
-masters/               full-resolution photographs — gitignored, never committed
+`build` and `check` are the two that matter. `check` is not advisory — both
+scripts exit non-zero and have each caught real regressions, listed in §2.5.
 
-Each folder under `docs/` holds exactly one document and everything that
-builds it.
+## 2.2 Repository layout
+
+Three kinds of thing live here: **data** that Priscilla edits, **code** that
+turns it into a site, and **documents** about the project. Nothing is
+duplicated between them — where a number appears twice, one of the two is
+reading it from the other.
+
+```
+.
+├── src/                          the site's inputs — edit these
+│   ├── data/
+│   │   ├── artworks.json           the works. Single source of truth: every
+│   │   │                           number is used by the caption, the scale
+│   │   │                           diagram, the JSON-LD offer, the Open Graph
+│   │   │                           card and the image srcset. Not a fixed
+│   │   │                           length — add an entry and rebuild.
+│   │   ├── seller.json             identity, both entity profiles, returns,
+│   │   │                           donation, shipping and import notes
+│   │   └── site.json               navigation, page copy, UI strings, en + zh
+│   ├── styles/
+│   │   ├── tokens.css              palette, type scale, spacing, motion, all
+│   │   │                           of it solved against contrast
+│   │   ├── base.css                the cream sheet, sfumato bands, hatching
+│   │   └── gallery.css             masthead, tombstone, scale diagram, lightbox
+│   ├── scripts/
+│   │   └── availability.js         ~40 lines, client-side sold check; the only
+│   │                               layer that survives a stale CDN page
+│   └── templates.js                document shell, tombstone, scale diagram,
+│                                   JSON-LD, locale-aware paths
+│
+├── build.js                      the whole generator. Every page, both
+│                                 locales, from the three data files. Plain
+│                                 Node, no framework; sharp is the one runtime
+│                                 dependency. Reports NEEDS-INPUT on exit.
+│
+├── scripts/                      build and verification tools
+│   ├── build-images.mjs            sRGB-tagged AVIF 4:4:4 + WebP, five widths,
+│   │                               capped at 2000px
+│   ├── build-fonts.sh              Latin subsets — 79.8 KB for both families
+│   ├── build-fonts-cjk.py          Chinese display face, subset to the ~100
+│   │                               glyphs that appear, 34 KB from 24 MB
+│   ├── check-contrast.mjs          every token against its worst-case ground
+│   ├── check-links.mjs             dead links, missing alt, missing width or
+│   │                               height, heading order, landmarks, hreflang
+│   └── preview.mjs                 one page as a single self-contained file
+│
+├── public/                       copied to the site as-is
+│   └── fonts/                      the subset woff2 files, their @font-face
+│                                   CSS, and both OFL licences
+│
+├── docs/                         one folder per document, each with its
+│   │                             own build
+│   ├── brief/                      Priscilla's original nine-page draft —
+│   │                               retired. Nothing builds from it; kept
+│   │                               because measurements were taken from it.
+│   │                               Its README says which, and what replaced it.
+│   ├── build-report/               the research findings as a web page
+│   │   ├── index.html                built: one file, 0 external requests
+│   │   ├── src.html                  the source
+│   │   ├── fonts/                    inlined as base64 at build time
+│   │   └── build.sh
+│   └── report/                     the printable technical report
+│       ├── senso-comune-report.pdf   built: A4, indexed, ~25 pages
+│       ├── senso-comune-report.qmd   the source
+│       ├── preamble.tex              typesetting: fonts, heads, callouts
+│       ├── figures.py                vector figures, read from tokens.css
+│       ├── fonts.py                  static cuts of Fraunces and Inter
+│       ├── fig/                      the figures and page screenshots
+│       ├── fonts/                    committed, so it builds offline
+│       └── build.sh                  fonts → figures → quarto → tectonic ×2
+│                                     → makeindex → tectonic
+│
+├── .github/workflows/pages.yml   preview deploy, for layout review only.
+│                                 Production is Cloudflare Pages: GitHub's
+│                                 terms exclude commercial sites, and
+│                                 github.io is not somewhere to point a
+│                                 Chinese buyer.
+├── README.md                     this file
+├── package.json                  scripts and the one dependency
+├── package-lock.json             committed, so a rebuild resolves the same
+│                                 sharp and the same platform binaries
+├── .gitignore                    dist, image derivatives and masters
+└── Priscilla.code-workspace      editor workspace
 ```
 
-## 2.2 The entity switch
+Three directories are not in the repository:
+
+| Directory | What it is | Why it is not here |
+|:--|:--|:--|
+| `dist/` | the built site | regenerated by `npm run build` from scratch |
+| `public/img/` | every image width, format and placeholder | regenerated from `masters/` |
+| `masters/` | the full-resolution photographs | see below |
+
+**`masters/` never goes in the repository.** It is gitignored by name, along
+with every raw and layered format — `.dng`, `.CR2`, `.NEF`, `.ARW`, `.psd`,
+`.tif`. The 2000px cap in `build-images.mjs` is the only image protection that
+actually works; committing the originals would hand them over and defeat it.
+Back that folder up somewhere that is not this repository, because nothing here
+can reconstruct it.
+
+## 2.3 The entity switch
 
 `src/data/seller.json` holds both commercial routes. Changing one string —
 
@@ -382,7 +459,7 @@ and unlocks Airwallex card acquiring *plus* Alipay and WeChat Pay from one
 checkout. ⚠️ Airwallex approves its Payments product separately from account
 opening, and reviews the live site as part of that. Ask before incorporating.
 
-## 2.3 Fonts
+## 2.4 Fonts
 
 **Latin** — Fraunces and Inter, self-hosted. `fonts.googleapis.com` is not
 blocked in mainland China, but it measures ~50% *disrupted* over plaintext and
@@ -413,7 +490,7 @@ Do not use the Chinese Google Fonts mirrors: `fonts.geekzu.org` now
 roughly double the bytes, and `fonts.loli.net` is a Cloudflare-fronted proxy
 that adds an unaudited third party able to inject arbitrary CSS.
 
-## 2.4 Checks
+## 2.5 Checks
 
 Both block the build, and both have earned it.
 
@@ -432,7 +509,7 @@ They are a floor, not a pass. Automated testing decides roughly 13–30% of
 accessibility criteria and catches almost none of the focus-order failures that
 block people outright.
 
-## 2.5 Decisions already made
+## 2.6 Decisions already made
 
 - **Cloudflare Pages.** The only host with no bill, no pause and no terms
   problem. `vercel.app` and `workers.dev` measure 100% blocked from mainland
