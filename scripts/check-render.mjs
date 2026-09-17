@@ -78,7 +78,15 @@ const PROBE = `<script>addEventListener('load',()=>setTimeout(()=>{
       lightbox:!!i.closest('dialog') };
   });
   const inner=document.querySelector('.masthead__inner');
-  const tops=[...new Set([...inner.children].filter((c)=>c.offsetParent!==null&&getComputedStyle(c).display!=='none').map((c)=>Math.round(c.getBoundingClientRect().top/8)))];
+  // Rows by vertical overlap, not by rounding each top edge into a band: a band
+  // boundary can fall between two items on the same row, and anything above
+  // the masthead that changes height (the preview ribbon wrapping differently
+  // on another machine's fonts) moves where the boundaries fall.
+  const boxes=[...inner.children].filter((c)=>c.offsetParent!==null&&getComputedStyle(c).display!=='none')
+    .map((c)=>c.getBoundingClientRect()).filter((r)=>r.height>0).sort((x,y)=>x.top-y.top);
+  let rowCount=0, rowBottom=-Infinity;
+  for (const r of boxes) { if (r.top >= rowBottom - 1) { rowCount++; rowBottom = r.bottom; } else rowBottom = Math.max(rowBottom, r.bottom); }
+  const tops={ length: rowCount };
   const mast={ overflow: inner.scrollWidth > inner.clientWidth + 1 || document.documentElement.scrollWidth > document.documentElement.clientWidth,
     rows: tops.length,
     small: [...document.querySelectorAll('.shopbar__link')].map((a)=>a.getBoundingClientRect()).filter((r)=>r.width<44||r.height<44).length };
