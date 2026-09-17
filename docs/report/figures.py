@@ -13,6 +13,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, FancyArrowPatch, FancyBboxPatch
+from matplotlib.font_manager import FontProperties
+import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT = ROOT / "docs/report/fig"
@@ -52,6 +54,36 @@ plt.rcParams.update({
     "pdf.fonttype": 42,
 })
 
+def on(bg, light="#FFFFFF", dark=None):
+    """The foreground that reads on `bg`. Picked by measurement, not by eye —
+    this figure argues that you cannot judge contrast by looking, so it would
+    be absurd to choose its own label colours that way."""
+    dark = dark or INK
+    return light if ratio(light, bg) >= ratio(dark, bg) else dark
+
+
+# ------------------------------------------------------------ report faces
+# The logo figure has to SET the candidates, not describe them, so it needs the
+# same static cuts the document is set in. fonts.py has already built them by
+# the time this runs; a missing file is a build-order bug, not a soft failure.
+FONTS = ROOT / "docs/report/fonts"
+FRAUNCES = FontProperties(fname=str(FONTS / "Fraunces-Display-SemiBold.ttf"))
+_cjk = FONTS / "NotoSerifSC-report.otf"
+CJK = FontProperties(fname=str(_cjk)) if _cjk.exists() else None
+
+
+def cjk_or_die(ch):
+    """matplotlib draws a missing glyph as nothing at all — the same silent
+    failure the preamble warns about for XeTeX. Fail here instead."""
+    from fontTools.ttLib import TTFont
+    if CJK is None or ord(ch) not in TTFont(_cjk).getBestCmap():
+        raise SystemExit(
+            f"  {ch} is not in the report's CJK subset.\n"
+            f"  fonts.py derives it from the .qmd; add the character to the prose "
+            f"or the figure cannot set it.")
+    return CJK
+
+
 def save(fig, name):
     fig.savefig(OUT / f"{name}.pdf", facecolor="white")
     plt.close(fig)
@@ -64,73 +96,129 @@ def palette():
     # role: text needs 4.5:1, a rule or border needs 3:1.  Flagging a rule red
     # for missing a threshold that does not apply to it would be a lie.
     rows = [
-        ("Bar / masthead",    BAR,   None,    None, "Priscilla's dark brown. Sand on it: 11.45:1"),
-        ("Field / sage",      FIELD, None,    None, "Frames the sheet. Carries no text"),
-        ("Paper / reading",   PAPER, None,    None, "All foregrounds solved against this family"),
-        ("Ink / headings",    INK,   "paper", 4.5,  "Hers. Warmer than the neutral it replaced"),
+        ("Bar / masthead",    BAR,   None,    None, "Hers. Sand on it: 11.45:1"),
+        ("Field / sage",      FIELD, None,    None, "Frames the sheet"),
+        ("Paper / reading",   PAPER, None,    None, "Every foreground solved here"),
+        ("Ink / headings",    INK,   "paper", 4.5,  "Hers. Warmer than the neutral"),
         ("Body",              BODY,  "paper", 4.5,  "Hers"),
-        ("Sanguine / accent", SANG,  "paper", 4.5,  "Red chalk. Priscilla chose it by eye"),
-        ("Muted / captions",  MUTED, "paper", 4.5,  "Re-solved; the white-ground value failed"),
-        ("Rule",              RULE,  "paper", 3.0,  "Van Gogh's stated violet. Needs 3:1, not 4.5"),
+        ("Sanguine / accent", SANG,  "paper", 4.5,  "Red chalk. Chosen by eye"),
+        ("Muted / captions",  MUTED, "paper", 4.5,  "The white-ground value failed"),
+        ("Rule",              RULE,  "paper", 3.0,  "Needs 3:1, not 4.5"),
     ]
-    fig, ax = plt.subplots(figsize=(6.6, 0.52 * len(rows) + 0.35))
-    ax.set_xlim(0, 10); ax.set_ylim(0, len(rows)); ax.axis("off")
+    # The swatch is wide enough to carry its own name and value, so the colour
+    # and the number that describes it are never read apart. A hex printed in a
+    # caption beside a chip is a claim; printed ON the chip it is a specimen,
+    # and a value that failed on its own ground would be visibly unreadable.
+    SW_X, SW_W = 0.0, 3.85          # swatch
+    NOTE_X = 4.05                   # note
+    MT_X, MT_W = 7.20, 1.90         # the ratio meter
+    NUM_X = 10.0                    # ratios in a fixed column: a number set at
+                                    # the end of its own bar lands on whichever
+                                    # threshold rule it happens to be near
+
+    fig, ax = plt.subplots(figsize=(6.6, 0.60 * len(rows) + 0.70))
+    ax.set_xlim(0, 10); ax.set_ylim(0, len(rows) + 0.85); ax.axis("off")
+
+    # meter scale: 1:1 to 12:1, with both thresholds ruled the full height
+    def mx(r):
+        return MT_X + MT_W * min(max(r - 1, 0), 11) / 11
+
+    for t, c, ls in ((3.0, MUTED, ":"), (4.5, INK, "--")):
+        ax.plot([mx(t), mx(t)], [0.16, len(rows) + .02], color=c, lw=.8, ls=ls, zorder=1)
+    ax.text(mx(3.0) - .04, len(rows) + .40, "3:1", ha="right", fontsize=6.2, color=BODY)
+    ax.text(mx(4.5) + .04, len(rows) + .40, "4.5:1", ha="left", fontsize=6.2, color=INK)
+    ax.text(MT_X, len(rows) + .66, "contrast on cream", fontsize=6.6, color=BODY)
 
     for i, (name, hexv, against, minimum, note) in enumerate(rows):
         y = len(rows) - i - 1
-        ax.add_patch(Rectangle((0, y + .12), 0.85, .76, facecolor=hexv,
-                               edgecolor=MUTED, linewidth=.5))
-        ax.text(1.05, y + .60, name, fontsize=8.2, weight="bold", va="center")
-        ax.text(1.05, y + .28, hexv.upper(), fontsize=7, family="DejaVu Sans Mono",
-                color=BODY, va="center")
+        fg = on(hexv)
+
+        ax.add_patch(Rectangle((SW_X, y + .10), SW_W, .80, facecolor=hexv,
+                               edgecolor=MUTED, linewidth=.5, zorder=2))
+        ax.text(SW_X + .20, y + .50, name, fontsize=8.0, weight="bold",
+                color=fg, va="center", zorder=3)
+        ax.text(SW_X + SW_W - .20, y + .50, hexv.upper(), fontsize=7.8,
+                family="DejaVu Sans Mono", color=fg, va="center", ha="right", zorder=3)
+
+        ax.text(NOTE_X, y + .50, note, fontsize=7.0, color=BODY, va="center")
+
         if against:
             r = ratio(hexv, PAPER)
-            ax.text(4.35, y + .45, f"{r:5.2f}:1", fontsize=8.4,
+            passes = r >= minimum
+            c = hexv if passes else "#A81E14"
+            ax.add_patch(Rectangle((MT_X, y + .39), mx(r) - MT_X, .22,
+                                   facecolor=c, edgecolor="none", zorder=2))
+            ax.text(NUM_X, y + .50, f"{r:.2f}", fontsize=7.2, ha="right",
                     family="DejaVu Sans Mono", va="center",
-                    color=INK if r >= minimum else "#A81E14")
-        ax.text(5.55, y + .45, note, fontsize=7.2, color=BODY, va="center")
+                    color=INK if passes else "#A81E14", zorder=3)
+        else:
+            # A ground carries no foreground of its own, so it has no ratio to
+            # report. Leaving the row blank would read as a failure.
+            ax.text(NUM_X, y + .50, "no text on it", fontsize=6.8, color=MUTED,
+                    va="center", ha="right", style="italic")
     save(fig, "palette")
 
 
 # -------------------------------------------- 2. why sage carries no text
 def sage_limit():
+    # (label, foreground, ground, minimum). Each row is drawn as a SPECIMEN —
+    # the actual foreground set on the actual ground — beside its measurement,
+    # because the whole point of the section is that the number and the
+    # impression disagree. A reader who cannot see the failure here is being
+    # shown exactly the problem the section describes.
+    DRAFT_GREY = "#A19E97"
     cases = [
-        ("Heading ink on sage",     ratio(INK, FIELD),       True),
-        ("Body text on sage",       ratio("#66594B", FIELD), False),
-        ("Terracotta on sage",      ratio("#98564B", FIELD), False),
-        ("The draft's failed grey", 2.67,                    False),
-        ("Body text on cream",      ratio(BODY, PAPER),      True),
-        ("Heading ink on cream",    ratio(INK, PAPER),       True),
+        ("Heading ink on sage",     INK,       FIELD, 3.0),
+        ("Body text on sage",       BODY,      FIELD, 4.5),
+        ("Terracotta on sage",      "#98564B", FIELD, 4.5),
+        ("The draft's failed grey", DRAFT_GREY, "#FFFFFF", 4.5),
+        ("Body text on cream",      BODY,      PAPER, 4.5),
+        ("Heading ink on cream",    INK,       PAPER, 4.5),
     ]
-    fig, ax = plt.subplots(figsize=(6.6, 2.7))
-    names = [c[0] for c in cases][::-1]
-    vals = [c[1] for c in cases][::-1]
-    oks = [c[2] for c in cases][::-1]
-    bars = ax.barh(names, vals, height=.6,
-                   color=[SANG if ok else "#A81E14" for ok in oks])
 
-    # Threshold markers annotated ABOVE the plot, not under the axis, where
-    # they previously collided with each other and with the axis label.
-    top = len(cases) - 0.3
-    ax.axvline(3.0, color=MUTED, lw=.9, ls=":")
-    ax.axvline(4.5, color=INK, lw=1.1, ls="--")
-    ax.annotate("3:1\nUI", xy=(3.0, top), xytext=(3.0, top + .55),
-                ha="center", va="bottom", fontsize=6.6, color=BODY,
-                linespacing=1.2)
-    ax.annotate("4.5:1\nAA body text", xy=(4.5, top), xytext=(4.9, top + .55),
-                ha="left", va="bottom", fontsize=6.6, color=INK,
-                linespacing=1.2)
+    SP_X, SP_W = 0.0, 2.15          # specimen chip
+    LB_X = 2.35                     # label
+    MT_X, MT_W = 5.55, 3.30         # bar
+    NUM_X = 10.0
 
-    for b, v in zip(bars, vals):
-        ax.text(v + .15, b.get_y() + b.get_height() / 2, f"{v:.2f}",
-                va="center", fontsize=7.6, family="DejaVu Sans Mono")
-    ax.set_xlim(0, 13.2)
-    ax.set_ylim(-0.6, top + 1.5)
-    ax.set_xlabel("contrast ratio", fontsize=7.4)
-    for s in ("top", "right", "left"):
-        ax.spines[s].set_visible(False)
-    ax.tick_params(axis="y", length=0, labelsize=7.6)
-    ax.tick_params(axis="x", labelsize=7)
+    fig, ax = plt.subplots(figsize=(6.6, 0.62 * len(cases) + 0.80))
+    ax.set_xlim(0, 10); ax.set_ylim(-0.62, len(cases) + 0.95); ax.axis("off")
+
+    def mx(r):
+        return MT_X + MT_W * min(max(r - 1, 0), 11) / 11
+
+    for t, c, ls in ((3.0, MUTED, ":"), (4.5, INK, "--")):
+        ax.plot([mx(t), mx(t)], [-0.02, len(cases) + .02], color=c, lw=.9, ls=ls, zorder=1)
+    ax.text(mx(3.0) - .05, len(cases) + .38, "3:1 UI", ha="right", fontsize=6.4, color=BODY)
+    ax.text(mx(4.5) + .05, len(cases) + .38, "4.5:1 AA body text", ha="left",
+            fontsize=6.4, color=INK)
+
+    for i, (name, fg, bg, minimum) in enumerate(cases):
+        y = len(cases) - i - 1
+        r = ratio(fg, bg)
+        passes = r >= minimum
+
+        ax.add_patch(Rectangle((SP_X, y + .08), SP_W, .84, facecolor=bg,
+                               edgecolor=MUTED, linewidth=.5, zorder=2))
+        ax.text(SP_X + SP_W / 2, y + .50, "Original Works", fontsize=8.2,
+                color=fg, va="center", ha="center", zorder=3)
+
+        ax.text(LB_X, y + .50, name, fontsize=7.6, color=INK, va="center")
+        if not passes:
+            ax.text(LB_X, y + .19, "fails", fontsize=6.4, color="#A81E14", va="center")
+
+        ax.add_patch(Rectangle((MT_X, y + .39), mx(r) - MT_X, .22,
+                               facecolor=fg if passes else "#A81E14",
+                               edgecolor="none", zorder=2))
+        ax.text(NUM_X, y + .50, f"{r:.2f}", fontsize=7.4, ha="right",
+                family="DejaVu Sans Mono", va="center", zorder=3,
+                color=INK if passes else "#A81E14")
+
+    ax.text(0, -0.52,
+            "Rows 1–3 are Priscilla's mockup as drawn. Row 4 is the draft's own failure, "
+            "on white, for scale.\nThe specimen is a real navigation label, set at the size it "
+            "is set at on the site.",
+            fontsize=6.8, color=BODY, va="bottom", linespacing=1.5)
     save(fig, "sage-limit")
 
 
@@ -306,6 +394,120 @@ def shipping():
     save(fig, "shipping")
 
 
+# ------------------------------------------------------- 7. the logo options
+def logo():
+    """The six candidates, each drawn twice: once at a size where anyone would
+    approve it, and once at 16 px, which is where it will actually spend its
+    life. Four of the six die in the second column."""
+    from scale_mark import MARK, GEOM   # the site's own geometry, imported
+
+    BAR_ = BAR
+    def tile(ax, x, y, s, kind, small=False):
+        """Draw candidate `kind` in a square of side `s` at (x, y)."""
+        ax.add_patch(Rectangle((x, y), s, s, facecolor=BAR_, edgecolor=MUTED,
+                               linewidth=.4, zorder=2))
+        k = s / 64.0                       # the marks are drawn in 64-unit space
+
+        if kind == "wordmark":
+            ax.text(x + s / 2, y + s / 2, "Senso\nComune\nGallery",
+                    fontproperties=FRAUNCES, color=PAPER, fontsize=s * 9.5,
+                    ha="center", va="center", linespacing=1.15, zorder=3)
+
+        elif kind == "sc":
+            ax.text(x + s / 2, y + s / 2, "SC", fontproperties=FRAUNCES,
+                    color=PAPER, fontsize=s * 30, ha="center", va="center", zorder=3)
+
+        elif kind == "pair":
+            ax.plot([x + s / 2, x + s / 2], [y, y + s], color=MUTED, lw=.4, zorder=3)
+            ax.text(x + s / 4, y + s / 2, "SC", fontproperties=FRAUNCES,
+                    color=PAPER, fontsize=s * 15, ha="center", va="center", zorder=3)
+            ax.text(x + 3 * s / 4, y + s / 2, "\u5e38",
+                    fontproperties=cjk_or_die("\u5e38"),
+                    color=PAPER, fontsize=s * 17, ha="center", va="center", zorder=3)
+
+        elif kind == "hatch":
+            # Leonardo ran upper-left to lower-right; the measured angle is 43.8 deg.
+            box = Rectangle((x, y), s, s, transform=ax.transData)
+            for t in np.arange(-1.2, 1.4, 0.22):
+                x0, y0 = x + t * s, y + s
+                line, = ax.plot([x0, x0 + s * 1.2],
+                                [y0, y0 - s * 1.2 * np.tan(np.radians(43.8))],
+                                color=PAPER, lw=s * 1.1, zorder=3)
+                line.set_clip_path(box)
+
+        elif kind == "sfumato":
+            g = np.linspace(-1, 1, 160)
+            gx, gy = np.meshgrid(g, g)
+            d = np.clip(1 - np.sqrt(gx ** 2 + gy ** 2) * 1.25, 0, 1) ** 1.5
+            ax.imshow(d, extent=(x, x + s, y, y + s), cmap=_cream_ramp(),
+                      vmin=0, vmax=1, zorder=3, interpolation="bilinear", aspect="auto")
+
+        elif kind == "plate":
+            ax.plot([x, x + s], [y + s - GEOM["cy"] * k] * 2,
+                    color=FIELD, lw=MARK["datumWidth"] * k * 2.2, zorder=3,
+                    solid_capstyle="butt")
+            ax.add_patch(Rectangle((x + GEOM["x"] * k, y + s - (GEOM["y"] + GEOM["plateH"]) * k),
+                                   MARK["plateW"] * k, GEOM["plateH"] * k,
+                                   facecolor=PAPER, edgecolor="none", zorder=4))
+
+    rows = [
+        ("wordmark", "Wordmark alone", "Where the site started",
+         "Nothing to put in a tab. Illegible below about 90 px, and there is no\n"
+         "second lockup for a share card or a WeChat avatar."),
+        ("sc", "SC monogram", "What shipped in September",
+         "Reads at 16 px. But the wordmark translates, and the Chinese one is not\n"
+         "spelled with Latin letters at all. It serves one of the two audiences."),
+        ("pair", "One monogram per locale", "The obvious repair",
+         "Two marks is two brands. The favicon is chosen by the origin, not by\n"
+         "the page, so a bilingual site cannot swap it per locale anyway."),
+        ("hatch", "Leonardo\u2019s hatching", "The debt, made literal",
+         "Announces the reference the brief asked to be carried quietly, and at\n"
+         "16 px it is four grey lines."),
+        ("sfumato", "Sfumato disc", "The principle, made literal",
+         "A soft edge cannot survive a 32 px ICO, a monochrome fax of an invoice\n"
+         "or an embroidered label. It has no outline to fall back to."),
+        ("plate", "A work on a wall", "Recommended",
+         "Carries no letterforms, so one file serves both locales. Its proportions\n"
+         "are the catalogue\u2019s own: a 3:4 portrait hung at 144.78 cm on a 244 cm wall."),
+    ]
+
+    BIG, SMALL, PITCH = 0.95, 0.30, 1.26
+    TEXT_X = 2.05
+    H = len(rows) * PITCH + 0.75
+
+    fig, ax = plt.subplots(figsize=(6.6, 6.6 * H / 10))
+    ax.set_xlim(0, 10); ax.set_ylim(0, H); ax.axis("off")
+    ax.set_aspect("equal")
+
+    ax.text(0, H - 0.20, "at display size", fontsize=6.0, color=BODY)
+    ax.text(1.32 + SMALL / 2, H - 0.20, "16 px", fontsize=6.0, color=BODY, ha="center")
+
+    for i, (kind, name, status, verdict) in enumerate(rows):
+        top = H - 0.42 - i * PITCH
+        y = top - BIG
+        tile(ax, 0.0, y, BIG, kind)
+        tile(ax, 1.32, y + (BIG - SMALL) / 2, SMALL, kind, small=True)
+
+        chosen = status == "Recommended"
+        if chosen:
+            ax.plot([TEXT_X - 0.16, TEXT_X - 0.16], [y + .02, top - .02],
+                    color=SANG, lw=2.0, solid_capstyle="butt")
+
+        ax.text(TEXT_X, top - 0.14, name, fontsize=8.4, weight="bold",
+                color=INK, va="center")
+        ax.text(TEXT_X, top - 0.40, status.upper(), fontsize=6.2,
+                color=SANG if chosen else MUTED, va="center")
+        ax.text(TEXT_X, top - 0.72, verdict, fontsize=6.9, color=BODY,
+                va="center", linespacing=1.5)
+
+    save(fig, "logo")
+
+
+def _cream_ramp():
+    from matplotlib.colors import LinearSegmentedColormap
+    return LinearSegmentedColormap.from_list("cream", [BAR, PAPER])
+
+
 if __name__ == "__main__":
     print("figures:")
-    palette(); sage_limit(); payments(); oversell(); duty(); shipping()
+    palette(); sage_limit(); payments(); oversell(); duty(); shipping(); logo()

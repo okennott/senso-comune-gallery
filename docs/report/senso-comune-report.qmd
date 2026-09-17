@@ -36,15 +36,19 @@ format:
 
 ## What this is
 
-A site selling six unique paintings, priced \$60–\$440, run by one
-non-technical person resident in mainland China, addressed equally to
-international and domestic buyers.
+A site selling unique paintings — six in the catalogue at the time of writing,
+priced \$60–\$440 — run by one non-technical person resident in mainland China,
+addressed equally to international and domestic buyers.
 
-That last sentence contains most of the difficulty. A gallery site for six
-works is an afternoon's work. A gallery site for six works that takes money
-across the Chinese border, ships physical objects internationally, satisfies
-two consumer-law regimes at once and loads acceptably on both sides of the
-Great Firewall is not.
+That last sentence contains most of the difficulty. A gallery site for a
+handful of works is an afternoon's work. A gallery site for a handful of works
+that takes money across the Chinese border, ships physical objects
+internationally, satisfies two consumer-law regimes at once and loads
+acceptably on both sides of the Great Firewall is not.
+
+Nothing in the build is fixed to six. The count, the year span, the
+counters and the page set are all derived from the work data; adding a
+seventh is a data edit.
 
 ## The seven findings that would have sunk it {#sec-blockers}
 
@@ -120,14 +124,14 @@ brown masthead bar, warm brown text, terracotta, and cream plates behind the
 paintings. Two of her decisions were already right and are kept exactly as
 drawn — the warm browns, and a **filled** terracotta button.
 
-![The palette as built. Each value is read from the project's token file, not transcribed.](fig/palette.pdf){#fig-palette width=100%}
+![The palette as built. Each value is read from the project's token file, not transcribed.](fig/palette.pdf){#fig-palette width=100% fig-pos="H"}
 
 ### What could not be adopted as drawn {#sec-sage}
 
 Body text on the sage does not pass, and the accent on sage is worse than the
 value it was replacing.
 
-![Why the sage carries no text. The three red bars are Priscilla's mockup as drawn; the draft's original failure is included for scale.](fig/sage-limit.pdf){#fig-sage width=100%}
+![Why the sage carries no text. The three red bars are Priscilla's mockup as drawn; the draft's original failure is included for scale.](fig/sage-limit.pdf){#fig-sage width=100% fig-pos="H"}
 
 ```{=latex}
 \begin{finding}{The resolution was already in her own mockup}
@@ -191,6 +195,116 @@ the *Vitruvian Man* sheet, is whole-number fractions of height.
 | Body             | the unit         |  16.8 px |    16.8 px |
 | Caption          | less 1/4         |  12.6 px |    13.1 px |
 
+## The mark {#sec-mark}
+
+The site had a wordmark and no mark. On a business whose entire acquisition
+motion is a link in an Instagram or a WeChat bio, the surfaces that render
+most often are a browser tab, a share card and an avatar — and none of them
+can render a wordmark.
+
+### The constraint that decides it {#sec-mark-constraint}
+
+The wordmark translates: *Senso Comune Gallery* in English, 常识画廊\index{wordmark} in
+Chinese. That was a deliberate decision and it is the right one — a Chinese
+buyer should not have to read a Latin name to know where they are.
+
+It also settles the logo. A favicon is chosen by **origin**, not by page: one
+file serves both URL trees, so a site cannot ship one monogram per locale
+however much it would like to. Any mark built from letterforms therefore
+serves one audience and decorates the other. `SC` is not the initials of
+常识画廊.
+
+```{=latex}
+\begin{finding}{This is why the first icon was replaced}
+```
+
+The icon shipped in September was `SC`, cut from real Fraunces outlines. It was
+a correct solution to the problem as stated — *make something that reads at
+16 px* — and it reads at 16 px. It was the wrong solution to the problem as it
+actually is, which is *make something that reads at 16 px in two languages*.
+
+```{=latex}
+\end{finding}
+```
+
+### The options {#sec-mark-options}
+
+Six were drawn. Four of them are eliminated by the same column of @fig-logo —
+the one that shows each candidate at the size it will actually be rendered at
+most of the time.
+
+![Six candidates, each drawn twice: at a size where anyone would approve it, and at 16 px, where it will spend its life.](fig/logo.pdf){#fig-logo width=100% fig-pos="H"}
+
+### What was chosen {#sec-mark-chosen}
+
+A work on a wall — the site's own structure, which is a cream sheet mounted on
+a sage field, reduced to three rectangles. It carries no letterforms, so one
+file serves both locales and it cannot fall back to the wrong typeface.
+
+Nothing in it is arbitrary. Every number is one the project had already
+committed to somewhere else.
+
+```{=latex}
+\Needspace*{10\baselineskip}
+```
+
+: The mark, and where each of its numbers comes from {#tbl-mark}
+
+| Element | Value | Source |
+|:---------|:--------------------------------|:-----------------------------------------------------|
+| Wall | 64 × 64, `--bar` | The masthead. A piece of the site, not a badge applied to it |
+| Plate | 28 × 37.33 — **3:4** — `--paper` | The modal aspect of the catalogue, every work in which is portrait |
+| Datum | Full width, `--field`, at **59.34 %** | 144.78 cm on a 244 cm wall — the museum hanging standard the work-page scale diagram is already drawn to |
+
+The datum runs the full width and passes *behind* the plate, so what is visible
+is two short sage segments either side of the work. That is what a hanging line
+looks like on a real wall, and it is the detail that stops the mark reading as
+a generic picture-frame glyph.
+
+### Two renderings, one geometry {#sec-mark-two}
+
+The wall is a **fill** where it can be seen and an **outline** where it cannot.
+In the tab, on the home screen and in this document's footer, the wall is
+painted. On the site's own masthead the ground is already `--bar`, so a filled
+wall would be no wall at all; there it is drawn as a 1.5-unit sage outline and
+everything else is identical.
+
+Both are generated from `scripts/mark.mjs`. The report reads the same file —
+@fig-logo is drawn from it, not from a copy of its numbers — so the document
+cannot end up arguing for a mark the site no longer ships.
+
+### What it deliberately does not do {#sec-mark-not}
+
+- **It spends no accent.** Sanguine is 2.03:1 on the bar and would disappear at
+  tab size; the sage datum is 4.70:1. The accent stays reserved for calls to
+  action, which is most of what this palette is for.
+- **It depends on no font.** An SVG favicon is rendered *without* the page's
+  webfonts, so a mark set as `<text>` falls back to whatever serif the operating
+  system has. Three rectangles and a line have no such failure mode.
+- **It has no per-locale variant**, by construction. @sec-mark-constraint is the
+  reason, and the build asserts it: the masthead lockup is byte-identical on
+  the English and Chinese homepages.
+
+WCAG contrast is defined on relative luminance, so converting the mark to
+greyscale leaves both of its ratios exactly where they are — 11.45:1 and 4.70:1
+— and it survives a monochrome print unchanged. Two cases have **not** been
+tested: single-ink reproduction, where plate and datum cannot be separated by
+lightness at all, and embroidery below about 15 mm. Neither is needed before
+launch.
+
+### Where it is used {#sec-mark-where}
+
+`icon.svg`, `favicon.ico` at 32 px, `apple-touch-icon.png` at 180 px and
+`site.webmanifest`, all from one source; the masthead lockup, where the mark
+and the name are a single link and a single tab stop; and this document, in the
+footer of every page and on the title page.
+
+Eight assertions in `scripts/check-review.mjs` hold it together: that the icon
+is the geometry `mark.mjs` declares, that the masthead draws the same plate,
+that the mark contributes no accessible name of its own, that it is identical
+in both locales, that it spends no accent, and that the hanging figure is the
+one the work pages cite.
+
 ## The two masters {#sec-masters}
 
 The brief asked for a debt to Leonardo\index{Leonardo da Vinci} and to van Gogh\index{van Gogh, Vincent}, carried without ever
@@ -248,15 +362,45 @@ is 2.78:1; the *Sunflowers* chrome yellow 2.70:1. Both sit within a hair of the
 
 Four views, at the two widths the layout was verified at. The screenshots are
 of the built pages, not mockups: what is shown is what `npm run build`
-produces.
+produces — `docs/report/shots.sh` takes them from `dist/` over a real origin,
+so this section cannot quietly describe a version of the site that no longer
+exists.
 
-![The homepage. Cream sheet mounted on the sage field, dark brown bar. The motto has the hero to itself; the factual line beneath it is generated from the work data and cannot drift.](fig/cap-home.png){#fig-home width=100%}
+![The homepage. Cream sheet mounted on the sage field, dark brown bar, the mark at the head of the wordmark. The first painting sits in the hero beside the motto rather than below the fold; the factual line under the motto is generated from the work data and cannot drift.](fig/cap-home.png){#fig-home width=100%}
 
-![A work page. The price is the boldest element in the block — the single change with the best evidence behind it. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm.](fig/cap-work.png){#fig-work width=100%}
+![A work page. The price is the boldest element in the block — the single change with the best evidence behind it. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
 
 ![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.png){#fig-sold width=100%}
 
-![Mobile. The masthead is static below 720 px: at 390 px the sticky version grew to 280 px, a third of the viewport, and broke the scroll padding that the focus-obscured criterion depends on.](fig/cap-mob.png){#fig-mob width=42%}
+![Mobile. The masthead is static below 720 px: at 390 px the sticky version grew to 280 px, a third of the viewport, and broke the scroll padding that the focus-obscured criterion depends on. The mark is sized in `em`, so it shrinks with the wordmark rather than needing its own breakpoint.](fig/cap-mob.png){#fig-mob width=42%}
+
+## The design review {#sec-review}
+
+The built site was reviewed again in September, as a designer rather than as
+its author, and the twenty findings were implemented. They are recorded here
+because several of them change claims made earlier in this document.
+
+```{=latex}
+\Needspace*{24\baselineskip}
+```
+
+: What the review changed, by group {#tbl-review}
+
+| Group | No. | What shipped |
+|:------------------|------:|:-----------------------------------------------------------------------|
+| **A** Selling | 4 | A painting moved into the hero beside the motto; a `mailto:` link stopped calling itself *Buy*; How to Buy gained reachable contact details; the price and its button were bound into one block |
+| **B** Contrast and craft | 4 | A footer grey at **2.34:1** — shipped, not theoretical — was removed; the contrast checker was taught to resolve the cascade rather than read declarations; the scale diagram's linework went from 1.73:1 to **3.24:1** and its labels from 3.05:1 to **4.90:1** |
+| **C** Reach | 4 | The icon set, `theme-color` and manifest (@sec-mark); Open Graph typed as a product with price and availability; the sage field restored on a phone |
+| **D** Reading | 5 | Prose pages given a narrower mount; the archive set as a grid rather than a second selling gallery; the gallery name made the `h1`; dead rules deleted |
+| **E** Fonts | 2 | The Chinese subset's coverage is now asserted at build time, and each locale preloads only the face it uses |
+| **F** The mark | 4 | @sec-mark |
+
+Two of the twenty were not fixes. **C-04** proposed freezing the wordmark in
+English; it was declined, and the wordmark still translates — which is what
+later decided the logo. And half of **B-03** was simply wrong: the review
+claimed the scale diagram's painting and sofa were composed off-axis. They are
+both centred, and always were. The contrast half of that finding was real and
+is the measurement above.
 
 # Money {#sec-money}
 
@@ -531,8 +675,15 @@ src/data/       seller.json · artworks.json · site.json
 src/styles/     tokens.css · base.css · gallery.css
 src/templates.js
 build.js        28 pages, two locales
-scripts/        build-fonts · build-images · check-contrast · check-links
+scripts/        mark.mjs          the logo geometry, shared with the report
+                build-fonts · build-fonts-cjk · build-images · build-icons
+                check-contrast · check-links · check-review
+                preview.mjs       one page, inlined, for review
+docs/           brief/ · build-report/ · report/     one document each
 ```
+
+The page count follows the catalogue: fourteen routes per locale for six
+works, of which six are work pages.
 
 ## The entity switch {#sec-switch}
 
@@ -561,15 +712,41 @@ payment stands and the second is refunded in full within 24 hours.*
 
 ## Checks that block the build {#sec-checks}
 
-`check-contrast.mjs` recomputes every token against its worst-case ground.
+Three, and `npm run check` runs all three.
+
+`check-contrast.mjs` recomputes every token against its worst-case ground. It
+also resolves the *cascade*: where several rules set a colour on the dark bar,
+it takes the declaration that actually wins and measures that one.
 
 `check-links.mjs` verifies dead links, missing `alt`, missing `width` or
-`height`, heading order, landmark counts and hreflang reciprocity.
+`height`, heading order, landmark counts, hreflang reciprocity, and that the
+shipped Chinese subset still covers every CJK character the build puts in a
+display position.
+
+`check-review.mjs` is newer and differently shaped: **41 assertions over the
+24 findings** of @sec-review, written against the built pages rather than the
+source, so a fix that silently stops being applied fails the build instead of
+being noticed in a screenshot months later.
 
 Between them they caught a muted grey that passed
 on white and failed on the darkest wash, work pages shipping with no `<h1>` at
 all, and a mobile override that made the navigation invisible once the dark bar
 was adopted.
+
+```{=latex}
+\begin{finding}{A test that passes for the wrong reason}
+```
+
+One of the review fixes set `font-size:var(--size-h1)`. No such token exists —
+the scale calls it `--size-hero` — so the rule silently fell back to inherited
+body size, and the assertion written for it passed because it only matched the
+declaration's text. The repair was a cross-cutting assertion that every
+`var(--token)` in the shipped stylesheet resolves to a definition. An
+undefined custom property is the one CSS error that produces no error.
+
+```{=latex}
+\end{finding}
+```
 
 ```{=latex}
 \begin{finding}{The limit of automation}
@@ -610,12 +787,20 @@ Three items that were open have been settled in the build itself.
 | CJK webfont strategy | The display face is subset to the ~100 characters that appear in headings, work titles and UI labels: **34 KB, from a 24 MB face.** `unicode-range` gates the fetch, so an English page never downloads it, and a character added before the next build falls through to the system face rather than rendering as tofu. Chinese body prose is deliberately not webfont-served. | `scripts/build-fonts-cjk.py` |
 | Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
+| No logo | A mark that carries no letterforms, so one file serves both locales, generated from a single geometry for the tab, the home screen, the masthead and this document | `scripts/mark.mjs` |
+| The report's own Chinese subset | Was built by hand, with `cjk-chars.txt` recording what somebody had built and nothing checking it still matched the prose. It is now derived from the `.qmd` on every build, and instanced to Regular first — subsetting the variable original silently yields **ExtraLight**, which is what the statutory quotations would have been set in | `docs/report/fonts.py` |
+| The report's screenshots | Were taken by hand in a section that claims to show what the build produces. Now taken from `dist/` by script | `docs/report/shots.sh` |
 
 ## Content still outstanding
 
-The build reports every placeholder. The blocking ones are the six photographs,
-the titles and descriptions, and the contact details — the email and phone are
-not optional, they are the consumer-law requirement in @sec-disclosure.
+The build reports every placeholder; 48 fields are still `NEEDS-INPUT`. The
+blocking ones are the photographs, the titles and descriptions, and the contact
+details — the email and phone are not optional, they are the consumer-law
+requirement in @sec-disclosure.
+
+One design item is also still open. The Chinese-locale enquiry route should be
+WeChat rather than a `mailto:`, and that needs a QR image that does not exist
+yet; the label was fixed, the channel was not.
 
 ```{=latex}
 \clearpage
@@ -646,7 +831,15 @@ be checked.
 
 **Layout.** Verified by headless screenshot at 1440 px and 390 px, not by
 description. Three defects were found that way and are recorded in the commit
-history.
+history. The captures in @sec-built are taken from `dist/` by
+`docs/report/shots.sh` as part of this document's build, so they cannot show a
+version of the site that is no longer shipping.
+
+**The mark.** @fig-logo and the mark in this document's footer are both drawn
+from `mark.mjs`, the one file the site's icons and its masthead are generated
+from. The TikZ copy of those numbers in the preamble is checked against it on
+every build. The hanging figure of 144.78 cm is the museum standard already
+used by the scale diagram on every work page.
 
 ```{=latex}
 \cleardoublepage

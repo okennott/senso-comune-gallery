@@ -12,9 +12,12 @@
 #   3. makeindex        -> .ind
 #   4. tectonic pass 2  -> resolves cross-references and sets the index
 #
-# Fonts and figures are built first: the fonts because XeTeX cannot drive the
-# variable axes the site uses and needs static instances, the figures so the
-# palette in the document can never drift from the palette in the site.
+# Everything the document shows is regenerated first, so that none of it can be
+# quietly out of date: the fonts because XeTeX cannot drive the variable axes
+# the site uses and needs static instances; the screenshots because the section
+# that shows them claims to show what the build produces; the figures so the
+# palette, the contrast figures and the logo are read from the project's own
+# token file and mark geometry rather than transcribed.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -25,6 +28,16 @@ cd "$HERE"
 
 echo "==> fonts"
 python3 fonts.py
+
+echo "==> the mark"
+python3 scale_mark.py --check-preamble
+
+echo "==> screenshots"
+if [ -d "$ROOT/dist" ]; then
+  ./shots.sh
+else
+  echo "  no dist/; keeping the captures already in fig/"
+fi
 
 echo "==> figures"
 python3 figures.py

@@ -166,9 +166,13 @@ check('C-01', 'the icon set exists and is linked', () => {
   return { ok: onDisk.length === files.length && linked, detail: `${onDisk.length}/${files.length} built, linked ${linked}` };
 });
 
-check('C-01', 'the mark is real Fraunces outlines, not a <text> fallback', () => {
+check('C-01', 'the icon carries no letterforms and no font dependency', () => {
+  // An SVG favicon renders without the page's webfonts, so a <text> mark falls
+  // back to whatever serif the OS has. Geometry has no such failure mode — and
+  // it is the reason the mark serves 常识画廊 as well as "Senso Comune Gallery".
   const svg = read('icon.svg');
-  return { ok: /<path d="M/.test(svg) && !/<text/.test(svg), detail: `${statSync(join(DIST, 'icon.svg')).size} bytes` };
+  const clean = !/<text|font-family|<path/.test(svg);
+  return { ok: clean, detail: `${statSync(join(DIST, 'icon.svg')).size} bytes, rect + line only` };
 });
 
 check('C-01', 'theme-color matches the masthead bar', () => {
@@ -262,6 +266,85 @@ check('E-02', 'zh pages preload the Chinese face, en pages the Latin one', () =>
   const zhNoFraunces = !/preload"[^>]*fraunces-latin\.woff2/.test(zhHome);
   const enFraunces = /preload"[^>]*fraunces-latin\.woff2/.test(home);
   return { ok: zhPre && zhNoFraunces && enFraunces, detail: `zh→noto ${zhPre}, zh drops fraunces ${zhNoFraunces}, en→fraunces ${enFraunces}` };
+});
+
+/* ===================== F — the mark ===================== */
+/* Added 17 September 2026 with the logo. One geometry, rendered four ways; the
+   assertions below are what stops the four drifting apart. */
+
+const markGeom = await import(join(ROOT, 'scripts/mark.mjs'));
+const MARK = markGeom.MARK;
+const G = markGeom.markGeometry();
+
+check('F-01', 'the icon is the mark as scripts/mark.mjs draws it', () => {
+  const svg = read('icon.svg');
+  const wall = new RegExp(`<rect width="${MARK.box}" height="${MARK.box}" fill="${MARK.ground}"/>`).test(svg);
+  const plate = svg.includes(`x="${G.x}" y="${+G.y.toFixed(3)}" width="${MARK.plateW}" height="${+G.plateH.toFixed(3)}"`);
+  const datum = svg.includes(`y1="${+G.cy.toFixed(3)}"`) && svg.includes(`stroke="${MARK.datum}"`);
+  return { ok: wall && plate && datum, detail: `wall ${wall}, plate ${plate}, datum ${datum}` };
+});
+
+check('F-01', 'the masthead lockup draws the same plate as the icon', () => {
+  // The masthead knocks the wall out to an outline, because the bar is already
+  // the wall. Everything else must be identical, or the tab and the header are
+  // two different logos.
+  const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
+  if (!m) return { ok: false, detail: 'no wordmark lockup' };
+  const svg = m[1];
+  const outline = /fill="none" stroke="var\(--field\)"/.test(svg);
+  const filled = !/<rect width="64" height="64" fill=/.test(svg);
+  const plate = svg.includes(`x="${G.x}" y="${+G.y.toFixed(3)}"`);
+  const datum = svg.includes(`y1="${+G.cy.toFixed(3)}"`);
+  return { ok: outline && filled && plate && datum,
+           detail: `outline ${outline}, no fill ${filled}, same plate ${plate}, same datum ${datum}` };
+});
+
+check('F-02', 'the mark is one link and one tab stop with the wordmark', () => {
+  // 2.5.3 Label in Name and 2.4.4: a decorative mark inside the link must not
+  // contribute an accessible name of its own, and must not be a second link to
+  // the same place.
+  const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
+  const svg = m[1];
+  const hidden = /aria-hidden="true"/.test(svg) && /focusable="false"/.test(svg);
+  const noName = !/<title>|aria-label=/.test(svg);
+  const named = /<span class="wordmark__name">/.test(m[1]);
+  return { ok: hidden && noName && named, detail: `aria-hidden ${hidden}, no name of its own ${noName}, wordmark still the name ${named}` };
+});
+
+check('F-02', 'the mark serves both locales unchanged', () => {
+  const en = (home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/span>/) ?? [])[0];
+  const zh = (zhHome.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/span>/) ?? [])[0];
+  const enSvg = (en.match(/<svg[\s\S]*?<\/svg>/) ?? [])[0];
+  const zhSvg = (zh.match(/<svg[\s\S]*?<\/svg>/) ?? [])[0];
+  const zhName = /常识画廊/.test(zh);
+  return { ok: enSvg === zhSvg && zhName,
+           detail: `byte-identical ${enSvg === zhSvg}, zh wordmark still translated ${zhName}` };
+});
+
+check('F-03', 'the mark does not spend the accent', () => {
+  // Sanguine is reserved for calls to action. It is also 2.03:1 on the bar and
+  // would vanish at tab size; the sage datum is 4.70:1.
+  const svg = read('icon.svg');
+  const sanguine = token('sanguine');
+  const usesAccent = svg.toUpperCase().includes(sanguine.toUpperCase());
+  const r = ratio(MARK.datum, MARK.ground);
+  return { ok: !usesAccent && r >= 3, detail: `no sanguine ${!usesAccent}, datum on wall ${r.toFixed(2)}:1` };
+});
+
+check('F-03', 'the plate reads at tab size against the wall', () => {
+  const r = ratio(MARK.plate, MARK.ground);
+  const share = (MARK.plateW * G.plateH) / (MARK.box ** 2);
+  // At 16px the plate is 7px wide. Below about a sixth of the box it stops
+  // being a shape and starts being a speck.
+  return { ok: r >= 4.5 && share > 0.15, detail: `${r.toFixed(2)}:1, plate is ${(share * 100).toFixed(0)}% of the mark` };
+});
+
+check('F-04', 'the hanging datum is the figure the work pages are drawn to', () => {
+  // 144.78 cm on a 244 cm wall: the same museum standard the scale diagram
+  // uses, so the mark and the diagram cannot state different numbers.
+  const fromWork = /144\.78/.test(work) || /144\.78/.test(src('src/templates.js'));
+  const declared = Math.abs(MARK.hang - 144.78 / 244) < 1e-9;
+  return { ok: fromWork && declared, detail: `work page cites 144.78 ${fromWork}, mark uses ${(MARK.hang * 100).toFixed(2)}%` };
 });
 
 /* ===================== cross-cutting ===================== */

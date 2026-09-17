@@ -380,20 +380,26 @@ reading it from the other.
 │                                 dependency. Reports NEEDS-INPUT on exit.
 │
 ├── scripts/                      build and verification tools
+│   ├── mark.mjs                    the logo: one geometry, four renderings.
+│   │                               Read by build-icons.sh, by templates.js for
+│   │                               the masthead lockup, and by the report
 │   ├── build-images.mjs            sRGB-tagged AVIF 4:4:4 + WebP, five widths,
 │   │                               capped at 2000px
 │   ├── build-fonts.sh              Latin subsets — 79.8 KB for both families
 │   ├── build-fonts-cjk.py          Chinese display face, subset to the ~100
 │   │                               glyphs that appear, 34 KB from 24 MB
-│   ├── build-icons.sh              favicon, home-screen icon and manifest —
-│   │                               the mark is real Fraunces outlines, so it
-│   │                               survives being rendered without webfonts
+│   ├── build-icons.sh              favicon, home-screen icon and manifest,
+│   │                               all from mark.mjs. No letterforms, so one
+│   │                               file serves both locales and nothing
+│   │                               depends on a webfont that a favicon never
+│   │                               gets to load
 │   ├── check-contrast.mjs          every token against its worst-case ground,
 │   │                               including the dark bar, read from the CSS
 │   ├── check-links.mjs             dead links, missing alt, missing width or
 │   │                               height, heading order, landmarks, hreflang,
 │   │                               CJK subset coverage
-│   ├── check-review.mjs            one assertion per design-review finding
+│   ├── check-review.mjs            41 assertions over the design-review
+│   │                               findings, written against the built pages
 │   └── preview.mjs                 one page as a single self-contained file
 │
 ├── public/                       copied to the site as-is
@@ -415,15 +421,25 @@ reading it from the other.
 │   │   ├── fonts/                    inlined as base64 at build time
 │   │   └── build.sh
 │   └── report/                     the printable technical report
-│       ├── senso-comune-report.pdf   built: A4, indexed, ~25 pages
+│       ├── senso-comune-report.pdf   built: A4, indexed, 38 pages
 │       ├── senso-comune-report.qmd   the source
-│       ├── preamble.tex              typesetting: fonts, heads, callouts
+│       ├── preamble.tex              typesetting: fonts, heads, callouts, and
+│       │                             the mark, redrawn in TikZ for the footers
 │       ├── figures.py                vector figures, read from tokens.css
-│       ├── fonts.py                  static cuts of Fraunces and Inter
+│       ├── fonts.py                  static cuts of Fraunces and Inter, plus
+│       │                             the Chinese subset — derived from the
+│       │                             .qmd, so the prose cannot outgrow it
+│       ├── scale_mark.py             reads scripts/mark.mjs, and fails the
+│       │                             build if preamble.tex has drifted from it
+│       ├── shots.sh                  the page screenshots, taken from dist/
+│       │                             (cjk-chars.txt is an intermediate and is
+│       │                              not in the repo; the staleness test is
+│       │                              the committed font's own coverage, so a
+│       │                              fresh clone builds offline)
 │       ├── fig/                      the figures and page screenshots
 │       ├── fonts/                    committed, so it builds offline
-│       └── build.sh                  fonts → figures → quarto → tectonic ×2
-│                                     → makeindex → tectonic
+│       └── build.sh                  fonts → mark → shots → figures → quarto
+│                                     → tectonic ×2 → makeindex → tectonic
 │
 ├── .github/workflows/pages.yml   preview deploy, for layout review only.
 │                                 Production is Cloudflare Pages: GitHub's
@@ -538,6 +554,13 @@ block people outright.
 
 ## 2.6 Decisions already made
 
+- **The logo carries no letterforms.** The wordmark translates — *Senso Comune
+  Gallery* and 常识画廊 — and a favicon is chosen by origin, not by page, so a
+  monogram can only ever serve one of the two audiences. The mark is a work
+  hung on a wall: a cream plate at the catalogue's modal 3:4, on the masthead
+  brown, crossed by a sage datum at the museum hanging height of 144.78 cm on a
+  244 cm wall. One geometry in `scripts/mark.mjs` generates the icon set, the
+  masthead lockup and the report's footer mark. `npm run icons` rebuilds it.
 - **Cloudflare Pages.** The only host with no bill, no pause and no terms
   problem. `vercel.app` and `workers.dev` measure 100% blocked from mainland
   China; `pages.dev` measures 0%.

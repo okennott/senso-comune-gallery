@@ -30,7 +30,17 @@
   font-variation-settings:'opsz' 22.4,'SOFT' 0,'WONK' 1;
   color:var(--paper); text-decoration:none;   /* 11.45:1 on the bar */
   margin-right:auto;
+  /* A lockup, not a word: the mark and the name are one link and one tab stop.
+     Baseline alignment, so the mark keeps its relationship to the type when
+     the wordmark shrinks below 720px. */
+  display:inline-flex; align-items:baseline; gap:.42em;
 }
+/* 1.5em square sitting on the baseline: the wall then stands about a cap
+   height above the line and a descender below it, which is the proportion at
+   which the plate reads as a work hung on a wall rather than as a filled
+   square. Sized in em, so it tracks the wordmark down to 16.8px on mobile. */
+.wordmark__mark{ width:1.5em; height:1.5em; flex:none; align-self:baseline; display:block }
+.wordmark__name{ display:inline-block }
 .nav{ display:flex; gap:var(--space-4); flex-wrap:wrap; align-items:center }
 .nav a{
   /* 2.5.8: a nav bar is not a sentence, so the "inline" exception does not

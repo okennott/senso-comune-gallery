@@ -52,10 +52,18 @@
 % the characters simply gone, which in a legal-citation context is a defect
 % rather than a cosmetic problem.
 %
-% Noto Serif SC, subset to the 49 characters this document actually uses:
-% 12 KB rather than 11.6 MB.
+% Noto Serif SC, instanced to Regular and then subset to exactly the characters
+% this document actually sets — 17 KB rather than 11.6 MB. fonts.py derives that
+% set from the .qmd on every build, so adding a Chinese word to the prose cannot
+% leave it uncovered.
 \usepackage{xeCJK}
 \setCJKmainfont{NotoSerifSC-report.otf}[Path=fonts/]
+% The monospace slot has to be set too. Inside a verbatim environment xeCJK
+% routes its character classes to the CJK MONO font; with none declared it fell
+% through to the main CJK face, and every middle dot separating the file names
+% in the build-tree listings was dropped without an error. Same subset, so the
+% document still ships one Chinese face.
+\setCJKmonofont{NotoSerifSC-report.otf}[Path=fonts/]
 \xeCJKsetup{CJKmath=false}
 % CJK/Latin glue. An earlier attempt set this to 0.08em to tighten bracket
 % pairs such as 〔2020〕, which instead swallowed the word space in
@@ -65,6 +73,11 @@
 \xeCJKsetup{xCJKecglue={\hskip 0.26em plus 0.06em minus 0.03em}}
 % Keep Latin text in the Latin face; only CJK codepoints switch.
 \xeCJKDeclareSubCJKBlock{CJK}{"3000 -> "303F, "3400 -> "4DBF, "4E00 -> "9FFF, "FF00 -> "FFEF}
+% U+00B7 also sits in xeCJK's default CJK punctuation class, so a middle dot in
+% running prose was taken from the Chinese face rather than the Latin one.
+% Declare it an ordinary character; fonts.py keeps a copy in the subset as well,
+% for the verbatim case above.
+\xeCJKDeclareCharClass{Default}{"00B7}
 
 % --- the site's own palette, so the document and the thing it
 % --- documents are the same object
@@ -101,7 +114,7 @@
 
 \fancyhead[L]{\uifont\footnotesize\color{muted}\nouppercase{\leftmark}}
 \fancyhead[R]{\uifont\footnotesize\color{muted}\scfolio}
-\fancyfoot[L]{\uifont\scriptsize\color{muted}Senso Comune Gallery}
+\fancyfoot[L]{\scmarkfig{7.6}\hspace{4pt}\uifont\scriptsize\color{muted}Senso Comune Gallery}
 \fancyfoot[R]{\uifont\scriptsize\color{muted}Prepared for Priscilla\quad\textperiodcentered\quad Not legal advice}
 
 % A hairline under the header, in the field colour.
@@ -134,12 +147,12 @@
   \fancyhf{}%
   \fancyhead[L]{\uifont\footnotesize\color{muted}Index}%
   \fancyhead[R]{\uifont\footnotesize\color{muted}\scfolio}%
-  \fancyfoot[L]{\uifont\scriptsize\color{muted}Senso Comune Gallery}%
+  \fancyfoot[L]{\scmarkfig{7.6}\hspace{4pt}\uifont\scriptsize\color{muted}Senso Comune Gallery}%
   \fancyfoot[R]{\uifont\scriptsize\color{muted}Prepared for Priscilla\quad\textperiodcentered\quad Not legal advice}}
 
 \fancypagestyle{plain}{%
   \fancyhf{}\renewcommand{\headrulewidth}{0pt}%
-  \fancyfoot[L]{\uifont\scriptsize\color{muted}Senso Comune Gallery}%
+  \fancyfoot[L]{\scmarkfig{7.6}\hspace{4pt}\uifont\scriptsize\color{muted}Senso Comune Gallery}%
   \fancyfoot[R]{\uifont\footnotesize\color{muted}\scfolio}}
 
 % --- the mark in the margin ----------------------------------------------
@@ -150,6 +163,36 @@
 % should not compete with a painting on the facing page.
 \usepackage{eso-pic}
 \usepackage{tikz}
+
+% --- the mark -------------------------------------------------------------
+% The logo the report recommends, drawn here so the document carries the thing
+% it argues for. Same geometry as scripts/mark.mjs, in the same 64-unit space:
+% a wall, a hanging datum at 144.78/244 of the height, and a 3:4 plate centred
+% on it. The numbers below are checked against mark.mjs by build.sh; they are
+% not free to drift.
+%
+%   \scmarkfig{<height in pt>}
+%
+% y is measured UP here and DOWN in the SVG, so the plate's corners are
+% 64-44.692 and 64-7.358, and the datum is at 64-26.025.
+\newcommand{\scmarkfig}[1]{%
+  \pgfmathsetmacro{\scmkS}{#1/64}%
+  \begin{tikzpicture}[x=\scmkS pt,y=\scmkS pt,baseline=0pt]
+    \fill[barink] (0,0) rectangle (64,64);
+    \draw[field,line width=\scmkS*2pt] (0,37.975) -- (64,37.975);
+    \fill[paper] (18,19.308) rectangle (46,56.642);
+  \end{tikzpicture}%
+}
+% The knockout rendering, for the bar on the title page, where the ground is
+% already the wall.
+\newcommand{\scmarkout}[1]{%
+  \pgfmathsetmacro{\scmkS}{#1/64}%
+  \begin{tikzpicture}[x=\scmkS pt,y=\scmkS pt,baseline=0pt]
+    \draw[field,line width=\scmkS*1.5pt] (0.75,0.75) rectangle (63.25,63.25);
+    \draw[field,line width=\scmkS*2pt] (0,37.975) -- (64,37.975);
+    \fill[paper] (18,19.308) rectangle (46,56.642);
+  \end{tikzpicture}%
+}
 % The geometry is two-sided (inner 28mm, outer 24mm), so the band belongs on
 % the OUTER edge and has to swap sides with the page parity. Suppressed on the
 % title page, which carries its own field.
@@ -241,7 +284,7 @@
       rectangle ([yshift=-38mm]current page.north east);
     \node[anchor=west,text=paper,inner sep=0pt]
       at ([xshift=28mm,yshift=-19mm]current page.north west)
-      {\displayfont\LARGE Senso Comune Gallery};
+      {\scmarkout{25}\hspace{9pt}\displayfont\LARGE Senso Comune Gallery};
     % the field below it
     \fill[fill=field!45] ([yshift=-38mm]current page.north west)
       rectangle (current page.south east);
@@ -260,7 +303,7 @@
   \vspace{8mm}
   {\quotefont\normalsize\color{body}\itshape
    \begin{minipage}{0.86\linewidth}\setlength{\parskip}{0pt}%
-   Six unique works, sold from mainland China to buyers at home and abroad.
+   Unique paintings, sold from mainland China to buyers at home and abroad.
    What follows is what that costs, what it requires, and what is still
    unresolved.\end{minipage}\par}
   \vfill

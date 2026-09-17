@@ -6,6 +6,8 @@
  * contradict its own aesthetic argument. This is that build script's half.
  */
 
+import { markSvg } from '../scripts/mark.mjs';
+
 /* ---------- helpers ---------- */
 
 export const esc = (s = '') =>
@@ -154,12 +156,18 @@ const OG_LOCALE = { en: 'en_US', 'zh-CN': 'zh_CN' };
 const ogLocale = (lang) => OG_LOCALE[lang] ?? lang.replace('-', '_');
 
 /* Finding C-01. The tab, the home-screen icon and the browser chrome were all
-   defaults. The SVG mark is the wordmark's initials in the display face on the
-   dark bar - the only lockup that survives at 16px. */
+   defaults. The mark is geometry, not letterforms, so one file serves both
+   locales - see scripts/mark.mjs for why an "SC" monogram could not. */
 const favicon = (asset) => `<link rel="icon" href="${asset('/icon.svg')}" type="image/svg+xml">
 <link rel="icon" href="${asset('/favicon.ico')}" sizes="32x32">
 <link rel="apple-touch-icon" href="${asset('/apple-touch-icon.png')}">
 <link rel="manifest" href="${asset('/site.webmanifest')}">`;
+
+/* The masthead sits ON the bar, which is the same colour the mark's wall would
+   be, so the wall is drawn as an outline instead of a fill. Decorative: the
+   link's own text is the accessible name, and a second one here would violate
+   2.5.3 Label in Name. */
+const MASTHEAD_MARK = markSvg({ wall: 'outline', tokens: true, className: 'wordmark__mark' });
 
 /* ---------- document shell ---------- */
 export function layout({ site, seller, loc, title, description, body, ogImage, ogImageAlt,
@@ -232,7 +240,7 @@ ${loc === 'zh'
 
 <header class="masthead">
   <div class="wrap masthead__inner">
-    <a class="wordmark" href="${esc(path(loc, site, '/'))}">${esc(t(seller.artist.siteName, loc))}</a>
+    <a class="wordmark" href="${esc(path(loc, site, '/'))}">${MASTHEAD_MARK}<span class="wordmark__name">${esc(t(seller.artist.siteName, loc))}</span></a>
     <nav class="nav" aria-label="${loc === 'zh' ? '主导航' : 'Main'}">
       ${nav}
     </nav>
