@@ -12,6 +12,24 @@
 \usepackage{float}
 \usepackage[normalem]{ulem}
 
+% --- Chinese.
+% The report quotes Chinese statutory references and one string that must be
+% reproduced verbatim (SAMR Order 37 Art. 12). Without a CJK font XeTeX drops
+% those glyphs SILENTLY — the citations rendered as "2020 14 Art. 66(2)" with
+% the characters simply gone, which in a legal-citation context is a defect
+% rather than a cosmetic problem.
+%
+% Noto Serif SC, subset to the 49 characters this document actually uses:
+% 12 KB rather than 11.6 MB.
+\usepackage{xeCJK}
+\setCJKmainfont{NotoSerifSC-report.otf}[Path=fonts/]
+\xeCJKsetup{CJKmath=false}
+% Default CJK/Latin glue is ~0.25em, which reads loose inside bracket pairs
+% such as 〔2020〕. Tightened.
+\xeCJKsetup{xCJKecglue={\hskip 0.08em plus 0.04em minus 0.02em}}
+% Keep Latin text in the Latin face; only CJK codepoints switch.
+\xeCJKDeclareSubCJKBlock{CJK}{"3000 -> "303F, "3400 -> "4DBF, "4E00 -> "9FFF, "FF00 -> "FFEF}
+
 % --- the site's own palette, so the document and the thing it
 % --- documents are the same object
 \definecolor{ink}{HTML}{3A2B22}

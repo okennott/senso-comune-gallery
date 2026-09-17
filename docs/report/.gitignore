@@ -1,0 +1,12 @@
+# tectonic / latex intermediates — build.sh cleans these, but belt and braces
+*.aux
+*.log
+*.toc
+*.lof
+*.lot
+*.out
+*.idx
+*.ilg
+*.ind
+*.tex
+cjk-chars.txt

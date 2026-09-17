@@ -11,9 +11,27 @@ contact details.
 
 ---
 
-## The report
+## The reports
 
-**[`docs/build-report.html`](docs/build-report.html)** — open it in a browser.
+There are two, for two audiences.
+
+**[`docs/report/senso-comune-report.pdf`](docs/report/senso-comune-report.pdf)** —
+the printable technical report. 24 pages, A4, typeset with Quarto and XeLaTeX:
+table of contents, list of figures, list of tables, numbered parts and an
+alphabetical index. This is the one to print, share, or hand to an accountant
+or a lawyer. Rebuild it with:
+
+```bash
+./docs/report/build.sh
+```
+
+It runs the passes explicitly — Quarto to TeX, a first LaTeX pass, `makeindex`,
+then a second pass — because Quarto's direct PDF route pipes through stdin and
+throws the index away. Figures regenerate from `src/styles/tokens.css` on every
+build, so the palette in the document cannot drift from the palette in the site.
+
+**[`docs/build-report.html`](docs/build-report.html)** — the same findings as a
+web page, for reading on screen.
 
 Twenty-nine findings against the original design draft, each scoped to a cost,
 an effort and a specific change. It is a single self-contained file: fonts
