@@ -557,5 +557,20 @@
       "every genre a work names is declared here."
     ],
     "items": []
+  },
+  "readiness": {
+    "$comment": "The preview ribbon. {n} is the number of blockers the readiness gate reports.",
+    "previewBlocked": {
+      "en": "Preview — not open for sales. {n} critical details are still owed before this site can go live.",
+      "zh": "预览版——尚未开放销售。网站上线前仍有 {n} 项关键信息待补充。"
+    },
+    "previewReady": {
+      "en": "Preview build. Every critical detail is supplied; the live site is the release build.",
+      "zh": "预览版本。所有关键信息均已补齐；正式网站以发布版本为准。"
+    },
+    "notOnSale": {
+      "en": "Not on sale yet",
+      "zh": "尚未开售"
+    }
   }
 }

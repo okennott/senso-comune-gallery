@@ -1,0 +1,39 @@
+# Release check — would this commit be allowed to go live?
+#
+# Runs the release build exactly as the production host will
+# (node scripts/release.mjs): images, the readiness gate, RELEASE=1 build and
+# every check in release mode. It publishes nothing. It fails red, with the
+# full readiness report on the run's summary page, while any critical detail
+# is still owed.
+#
+# Run it by hand from the Actions tab, or push a tag such as v1.0.0.
+#
+# The production host itself (Cloudflare Pages) should use the same command as
+# its build command, so the gate stands in front of the only deploy that
+# matters: node scripts/release.mjs, output directory dist. A failed build is
+# not published there; the previous release stays live. That failure is quiet
+# on the host's side, which is why this workflow exists — to make it loud.
+
+name: Release check
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci || npm install
+      - name: Readiness report
+        run: node scripts/check-readiness.mjs --report
+      - name: Release build (refuses while blocked)
+        run: node scripts/release.mjs

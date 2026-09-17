@@ -390,12 +390,14 @@ carries a penalty onto a personal credit file.
 
 ```bash
 npm install
-npm run build        # images, then every page → dist/
+npm run build        # a PREVIEW: images, then every page → dist/ (noindex, ribbon)
 npm run check        # contrast, structure, design review; all three block the build
 npm run preview      # one built page as a single self-contained file
 npm run fonts        # rebuild the webfonts, Latin and Chinese
 npm run icons        # rebuild the favicon, home-screen icon and manifest
 npm run check:render # paintings keep their proportions in a real browser (needs Chrome)
+npm run readiness    # what is still owed before the site may go live
+npm run build:release # the only build that may go live; refuses while anything is owed
 npm run report       # rebuild both reports (report:pdf, report:html)
 ```
 
@@ -798,6 +800,75 @@ of the three, and it needs more than a script:
 - **Sign-in options.** Email link is the simplest to operate. WeChat sign-in
   requires registering an application with WeChat Open Platform, which has its
   own verification requirements.
+
+## 2.8 Going live: the readiness gate
+
+The site can only go live once every critical detail is supplied. That is
+enforced, not remembered.
+
+**Two kinds of build.**
+
+| | Preview — `npm run build` | Release — `npm run build:release` |
+|:--|:--|:--|
+| When | Any time, including now | Only when the gate is open |
+| Indexed by search engines | No — noindex on every page | Yes |
+| Marked on every page | A ribbon: *Preview — not open for sales. N critical details are still owed* | Nothing |
+| Buy and enquire buttons | Drawn, but unusable while anything is owed | Live |
+| Views without a photograph | Shown as labelled placeholders | Left out |
+| `NEEDS-INPUT` | Flagged in red | Cannot exist — the release checks fail on a single one |
+
+A preview is the default; there is no way to forget to mark a build as not
+ready. A release has to be asked for, and asks the gate twice: once before
+building, and again inside the build itself, which refuses and leaves `dist/`
+untouched. **See what is owed:**
+
+```bash
+npm run readiness
+```
+
+It lists every blocker by area — identity and contact, legal, the site, works
+and prices, photography, payments — with the field, what is wrong, how to fix
+it, and the rule or law it rests on.
+
+**What it checks is the value, not just the word.** `NEEDS-INPUT` is only the
+backstop. An empty email, an address on `example.com`, a phone number without
+its country code, a price of 0, a returns window under 14 days, a Chinese
+registration declaration someone edited, a painting still showing its
+placeholder photograph, a payment link over `http` — each is its own rule.
+Optional channels (Instagram, 小红书) are either a handle or `""`, which leaves
+the channel off the site; left as `NEEDS-INPUT` they are *undecided*, and that
+blocks.
+
+**Some rules only apply sometimes.** Hong Kong registration numbers only while
+that entity is active; a transaction ceiling only once the cart takes payments;
+a donation recipient only while the pledge is above 0%.
+
+**Waivers.** A blocker that can wait may be waived in
+`src/data/readiness-waivers.json` — with a reason, the name of whoever accepts
+the risk, and an expiry date, after which the gate closes again. Every live
+waiver is printed in every report and recorded in the release's
+`readiness.json`. Legal identity and disclosure, returns, prices, dimensions,
+photographs and payment links cannot be waived: a waiver naming one keeps the
+gate shut.
+
+**Today** the gate reports 54 blockers. The largest group is the works'
+titles, descriptions and alt text; one that needs a decision rather than
+typing is the search, account and cart placeholders (rule SH-01), which block a
+release until those pages exist or a waiver is signed for them.
+
+**Where it stands in front of the public.** The production host's build command
+should be `node scripts/release.mjs`, output directory `dist` (Cloudflare Pages:
+*Settings → Builds*). A failed build is not published there — the last release
+stays live — but the host fails quietly, so the *Release check* workflow runs the
+same command on GitHub, by hand or on a `v*` tag, and fails red with the report.
+The preview workflow adds the report to every run's summary.
+
+**Tested both ways.** `scripts/test-readiness.mjs` (in `npm run check`) builds a
+copy of the data with everything supplied and proves the gate opens, then breaks
+one thing at a time — 32 ways — and proves it closes on the right rule, and tests
+the waivers. Review assertions K-01 to K-03 prove every preview page says so,
+nothing can be bought while blocked, and a release attempt is refused without
+touching the last built site.
 
 ## Still open
 

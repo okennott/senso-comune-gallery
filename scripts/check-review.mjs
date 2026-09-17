@@ -12,9 +12,10 @@
  */
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BASE } from '../src/templates.js';
+import { BASE, RELEASE } from '../src/templates.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -81,7 +82,8 @@ check('A-01', 'a painting is in the hero, above the fold', () => {
    outright — "All works (5)" — and asserted in I-02. */
 
 check('A-02', 'no mail link is labelled "Buy"', () => {
-  const btns = [...home.matchAll(/<a class="btn"[^>]*href="(mailto:[^"]*)"[^>]*>([^<]*)/g)];
+  // an unusable control keeps its address in data-inert-href (readiness gate)
+  const btns = [...home.matchAll(/<a class="btn"[^>]*(?:data-inert-href|href)="(mailto:[^"]*)"[^>]*>([^<]*)/g)];
   const bad = btns.filter(([, , label]) => /^(Buy|购买)$/.test(label.trim()));
   return { ok: btns.length > 0 && bad.length === 0, detail: `${btns.length} mail buttons, ${bad.length} still say Buy` };
 });
@@ -501,16 +503,27 @@ check('H-02', 'the placeholders land on a bilingual, unindexed 404', () => {
            detail: `404 ${!!nf}, routes unbuilt ${unbuilt}, bilingual ${bilingual}, noindex ${noindex}, not in sitemap ${notInSitemap}` };
 });
 
-check('H-03', 'every work page shows front, detail, edge, back and video, with a thumbnail each', () => {
+const viewManifest = existsSync(join(ROOT, 'public/img/views.json')) ? JSON.parse(src('public/img/views.json')) : {};
+/** The views a work page should show: all of them in a preview; in a release,
+ *  only those whose photograph exists (readiness rule WK-10). */
+const expectedViews = (slug) => {
+  const w = artJson.works.find((x) => x.slug === slug);
+  return ['front', ...(w.views ?? []).map((v) => v.kind)
+    .filter((k) => !RELEASE || viewManifest[`${w.image}-${k}`]?.placeholder === false)];
+};
+
+check('H-03', 'every work page shows its views, in order, with a thumbnail each', () => {
   const bad = [];
   for (const [p, html] of workPages) {
+    const slug = p.match(/\/works\/([a-z0-9-]+)\//)[1];
+    const want = expectedViews(slug);
     const views = [...html.matchAll(/<li class="gallery__view" id="view-[a-z0-9-]+?-(front|detail|edge|back|video)"/g)].map((m) => m[1]).join(' ');
     const thumbs = [...html.matchAll(/class="gallery__thumb[^"]*" href="#(view-[a-z0-9-]+)"/g)].map((m) => m[1]);
     const ids = new Set([...html.matchAll(/id="(view-[a-z0-9-]+)"/g)].map((m) => m[1]));
-    if (views !== 'front detail edge back video') bad.push(`${p}: ${views}`);
-    if (thumbs.length !== 5 || !thumbs.every((t) => ids.has(t))) bad.push(`${p}: thumbnails ${thumbs.length}, all targets exist ${thumbs.every((t) => ids.has(t))}`);
+    if (views !== want.join(' ')) bad.push(`${p}: ${views} (expected ${want.join(' ')})`);
+    if (thumbs.length !== want.length || !thumbs.every((t) => ids.has(t))) bad.push(`${p}: thumbnails ${thumbs.length}, all targets exist ${thumbs.every((t) => ids.has(t))}`);
   }
-  return { ok: workPages.length > 0 && !bad.length, detail: bad.length ? bad.slice(0, 2).join('; ') : `${workPages.length} work pages, 5 views and 5 working thumbnail links each` };
+  return { ok: workPages.length > 0 && !bad.length, detail: bad.length ? bad.slice(0, 2).join('; ') : `${workPages.length} work pages, each view with a working thumbnail link${RELEASE ? ' (release: views without photographs omitted)' : ''}` };
 });
 
 check('H-04', 'video only on work pages; never preloaded, never autoplayed', () => {
@@ -518,7 +531,8 @@ check('H-04', 'video only on work pages; never preloaded, never autoplayed', () 
   const vids = workPages.flatMap(([, h]) => [...h.matchAll(/<video\b[^>]*>/g)].map((m) => m[0]));
   const quiet = vids.every((v) => /preload="none"/.test(v) && !/\bautoplay\b/.test(v) && /\bcontrols\b/.test(v) && /\bplaysinline\b/.test(v));
   const named = vids.every((v) => /aria-label="[^"]+"/.test(v));
-  return { ok: !elsewhere.length && vids.length === workPages.length && quiet && named,
+  const wantVideos = workPages.filter(([p]) => expectedViews(p.match(/\/works\/([a-z0-9-]+)\//)[1]).includes('video')).length;
+  return { ok: !elsewhere.length && vids.length === wantVideos && quiet && named,
            detail: `elsewhere ${elsewhere.length}, ${vids.length} videos, preload none + controls + no autoplay ${quiet}, named ${named}` };
 });
 
@@ -533,7 +547,8 @@ check('H-04', 'a placeholder view is marked as one, and its alt text is still ow
     }
   }
   const owed = artJson.works.every((w) => (w.views ?? []).every((v) => v.alt?.en && v.alt?.zh));
-  return { ok: views > 0 && !mismatch && owed, detail: `${views} view images, flag disagrees with the manifest ${mismatch}, every view has an alt field ${owed}` };
+  const wantViews = RELEASE ? workPages.reduce((n, [p]) => n + expectedViews(p.match(/\/works\/([a-z0-9-]+)\//)[1]).filter((k) => k !== 'front' && k !== 'video').length, 0) : views;
+  return { ok: (RELEASE || views > 0) && views === wantViews && !mismatch && owed, detail: `${views} view images, flag disagrees with the manifest ${mismatch}, every view has an alt field ${owed}` };
 });
 
 check('H-05', 'only the front view carries the painting between pages', () => {
@@ -683,8 +698,40 @@ check('J-01', 'every visible NEEDS-INPUT is flagged, and nothing else is', () =>
   }
   // and a mark is only ever around the placeholder word
   const stray = pages.filter(([, h]) => /<mark class="needs-input">(?!NEEDS-INPUT<\/mark>)/.test(h)).length;
-  return { ok: flagged > 0 && !unflagged && !broken && !wrongPlace && !stray,
+  return { ok: (RELEASE || flagged > 0) && !unflagged && !broken && !wrongPlace && !stray,
            detail: `${flagged} flagged, ${unflagged} unflagged, ${broken} inside attributes, ${wrongPlace} in title/script, ${stray} pages with a stray mark` };
+});
+
+/* ===================== K — readiness ===================== */
+/* 17 September 2026 (report, "Readiness"): the site can only go live once
+   every critical detail is supplied. These hold the build's half of that; the
+   rules themselves are tested in scripts/test-readiness.mjs. */
+
+const readinessJson = JSON.parse(read('readiness.json'));
+
+check('K-01', 'a build that is not a release says so on every page', () => {
+  const pages = [...allHtml, ['/404.html', read('404.html')]];
+  if (readinessJson.mode === 'release') return { ok: true, detail: 'release build — covered by check-links' };
+  const bad = pages.filter(([, h]) => !/class="readiness-ribbon"/.test(h) || !/name="robots" content="noindex/.test(h)).map(([p]) => p);
+  const n = readinessJson.blockers;
+  const counted = readinessJson.ready || new RegExp(`\\b${n}\\b`).test(home.match(/class="readiness-ribbon"[^>]*>([^<]*)/)?.[1] ?? '');
+  return { ok: !bad.length && counted, detail: bad.length ? bad.slice(0, 3).join(' ') : `${pages.length} pages marked preview and noindex; the ribbon states ${n} blockers ${counted}` };
+});
+
+check('K-02', 'while the gate is closed, nothing can be bought', () => {
+  if (readinessJson.ready) return { ok: true, detail: 'gate open' };
+  const live = allHtml.flatMap(([p, h]) => [...h.matchAll(/<a class="btn"(?![^>]*aria-disabled)[^>]*href=/g)].map(() => p));
+  const inert = allHtml.reduce((n, [, h]) => n + [...h.matchAll(/<a class="btn" aria-disabled="true"[^>]*data-inert-href="[^"]+"/g)].length, 0);
+  return { ok: !live.length && inert > 0, detail: live.length ? `usable on ${[...new Set(live)].slice(0, 3).join(' ')}` : `${inert} purchase controls inert, none usable` };
+});
+
+check('K-03', 'a release is refused while blocked — and leaves the last site untouched', () => {
+  if (readinessJson.ready) return { ok: true, detail: 'gate open; nothing to refuse' };
+  const stamp = statSync(join(DIST, 'index.html')).mtimeMs;
+  const r = spawnSync(process.execPath, [join(ROOT, 'build.js')], { env: { ...process.env, RELEASE: '1' }, encoding: 'utf8' });
+  const untouched = statSync(join(DIST, 'index.html')).mtimeMs === stamp && JSON.parse(read('readiness.json')).mode === 'preview';
+  return { ok: r.status === 1 && /RELEASE REFUSED/.test(r.stderr) && untouched,
+           detail: `exit ${r.status}, refused ${/RELEASE REFUSED/.test(r.stderr)}, dist untouched ${untouched}` };
 });
 
 /* ===================== cross-cutting ===================== */

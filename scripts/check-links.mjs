@@ -16,7 +16,7 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BASE, PREVIEW } from '../src/templates.js';
+import { BASE, PREVIEW, RELEASE } from '../src/templates.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -145,7 +145,17 @@ for (const page of pages) {
   /* --- indexing: preview builds are hidden, production builds never are --- */
   const noindex = /<meta name="robots" content="[^"]*noindex/.test(html);
   if (PREVIEW && !noindex) problems.push(`${where}: preview build without noindex — it would be indexed`);
-  if (!PREVIEW && noindex) problems.push(`${where}: PRODUCTION build carries noindex — the shop would be delisted`);
+  if (RELEASE && noindex) problems.push(`${where}: RELEASE build carries noindex — the shop would be delisted`);
+  const ribbon = /class="readiness-ribbon"/.test(html);
+  if (PREVIEW && !ribbon) problems.push(`${where}: preview build without its preview ribbon`);
+  if (RELEASE) {
+    // A release is the site as buyers see it: nothing of the preview may survive.
+    if (ribbon) problems.push(`${where}: RELEASE build shows the preview ribbon`);
+    if (html.includes('NEEDS-INPUT')) problems.push(`${where}: RELEASE build contains NEEDS-INPUT`);
+    if (/data-placeholder="(view|video)"/.test(html)) problems.push(`${where}: RELEASE build shows a placeholder photograph or video`);
+    if (/\/placeholders\//.test(html)) problems.push(`${where}: RELEASE build references a placeholder asset`);
+    if (/class="btn" aria-disabled="true"/.test(html)) problems.push(`${where}: RELEASE build has a purchase control that cannot be used`);
+  }
 
   /* --- canonical present --- */
   if (!/rel="canonical"/.test(html)) problems.push(`${where}: no canonical link`);
@@ -244,6 +254,23 @@ function coveredCodepoints() {
 }
 
 /* --- report --- */
+/* --- the verdict the site carries --- */
+{
+  const f = join(DIST, 'readiness.json');
+  if (!existsSync(f)) problems.push('/readiness.json: missing — the build did not record the gate\'s verdict');
+  else {
+    const r = JSON.parse(readFileSync(f, 'utf8'));
+    if (r.mode !== (RELEASE ? 'release' : 'preview')) problems.push(`/readiness.json: says ${r.mode}, but this is a ${RELEASE ? 'release' : 'preview'} check`);
+    if (RELEASE && r.ready !== true) problems.push('/readiness.json: a release that did not pass the gate');
+    // in a release, a placeholder header link is allowed only under a live waiver
+    if (RELEASE) for (const route of Object.keys(siteData.placeholders?.routes ?? {})) {
+      if (!r.waived.some((w) => w.path === `site.placeholders.routes.${route}` || (w.rule === 'SH-01' && !w.path))) {
+        problems.push(`/readiness.json: ${route} is a placeholder in a release without a waiver`);
+      }
+    }
+  }
+}
+
 /* --- the 404: every placeholder click lands here, so it must work --- */
 {
   const nf = join(DIST, '404.html');

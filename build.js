@@ -23,7 +23,10 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   esc, t, dims, money, path as lpath, asset, BASE, scaleSvg, jsonLd, layout,
+  RELEASE, setReadiness,
 } from './src/templates.js';
+import { execFileSync } from 'node:child_process';
+import { loadAndAssess } from './scripts/check-readiness.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST = join(ROOT, 'dist');
@@ -60,6 +63,25 @@ const RESERVED = new Set(['series', 'sold']);
 const VIEWS_FILE = join(ROOT, 'public/img/views.json');
 const VIEWS = existsSync(VIEWS_FILE) ? JSON.parse(readFileSync(VIEWS_FILE, 'utf8')) : {};
 if (!existsSync(VIEWS_FILE)) console.log('  note: public/img/views.json missing — run: npm run build:images');
+
+/* ------------------------------------------------------------------ *
+ * The readiness gate (report, "Readiness").                           *
+ *                                                                     *
+ * Asked before anything is written. A release build with a blocker   *
+ * stops here, printing the full report — and it stops BEFORE dist/ is *
+ * cleared, so whatever site was last built is left exactly as it was. *
+ * A preview build carries on, and says on every page what is owed.    *
+ * ------------------------------------------------------------------ */
+const READY = loadAndAssess();
+setReadiness(READY);
+if (RELEASE && !READY.ready) {
+  try { execFileSync(process.execPath, [join(ROOT, 'scripts/check-readiness.mjs')], { stdio: 'inherit' }); } catch {}
+  console.error('  RELEASE REFUSED — the readiness gate is closed. Nothing was built; dist/ is untouched.\n');
+  process.exit(1);
+}
+
+/** A view is shown in a release only if its photograph exists (rule WK-10). */
+const viewShown = (w, v) => !RELEASE || VIEWS[`${w.image}-${v.kind}`]?.placeholder === false;
 const LOCALES = Object.keys(site.locales);
 const ui = site.ui;
 const origin = process.env.SITE_URL || site.url;
@@ -69,21 +91,7 @@ const entity = seller.entities[seller.activeEntity];
  * NEEDS-INPUT audit. The site must not go live with placeholders, so  *
  * the build reports every one rather than silently shipping them.     *
  * ------------------------------------------------------------------ */
-const todo = [];
-const scan = (obj, trail = '') => {
-  if (obj === null || obj === undefined) return;
-  if (typeof obj === 'string') { if (obj === 'NEEDS-INPUT') todo.push(trail); return; }
-  if (Array.isArray(obj)) { obj.forEach((v, i) => scan(v, `${trail}[${i}]`)); return; }
-  if (typeof obj === 'object') {
-    for (const [k, v] of Object.entries(obj)) {
-      if (k.startsWith('$') || k.startsWith('_')) continue;
-      scan(v, trail ? `${trail}.${k}` : k);
-    }
-  }
-};
-scan(seller, 'seller');
-scan(artworksF, 'artworks');
-if (site.url.includes('example')) todo.push('site.url');
+/* The placeholder audit moved to the readiness gate: scripts/readiness.mjs. */
 
 /* ------------------------------------------------------------------ */
 /* URLs carry the deployment base, but the built files must sit at the artifact
@@ -165,7 +173,7 @@ function viewPicture(w, v, loc, sizes) {
  *  adds the current-view marker, arrow keys and scrolling without history. */
 function gallery(w, loc) {
   const sizes = '(min-width:900px) 55vw, calc(100vw - 40px)';
-  const views = [{ kind: 'front' }, ...(w.views ?? [])];
+  const views = [{ kind: 'front' }, ...(w.views ?? []).filter((v) => viewShown(w, v))];
   const id = (kind) => `view-${w.slug}-${kind}`;
   const label = (kind) => t(ui[VIEW_LABEL[kind]], loc);
   const n = views.length;
@@ -300,6 +308,14 @@ function tombstone(w, loc, { linked = true, level = 'p' } = {}) {
   ].filter(Boolean).join(' · ');
 
   // N-04: sold keeps the price visible and repurposes the CTA slot.
+  // While the readiness gate is closed a purchase control cannot be used: no
+  // href, so it is neither a link nor focusable; aria-disabled so it is still
+  // announced for what it will be. The address it will carry is kept in
+  // data-inert-href, so its wording can be checked before the site is ready.
+  const inert = (html) => (READY.ready ? html : html
+    .replace(/<a class="btn"([^>]*?) href="([^"]*)"/, '<a class="btn" aria-disabled="true"$1 data-inert-href="$2"')
+    .replace(/<\/span><\/a>$/, ` · ${esc(t(site.readiness.notOnSale, loc))}</span></a>`));
+
   const action = w.sold
     ? `<a class="link-quiet" href="mailto:${esc(seller.contact.email)}?subject=${encodeURIComponent(t(w.title, loc))}">${esc(t(ui.soldEnquire, loc))}</a>`
     : w.checkoutUrl
@@ -307,6 +323,8 @@ function tombstone(w, loc, { linked = true, level = 'p' } = {}) {
       // Finding A-02. With no checkout link this control opens a mail client,
       // so it must not say "Buy". Same button, honest promise.
       : `<a class="btn" href="mailto:${esc(seller.contact.email)}?subject=${encodeURIComponent(t(w.title, loc))}">${esc(t(ui.enquireToBuy, loc))}<span class="visually-hidden"> — ${title}, ${money(w.priceUSD)}</span></a>`;
+
+  const actionEl = w.sold ? action : inert(action);
 
   const priceEl = w.sold
     ? `<p class="price price--sold"><span class="price__struck">${money(w.priceUSD)}</span>${esc(t(ui.sold, loc))}</p>`
@@ -323,7 +341,7 @@ function tombstone(w, loc, { linked = true, level = 'p' } = {}) {
         </p>
         <div class="tombstone__row">
           ${priceEl}
-          ${action}
+          ${actionEl}
         </div>
       </div>`;
 }
@@ -678,7 +696,7 @@ function renderWork(w, loc) {
   <img src="${asset(`/img/${w.image}-2000.webp`)}" alt="${esc(t(w.alt, loc))}" width="2000"
        height="${Math.round((w.heightCm / w.widthCm) * 2000)}">
 </dialog>
-${(w.views ?? []).filter((v) => v.kind !== 'video').map((v) => {
+${(w.views ?? []).filter((v) => v.kind !== 'video' && viewShown(w, v)).map((v) => {
   const key = `${w.image}-${v.kind}`;
   const m = VIEWS[key] ?? { width: 2000, height: 2000 };
   return `<dialog class="lightbox" id="lb-${esc(w.slug)}-${v.kind}">
@@ -1113,11 +1131,17 @@ if (unknownMedia.size) {
   console.log(`  It is being described as oil. Add the noun to site.json 'ui' and`);
   console.log(`  its pattern to MEDIA in build.js, in both locales.`);
 }
-if (todo.length) {
-  console.log(`\n  ${todo.length} field${todo.length > 1 ? 's' : ''} still NEEDS-INPUT:`);
-  for (const p of todo.slice(0, 40)) console.log(`    · ${p}`);
-  if (todo.length > 40) console.log(`    … and ${todo.length - 40} more`);
-  console.log('');
-} else {
-  console.log('\n  no placeholders remaining.\n');
-}
+console.log(READY.ready
+  ? `\n  readiness: READY — ${READY.rules} rules pass${READY.waived.length ? `, ${READY.waived.length} waived` : ''}`
+  : `\n  readiness: NOT READY — ${READY.blockers.length} blockers. This is a preview build.\n  See what is owed: npm run readiness`);
+
+/* The verdict travels with the site: a release carries proof it passed, and
+   the waivers it passed with. */
+writeFileSync(join(DIST, 'readiness.json'), JSON.stringify({
+  mode: RELEASE ? 'release' : 'preview',
+  ready: READY.ready,
+  rules: READY.rules,
+  blockers: READY.blockers.length,
+  waived: READY.waived.map((x) => ({ rule: x.rule, path: x.path, reason: x.waiver.reason, approvedBy: x.waiver.approvedBy, expires: x.waiver.expires })),
+}, null, 2) + '\n');
+console.log('');

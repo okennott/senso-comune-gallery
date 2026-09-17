@@ -10,9 +10,11 @@
   "scripts": {
     "build": "npm run build:images && npm run build:site",
     "build:site": "node build.js",
+    "build:release": "node scripts/release.mjs",
+    "readiness": "node scripts/check-readiness.mjs",
     "build:images": "node scripts/build-images.mjs",
     "icons": "bash scripts/build-icons.sh",
-    "check": "node scripts/check-contrast.mjs && node scripts/check-links.mjs && node scripts/check-review.mjs",
+    "check": "node scripts/check-contrast.mjs && node scripts/check-links.mjs && node scripts/check-review.mjs && node scripts/test-readiness.mjs",
     "check:render": "node scripts/check-render.mjs",
     "preview": "node scripts/preview.mjs",
     "fonts": "bash scripts/build-fonts.sh",

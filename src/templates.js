@@ -40,14 +40,25 @@ export const money = (n, cur = 'USD') =>
  *  serves from a subpath rather than the origin root. */
 export const BASE = (process.env.BASE_PATH || '').replace(/\/$/, '');
 
-/* PREVIEW=1 marks a build that is not the shop: the GitHub Pages layout
-   preview. It must not be indexed — it is full of placeholders and its
-   canonicals point at github.io — and robots.txt cannot say so, because
-   crawlers only read it at the host root, never under /<repo>/. So every page
-   carries the meta tag instead. check-links.mjs asserts it is present exactly
-   when PREVIEW is set: a noindex that leaked into production would delist the
-   real site without a single error. */
-export const PREVIEW = process.env.PREVIEW === '1';
+/* RELEASE=1 is the only build that is the shop (report, "Readiness").
+
+   Every other build is a PREVIEW, by default and not by opt-in — a gate that
+   has to be remembered fails the day it is forgotten. A preview carries
+   noindex on every page (robots.txt is not read under a subpath), a ribbon
+   saying it is a preview, and, while any critical detail is still owed,
+   purchase buttons that cannot be used.
+
+   A release build runs the readiness gate first and refuses to start while
+   anything blocks, so an unready site cannot be produced in release form at
+   all. check-links asserts both halves: noindex and the ribbon on every
+   preview page; neither, and no placeholder anywhere, in a release. */
+export const RELEASE = process.env.RELEASE === '1';
+export const PREVIEW = !RELEASE;
+
+/* The gate's verdict, set once by build.js before any page is rendered. */
+let READINESS = { ready: false, blockers: [] };
+export const setReadiness = (r) => { READINESS = r; };
+export const readiness = () => READINESS;
 
 /** Locale-aware path: en has no prefix, zh sits under /zh. */
 export const path = (loc, site, p = '/') => {
@@ -286,6 +297,7 @@ ${loc === 'zh'
 <body class="${bodyClass}">
 <a class="skip-link" href="#main">${esc(t(ui.skipToContent, loc))}</a>
 
+${PREVIEW ? `<div class="readiness-ribbon" role="note">${esc(t(READINESS.ready ? site.readiness.previewReady : site.readiness.previewBlocked, loc).replace('{n}', READINESS.blockers.length))}</div>` : ''}
 <header class="masthead">
   <div class="wrap masthead__inner">
     <a class="wordmark" href="${esc(path(loc, site, '/'))}">${MASTHEAD_MARK}<span class="wordmark__name">${wordmarkName(seller, loc)}</span></a>
@@ -320,9 +332,9 @@ ${body}
       ${site.footer.links.map((l) => `<li><a href="${esc(path(loc, site, l.href))}">${esc(t(l.label, loc))}</a></li>`).join('\n      ')}
     </ul>
     <ul>
-      <li><a href="https://instagram.com/${esc(seller.artist.instagram)}" rel="me noopener">Instagram</a></li>
-      <li><span>WeChat: ${esc(seller.artist.wechatId)}</span></li>
-      <li><span>小红书: ${esc(seller.artist.xiaohongshu)}</span></li>
+      ${seller.artist.instagram ? `<li><a href="https://instagram.com/${esc(seller.artist.instagram)}" rel="me noopener">Instagram</a></li>` : ''}
+      ${seller.artist.wechatId ? `<li><span>WeChat: ${esc(seller.artist.wechatId)}</span></li>` : ''}
+      ${seller.artist.xiaohongshu ? `<li><span>小红书: ${esc(seller.artist.xiaohongshu)}</span></li>` : ''}
     </ul>
   </div>
   ${decl ? `<div class="wrap"><p class="legal-declaration" lang="zh-CN">${esc(decl.zh)}</p>

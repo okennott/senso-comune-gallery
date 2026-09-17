@@ -40,22 +40,26 @@ jobs:
 
       # BASE_PATH: a project site serves from /<repo>/, so every absolute URL
       # needs that prefix. SITE_URL feeds canonical, og:url and the sitemap.
-      # PREVIEW: every page gets noindex. This is a public placeholder build of
-      # a shop, and robots.txt is not read under a subpath.
+      # No RELEASE=1: this is a preview, which the build makes by default —
+      # noindex on every page, a preview ribbon, and purchase controls that
+      # cannot be used while the readiness gate is closed.
       # The same three variables go to the checks, so they test the build that
       # was actually made rather than an unprefixed one that was not.
       - name: Build
         env:
           BASE_PATH: /${{ github.event.repository.name }}
           SITE_URL: https://${{ github.repository_owner }}.github.io
-          PREVIEW: '1'
         run: npm run build
+
+      # What is still owed before the site may go live, on the run's summary
+      # page. Report only: a preview is allowed to be unready; a release is not.
+      - name: Readiness report
+        run: node scripts/check-readiness.mjs --report
 
       - name: Check
         env:
           BASE_PATH: /${{ github.event.repository.name }}
           SITE_URL: https://${{ github.repository_owner }}.github.io
-          PREVIEW: '1'
         run: npm run check
 
       # Lays the pages out in the runner's Chrome and fails if any painting is
@@ -64,7 +68,6 @@ jobs:
       - name: Check rendering
         env:
           BASE_PATH: /${{ github.event.repository.name }}
-          PREVIEW: '1'
         run: npm run check:render
 
       # Pages will not serve paths beginning with an underscore unless this

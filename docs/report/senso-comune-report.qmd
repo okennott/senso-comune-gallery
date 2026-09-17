@@ -1069,6 +1069,132 @@ outright. The checks are a floor, not a pass.
 \end{finding}
 ```
 
+## Readiness {#sec-readiness}
+
+The site must not go live until every critical detail is supplied. Until this
+section, nothing enforced that. The build printed the fields still marked
+`NEEDS-INPUT` — stopping after forty of ninety-eight — and built the site anyway;
+any build could be published; and only the literal word was detected, so an
+empty email, `test@example.com` or a placeholder photograph passed in silence.
+
+### What the research says {#sec-readiness-research}
+
+- **Fail closed.** When a control cannot establish that it is safe to proceed, it
+  should stop rather than carry on — the security principle usually called
+  *failing securely*.[^owasp-fail] For this site the unsafe state is a shop that
+  looks open and is not lawful or not honest.
+- **The law names what is critical.** For distance sales to EU consumers, the
+  trader's identity, geographical address, telephone number and email, the main
+  characteristics of the goods, the total price and the arrangements for payment
+  must all be given.[^crd] China's E-Commerce Law requires the business licence
+  information — or the statement that registration is not required — to be shown
+  continuously in a prominent place on the homepage.[^ecl15]
+- **Validate values, not words.** A real email address is best checked against the
+  definition every browser uses, a deliberate, practical subset of RFC 5322.[^whatwg]
+  Some names are reserved precisely so they can never be real — `example.com`,
+  `.test`, `.invalid`[^rfc2606] — which makes an address on one an example nobody
+  replaced. A telephone number in international form has a country code and at
+  most fifteen digits.[^e164] A WeChat ID is six to twenty letters, digits,
+  underscores or hyphens, beginning with a letter.[^wechat]
+- **Gates must be visible.** A documented case from this month: a Cloudflare Pages
+  production build failed, the previous version kept being served, and every check
+  on the repository stayed green, so nobody knew.[^cf-silent] A gate on the host
+  alone is necessary and not sufficient.
+
+### How it works {#sec-readiness-design}
+
+- **A rules engine over the data** (`scripts/readiness.mjs`): 26 rules, each with an
+  area, a severity, the condition under which it applies, the fix, and the law or
+  finding it rests on. It reads nothing and writes nothing, so the build, the
+  report and the tests ask the same question.
+- **Values, with the word as backstop.** Every critical field has a rule that checks
+  what is in it; a final rule catches `NEEDS-INPUT`, *TODO*, *lorem ipsum* and the
+  like anywhere no specific rule reaches, and reports only what no other rule
+  already has.
+- **Conditions.** Hong Kong registration numbers apply only while that entity is
+  active; the transaction ceiling only once the cart takes payments; a donation
+  recipient only while the pledge is above zero. A conditional rule *owns* its
+  fields, so the backstop cannot block on a field its rule has deliberately set
+  aside.
+- **Undecided is not declined.** An optional channel is either a handle or `""`,
+  which removes it from the site. Left as `NEEDS-INPUT` it is undecided, and blocks.
+- **Preview by default; release by request.** Any build not explicitly a release
+  is a preview: noindex on every page, a ribbon saying it is not open for sales and
+  how many details are owed, and — while anything is owed — purchase controls that
+  are drawn but cannot be used. A release asks the gate before building and again
+  inside the build, which refuses *before* clearing the previous output.
+- **Nothing of the preview survives a release.** In release mode the link check
+  fails on a single `NEEDS-INPUT` anywhere — attributes and structured data
+  included — on any placeholder photograph, video or asset, on the ribbon, and on
+  any unusable button. Views without photographs are left out rather than shown.
+- **Waivers with an expiry.** A blocker that can wait may be waived with a reason, a
+  name and a date; expired or unsigned waivers do not count, and every live one is
+  printed in every report and written into the release. Identity, the registration
+  disclosure, returns, prices, dimensions, photographs and payment links cannot be
+  waived — a waiver naming one keeps the gate shut.
+- **Loud where it matters.** The production host's build command is the release
+  script, so a closed gate is never published; a *Release check* workflow runs the
+  same script on GitHub and fails red with the report on the run's summary page, and
+  the preview workflow shows the report on every run.
+
+: The rules, by area {#tbl-readiness-rules}
+
+| Area | Rules | Examples of what blocks |
+|:----------------------|:-----|:---------------------------------------------|
+| Identity and contact | 6 | An email on a reserved domain; a phone number without country code; an address in one language; a malformed WeChat ID; an optional channel left undecided |
+| Legal | 4 | The SAMR declaration edited by a single character; the Hong Kong entity active without its numbers; returns under 14 days; a pledge with no recipient |
+| The site | 2 | An `example` or `http` site address; a header control that leads to the 404 |
+| Works and prices | 7 | No work for sale; a title as *TODO*; alt text as an ellipsis; a price of 0; a currency that is not ISO 4217; a work dated next year; a payment link over `http` |
+| Photography | 3 | A work for sale still showing its placeholder; a real view photograph with no description |
+| Payments | 3 | No way to pay on the active entity; a live cart with no transaction ceiling |
+| Backstop | 1 | A placeholder in any field no rule names |
+
+### Found while building it {#sec-readiness-found}
+
+- **A claim in the stylesheet was false.** It said the build fails if the Chinese
+  registration declaration is edited. Nothing checked it. Rule LG-01 now does, and
+  it cannot be waived.
+- **The first backstop defeated its own conditions.** It blocked on the transaction
+  ceiling even while the cart is a placeholder, which the ceiling's own rule had set
+  aside, and on descriptions of views that a release leaves out. Rules now own their
+  fields.
+- **Four review assertions described a preview, not the site.** They expected five
+  views on every page, a video on every work, and flagged placeholders to exist. A
+  correct release has none of those. They now expect what the build should produce
+  in each mode.
+
+### How it is proved {#sec-readiness-proof}
+
+- **The gate opens when it should.** A copy of the data with every critical detail
+  supplied passes; 32 single breakages each close it on the named rule; five waiver
+  cases — valid, expired, unsigned, scoped to another field, and aimed at a rule that
+  cannot be waived — each behave as specified. 43 tests, in `npm run check`; weakening
+  the 14-day rule or the reserved-domain list turns them red.
+- **End to end, on completed data.** With the fields temporarily supplied and the
+  three header placeholders waived, the release ran: 0 blockers, 36 pages, no
+  `NEEDS-INPUT` anywhere, no ribbon, all 40 purchase controls live, views without
+  photographs omitted, the three waivers written into `readiness.json`, and every
+  check green in release mode. The real data was then restored.
+- **It refuses on today's data** — exit 1 at the readiness step — and assertion K-03
+  checks on every run that a refused release leaves the last built site untouched.
+
+### Today {#sec-readiness-today}
+
+The gate reports **54 blockers**: 36 in the works (titles, alt text and descriptions,
+in two languages), 5 photographs, 7 identity and contact details, the site's real
+address, the donation recipient, and the three header placeholders. Most are
+typing. One is a decision: search, account and cart block a release until those pages
+exist, or until someone signs a waiver for them.
+
+[^owasp-fail]: OWASP, [Fail securely](https://owasp.org/www-community/Fail_securely).
+[^crd]: Directive 2011/83/EU on consumer rights, [Article 6(1)](https://www.legislation.gov.uk/eudr/2011/83/article/6), points (a), (b), (c), (e) and (g); Article 9(1) for the 14-day withdrawal period.
+[^ecl15]: 中华人民共和国电子商务法, [第十五条](https://www.cac.gov.cn/2018-09/01/c_1123362506.htm).
+[^whatwg]: WHATWG HTML Standard, [valid e-mail address](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address).
+[^rfc2606]: [RFC 2606](https://www.rfc-editor.org/info/rfc2606/), Reserved Top Level DNS Names; see also RFC 6761.
+[^e164]: ITU-T Recommendation [E.164](https://en.wikipedia.org/wiki/E.164).
+[^wechat]: WeChat Help Center, [How do I set my WeChat ID?](https://cs.help.wechat.com/hc/en-us/articles/11916094962703-How-do-I-set-my-WeChat-ID)
+[^cf-silent]: [tallyfy/documentation #242](https://github.com/tallyfy/documentation/issues/242): the pipeline stays green when the Cloudflare Pages build that publishes the site fails.
+
 # Next: the work page and the shop bar {#sec-next}
 
 ```{=latex}

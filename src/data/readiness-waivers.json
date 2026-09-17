@@ -1,0 +1,22 @@
+{
+  "$comment": [
+    "WAIVERS FOR THE READINESS GATE (scripts/readiness.mjs). Empty by default.",
+    "",
+    "A waiver lets the release build go ahead with one blocker still open. Each",
+    "one needs a reason, the name of the person accepting the risk, and an expiry",
+    "date; on that date it stops counting and the gate closes again. Every live",
+    "waiver is printed in every readiness report and recorded in the release's",
+    "readiness.json, so an accepted risk is never invisible.",
+    "",
+    "Legal identity, the registration disclosure, returns, prices, dimensions,",
+    "photographs and payment links cannot be waived; a waiver naming one of them",
+    "is itself an error that keeps the gate closed.",
+    "",
+    "  { \"rule\": \"SH-01\", \"path\": \"site.placeholders.routes.search\",",
+    "    \"reason\": \"Search ships in the next release\", \"approvedBy\": \"Priscilla\",",
+    "    \"expires\": \"2026-12-31\" }",
+    "",
+    "`path` is optional: without it the waiver covers every finding of that rule."
+  ],
+  "waivers": []
+}
