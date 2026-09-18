@@ -386,6 +386,7 @@ npm run check        # contrast, structure, design review; all three block the b
 npm run preview      # one built page as a single self-contained file
 npm run fonts        # rebuild the webfonts, Latin and Chinese
 npm run mark         # re-cut the interim construction's letters (report only)
+npm run image        # vectorize / rasterize, with the fidelity stated
 npm run icons        # rebuild the favicon, home-screen icon and manifest
 npm run check:render # paintings keep their proportions in a real browser (needs Chrome)
 npm run readiness    # what is still owed before the site may go live
@@ -448,6 +449,13 @@ reading it from the other.
 │   ├── build-icons.py              the icon set and the masthead mark, cut
 │   │                               from brand/mark-lockup.png by crop and
 │   │                               resize alone. Nothing is redrawn
+│   ├── image.py                    raster → vector and vector → raster, with
+│   │                               the fidelity said out loud: pixel (exact
+│   │                               geometry), embed (the bytes in a wrapper)
+│   │                               or trace (an approximation). Writes
+│   │                               .svg .svgz .pdf .ps .eps, and reads them
+│   │                               back to .png .webp .jpg .tif. Its own
+│   │                               selftest runs in npm run check
 │   ├── mark.mjs                    the INTERIM construction — an SC built from
 │   │                               Fraunces outlines, superseded by the
 │   │                               artwork and kept only so the report can
@@ -633,7 +641,7 @@ an iframe of exactly that width, with scrollbars hidden as a phone's are, and
 the check asserts the content width it actually received. `docs/report/shots.sh`
 takes the phone screenshot the same way.
 
-`check-review.mjs` holds 70 assertions over 46 findings — the September 2026
+`check-review.mjs` holds 74 assertions over 48 findings — the September 2026
 design review, the mark, softness, the shop bar and views, the structure, the
 red flags and the readiness gate — written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
@@ -670,6 +678,17 @@ block people outright.
   1536 × 1024; it does not survive 16 px; and it cannot take `currentColor`.
   The Fraunces construction that stood in before it arrived is kept in
   `scripts/mark.mjs` for the report's figure only.
+- **One canvas, on the surfaces that frame.** The ground of the artwork was
+  measured — a cold-press cotton-rag sheet, 1/f spectrum, luminance σ 4.87 of
+  255 — and reproduced as a single tile in `tokens.css` (`--canvas-grain`).
+  It is neutral grey with a mean of exactly 0.5 and is composited with
+  `background-blend-mode: soft-light`, whose identity at 0.5 is what makes it
+  incapable of changing a colour: the largest mean drift measured on any
+  ground is 0.9 of 255. It goes on the field, the bands and the mats, and on
+  nothing that is read — `--muted-ui` on `--wash-blue` is exactly 3.00:1
+  against a 3.0 floor, so the reading grounds have no room to be modulated at
+  all. `check-contrast` prints that allowance every build and fails if a
+  reading ground is ever textured.
 - **Softness without new colour.** Mats, radii, shadows, glass and section
   boundaries are all expressed through existing tokens; shadows are `--bar` at
   a few percent. The masthead's glass stops at 88% because the navigation must

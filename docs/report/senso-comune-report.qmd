@@ -522,7 +522,7 @@ the reason says so.
 
 ### What was built {#sec-soft-built}
 
-![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: the homepage boundary between Latest works and Series.](fig/cap-soft.png){#fig-soft width=100%}
+![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: the homepage boundary between Latest works and Series.](fig/cap-soft.jpg){#fig-soft width=100%}
 
 Nothing in the palette changed. Every softness token — two radii, three
 shadows, the mat, the glass values and the boundary breath — is expressed
@@ -562,6 +562,74 @@ the rule also paints, which is how a surface painted in a `color-mix()` the
 script cannot composite still gets solved against a real colour. The footer,
 the legal declaration and the channel row all declare one.
 
+### The canvas {#sec-soft-canvas}
+
+The brief for this pass was the texture in the artwork, and not one colour with
+it. So the texture was **measured off the artwork** rather than chosen: a
+300 px patch of blank ground in `brand/mark-lockup.png` has a mean of `#E4DCCC`
+and a luminance standard deviation of **4.87 of 255**, about 2.2 %, and its
+spatial spectrum falls off as 1/f with no periodic peak. That last detail
+settles what it is. A woven canvas has a weave, and a weave shows as a peak;
+this is a **cold-press cotton-rag sheet** — paper fibre, not cloth. The site is
+a cream sheet mounted on a field, so paper is the right answer anyway.
+
+One tile in `tokens.css` reproduces it: `feTurbulence`, desaturated, its output
+compressed to a narrow band about 0.5, tiled at 240 px. Measured back out of
+Chrome on the built page, the field reads at **σ 5.1**, against the artwork's
+4.87.
+
+```{=latex}
+\begin{finding}{Why it cannot change a colour, and why that needed measuring}
+```
+
+The tile is neutral grey with a mean of exactly 0.5, and it is composited in
+`soft-light`. Soft-light with a 0.5 source is the **identity** —
+$B(C_b, 0.5) = C_b$ — so the mean of a textured surface is the token it was
+painted with, and the grain only modulates around it. Measured, the largest
+mean drift on any ground is **0.9 of 255**, or 0.35 %.
+
+That is true only because the filter declares
+`color-interpolation-filters="sRGB"`. Without it SVG filters run in linearRGB,
+`feTurbulence`'s 0.5 mean arrives as **0.73** in sRGB, and the tile that was
+supposed to be an identity lightens everything it touches. The first render
+did exactly that, and it was caught by measuring the result rather than by
+reading the specification — which is the same lesson as @sec-trap, in a
+different currency.
+
+```{=latex}
+\end{finding}
+```
+
+**Where it may go** is decided by the same law the palette already follows:
+text lives on cream, the sage frames and never carries a word. The texture
+takes that line too — the **field**, the **bands** between sections and the
+**mat** around every painting, and nothing that is read.
+
+That is arithmetic, not taste. `check-contrast.mjs` solves how far a
+mean-neutral grain could move each reading ground before its tightest pair
+fell through its floor, and prints the answer on every build:
+
+: How much texture each reading ground could take {#tbl-canvas}
+
+| Ground | The tightest pair on it | Room either side of 0.5 | The tile needs |
+|:-----------------|:-------------------------------|-----------:|-----------:|
+| `--wash-warm` | — | ±0.240 | ±0.250 |
+| `--wash-violet` | `--muted-ui` at 3.04:1 | ±0.031 | ±0.250 |
+| `--wash-blue` | `--muted-ui` at **3.00:1** | ±0.010 | ±0.250 |
+
+`--muted-ui` on `--wash-blue` is exactly 3.00:1 against a 3.0 floor: those
+tokens were solved *to* their floors, so there is nowhere to modulate them.
+Texturing the reading surfaces means moving `--muted` and `--muted-ui` first,
+which is a palette decision and therefore not one this pass could take.
+
+It costs less than it sounds. Soft-light's effect shrinks towards white, so on
+a ground as light as `--paper-deep` the same tile reads at **σ 1.7** — barely
+perceptible. The visible texture was always going to be on the field, which is
+the largest single surface on the site, and it is.
+
+The check also fails the build if any rule ever paints a reading ground *and*
+textures it, so the rule is enforced rather than remembered.
+
 ### How it is held {#sec-soft-held}
 
 - `check-contrast.mjs` composites the bar at `--glass-bar-opacity` over pure
@@ -570,6 +638,10 @@ the legal declaration and the channel row all declare one.
 - `check-render.mjs` lays the built pages out in Chrome and asserts that every
   painting's box keeps the painting's own proportions to within 1%, with no
   radius and no transform (@sec-checks).
+- Three more (G-07) cover the canvas: one tile defined once and referenced
+  from the frame surfaces only; the tile neutral, symmetric about 0.5, declared
+  in sRGB and blended with soft-light; and the textured selectors exactly the
+  four that carry no text.
 - Six assertions in `check-review.mjs` (G-01 to G-06) cover the rest: no
   literal colour in the new tokens — with one named exception, `--glass-footer`,
   allowed only while the contrast check recomputes it — a mat and nothing that
@@ -795,13 +867,13 @@ document is built, so they show the site as it is. The ribbon across the top of
 each page and the red `NEEDS-INPUT` flags are the preview's; a release has
 neither (@sec-readiness).
 
-![The homepage. Cream sheet mounted on the sage field, dark brown bar, the SC monogram at the head of the wordmark, and search, account and cart at the right. Van Gogh's line stands twice: his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line. Beside it, the featured work; on a phone the quote leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
+![The homepage. Cream sheet mounted on the sage field, dark brown bar, the SC monogram at the head of the wordmark, and search, account and cart at the right. Van Gogh's line stands twice: his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line. Beside it, the featured work; on a phone the quote leads and the work follows.](fig/cap-home.jpg){#fig-home width=100%}
 
-![A work page. The views of the work — front, detail, edge, back and video — sit in a strip with thumbnails always visible, grey placeholders until the photographs exist. The price is the boldest element in the block. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
+![A work page. The views of the work — front, detail, edge, back and video — sit in a strip with thumbnails always visible, grey placeholders until the photographs exist. The price is the boldest element in the block. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.jpg){#fig-work width=100%}
 
-![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.png){#fig-sold width=100%}
+![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.jpg){#fig-sold width=100%}
 
-![The homepage on a 390 px phone. The masthead takes two rows — the short name and the shop bar, then the sections and the language switch — and does not stick: a sticky masthead that tall would take a third of the screen and hide the focused item. Van Gogh's line comes before the featured work.](fig/cap-mob.png){#fig-mob width=42%}
+![The homepage on a 390 px phone. The masthead takes two rows — the short name and the shop bar, then the sections and the language switch — and does not stick: a sticky masthead that tall would take a third of the screen and hide the focused item. Van Gogh's line comes before the featured work.](fig/cap-mob.jpg){#fig-mob width=42%}
 
 ## The design review {#sec-review}
 
@@ -984,7 +1056,7 @@ rate, which is where the belief comes from. For a **China-origin** shipment in
 | United Kingdom | **0%**, ERGA OMNES (origin-neutral) | Reduced art rate | Verified |
 | European Union | 0% expected | Reduced art rate per member state | **Unverified — see @sec-open** |
 
-![The How to Buy page, which puts the duty figure in front of the buyer before they commit rather than after.](fig/cap-buy.png){#fig-buy width=100%}
+![The How to Buy page, which puts the duty figure in front of the buyer before they commit rather than after.](fig/cap-buy.jpg){#fig-buy width=100%}
 
 ## The donation pledge {#sec-donation}
 
@@ -1118,6 +1190,7 @@ build.js         36 pages, two locales, and the 404
 brand/           mark-lockup.png              the artwork, as supplied, and
                  brand-sheet.png              the sheet it came on
 scripts/         build-icons.py               the icon set, cut from it
+                 image.py                     vectorize · rasterize · selftest
                  mark.mjs · mark-paths.js     the interim construction, now
                                               drawn only by this report
                  build-fonts · build-fonts-cjk · build-images · build-icons
@@ -1129,6 +1202,42 @@ docs/            brief/ · report/
 
 The page count follows the data: eighteen pages per locale for six works in two
 series, of which six are work pages.
+
+### Converting between a drawing and pixels {#sec-image-tool}
+
+`scripts/image.py` (`npm run image`) is the one place the project converts
+between the two, in both directions, and it states what each conversion costs
+instead of choosing quietly:
+
+| Mode | What you get |
+|:-----------|:---------------------------------------------------------------|
+| `pixel` | True vector geometry — every decoded pixel as an integer-aligned rectangle, horizontal runs merged. No quantization, smoothing, denoising, recolouring or resampling, and no compression either: large, and exact |
+| `embed` | The original file, byte for byte, inside an SVG `<image>`. Visually lossless and honest about being a raster in a vector wrapper |
+| `trace` | VTracer infers regions and paths. Compact, and an **approximation** — which is what `--verify` is for |
+| `rasterize` | SVG or SVGZ back to a raster at a stated size, optionally flattened onto a colour, because alpha is the commonest thing to lose by accident |
+
+The output format is chosen by the **extension**, so the name of a file and its
+contents cannot disagree: `.svg` `.svgz` `.pdf` `.ps` `.eps` on the vector side,
+`.png` `.webp` `.jpg` `.tif` on the raster side. The geometry is always built as
+SVG; PDF, PS and EPS are that SVG handed to Cairo, which is a container change
+and not a second approximation. Two things follow and are said rather than
+discovered: the `<metadata>` audit block only survives in the SVG containers,
+because PDF and PostScript have nowhere to keep it, and a pixel-mode page of a
+million rectangles is a million rectangles in PDF too — for print, `trace` or
+`embed` is almost always what is wanted. A format that cannot carry alpha, such
+as JPEG, refuses an image that has some until `--on` says what it should sit on.
+
+The input file is never written to, and every output carries a `<metadata>`
+block naming its source, that source's SHA-256 and the mode, so a derived file
+can always be traced back. `--verify` renders the result back at native size
+and reports per-channel error, composited over black and over white as well as
+raw, because a renderer may legitimately rewrite RGB wherever alpha is low.
+
+It has a `selftest`, and `npm run check` runs it: two fixtures — flat runs,
+a single pixel against a run, and partial alpha — both directions, requiring
+byte-exactness when the source is opaque and one unit per channel when it is
+not. A tool nobody re-tests is a tool that quietly stops working before the
+day somebody needs it.
 
 ## The entity switch {#sec-switch}
 
@@ -1170,7 +1279,7 @@ needs Chrome; GitHub runs it on every preview, and the release runs all of them.
 |:----------------------|:----------------------------------------------------------|
 | `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **70 assertions over 46 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `check-review` | **74 assertions over 48 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
 | `test-readiness` | Any of **44 tests** showing the gate opens only when it should (@sec-readiness-proof) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
 

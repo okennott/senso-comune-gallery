@@ -51,11 +51,20 @@ body{
      Fixed, so the fall belongs to the page and not to the scroll; and since
      no text ever sits on the field, none of this is a contrast question. */
   background-color:var(--field);
-  background-image:linear-gradient(in oklab,
-    color-mix(in oklab,var(--field) 90%,white) 0%,
-    var(--field) 34%,
-    var(--field-deep) 100%);
-  background-attachment:fixed;
+  /* Two layers: the canvas grain, then the fall of the field beneath it. The
+     grain scrolls with the page, because paper does not stay still while what
+     is printed on it moves; the fall is fixed, because it belongs to the
+     page rather than to the scroll. Soft-light against a 0.5-mean tile leaves
+     the colour exactly where the token put it — see CANVAS in tokens.css. */
+  background-image:var(--canvas-grain),
+    linear-gradient(in oklab,
+      color-mix(in oklab,var(--field) 90%,white) 0%,
+      var(--field) 34%,
+      var(--field-deep) 100%);
+  background-size:var(--canvas-tile) var(--canvas-tile),auto;
+  background-repeat:repeat,no-repeat;
+  background-attachment:scroll,fixed;
+  background-blend-mode:soft-light,normal;
   color:var(--body);
   font-family:var(--font-body);
   font-size:var(--size-body);
@@ -274,13 +283,17 @@ a{ color:var(--sanguine) }
   .edge{ background:linear-gradient(var(--edge-from),var(--edge-to)) }
 }
 
-/* Noise dither. ~1.4KB inline SVG, no network request, no repaint cost
-   beyond one composited layer. */
+/* The band carries the same canvas as the field it opens onto — it used to
+   carry a noise dither of its own, at a different frequency and a different
+   strength, which is two textures pretending to be one surface. One token
+   now, blended the same way. It still does the dither's job: a nine-rem
+   gradient in eight bits bands visibly without something to break the steps. */
 .edge::after{
   content:'';
   position:absolute; inset:0;
-  opacity:.5;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+  background-image:var(--canvas-grain);
+  background-size:var(--canvas-tile) var(--canvas-tile);
+  mix-blend-mode:soft-light;
 }
 
 /* Section grounds, so the wash continues behind content rather than

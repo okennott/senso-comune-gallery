@@ -3,6 +3,7 @@
 
     python3 soft_plate.py canvas <raw> <w> <h> <out.webp>
     python3 soft_plate.py plate  <hover> <glass> <band> <out.png>
+    python3 soft_plate.py jpeg   <in.png> <out.jpg>
 
 soft_shots.mjs drives Chrome and paints the stand-in canvas; everything that
 is pixels rather than pages happens here. It used to be sharp, which is the
@@ -38,6 +39,13 @@ def plate(hover, glass, band, out):
     sheet.save(out, "PNG", optimize=True)
 
 
+def jpeg(src, out, quality=88):
+    """A page capture, as JPEG. The captures carry the canvas grain, which is
+    noise, which is the one thing PNG cannot compress."""
+    Image.open(src).convert("RGB").save(out, quality=int(quality), optimize=True,
+                                        progressive=True, subsampling=0)
+
+
 if __name__ == "__main__":
     cmd, *rest = sys.argv[1:]
-    {"canvas": canvas, "plate": plate}[cmd](*rest)
+    {"canvas": canvas, "plate": plate, "jpeg": jpeg}[cmd](*rest)

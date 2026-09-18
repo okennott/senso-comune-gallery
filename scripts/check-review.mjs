@@ -526,6 +526,54 @@ check('G-06', 'every boundary band joins the grounds actually either side of it'
   return { ok: bands >= 8 && !bad.length && breath, detail: bad.length ? bad.join('; ') : `${bands} bands, all seamless, the field breathes through at the centre ${breath}` };
 });
 
+/* ===================== G — the canvas ===================== */
+/* Added 18 September 2026 with the texture pass. One tile, defined once,
+   blended one way, on the surfaces that frame and on none that is read. */
+
+check('G-07', 'the canvas is one tile, defined once and referenced', () => {
+  const tokens = src('src/styles/tokens.css');
+  const defined = (tokens.match(/--canvas-grain:/g) ?? []).length;
+  const sheets = src('src/styles/base.css') + src('src/styles/gallery.css');
+  const used = (sheets.replace(/\/\*[\s\S]*?\*\//g, '').match(/var\(--canvas-grain\)/g) ?? []).length;
+  const noOther = !/feTurbulence/.test(sheets.replace(/\/\*[\s\S]*?\*\//g, ''));
+  return { ok: defined === 1 && used >= 3 && noOther,
+           detail: `defined ${defined}x, used ${used}x, no second noise in the stylesheets ${noOther}` };
+});
+
+check('G-07', 'the tile cannot change a colour: neutral, mean 0.5, soft-light', () => {
+  const tokens = src('src/styles/tokens.css');
+  const tile = (tokens.match(/--canvas-grain:\s*url\("([^"]+)"\)/) ?? [])[1] ?? '';
+  const slope = Number((tokens.match(/--canvas-slope:\s*([\d.]+)/) ?? [])[1]);
+  // desaturated, so it can only modulate lightness and never tint
+  const grey = /saturate' values='0'/.test(tile);
+  // sRGB, or feTurbulence's 0.5 mean arrives as 0.73 and the "identity" lightens
+  const srgb = /color-interpolation-filters='sRGB'/.test(tile);
+  // the transfer is symmetric about 0.5: intercept = (1 - slope) / 2
+  const intercepts = [...tile.matchAll(/slope='([\d.]+)' intercept='([\d.]+)'/g)]
+    .map(([, sl, ic]) => Math.abs(Number(ic) - (1 - Number(sl)) / 2) < 1e-9);
+  const centred = intercepts.length === 3 && intercepts.every(Boolean);
+  const declared = Math.abs(slope - Number((tile.match(/feFuncR type='linear' slope='([\d.]+)'/) ?? [])[1])) < 1e-9;
+  const sheets = src('src/styles/base.css') + src('src/styles/gallery.css');
+  const blended = (sheets.match(/(?:background-blend-mode|mix-blend-mode):[^;]*soft-light/g) ?? []).length >= 3;
+  return { ok: grey && srgb && centred && declared && blended,
+           detail: `greyscale ${grey}, sRGB ${srgb}, symmetric about 0.5 ${centred}, --canvas-slope matches the tile ${declared}, soft-light everywhere ${blended}` };
+});
+
+check('G-07', 'the texture frames and is never read on', () => {
+  // The same law the palette follows. check-contrast.mjs solves the arithmetic
+  // — what excursion each reading ground could take — and fails on a textured
+  // reading ground; this asserts the surfaces that ARE textured are the frame.
+  const sheets = (src('src/styles/base.css') + src('src/styles/gallery.css'))
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const textured = [...sheets.matchAll(/([^{}]+)\{([^{}]*var\(--canvas-grain\)[^{}]*)\}/g)]
+    .map((m) => m[1].trim().replace(/\s+/g, ' '));
+  const frame = ['body', '.edge::after', '.work__img, .hero__work img', '.work__video'];
+  const same = textured.length === frame.length && frame.every((f) => textured.includes(f));
+  const solved = /READING/.test(src('scripts/check-contrast.mjs'));
+  return { ok: same && solved,
+           detail: `${textured.join(' · ') || 'nothing'}${same ? '' : ` — expected ${frame.join(' · ')}`}` };
+});
+
 /* ===================== H — shop bar and work views ===================== */
 /* Decisions of 17 September 2026 (report, Part 6): search, account and cart
    shown now with placeholder destinations; detail, edge, back and video views
@@ -830,6 +878,22 @@ check('CSS', 'every custom property referenced is actually defined', () => {
   const used = new Set([...css.matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((v) => !defined.has(v));
   return { ok: missing.length === 0, detail: missing.length ? missing.join(' ') : `${used.size} referenced, all defined` };
+});
+
+check('TOOL', 'the image tool still converts exactly, both directions', () => {
+  // scripts/image.py promises that pixel mode keeps every decoded pixel. A
+  // promise nobody re-tests is a promise that quietly stops being true, so its
+  // own selftest runs here: two fixtures, both directions, byte-exact when the
+  // source is opaque and within one unit per channel when it is not — which is
+  // renderer premultiplication and is the only slack it is given.
+  const r = spawnSync('python3', [join(ROOT, 'scripts/image.py'), 'selftest'], { encoding: 'utf8' });
+  const out = `${r.stdout ?? ''}${r.stderr ?? ''}`;
+  const pass = r.status === 0 && /selftest: pass/.test(out);
+  const cases = (out.match(/max \d+ \(allowed \d\)/g) ?? []).length;
+  const containers = (out.match(/\.\w+\s+container:/g) ?? []).length;
+  return { ok: pass && containers >= 5,
+           detail: pass ? `${cases} round-trips within tolerance, ${containers} vector containers written`
+                        : out.trim().split('\n').pop() };
 });
 
 /* ---------- report ---------- */

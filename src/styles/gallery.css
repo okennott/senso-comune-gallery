@@ -213,7 +213,13 @@
 .hero__work img{
   box-sizing:border-box;
   padding:var(--mat);
-  background:var(--paper-deep);
+  /* The mat is board, and board has tooth. The grain shows in the ring around
+     the painting and nowhere else — the image itself is opaque and covers the
+     rest of the box. No text is ever set on a mat. */
+  background-color:var(--paper-deep);
+  background-image:var(--canvas-grain);
+  background-size:var(--canvas-tile) var(--canvas-tile);
+  background-blend-mode:soft-light;
   object-fit:contain;
   box-shadow:var(--shadow-mount);
   transition:box-shadow var(--dur-lift) var(--ease-settle);
@@ -876,7 +882,10 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
 .work__video{
   box-sizing:border-box;
   padding:var(--mat);
-  background:var(--paper-deep);
+  background-color:var(--paper-deep);
+  background-image:var(--canvas-grain);
+  background-size:var(--canvas-tile) var(--canvas-tile);
+  background-blend-mode:soft-light;
   box-shadow:var(--shadow-mount);
 }
 

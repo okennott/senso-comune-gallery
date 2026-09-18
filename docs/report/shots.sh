@@ -3,7 +3,7 @@
 #
 #   ./docs/report/shots.sh
 #
-# The captures in fig/cap-*.png used to be taken by hand, which meant the
+# The captures in fig/cap-*.jpg used to be taken by hand, which meant the
 # report's "The site as built" section was only as current as the last time
 # somebody remembered. It is a section that claims "what is shown is what
 # npm run build produces", so it has to be produced by npm run build.
@@ -28,12 +28,20 @@ for _ in $(seq 1 40); do
   sleep 0.25
 done
 
+# Chrome writes PNG; the figure is kept as JPEG. The pages carry the canvas
+# grain now (report, "The canvas"), and noise is exactly what PNG cannot
+# compress — the six captures went from 1.4 MB to 5.6 MB the day the texture
+# landed, and the report with them. A screenshot of a textured surface is a
+# photograph, and JPEG is what photographs are for: same figures, a quarter of
+# the bytes, at a quality where the grain still reads.
 shoot() {  # name route width height scale
   "$CHROME" --headless --disable-gpu --no-sandbox --hide-scrollbars \
     --force-device-scale-factor="$5" --window-size="$3,$4" \
     --virtual-time-budget=6000 \
     --screenshot="$HERE/fig/cap-$1.png" "http://127.0.0.1:$PORT$2" 2>/dev/null
-  printf '  fig/cap-%s.png  %s  %sx%s @%sx\n' "$1" "$2" "$3" "$4" "$5"
+  python3 "$HERE/soft_plate.py" jpeg "$HERE/fig/cap-$1.png" "$HERE/fig/cap-$1.jpg"
+  rm -f "$HERE/fig/cap-$1.png"
+  printf '  fig/cap-%s.jpg  %s  %sx%s @%sx\n' "$1" "$2" "$3" "$4" "$5"
 }
 
 # The two widths the layout is verified at, and nothing in between: 1440 is the

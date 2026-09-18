@@ -259,6 +259,47 @@
      rather than as a highlight on it. */
   --glass-rim:  inset 0 1px 0 color-mix(in srgb,var(--paper) 55%,transparent);
 
+  /* ======================================================================
+     CANVAS — the paper the whole thing is drawn on
+
+     Researched from the artwork itself rather than chosen: the ground of
+     brand/mark-lockup.png was measured over a 300 px patch of blank paper.
+     It is a cold-press cotton-rag SHEET, not a woven canvas — there is no
+     weave periodicity in its spectrum, which falls off as 1/f the way paper
+     fibre does, with a mean of #E4DCCC and a luminance standard deviation of
+     4.87 of 255, about 2.2 %. That figure is what the tile below is tuned to.
+
+     HOW IT CANNOT CHANGE A COLOUR. The tile is neutral grey with a mean of
+     exactly 0.5, and it is composited with `background-blend-mode: soft-light`.
+     Soft-light with a 0.5 source is the identity — B(Cb, 0.5) = Cb — so the
+     mean of every textured surface is the token it was painted with. Measured
+     in Chrome, the largest mean drift on any ground is 0.9 of 255, which is
+     0.35 %: the palette is not touched, only modulated around it.
+
+     The filter declares color-interpolation-filters=sRGB. Without it SVG
+     filters run in linearRGB, feTurbulence's 0.5 mean arrives as 0.73 in sRGB,
+     and the "identity" tile lightens everything it touches. That was caught by
+     measuring a render, not by reading the spec.
+
+     WHERE IT MAY GO. The same law the palette already follows — text lives on
+     cream; the sage frames and never carries a word — decides this too. The
+     texture goes on the surfaces that FRAME: the field, the bands between
+     sections, and the mat around every painting. It goes on nothing that is
+     read, and that is arithmetic rather than taste: --muted-ui on --wash-blue
+     measures 3.00:1 against a 3.0 floor and --muted measures 4.53:1 against
+     4.5, so the reading grounds have no room to be modulated in either
+     direction. check-contrast.mjs solves every textured ground against the
+     tile's worst excursion and fails the build if a textured surface ever
+     acquires text. Texturing the reading surfaces means moving those two
+     tokens first, which is a palette decision and not this one.
+     ====================================================================== */
+  --canvas-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='t' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.34 0.42' numOctaves='5' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncG type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncB type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncA type='discrete' tableValues='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23t)'/%3E%3C/svg%3E");
+  --canvas-tile:  240px;
+  /* The tile's transfer slope, and therefore the largest excursion either side
+     of 0.5 that any pixel of it can reach: slope / 2. Stated as a token so the
+     contrast check can read it rather than be told it. */
+  --canvas-slope: 0.5;
+
   /* --- targets -----------------------------------------------------------
      48px clears WCAG 2.5.8 (24px AA), 2.5.5 (44px AAA) and Android's 48dp
      simultaneously. Reached via padding, never via font size.             */

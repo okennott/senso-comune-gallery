@@ -223,6 +223,72 @@ for (const [selector, token, min, note] of barPairs) {
   line(`    over --field-deep it composites to ${over(T['field-deep']).toUpperCase()}, which is darker still`);
 }
 
+/* ---------- the canvas ----------
+   The grain is mean-neutral and composited with soft-light, so it leaves the
+   MEAN of a surface exactly where its token put it. What it does do is move
+   individual pixels, by up to --canvas-slope / 2 either side of 0.5, and on a
+   ground that carries text that is a contrast question.
+
+   The site's answer is that textured surfaces carry no text. This block is
+   what holds that answer to arithmetic rather than to assertion: it solves
+   how much excursion each READING ground could take before its tightest pair
+   fell through the floor, prints it next to what the tile actually has, and
+   fails if any rule ever paints a reading ground AND textures it. */
+{
+  const slope = Number((readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8')
+    .match(/--canvas-slope:\s*([\d.]+)/) ?? [])[1]);
+  line('\n  THE CANVAS — how far a mean-neutral grain may move a ground\n');
+  if (!Number.isFinite(slope)) { line('  ✗ --canvas-slope not found in tokens.css'); failures++; }
+  else {
+    const k = slope / 2;
+    // W3C soft-light, per channel, in sRGB — which is what the filter declares.
+    const D = (cb) => (cb <= 0.25 ? ((16 * cb - 12) * cb + 4) * cb : Math.sqrt(cb));
+    const soft = (cb, cs) => (cs <= 0.5 ? cb - (1 - 2 * cs) * cb * (1 - cb)
+                                        : cb + (2 * cs - 1) * (D(cb) - cb));
+    const px = (hex) => [0, 2, 4].map((i) => parseInt(hex.replace('#', '').slice(i, i + 2), 16) / 255);
+    const toHex = (c) => '#' + c.map((v) => Math.round(Math.min(1, Math.max(0, v)) * 255)
+      .toString(16).padStart(2, '0')).join('');
+    const blend = (hex, cs) => toHex(px(hex).map((cb) => soft(cb, cs)));
+
+    // How much excursion a ground can take before any pair on it fails.
+    const allowance = (ground, pairs) => {
+      let lo = 0, hi = 0.5;
+      for (let i = 0; i < 40; i++) {
+        const m = (lo + hi) / 2;
+        const ok = pairs.every(([tok, min]) => [0.5 - m, 0.5 + m]
+          .every((cs) => ratio(T[tok], blend(T[ground], cs)) >= min));
+        if (ok) lo = m; else hi = m;
+      }
+      return lo;
+    };
+    const onCream = CHECKS.map(([tok, min]) => [tok, min]);
+    for (const g of ['wash-warm', 'wash-violet', 'wash-blue']) {
+      const a = allowance(g, onCream.filter(([, , ] ) => true));
+      const verdict = a >= k ? 'could carry the tile' : `could carry only ±${a.toFixed(3)}`;
+      line(`    --${g.padEnd(12)} tightest pair leaves ±${a.toFixed(3)};  the tile is ±${k.toFixed(3)}  — ${verdict}`);
+    }
+
+    // …and the rule that follows from it: a reading ground is never textured.
+    const READING = new Set(['wash-warm', 'wash-violet', 'wash-blue', 'paper']);
+    const sheets = ['src/styles/base.css', 'src/styles/gallery.css']
+      .map((f) => readFileSync(join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')).join('\n');
+    const textured = [];
+    for (const m of sheets.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (!/var\(--canvas-grain\)/.test(m[2])) continue;
+      const ground = ([...m[2].matchAll(/background(?:-color)?:\s*var\(--([a-z0-9-]+)\)/g)].at(-1) ?? [])[1];
+      textured.push([m[1].trim().replace(/\s+/g, ' ').slice(0, 30), ground]);
+    }
+    if (!textured.length) { line('  ✗ nothing references --canvas-grain — the texture is defined and unused'); failures++; }
+    line('');
+    for (const [selector, ground] of textured) {
+      const bad = ground && READING.has(ground);
+      if (bad) failures++;
+      line(`  ${bad ? '✗' : '✓'} ${selector.padEnd(30)} textured${ground ? `, on --${ground}` : ''}`
+        + (bad ? '  — a reading ground may not be textured' : ''));
+    }
+  }
+}
+
 for (const [selector, token, ground, min] of ownGround) {
   const r = ratio(T[token], T[ground]);
   const ok = r >= min;
