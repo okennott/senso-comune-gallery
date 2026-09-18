@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, FancyArrowPatch, FancyBboxPatch
 from matplotlib.font_manager import FontProperties
 import numpy as np
+from PIL import Image
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT = ROOT / "docs/report/fig"
@@ -396,12 +397,17 @@ def shipping():
 
 
 # ------------------------------------------------------------ 7. the mark
-# The report draws the logo the site ships, not a redrawing of it. Every tile
-# below is the SVG scripts/mark.mjs produces, rasterised here, so the document
-# cannot end up arguing for a mark the site no longer has.
+# The report shows the artwork Priscilla supplied, and shows it as supplied:
+# brand/brand-sheet.png and brand/mark-lockup.png are cropped and recompressed
+# for the page and not otherwise touched. The Fraunces construction that stood
+# in before they arrived is kept as a figure of its own — the alternative on
+# the record, not a second live logo.
+
+BRAND = ROOT / "brand"
+
 
 def _mark_svgs(jobs):
-    """Ask Node for a batch of renderings. jobs: {name: options}."""
+    """Ask Node for a batch of renderings of the CONSTRUCTION. jobs: {name: options}."""
     import json, subprocess
     src = (
         'const {markSvg} = await import(process.argv[1]);'
@@ -416,43 +422,51 @@ def _mark_svgs(jobs):
     return json.loads(r.stdout)
 
 
-def _downgrade(pdf, version):
-    """Rewrite a PDF's header to an older version, in place. matplotlib's
-    figures are already 1.4; only the SVG conversions are not."""
-    raw = pdf.read_bytes()
-    if raw.startswith(b"%PDF-"):
-        pdf.write_bytes(b"%PDF-" + version.encode() + raw[8:])
+def _monogram():
+    """The monogram square, cut from the artwork by the same rule the icon
+    build uses — imported rather than reimplemented, so the report's mark and
+    the browser tab's are the same crop of the same file."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("bi", ROOT / "scripts/build-icons.py")
+    bi = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bi)
+    from PIL import Image
+    return bi.monogram(Image.open(BRAND / "mark-lockup.png").convert("RGB"))[0]
 
 
 def mark_assets():
-    """The two renderings the preamble sets in the page furniture: the running
-    footer's mark, on cream, and the title bar's, where the ground is already
-    the bar. Vector PDF both times — a footer wants a vector."""
-    import cairosvg
-    svgs = _mark_svgs({
-        "mark":     {"variant": "reversed"},
-        "mark-out": {"variant": "mono", "ink": PAPER},
-    })
-    for name, svg in svgs.items():
-        pdf = OUT / f"{name}.pdf"
-        cairosvg.svg2pdf(bytestring=svg.encode("utf8"),
-                         output_width=64, output_height=64,
-                         write_to=str(pdf))
-        # cairosvg writes PDF 1.7; the document is set at 1.5, and xdvipdfmx
-        # warns on every inclusion of a file newer than its output setting.
-        # Two 64-unit line drawings need nothing 1.7 has, so say 1.5.
-        _downgrade(pdf, "1.5")
-        print(f"    fig/{name}.pdf")
+    """What the page furniture sets: the mark in the running footer and on the
+    title bar. Both are the artwork, cut once at 256 px — a plate of cream in
+    the bar, which is the site's own device at type size."""
+    _monogram().resize((256, 256), Image.LANCZOS).save(OUT / "mark.png", optimize=True)
+    print(f"    fig/mark.png — {(OUT / 'mark.png').stat().st_size:,} bytes")
+
+    # The two plates, as supplied. JPEG because both are photographs of paper,
+    # where it is several times smaller than PNG at the same quality.
+    for name, width in (("brand-sheet", 1536), ("mark-lockup", 1200)):
+        im = Image.open(BRAND / f"{name}.png").convert("RGB")
+        if im.width != width:
+            im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+        im.save(OUT / f"{name}.jpg", quality=88, optimize=True, progressive=True)
+        print(f"    fig/{name}.jpg — {(OUT / f'{name}.jpg').stat().st_size:,} bytes, {im.width}x{im.height}")
+
+    # The variations row, cropped from the sheet. At the size the whole sheet
+    # fits an A4 column its own labels are unreadable, and this is the panel
+    # the mark section's second issue turns on: the variations are a DIFFERENT
+    # drawing from the preferred one — solid letters, no construction lines.
+    sheet = Image.open(BRAND / "brand-sheet.png").convert("RGB")
+    sheet.crop((958, 600, 1525, 800)).resize((1701, 600), Image.LANCZOS).save(
+        OUT / "mark-variations.jpg", quality=90, optimize=True, progressive=True)
+    print(f"    fig/mark-variations.jpg — {(OUT / 'mark-variations.jpg').stat().st_size:,} bytes")
 
 
-def mark():
-    """The monogram as the site ships it: the four renderings, and then the
-    one that matters — the same mark rasterised at the three sizes it is
-    actually cut to. The bottom row is the whole argument for taking the
-    hatching off below about 96 px."""
+def mark_construction():
+    """The Fraunces construction: what the site carried between the decision to
+    use a monogram and the arrival of the drawing. Kept because the argument it
+    settles — that a mark has to survive the size it is seen at most — is the
+    argument the artwork has to answer too."""
     import io
     import cairosvg
-    from PIL import Image
 
     svgs = _mark_svgs({
         "primary":  {"variant": "primary"},
@@ -487,8 +501,6 @@ def mark():
         ax.imshow(raster(svgs[key], 600, ground), interpolation="antialiased")
         ax.set_title(label, fontproperties=UI, fontsize=6, color=MUTED, pad=5)
 
-    # The small row is drawn at ONE display size from three different rasters,
-    # so what the reader compares is what survives, not how big the tile is.
     for ax, (px, label) in zip(axes[1], bottom):
         img = Image.fromarray(raster(svgs["small"], px, PAPER)).resize(
             (300, 300), Image.NEAREST)
@@ -502,7 +514,32 @@ def mark():
                     ha="left", va="center", linespacing=1.6,
                     transform=axes[1][3].transAxes)
 
-    save(fig, "mark-plate")
+    save(fig, "mark-construction")
+
+
+def mark_sizes():
+    """The adopted artwork at the three sizes it is cut to, each enlarged from
+    the file that actually ships. This is the evidence for everything the mark
+    section says about a drawn mark at icon sizes."""
+    mono = _monogram()
+    sizes = [(180, "180 px — the home screen"),
+             (32, "32 px — favicon.ico and the tab"),
+             (16, "16 px — the tab on a dense display")]
+    fig, axes = plt.subplots(1, 4, figsize=(7.0, 2.2))
+    for ax in axes:
+        ax.set_axis_off()
+    for ax, (px, label) in zip(axes, sizes):
+        small = mono.resize((px, px), Image.LANCZOS).resize((360, 360), Image.NEAREST)
+        ax.imshow(np.asarray(small), interpolation="nearest")
+        ax.set_title(label, fontproperties=UI, fontsize=6, color=MUTED, pad=5)
+    axes[3].text(0.0, 0.5,
+                 "The same crop of the same file at\neach size, then enlarged. The\n"
+                 "construction lines go first, then the\nhatching; at 16 px what is left is a\n"
+                 "shape that reads as a monogram\nrather than as two letters.",
+                 fontproperties=UI, fontsize=6, color=BODY,
+                 ha="left", va="center", linespacing=1.6,
+                 transform=axes[3].transAxes)
+    save(fig, "mark-sizes")
 
 
 def softness():
@@ -665,4 +702,4 @@ def _cream_ramp():
 if __name__ == "__main__":
     print("figures:")
     palette(); sage_limit(); payments(); oversell(); duty(); shipping()
-    mark_assets(); mark(); softness(); structure()
+    mark_assets(); mark_construction(); mark_sizes(); softness(); structure()

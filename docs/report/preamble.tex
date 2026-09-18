@@ -166,22 +166,27 @@
 \usepackage{graphicx}   % the mark is an included vector, not a redrawing
 
 % --- the mark -------------------------------------------------------------
-% The document carries the logo the site ships, and carries the file itself:
-% figures.py asks scripts/mark.mjs for the two renderings and writes them to
-% fig/mark.pdf and fig/mark-out.pdf as vector. Nothing is redrawn here.
+% The document carries the logo the site ships, and carries the artwork
+% itself: figures.py cuts the monogram out of brand/mark-lockup.png with the
+% same crop the icon build uses and writes fig/mark.png. Nothing is redrawn
+% here, and nothing is redrawn anywhere for the site either.
 %
-% It used to be redrawn, in TikZ, from the numbers in mark.mjs — which was
-% defensible while the mark was three rectangles and a line. The SC monogram
-% is two Fraunces outlines, and a TikZ copy of those would be a trace of a
-% trace. A footer still wants a vector, and an included PDF is one.
+% It was redrawn once, in TikZ, from the numbers in mark.mjs — defensible
+% while the mark was three rectangles and a line, and abandoned when it became
+% a drawing. A footer would still rather have a vector than a raster; there is
+% no vector of this mark to have, which is the first of the costs the mark
+% section sets out.
+%
+% One file serves both: the artwork is opaque cream, so it reads as a small
+% mounted plate on the title bar exactly as it does in the site's masthead.
 %
 %   \scmarkfig{<height in pt>}   on cream: the running footer
 %   \scmarkout{<height in pt>}   on the bar: the title page
 \newcommand{\scmarkfig}[1]{%
-  \raisebox{-0.22\dimexpr#1pt\relax}{\includegraphics[height=#1pt]{fig/mark.pdf}}%
+  \raisebox{-0.22\dimexpr#1pt\relax}{\includegraphics[height=#1pt]{fig/mark.png}}%
 }
 \newcommand{\scmarkout}[1]{%
-  \raisebox{-0.22\dimexpr#1pt\relax}{\includegraphics[height=#1pt]{fig/mark-out.pdf}}%
+  \raisebox{-0.22\dimexpr#1pt\relax}{\includegraphics[height=#1pt]{fig/mark.png}}%
 }
 % The geometry is two-sided (inner 28mm, outer 24mm), so the band belongs on
 % the OUTER edge and has to swap sides with the page parity. Suppressed on the

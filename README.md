@@ -385,7 +385,7 @@ npm run build        # a PREVIEW: images, then every page → dist/ (noindex, ri
 npm run check        # contrast, structure, design review; all three block the build
 npm run preview      # one built page as a single self-contained file
 npm run fonts        # rebuild the webfonts, Latin and Chinese
-npm run mark         # re-cut the monogram's letters out of Fraunces
+npm run mark         # re-cut the interim construction's letters (report only)
 npm run icons        # rebuild the favicon, home-screen icon and manifest
 npm run check:render # paintings keep their proportions in a real browser (needs Chrome)
 npm run readiness    # what is still owed before the site may go live
@@ -435,13 +435,25 @@ reading it from the other.
 │                                 Node, no framework; sharp is the one runtime
 │                                 dependency. Reports NEEDS-INPUT on exit.
 │
+├── brand/                        the identity as supplied, unmodified
+│   ├── mark-lockup.png             the preferred option — the monogram as
+│   │                               drawn, with the wordmark beneath. The site
+│   │                               and the report both derive from this file
+│   │                               and nothing else, and it is pinned by hash
+│   ├── brand-sheet.png             the full prototype sheet, reproduced in
+│   │                               the report
+│   └── README.md                   why these are originals, not derivatives
+│
 ├── scripts/                      build and verification tools
-│   ├── mark.mjs                    the SC monogram: one geometry, four
-│   │                               renderings. Read by build-icons.sh, by
-│   │                               templates.js for the masthead lockup, and
-│   │                               by the report
-│   ├── build-mark-paths.py         cuts the monogram's S and C out of Fraunces
-│   │                               at a stated instance. Output is committed
+│   ├── build-icons.py              the icon set and the masthead mark, cut
+│   │                               from brand/mark-lockup.png by crop and
+│   │                               resize alone. Nothing is redrawn
+│   ├── mark.mjs                    the INTERIM construction — an SC built from
+│   │                               Fraunces outlines, superseded by the
+│   │                               artwork and kept only so the report can
+│   │                               show what it settled
+│   ├── build-mark-paths.py         cuts that construction's S and C out of
+│   │                               Fraunces. Output is committed
 │   │                               (mark-paths.js), so a build needs only Node
 │   ├── mark-paths.js               GENERATED. Re-run with npm run mark
 │   ├── build-images.mjs            sRGB-tagged AVIF 4:4:4 + WebP, five widths,
@@ -449,12 +461,7 @@ reading it from the other.
 │   ├── build-fonts.sh              Latin subsets — 79.8 KB for both families
 │   ├── build-fonts-cjk.py          Chinese display face, subset to the ~100
 │   │                               glyphs that appear, 34 KB from 24 MB
-│   ├── build-icons.sh              favicon, home-screen icon and manifest,
-│   │                               all from mark.mjs. The letters are outlines
-│   │                               cut at build time, so nothing depends on a
-│   │                               webfont that a favicon never gets to load.
-│   │                               icon.svg needs Node alone; the two rasters
-│   │                               use sharp, or cairosvg where it is missing
+│   ├── build-icons.sh              one line of shell around build-icons.py
 │   ├── check-contrast.mjs          every token against its worst-case ground,
 │   │                               including the dark bar, read from the CSS
 │   ├── check-links.mjs             dead links, missing alt, missing width or
@@ -475,8 +482,9 @@ reading it from the other.
 │   ├── placeholders/
 │   │   └── work-video.mp4          4.8 KB, shared by every work until its own
 │   │                               video exists; committed, so CI needs no ffmpeg
-│   └── icon.svg                    built by build-icons.sh, alongside
-│                                   favicon.ico, apple-touch-icon.png and
+│   └── icon-32.png                 built by build-icons.sh, alongside
+│                                   favicon.ico, apple-touch-icon.png,
+│                                   logo-mark.png and
 │                                   site.webmanifest
 │
 ├── docs/                         one folder per document, each with its
@@ -650,17 +658,18 @@ block people outright.
   shows four latest works and a card per series, not the whole catalogue. Six
   reference sites agree on all of this except *How to Buy* in the header, which
   stays until the cart works.
-- **The logo is an SC monogram**, adopted from Priscilla's own prototype sheet.
-  The wordmark still translates — *Senso Comune Gallery* and 常识画廊 — and a
-  favicon is chosen by origin, not by page, so the mark cannot say a different
-  name per locale. It does not: a monogram is a device that stands beside a
-  name, not a translation of one, which is what finding C-04's closure settled.
-  The letters are Fraunces outlines cut from the font at build time, the
-  proportion is 1 : √φ (the sheet's 1 : 1.618 makes the S read as a lowercase
-  s), and the hatching comes off below about 96 px because it fills in. One
-  geometry in `scripts/mark.mjs` generates the icon set, the masthead lockup
-  and the report's footer mark. `npm run mark` re-cuts the outlines;
-  `npm run icons` rebuilds the icon set.
+- **The logo is Priscilla's own SC monogram, used as drawn.** The wordmark
+  still translates — *Senso Comune Gallery* and 常识画廊 — and a favicon is
+  chosen by origin, not by page, so the mark cannot say a different name per
+  locale. It does not: a monogram is a device that stands beside a name, not a
+  translation of one, which is what finding C-04's closure settled. The
+  artwork is `brand/mark-lockup.png`, kept unmodified and pinned by hash;
+  `npm run icons` cuts the icon set and the masthead mark out of it by crop
+  and resize alone. Three costs come with a drawn mark and are set out in the
+  report rather than worked around: there is no vector and the raster is
+  1536 × 1024; it does not survive 16 px; and it cannot take `currentColor`.
+  The Fraunces construction that stood in before it arrived is kept in
+  `scripts/mark.mjs` for the report's figure only.
 - **Softness without new colour.** Mats, radii, shadows, glass and section
   boundaries are all expressed through existing tokens; shadows are `--bar` at
   a few percent. The masthead's glass stops at 88% because the navigation must

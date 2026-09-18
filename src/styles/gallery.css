@@ -66,11 +66,22 @@
      the wordmark shrinks below 720px. */
   display:inline-flex; align-items:baseline; gap:.42em;
 }
-/* 1.5em square sitting on the baseline: the wall then stands about a cap
-   height above the line and a descender below it, which is the proportion at
-   which the plate reads as a work hung on a wall rather than as a filled
-   square. Sized in em, so it tracks the wordmark down to 16.8px on mobile. */
-.wordmark__mark{ width:1.5em; height:1.5em; flex:none; align-self:baseline; display:block }
+/* The artwork is opaque cream, which is the point: on the dark bar it reads
+   as a small mounted plate — the site's own device, a cream sheet on a dark
+   ground, at wordmark size. It takes the panel radius and the mount shadow
+   for the same reason.
+
+   2.1em rather than the 1.5em the old geometric mark used. That mark was
+   three rectangles and survived being small; this one is a pencil drawing
+   with construction lines, and at 1.5em (about 34px) the letters had gone
+   soft. 2.1em is 47px, which still clears neither the 48px nav targets nor
+   the bar's own height, so nothing grows. It is centred rather than sat on
+   the baseline: a square plate hung off a baseline reads as having slipped. */
+.wordmark__mark{
+  width:2.1em; height:2.1em; flex:none; align-self:center; display:block;
+  border-radius:var(--radius-ui);
+  box-shadow:var(--shadow-mount);
+}
 .wordmark__name{ display:inline-block }
 .nav{ display:flex; gap:var(--space-4); flex-wrap:wrap; align-items:center }
 .nav a{

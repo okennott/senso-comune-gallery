@@ -1,5 +1,26 @@
 /* ===========================================================================
-   THE MARK — the SC monogram
+   THE MARK — the SC monogram, CONSTRUCTED
+
+   SUPERSEDED. The site now uses Priscilla's drawing itself: brand/
+   mark-lockup.png, cropped and resized by scripts/build-icons.py and by
+   nothing else. This file is what stood in between the decision to use a
+   monogram and the arrival of the artwork, and it is kept for one reason —
+   docs/report/figures.py draws a figure from it, so the report can show what
+   the reconstruction settled (report, "What was built before the artwork
+   arrived"). A check asserts that nothing the SITE builds imports it.
+
+   What it settled, and what survived into the artwork's own assessment:
+     * the proportion. Built at the sheet's literal 1 : 1.618 the S falls to
+       about the C's x-height and the mark reads "sC". Measured off the
+       drawing, Priscilla's own S is nearer 1 : 1.3 of her C — the stated
+       ratio and the drawn ratio are not the same number, and the drawn one
+       is the one that reads.
+     * the size rule. Hatching has to come off below about 96px, because
+       below that it fills in. A construction can obey that by not drawing
+       it; the artwork cannot, because the hatching is in the pixels.
+
+   Everything below this line is the construction as it was.
+   ---------------------------------------------------------------------------
 
    Adopted 18 September 2026 from Priscilla's own prototype sheet, which
    settles a question the first mark could only work around.
@@ -44,9 +65,7 @@
       a mark survives the surface it is seen on most.
 
    Consumed by:
-     scripts/build-icons.sh   icon.svg, favicon.ico, apple-touch-icon.png
-     src/templates.js         the masthead lockup, inline and ground-less
-     docs/report/figures.py   the mark plate and the report's own footer mark
+     docs/report/figures.py   mark_construction(), and nothing else
    =========================================================================== */
 
 import { GLYPHS } from './mark-paths.js';

@@ -996,7 +996,7 @@ for (const f of ['fraunces-latin.woff2', 'inter-latin.woff2',
 
 /* Finding C-01. The icon set, built by scripts/build-icons.sh. Copied by name
    rather than by globbing public/, so a stray file there cannot ship. */
-for (const f of ['icon.svg', 'favicon.ico', 'apple-touch-icon.png', 'site.webmanifest']) {
+for (const f of ['icon-32.png', 'favicon.ico', 'apple-touch-icon.png', 'logo-mark.png', 'site.webmanifest']) {
   const src = join(ROOT, 'public', f);
   if (existsSync(src)) cpSync(src, join(DIST, f));
   else console.log(`  note: public/${f} missing — run: npm run icons`);

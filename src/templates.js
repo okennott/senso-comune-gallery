@@ -6,8 +6,6 @@
  * contradict its own aesthetic argument. This is that build script's half.
  */
 
-import { markSvg } from '../scripts/mark.mjs';
-
 /* ---------- helpers ---------- */
 
 export const esc = (s = '') =>
@@ -180,23 +178,25 @@ const OG_LOCALE = { en: 'en_US', 'zh-CN': 'zh_CN' };
 const ogLocale = (lang) => OG_LOCALE[lang] ?? lang.replace('-', '_');
 
 /* Finding C-01. The tab, the home-screen icon and the browser chrome were all
-   defaults. The mark is geometry, not letterforms, so one file serves both
-   locales - see scripts/mark.mjs for why an "SC" monogram could not. */
-const favicon = (asset) => `<link rel="icon" href="${asset('/icon.svg')}" type="image/svg+xml">
+   defaults. The icons are cut from brand/mark-lockup.png — Priscilla's own
+   artwork — by scripts/build-icons.py. There is no SVG in the set any more:
+   the mark is a drawing, and an SVG carrying a raster would be the same
+   pixels behind a vector's promise. */
+const favicon = (asset) => `<link rel="icon" href="${asset('/icon-32.png')}" type="image/png" sizes="32x32">
 <link rel="icon" href="${asset('/favicon.ico')}" sizes="32x32">
 <link rel="apple-touch-icon" href="${asset('/apple-touch-icon.png')}">
 <link rel="manifest" href="${asset('/site.webmanifest')}">`;
 
-/* The masthead sits ON the bar, which is the same colour the mark's wall would
-   be, so the wall is drawn as an outline instead of a fill. Decorative: the
-   link's own text is the accessible name, and a second one here would violate
-   2.5.3 Label in Name. */
-/* The masthead paints no field of its own: the bar is already the ground, and
-   an opaque square would show as a slab the moment the bar goes to glass. The
-   inlay between the two letters is cut with a mask instead, so the bar — or
-   the painting passing under it — shows through. currentColor takes the
-   wordmark's own --paper. */
-const MASTHEAD_MARK = markSvg({ variant: 'mono', tokens: true, className: 'wordmark__mark' });
+/* The masthead lockup: the monogram AS DRAWN, on the paper it was drawn on.
+   The artwork is opaque cream, so it arrives on the dark bar as a small plate
+   — which is the site's own device, a cream sheet mounted on a dark ground,
+   at wordmark size.
+
+   Decorative: the link's own text is the accessible name, and a second one
+   here would violate 2.5.3 Label in Name. Width and height are set so the bar
+   does not reflow when the file lands. */
+const MASTHEAD_MARK = (asset) =>
+  `<img class="wordmark__mark" src="${asset('/logo-mark.png')}" alt="" width="192" height="192" decoding="async">`;
 
 /* The shop bar's icons: 24-unit, one stroke weight, drawn in currentColor so
    they take the bar's text colour and are checked with it. */
@@ -372,7 +372,7 @@ ${loc === 'zh'
 ${PREVIEW ? `<div class="readiness-ribbon" role="note">${esc(t(READINESS.ready ? site.readiness.previewReady : site.readiness.previewBlocked, loc).replace('{n}', READINESS.blockers.length))}</div>` : ''}
 <header class="masthead">
   <div class="wrap masthead__inner">
-    <a class="wordmark" href="${esc(path(loc, site, '/'))}">${MASTHEAD_MARK}<span class="wordmark__name">${wordmarkName(seller, loc)}</span></a>
+    <a class="wordmark" href="${esc(path(loc, site, '/'))}">${MASTHEAD_MARK(asset)}<span class="wordmark__name">${wordmarkName(seller, loc)}</span></a>
     <nav class="nav" aria-label="${loc === 'zh' ? '主导航' : 'Main'}">
       ${nav}
     </nav>

@@ -220,8 +220,9 @@ most often are a browser tab, a share card and an avatar — and none of them
 can render a wordmark.
 
 The mark it now carries is Priscilla's own: an interlocking **SC** monogram,
-adopted on 18 September 2026 from her prototype sheet, which arrives with a
-construction, a palette and a set of variations already worked out.
+drawn, with a prototype sheet that arrives with a construction, a palette, four
+variations and a minimum size already worked out. **The site uses that
+artwork itself** — her drawing, cropped and resized, never redrawn.
 
 ### The constraint that used to decide it {#sec-mark-constraint}
 
@@ -256,105 +257,155 @@ English and Chinese homepages.
 \end{finding}
 ```
 
-### What the sheet specifies, and what is adopted {#sec-mark-sheet}
+### The sheet, as drawn {#sec-mark-sheet}
+
+![The prototype sheet, reproduced as supplied — `brand/brand-sheet.png`.](fig/brand-sheet.jpg){#fig-brand width=100% fig-pos="H"}
+
+Construction and proportion, the hatching detail, the four variations, clear
+space and minimum size, the four brand colours, and the horizontal and vertical
+lockups.
+
+![The preferred option, reproduced as supplied — `brand/mark-lockup.png`.](fig/mark-lockup.jpg){#fig-mark width=92% fig-pos="H"}
+
+This is the artwork the site uses: the monogram with its construction lines,
+over the wordmark. Everything the build ships is a crop and a resize of this
+one file.
+
+Both files live in `brand/`, unmodified, and are pinned by hash: re-exporting
+or tidying either one fails the build and has to be a decision rather than an
+accident. They arrived at `dist/archive/logo/`, which is build output and is
+gitignored, so keeping them meant moving them somewhere the repository keeps.
+
+### The notes on the sheet, and what each one costs {#sec-mark-notes}
+
+Every row's left column is the sheet's own wording. The right column is what
+it means once the mark has to live in a browser tab, on a phone masthead and
+in this document.
 
 ```{=latex}
-\Needspace*{14\baselineskip}
+\Needspace*{16\baselineskip}
 ```
 
-: The prototype sheet against the built mark {#tbl-mark}
+: The sheet's specification, and the issue against each {#tbl-mark}
 
-| On the sheet | In the build |
-|:--------------------------------|:-----------------------------------------------|
-| Interlocking S and C | Adopted. The S sits upper left, the C lower right, overlapping by 45 % of the S's width |
-| Letter proportion S : C = 1 : 1.618 | Adopted as 1 : $\sqrt{\varphi}$ = 1 : 1.272 — see below |
-| Fibonacci / golden-rectangle grid | Adopted as the layout: the pair is sized to fill a square field with equal margins on four sides |
-| Diagonal hatching, upper left → lower right | Adopted at 45°, which is the angle and the direction the Leonardo hatch already runs at across the Tribute ground. Off below about 96 px |
-| Sage green `#969B7D` | Already `--field` |
-| Deep green `#737C61` | Already `--field-deep`; it is what the hatching is drawn in |
-| Warm ivory `#E9E2D3` | **Not added.** Within one step of `--wash-blue` `#E9E3D6`; a fifth cream is a fifth cream |
-| Charcoal black `#24241F` | **Not adopted.** The site's ink and bar are `#3A2B22`, a warm brown the whole palette is solved against; a cool near-black beside sage reads as a second, colder identity. The sheet's *black* variation is drawn in `--bar` |
-| Minimum size 15 mm, print | Adopted as the reason the hatching comes off, and extended: the mark is also cut at 32 px and 16 px, where 15 mm has no meaning |
+| As the sheet states it | What it costs, and what was done |
+|:-----------------------------------|:-----------------------------------------------|
+| **Golden Ratio 1 : 1.618** | Adopted as drawn — the artwork *is* the construction, so nothing has to be re-derived. The number only became a question when the mark was being rebuilt rather than used; see @sec-mark-construction |
+| **Letter Proportion S : C = 1 : 1.618** | As above. Taken literally in a *rebuild* it makes the S fall to about the C's x-height; in Priscilla's own drawing the S is visibly larger than 1/1.618 of the C, which is why the drawing reads and a literal reconstruction did not |
+| **Grid System based on Fibonacci Spiral & Golden Rectangle** | Visible in the artwork as construction lines, and they are part of the drawing, not scaffolding to be cleaned off. They are also the first thing to disappear as the file gets smaller — by 32 px they are grey haze (@fig-mark-sizes) |
+| **Diagonal Hatching, Upper Left → Lower Right** | The same direction and angle as the Leonardo hatch already running across the Tribute ground (`base.css`, `.hatch`) — an agreement nobody arranged, and worth keeping |
+| **Subtle texture / Enhances depth and form / Not overpowering** | True at the sizes the sheet is drawn for. At 32 px the hatching has become tone rather than texture, and at 16 px it is a smudge. Nothing in the build can fix that; it is stated instead (@sec-mark-issues) |
+| **Primary (Sage Green)** `#969B7D` | Already `--field`, exactly |
+| **Black (For Print / Digital)** `#24241F` | **Not adopted as a site colour.** The site's ink and bar are `#3A2B22`, a warm brown the whole palette is solved against; a cool near-black beside sage reads as a second, colder identity. It is kept for print, where it is what the sheet says |
+| **Reversed (Dark Background)** | The variation that would suit the masthead best — and it is a *different drawing* from the preferred one: solid letters, no construction lines. Not used, because the instruction was to use the preferred option. The site instead lets the artwork's own cream paper be the plate, which is the site's own device |
+| **Monochrome (One Color)** | Held in reserve for single-ink reproduction, where the hatching and the letter cannot be separated by lightness at all |
+| **Deep Green** `#737C61` | Already `--field-deep`, exactly |
+| **Warm Ivory** `#E9E2D3` | **Not added.** Within one step of `--wash-blue` `#E9E3D6`; a fifth cream is a fifth cream. The artwork's own paper measures `#E4DCCC` and is kept as it is |
+| **Clear Space & Minimum Size — 15 mm (Print)** | The icon build uses the sheet's clear-space rule as its crop, at 5.5 % of the monogram's side. The minimum size is the sheet's for print; the screen equivalents are in @sec-mark-issues, and they are smaller than 15 mm |
+| **Horizontal lockup / Vertical lockup** | Both are on the sheet and neither is used yet. The site's masthead is its own lockup — the mark beside a wordmark already set in Fraunces — and the two supplied lockups set the name in a different face |
+| **"Art connects what we share"** | A line, not a tagline in use. It is not on the site, and nothing here proposes putting it there |
+| **"Timeless / Art Gallery / Identity"** | The sheet's own note on intent. Recorded, and it is the right description |
 
-### Two decisions taken here {#sec-mark-decisions}
+### The issues, one by one {#sec-mark-issues}
 
-**The letters are Fraunces.** There is no vector source for the drawing on the
-sheet, and a trace from a screenshot would be a worse object than a
-construction. Fraunces is the face the wordmark is already set in; at the
-display end of its optical-size axis (`opsz 40`, `wght 700`) it draws the heavy
-stems against fine hairlines that the prototype is built from. So the lockup —
-the mark beside *Senso Comune* — is one typeface rather than two. The outlines
-are cut from the font by `scripts/build-mark-paths.py` and committed as
-`scripts/mark-paths.js`, so building the site needs Node and nothing else.
+Four of these are worth more than a table row. None is a reason not to use the
+artwork; all four are reasons to know what using it costs.
 
-**The proportion is $\sqrt{\varphi}$, not $\varphi$.** This is the one number
-on the sheet not taken literally, and the reason is visible rather than
-theoretical. Drawn at 1 : 1.618 in a square field, Fraunces' S falls to about
-the C's x-height and stops reading as a capital — the mark reads *sC* — and
-the C's lower arm cannot reach far enough left to close the hole the small S
-leaves at the bottom of the square. At 1 : 1.272 the S is still plainly the
-smaller letter, which is what the sheet's own four variations show, and the
-pair fills the square. $\sqrt{\varphi}$ is the same construction one step in:
-the golden section of the golden section.
+**1 — There is no vector, and the raster is 1536 × 1024.** That is the whole
+supply. The monogram occupies about 590 px of it, which is enough for a 180 px
+home-screen icon and a masthead mark at 2× on a phone, and is the ceiling. A
+business card, a 15 mm foil stamp or a gallery window would each want the
+original vector or a much larger scan. **Ask for the source file** — it exists
+somewhere, and it costs nothing to keep with the rest.
 
-### Four renderings, one geometry {#sec-mark-two}
+**2 — A drawn mark does not survive 16 px.** @fig-mark-sizes shows the same
+crop of the same file at each size that ships. At 180 px it is the drawing; at
+32 px the construction lines have gone to haze and the hatching to tone; at
+16 px what is left is a shape that reads as *a monogram* rather than as an S
+and a C. That is the size a browser tab uses on a standard display. The
+sheet's own answer to this is on the sheet — the **Monochrome** and
+**Reversed** variations (@fig-mark-variations), which are solid-lettered
+drawings without construction lines and would hold at 16 px. Switching the
+small sizes to one of them is a one-line change in `scripts/build-icons.py`;
+it is not made here, because the instruction was to use the preferred option
+as it is.
 
-![The monogram as the site ships it. Every tile is the SVG `scripts/mark.mjs` produces, rasterised here rather than redrawn, so the report cannot argue for a mark the site no longer has.](fig/mark-plate.pdf){#fig-mark width=100% fig-pos="H"}
+![The variations panel, enlarged from @fig-brand. These are a *different drawing* from the preferred option — solid letters, no construction lines — and they are what the sheet offers for the sizes and grounds the preferred one cannot hold.](fig/mark-variations.jpg){#fig-mark-variations width=100% fig-pos="H"}
 
-The C's cap height is 68 % of the field and the S's is 54 %; the two are pushed
-together by 45 % of the S's width and the pair is then sized to leave the same
-margin on all four sides. Where the S crosses the C there is an **inlay** — a
-gap the width of twice `--inlay`, which is what makes the C pass *behind* the S
-rather than merge with it. On the icon that gap is stamped in the field colour;
-on the masthead, where there is no field to stamp with, it is cut with a mask,
-so the bar — or the painting passing under the bar once it goes to glass —
-shows through it.
+**3 — The mark is now a photograph of paper, not a shape.** It cannot take
+`currentColor`, cannot invert for a dark theme, cannot be recoloured for a
+seasonal card, and cannot be knocked out of a coloured ground. The site works
+with that rather than against it: the artwork is opaque cream, so on the dark
+masthead it arrives as a small mounted plate — a cream sheet on a dark ground,
+which is the site's central visual idea at wordmark size.
 
-That distinction matters more than it sounds. The masthead paints **no field**
-at all: an opaque square behind the letters would have been invisible while the
-bar was solid and would have appeared as a slab the moment the bar became
-glass (@sec-soft).
+**4 — The SVG favicon is gone.** The site shipped an `icon.svg`; a vector
+favicon is sharp at every size and is what a tab would rather have. There is no
+vector of this mark to ship, and an SVG wrapping a raster would be the same
+pixels behind a vector's promise. The set is now a 32 px PNG, the `.ico`, the
+180 px home-screen icon and the manifest, all cut from the artwork by the icon
+build.
+
+![The adopted artwork at the three sizes the build cuts, each enlarged from the file that actually ships.](fig/mark-sizes.pdf){#fig-mark-sizes width=100% fig-pos="H"}
+
+### What was built before the artwork arrived {#sec-mark-construction}
+
+This is kept on the record, not as a second live logo. Between the decision to
+use a monogram and the arrival of the drawing, the site carried an `SC`
+**constructed** from Fraunces — the face the wordmark is already set in — with
+the outlines cut from the font at `opsz 40`, `wght 700` by
+`scripts/build-mark-paths.py`. `scripts/mark.mjs` still holds it, and the build
+asserts that nothing the *site* builds imports it: it exists so that @fig-mark-construction
+can be drawn, and for no other reason.
+
+Two things it settled are still worth having.
+
+The first is a **proportion**. Drawn at the sheet's literal 1 : 1.618 in a
+square field, Fraunces' S falls to about the C's x-height and stops reading as
+a capital — the mark reads *sC* — and the C's lower arm cannot reach far enough
+left to close the hole the small S leaves. The construction used
+1 : $\sqrt{\varphi}$ = 1 : 1.272 instead, the same construction one step in. It
+is not a correction to the sheet: measured off Priscilla's own drawing, her S
+is nearer 1 : 1.3 of her C than 1 : 1.618, so what the reconstruction found was
+that the *stated* ratio and the *drawn* ratio are not the same number. The
+drawn one is the one that reads.
+
+The second is the **size rule**: hatching comes off below about 96 px, because
+below that it fills in. The construction could obey it, by simply not drawing
+the hatch at small sizes. The artwork cannot, because the hatching is in the
+pixels — which is issue 2 above, arrived at twice from opposite directions.
+
+![The interim construction: an `SC` cut from Fraunces outlines, in the four renderings the sheet's variation set asks for, and at the three sizes that decide whether a mark works. Superseded by the artwork; kept because the size argument survived it.](fig/mark-construction.pdf){#fig-mark-construction width=100% fig-pos="H"}
 
 ### What it deliberately does not do {#sec-mark-not}
 
-- **It spends no accent.** Sanguine is 2.03:1 on the bar and would disappear at
-  tab size. The letters are `--paper` on `--bar` at **11.45:1**, the most
-  legible pair on the site, and the accent stays reserved for calls to action.
-- **It depends on no font at render time.** An SVG favicon is rendered
-  *without* the page's webfonts, so a mark set as `<text>` falls back to
-  whatever serif the operating system has — a different logo on every machine.
-  These are outlines, cut at build time. The check forbids live text and
-  requires outlines; it does not forbid letterforms any more.
+- **It spends no accent.** Sanguine is reserved for calls to action. Nothing in
+  the artwork is sanguine, and nothing has been tinted to make it so.
 - **It has no per-locale variant**, by construction, for the reason in
-  @sec-mark-constraint.
-- **It does not carry its texture down to sizes the texture cannot survive.**
-  The bottom row of @fig-mark is the argument: the hatching is gone by 32 px
-  and would be mud at 16 px.
-
-WCAG contrast is defined on relative luminance, so converting the mark to
-greyscale leaves its ratio exactly where it is and it survives a monochrome
-print unchanged. Two cases have **not** been tested: single-ink reproduction of
-the hatched rendering, where hatch and letter cannot be separated by lightness
-at all, and embroidery below the sheet's own 15 mm. Neither is needed before
-launch.
+  @sec-mark-constraint: the same file, byte for byte, on both homepages.
+- **It contributes no accessible name.** In the masthead the mark is an `<img>`
+  with an *empty* `alt` inside the wordmark link, so the link's name is the
+  gallery's name and nothing else — 2.5.3 Label in Name, and 2.4.4.
+- **It is not cleaned up.** No tracing, no background removal, no contrast
+  boost, no redrawing of the construction lines. `scripts/build-icons.py` is
+  asserted to do nothing but crop, resize and save.
 
 ### Where it is used {#sec-mark-where}
 
-The icon set — `icon.svg` at 3.6 KB, the 32 px `favicon.ico`, the 180 px
-home-screen icon and the manifest — all from one source; the masthead lockup,
-where the mark and the name are a single link and a single tab stop; and this
-document, in the footer of every page and on the title page, included as the
-vector `mark.mjs` produces rather than redrawn in TikZ, which is what the
-footer carried while the mark was three rectangles.
+The icon set — `icon-32.png`, `favicon.ico`, the 180 px home-screen icon and
+the manifest; `logo-mark.png` in the masthead, where the mark and the name are
+a single link and a single tab stop; and this document, in the footer of every
+page and on the title page. All from `brand/mark-lockup.png`, by one crop.
 
-Eight assertions in `scripts/check-review.mjs` (F-01 to F-04) hold it together:
-that the icon is the geometry `mark.mjs` declares, that the masthead is the
-same monogram with its field unpainted and its inlay masked, that the letters
-are Fraunces outlines from a stated instance and not live text, that the mark
-contributes no accessible name of its own, that it is byte-identical in both
-locales, that it spends no accent and holds its proportions at tab size, that
-the hatching is off in both the icon and the masthead while remaining
-available, and that the ratio is derived from $\varphi$ rather than typed in.
+Nine assertions in `scripts/check-review.mjs` (F-01 to F-04) hold it together:
+that both originals are present and byte-for-byte the files that were supplied;
+that every derivative is a crop and a resize of the lockup and of nothing else,
+with no drawing, tracing or recolouring in the builder; that the masthead
+carries the artwork at a declared size and mounted as a plate; that the mark
+takes no accessible name of its own and is identical in both locales; that
+nothing the site builds redraws it; that the costs in @sec-mark-issues are
+still stated rather than quietly absorbed; and that this section still quotes
+the sheet's own values rather than paraphrasing them.
 
 ## Softness {#sec-soft}
 
@@ -1064,9 +1115,11 @@ src/styles/      tokens.css · base.css · gallery.css
 src/scripts/     gallery.js                   the work-page views, enhanced
 src/templates.js
 build.js         36 pages, two locales, and the 404
-scripts/         mark.mjs · mark-paths.js     the monogram, shared with
-                                              this report; its letters are
-                                              cut by build-mark-paths.py
+brand/           mark-lockup.png              the artwork, as supplied, and
+                 brand-sheet.png              the sheet it came on
+scripts/         build-icons.py               the icon set, cut from it
+                 mark.mjs · mark-paths.js     the interim construction, now
+                                              drawn only by this report
                  build-fonts · build-fonts-cjk · build-images · build-icons
                  readiness · check-readiness · test-readiness · release
                  check-contrast · check-links · check-review · check-render
@@ -1523,7 +1576,7 @@ carrier, a payment provider — and none can be closed by writing more code.
 | CJK webfont strategy | The display face is subset to the characters that appear in headings, work titles and UI labels: **34 KB, from a 24 MB face.** `unicode-range` gates the fetch, so an English page never downloads it, and a character added before the next build falls through to the system face rather than rendering as tofu. Chinese body prose is deliberately not webfont-served. | `scripts/build-fonts-cjk.py` |
 | Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
-| A mark for two languages | An `SC` monogram — a device beside the name rather than a translation of it — cut from Fraunces outlines and generated from one geometry for the tab, the home screen, the masthead and this document | `scripts/mark.mjs` |
+| A mark for two languages | An `SC` monogram — a device beside the name rather than a translation of it — used as the drawing Priscilla supplied, one crop serving the tab, the home screen, the masthead and this document | `brand/`, `scripts/build-icons.py` |
 
 ## Content still outstanding {#sec-content}
 
@@ -1570,11 +1623,12 @@ captures in @sec-built are taken from `dist/` by `docs/report/shots.sh` as part
 of this document's build, so they cannot show a version of the site that is no
 longer shipping.
 
-**The mark.** @fig-mark and the mark in this document's footer are the SVG
-that `mark.mjs` produces — asked of it at build time and included as a vector,
-not redrawn here. The letters are cut out of the shipped Fraunces subset by a
-generator script at a stated instance, so the document, the browser tab and
-the masthead cannot be three different drawings.
+**The mark.** @fig-brand and @fig-mark are `brand/brand-sheet.png` and
+`brand/mark-lockup.png` reproduced as supplied, and the mark in this document's
+footer is the same crop of the lockup that the browser tab gets — the report
+imports the icon build's own cropping rule rather than repeating it, so the
+document, the tab and the masthead cannot be three different drawings. Both
+originals are pinned by hash (@sec-mark-sheet).
 
 ```{=latex}
 \cleardoublepage

@@ -12,6 +12,7 @@
  */
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -165,24 +166,24 @@ check('B-04', 'both nav labels ship so the visible name is the accessible name',
 /* ===================== C — branding and assets ===================== */
 
 check('C-01', 'the icon set exists and is linked', () => {
-  const files = ['icon.svg', 'favicon.ico', 'apple-touch-icon.png', 'site.webmanifest'];
+  const files = ['icon-32.png', 'favicon.ico', 'apple-touch-icon.png', 'logo-mark.png', 'site.webmanifest'];
   const onDisk = files.filter((f) => existsSync(join(DIST, f)));
-  const linked = /rel="icon"[^>]*icon\.svg/.test(home) && /rel="apple-touch-icon"/.test(home)
+  const linked = /rel="icon"[^>]*icon-32\.png/.test(home) && /rel="apple-touch-icon"/.test(home)
               && /rel="manifest"/.test(home);
   return { ok: onDisk.length === files.length && linked, detail: `${onDisk.length}/${files.length} built, linked ${linked}` };
 });
 
-check('C-01', 'the icon carries no font dependency', () => {
-  // An SVG favicon renders without the page's webfonts, so a <text> mark falls
-  // back to whatever serif the OS has — a different logo on every machine.
-  // The monogram adopted on 18 September 2026 does carry letterforms, but as
-  // OUTLINES cut from Fraunces at build time (scripts/build-mark-paths.py),
-  // which has no such failure mode. What is forbidden is live text.
-  const svg = read('icon.svg');
-  const clean = !/<text|font-family|@font-face/.test(svg);
-  const outlines = /<path d="/.test(svg);
-  return { ok: clean && outlines,
-           detail: `${statSync(join(DIST, 'icon.svg')).size} bytes, no live text ${clean}, drawn as outlines ${outlines}` };
+check('C-01', 'the set is cut at the sizes it is declared at', () => {
+  // A PNG states its own size in the IHDR, 16 bytes in. An icon linked as
+  // 32x32 and shipped at some other size is the kind of thing nobody looks at
+  // twice and every crawler notices.
+  const px = (f) => { const b = readFileSync(join(DIST, f)); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+  const want = { 'icon-32.png': 32, 'apple-touch-icon.png': 180, 'logo-mark.png': 192 };
+  const got = Object.entries(want).map(([f, n]) => [f, px(f), px(f)[0] === n && px(f)[1] === n]);
+  const manifest = JSON.parse(read('site.webmanifest'));
+  const declared = manifest.icons.every((i) => existsSync(join(DIST, i.src.replace(/^\//, ''))));
+  return { ok: got.every(([, , ok]) => ok) && declared,
+           detail: got.map(([f, [w, h]]) => `${f} ${w}x${h}`).join(', ') + `, manifest resolves ${declared}` };
 });
 
 check('C-01', 'theme-color matches the masthead bar', () => {
@@ -300,117 +301,113 @@ check('E-02', 'zh pages preload the Chinese face, en pages the Latin one', () =>
 });
 
 /* ===================== F — the mark ===================== */
-/* The SC monogram, adopted 18 September 2026 from Priscilla's prototype sheet.
-   One geometry, four renderings; these assertions are what stops the four
-   drifting apart, and what stops the letters drifting from the font. */
+/* The SC monogram, as Priscilla's prototype sheet draws it. Adopted as the
+   artwork itself on 18 September 2026: the site shows her drawing, not a
+   construction of it. These assertions hold the one source file unedited, the
+   derivatives to the sizes they claim, and the costs of a raster mark on the
+   record rather than quietly absorbed. */
 
-const markGeom = await import(join(ROOT, 'scripts/mark.mjs'));
-const MARK = markGeom.MARK;
-const G = markGeom.markGeometry();
-const { GLYPHS } = await import(join(ROOT, 'scripts/mark-paths.js'));
+const ART = join(ROOT, 'brand/mark-lockup.png');
+const SHEET = join(ROOT, 'brand/brand-sheet.png');
+const sha = (f) => createHash('sha256').update(readFileSync(f)).digest('hex');
+const pngSize = (f) => { const b = readFileSync(f); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
 
-check('F-01', 'the icon is the mark as scripts/mark.mjs draws it', () => {
-  const svg = read('icon.svg');
-  const field = new RegExp(`<rect width="${MARK.box}" height="${MARK.box}" fill="${MARK.ground}"/>`).test(svg);
-  const letters = [...svg.matchAll(/<path d="([^"]+)"/g)].map((m) => m[1]);
-  const fromFont = letters.length >= 3
-    && letters.every((d) => d === GLYPHS.glyphs.S.d || d === GLYPHS.glyphs.C.d);
-  const inlay = new RegExp(`stroke="${MARK.ground}" stroke-width="${MARK.inlay * 2}"`).test(svg);
-  return { ok: field && fromFont && inlay,
-           detail: `field ${field}, ${letters.length} outlines, all cut from Fraunces ${fromFont}, inlay ${inlay}` };
+check('F-01', 'the supplied artwork is present, and is the file that was supplied', () => {
+  // brand/ holds the originals and nothing derived. A derived copy quietly
+  // replacing an original is how a brand loses its own artwork, so the two
+  // files are pinned by hash: re-exporting or "cleaning up" either one fails
+  // the build and has to be an explicit decision.
+  const want = {
+    'brand/mark-lockup.png': '7dfbc7384a9ff346b2a97d8488a95c8fdcdd6e97ccee90ef407d5ce75cf64682',
+    'brand/brand-sheet.png': '5b577e91d0e49d12cee7b4462db9298d352bff28008f3cb556209383f2a32eb9',
+  };
+  const bad = Object.entries(want).filter(([f, h]) => !existsSync(join(ROOT, f)) || sha(join(ROOT, f)) !== h);
+  const [w, h] = existsSync(ART) ? pngSize(ART) : [0, 0];
+  return { ok: !bad.length && w === 1536 && h === 1024,
+           detail: `both originals unmodified ${!bad.length}, lockup ${w}x${h}` };
 });
 
-check('F-01', 'the masthead lockup is the same monogram as the icon', () => {
-  // The masthead paints NO field: the bar is already the ground, and an opaque
-  // square would show as a slab the moment the bar goes to glass. The inlay is
-  // cut with a mask there instead of stamped, so the bar shows through it.
+check('F-01', 'every derivative is cut from that one file, by crop and resize alone', () => {
+  const py = src('scripts/build-icons.py');
+  const reads = [...py.matchAll(/ROOT \/ "([^"]+)"/g)].map((m) => m[1]);
+  const onlyArtwork = reads.length === 2 && reads.includes('brand/mark-lockup.png') && reads.includes('public');
+  // Crop, resize and save. No drawing, no colour replacement, no tracing.
+  const noRedraw = !/ImageDraw|ImageFont|putpixel|new\(\s*["']RGB/.test(py);
+  const cropped = /\.crop\(/.test(py) && /\.resize\(/.test(py);
+  return { ok: onlyArtwork && noRedraw && cropped,
+           detail: `reads ${reads.join(' + ')}, crop+resize only ${cropped}, nothing redrawn ${noRedraw}` };
+});
+
+check('F-01', 'the masthead carries the artwork, sized, and does not reflow the bar', () => {
   const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
   if (!m) return { ok: false, detail: 'no wordmark lockup' };
-  const svg = m[1];
-  const noField = !/<rect width="64" height="64" fill="(?!#fff)/.test(svg);
-  const masked = /<mask id="sc-inlay">/.test(svg) && /mask="url\(#sc-inlay\)"/.test(svg);
-  const sameLetters = svg.includes(GLYPHS.glyphs.S.d) && svg.includes(GLYPHS.glyphs.C.d);
-  const tokens = /fill="currentColor"/.test(svg);
-  return { ok: noField && masked && sameLetters && tokens,
-           detail: `no painted field ${noField}, inlay masked ${masked}, same outlines ${sameLetters}, takes the bar's colour ${tokens}` };
-});
-
-check('F-01', 'the letters are Fraunces outlines, not <text> and not a trace', () => {
-  // An SVG favicon renders without the page's webfonts, so <text> would fall
-  // back to whatever serif the OS has. The outlines are cut from the font by
-  // scripts/build-mark-paths.py at a stated instance.
-  const svg = read('icon.svg');
-  const noText = !/<text\b/.test(svg);
-  const instanced = GLYPHS.opsz === 40 && GLYPHS.wght === 700 && GLYPHS.upem === 2000;
-  const generator = /instantiateVariableFont/.test(src('scripts/build-mark-paths.py'));
-  return { ok: noText && instanced && generator,
-           detail: `no <text> ${noText}, opsz ${GLYPHS.opsz}/wght ${GLYPHS.wght} on ${GLYPHS.upem} upem, cut by the generator ${generator}` };
+  const img = (m[1].match(/<img class="wordmark__mark"[^>]*>/) ?? [''])[0];
+  const sized = /width="192"/.test(img) && /height="192"/.test(img);
+  const art = /src="[^"]*\/logo-mark\.png"/.test(img);
+  const plate = /\.wordmark__mark\{[^}]*border-radius:var\(--radius-ui\)/.test(flat)
+             && /\.wordmark__mark\{[^}]*box-shadow:var\(--shadow-mount\)/.test(flat);
+  return { ok: sized && art && plate,
+           detail: `artwork ${art}, width+height ${sized}, mounted as a plate ${plate}` };
 });
 
 check('F-02', 'the mark is one link and one tab stop with the wordmark', () => {
   // 2.5.3 Label in Name and 2.4.4: a decorative mark inside the link must not
   // contribute an accessible name of its own, and must not be a second link to
-  // the same place.
+  // the same place. An <img> does that with an EMPTY alt, not a missing one.
   const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
-  const svg = m[1];
-  const hidden = /aria-hidden="true"/.test(svg) && /focusable="false"/.test(svg);
-  const noName = !/<title>|aria-label=/.test(svg);
+  const img = (m[1].match(/<img class="wordmark__mark"[^>]*>/) ?? [''])[0];
+  const decorative = /\salt=""/.test(img) && !/aria-label=/.test(img) && !/title=/.test(img);
   const named = /<span class="wordmark__name">/.test(m[1]);
-  return { ok: hidden && noName && named, detail: `aria-hidden ${hidden}, no name of its own ${noName}, wordmark still the name ${named}` };
+  return { ok: decorative && named,
+           detail: `empty alt, no name of its own ${decorative}, wordmark still the name ${named}` };
 });
 
 check('F-02', 'the monogram serves both locales unchanged', () => {
   // Finding C-04, closed by decision: the NAME stays translated — 常识画廊 on
   // the Chinese page — and the monogram is the device that stands beside it,
   // identical in both. A device is not a translation.
-  const en = (home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/span>/) ?? [])[0];
-  const zh = (zhHome.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/span>/) ?? [])[0];
-  const enSvg = (en.match(/<svg[\s\S]*?<\/svg>/) ?? [])[0];
-  const zhSvg = (zh.match(/<svg[\s\S]*?<\/svg>/) ?? [])[0];
-  const zhName = /常识画廊/.test(zh);
-  return { ok: enSvg === zhSvg && zhName,
-           detail: `byte-identical ${enSvg === zhSvg}, zh wordmark still translated ${zhName}` };
+  const lock = (h) => (h.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/span>/) ?? [])[0] ?? '';
+  const img = (h) => (lock(h).match(/<img class="wordmark__mark"[^>]*>/) ?? [''])[0];
+  const zhName = /常识画廊/.test(lock(zhHome));
+  return { ok: img(home) && img(home) === img(zhHome) && zhName,
+           detail: `byte-identical ${img(home) === img(zhHome)}, zh wordmark still translated ${zhName}` };
 });
 
-check('F-03', 'the mark does not spend the accent, and holds at tab size', () => {
-  // Sanguine is reserved for calls to action, and is 2.03:1 on the bar. The
-  // letters are --paper on --bar, the most legible pair on the site.
-  const svg = read('icon.svg');
-  const usesAccent = svg.toUpperCase().includes(token('sanguine').toUpperCase());
-  const r = ratio(MARK.paper, MARK.ground);
-  // The C's cap height as a share of the box. Below about a third the pair
-  // stops being two letters at 16px and becomes a smudge.
-  const share = G.hC / MARK.box;
-  return { ok: !usesAccent && r >= 4.5 && share > 0.33,
-           detail: `no sanguine ${!usesAccent}, letters on the field ${r.toFixed(2)}:1, C is ${(share * 100).toFixed(0)}% of the mark` };
+check('F-03', 'nothing on the site redraws the mark', () => {
+  // scripts/mark.mjs still holds the Fraunces construction that stood in
+  // before the artwork arrived. It is kept because the report's own figure is
+  // drawn from it — the recorded alternative, not a second live logo — and
+  // this asserts that nothing the SITE builds imports it.
+  const site = [src('src/templates.js'), src('build.js'), src('scripts/build-icons.py')].join('\n');
+  const unused = !/mark\.mjs|markSvg/.test(site);
+  const keptForTheReport = /mark\.mjs/.test(src('docs/report/figures.py'));
+  return { ok: unused && keptForTheReport,
+           detail: `the site imports no generator ${unused}, the report still draws the alternative ${keptForTheReport}` };
 });
 
-check('F-03', 'the hatching is off below the size it survives', () => {
-  // The sheet's own minimum is 15mm in print. At a 16px favicon the hatch
-  // fills in, so neither the icon nor the masthead carries it.
-  const icon = read('icon.svg');
-  const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
-  const off = !/-hatch/.test(icon) && !/-hatch/.test(m[1]);
-  // …and it is still available, at the sheet's own angle and direction.
-  const available = /-hatch/.test(markGeom.markSvg({ hatch: true }))
-    && MARK.hatchAngle === 45;
-  return { ok: off && available,
-           detail: `off in the icon and the masthead ${off}, available at ${MARK.hatchAngle}° ${available}` };
+check('F-03', 'the cost of a drawn mark at icon sizes is on the record', () => {
+  // A pencil drawing with construction lines does not survive 16px, and the
+  // supply is one 1536x1024 raster with no vector behind it. Both are true,
+  // neither is fixable by the build, and so both are stated in the report
+  // rather than absorbed. This asserts the statement is still there.
+  const r = src('docs/report/senso-comune-report.qmd');
+  const said = /16 px/.test(r) && /1536/.test(r) && /no vector/i.test(r);
+  const [w] = pngSize(join(DIST, 'icon-32.png'));
+  return { ok: said && w === 32,
+           detail: `report states the ceiling and the small-size cost ${said}` };
 });
 
-check('F-04', 'the proportion is the sheet\'s construction, and says where it departs', () => {
-  // S : C = 1 : sqrt(phi), not 1 : phi. The reason is written in mark.mjs; the
-  // assertion is that the number is derived from phi and not typed in.
-  const derived = Math.abs(MARK.ratio - Math.sqrt(MARK.phi)) < 1e-9;
-  const stated = /1 : sqrt\(phi\)/.test(src('scripts/mark.mjs'));
-  // The pair fills the square: equal margins on all four sides.
-  const rightMargin = MARK.box - (G.C.x + G.wC);
-  const bottomMargin = MARK.box - (G.C.y + G.hC);
-  const square = Math.abs(rightMargin - MARK.pad) < 1e-6
-    && Math.abs(bottomMargin - MARK.pad) < 1e-6
-    && Math.abs(G.S.x - MARK.pad) < 1e-6 && Math.abs(G.S.y - MARK.pad) < 1e-6;
-  return { ok: derived && stated && square,
-           detail: `ratio ${MARK.ratio.toFixed(4)} = sqrt(phi) ${derived}, departure documented ${stated}, fills the square ${square}` };
+check('F-04', 'the sheet\'s own specification is reproduced, not paraphrased', () => {
+  // The report carries the sheet as drawn AND its notes as written. These are
+  // the values a reader would check against the image on the facing page.
+  const r = src('docs/report/senso-comune-report.qmd');
+  const values = ['1 : 1.618', 'Upper Left', 'Lower Right', '15 mm',
+                  '#969B7D', '#737C61', '#24241F', '#E9E2D3',
+                  'Primary', 'Black', 'Reversed', 'Monochrome'];
+  const missing = values.filter((v) => !r.includes(v));
+  const figures = /brand-sheet/.test(r) && /mark-lockup/.test(r);
+  return { ok: !missing.length && figures,
+           detail: `${values.length - missing.length}/${values.length} values quoted${missing.length ? ` — missing ${missing.join(', ')}` : ''}, both plates shown ${figures}` };
 });
 
 /* ===================== G — softness ===================== */
