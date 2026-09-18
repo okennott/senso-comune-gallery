@@ -1,3 +1,46 @@
+% --- the page ------------------------------------------------------------
+% A4, two-sided margins in millimetres, set HERE and not in the front matter.
+%
+% The .qmd asks for `papersize: a4` and a geometry list, and Quarto passes
+% neither to this template: the class options come out as `letterpaper` and
+% the geometry package is never loaded at all. So the document was 612x792pt —
+% US Letter — for its whole life while every margin in it was specified in
+% millimetres and both READMEs called it A4. It was found by measuring the PDF
+% rather than by reading the front matter, which is the only way this kind of
+% thing is ever found, and it matters the moment anyone prints it.
+%
+% Loaded late, which is fine: geometry applies its page at \begin{document},
+% so it wins over the class option regardless of order.
+\usepackage[a4paper,top=26mm,bottom=26mm,inner=28mm,outer=24mm,twoside]{geometry}
+
+% --- bleed and crop marks, for the press --------------------------------
+% Off by default: the reading PDF is A4 trim, exactly. Turned on by
+% docs/report/build.sh when BLEED=1, which writes a second file.
+%
+% Why it is needed at all: the sage band and the page canvas both run to the
+% edge of the page. A printer handed trim-size artwork with nothing past the
+% trim either asks for bleed or scales the page up to invent it, and scaling
+% is how a 26mm margin quietly becomes 26.6mm. So the press file is drawn on
+% larger paper with the page in the middle of it, the edge artwork carried
+% 3mm past where the knife falls, and marks showing where that is.
+%
+%   trim   210 x 297      the A4 the reader gets
+%   bleed  3mm            artwork past the knife on every side
+%   marks  3mm gap, 4mm long, hairline
+%   paper  230 x 317      trim + 2 x (bleed + gap + mark)
+\newlength{\scbleed}   \setlength{\scbleed}{3mm}
+\newlength{\scmarkgap} \setlength{\scmarkgap}{3mm}
+\newlength{\scmarklen} \setlength{\scmarklen}{4mm}
+\newif\ifbleed \bleedfalse
+\IfFileExists{bleed.on}{\bleedtrue}{}
+\ifbleed
+  % geometry's own layout mechanism: the PAPER grows, the LAYOUT stays A4, and
+  % every margin is still measured from the A4 the reader will hold.
+  \geometry{papersize={230mm,317mm},
+            layoutsize={210mm,297mm},
+            layoutoffset={10mm,10mm}}
+\fi
+
 \usepackage{makeidx}
 \makeindex
 
@@ -209,31 +252,66 @@
 % Registered before the sage band below, because eso-pic paints these in the
 % order they are added and the band belongs on top of the paper, not under it.
 % Suppressed on the title page, which paints its own ground edge to edge.
-\pagecolor{paper}
-\AddToShipoutPictureBG{%
-  \ifscmark
-  \put(0,0){\includegraphics[width=\paperwidth,height=\paperheight]{fig/page-canvas.jpg}}%
-  \fi}
+% One switch. Set \canvaspaperfalse for white pages with the sage band and
+% nothing else — which is what to do if this is ever printed in quantity,
+% because a tinted page means the press lays ink across every sheet.
+\newif\ifcanvaspaper \canvaspapertrue
+\ifcanvaspaper
+  \pagecolor{paper}
+  \AddToShipoutPictureBG{%
+    \ifscmark
+    \put(0,0){\includegraphics[width=\paperwidth,height=\paperheight]{fig/page-canvas.jpg}}%
+    \fi}
+\fi
+% \scedge is how far in from the PAPER edge the band's inner boundary sits. On
+% the reading PDF that is the 9mm it has always been; on the press file the
+% paper is 10mm bigger on each side, so the band has to start further in to
+% land in the same place on the trimmed sheet — and it still runs off the paper
+% edge, which is what bleed is.
+\newlength{\scedge}\newlength{\scpad}
+\ifbleed \setlength{\scedge}{19mm}\setlength{\scpad}{10mm}
+\else    \setlength{\scedge}{9mm} \setlength{\scpad}{0mm}\fi
+
 \AddToShipoutPictureBG{%
   \ifscmark
   \begin{tikzpicture}[remember picture,overlay]
     \ifodd\value{page}
       \fill[fill=field!30]
-        ([xshift=-9mm]current page.north east) rectangle (current page.south east);
+        ([xshift=-\scedge]current page.north east) rectangle (current page.south east);
       \foreach \y in {38,50,...,244}{%
         \draw[draw=field!55,line width=.35pt]
-          ([xshift=-9mm,yshift=-\y mm]current page.north east)
-          -- ([xshift=-3mm,yshift=-\y mm-6mm]current page.north east);}
+          ([xshift=-\scedge,yshift=-\y mm-\scpad]current page.north east)
+          -- ([xshift=-\scedge+6mm,yshift=-\y mm-6mm-\scpad]current page.north east);}
     \else
       \fill[fill=field!30]
-        (current page.north west) rectangle ([xshift=9mm]current page.south west);
+        (current page.north west) rectangle ([xshift=\scedge]current page.south west);
       \foreach \y in {38,50,...,244}{%
         \draw[draw=field!55,line width=.35pt]
-          ([xshift=3mm,yshift=-\y mm]current page.north west)
-          -- ([xshift=9mm,yshift=-\y mm-6mm]current page.north west);}
+          ([xshift=\scedge-6mm,yshift=-\y mm-\scpad]current page.north west)
+          -- ([xshift=\scedge,yshift=-\y mm-6mm-\scpad]current page.north west);}
     \fi
   \end{tikzpicture}%
   \fi}
+
+% --- crop marks ----------------------------------------------------------
+% Drawn rather than delegated to the crop package, which wants to own the page
+% geometry and disagrees with geometry's layout. Eight hairlines at the four
+% corners of the TRIM box, starting 3mm outside it so they never sit on bleed
+% artwork, 4mm long, in registration black.
+\ifbleed
+\AddToShipoutPictureFG{%
+  \begin{tikzpicture}[remember picture,overlay,
+      every path/.style={draw=black,line width=0.25pt}]
+    \foreach \cx/\cy/\sx/\sy in {10/10/1/1, 220/10/-1/1, 10/307/1/-1, 220/307/-1/-1}{%
+      % \cx,\cy is a trim corner in mm from the paper's lower-left; \sx,\sy
+      % point inward, so the marks are pushed the other way.
+      \path ([xshift=\cx mm-\sx*\scmarkgap,yshift=\cy mm]current page.south west)
+         -- ([xshift=\cx mm-\sx*\scmarkgap-\sx*\scmarklen,yshift=\cy mm]current page.south west);
+      \path ([xshift=\cx mm,yshift=\cy mm-\sy*\scmarkgap]current page.south west)
+         -- ([xshift=\cx mm,yshift=\cy mm-\sy*\scmarkgap-\sy*\scmarklen]current page.south west);}
+  \end{tikzpicture}%
+}
+\fi
 
 % --- headings in the accent
 %
@@ -299,13 +377,18 @@
     % the bar the site opens on
     \fill[fill=barink] ([yshift=-0mm]current page.north west)
       rectangle ([yshift=-38mm]current page.north east);
-    % The logo as Priscilla's sheet draws it — the horizontal lockup, on its
-    % own paper, mounted on the dark bar, which is the site's own device. It is
-    % set at 52mm because the supply is 279px wide and that is 136 dpi; it is
-    % not enlarged past what it has (open item 7).
-    \node[anchor=west,inner sep=0pt]
+    % The monogram as drawn, mounted on the bar, with the name set in Fraunces
+    % beside it — the site's masthead, at title size.
+    %
+    % The sheet's own HORIZONTAL LOCKUP was tried here and taken off again.
+    % It is 279px wide in the supply, so at the 52mm a title page wants it is
+    % 136 dpi, and its wordmark's caps are about 2mm tall — type at 136 dpi is
+    % visibly soft in print. The monogram survives because 256px at 8.8mm is
+    % 738 dpi, and Fraunces is an outline at any size. That is open item 7
+    % with a number on it.
+    \node[anchor=west,text=paper,inner sep=0pt]
       at ([xshift=28mm,yshift=-19mm]current page.north west)
-      {\includegraphics[width=52mm]{fig/lockup.png}};
+      {\scmarkout{25}\hspace{9pt}\displayfont\LARGE Senso Comune Gallery};
     % the field below it
     \fill[fill=field!45] ([yshift=-38mm]current page.north west)
       rectangle (current page.south east);

@@ -403,7 +403,8 @@ npm run icons        # rebuild the favicon, home-screen icon and manifest
 npm run check:render # paintings keep their proportions in a real browser (needs Chrome)
 npm run readiness    # what is still owed before the site may go live
 npm run build:release # the only build that may go live; refuses while anything is owed
-npm run report       # rebuild the technical report (PDF)
+npm run report       # rebuild the technical report (A4 PDF)
+npm run report:print # …and a press file: 3mm bleed and crop marks
 ```
 
 `build` and `check` are the two that matter. `check` is not advisory — all
@@ -514,7 +515,9 @@ reading it from the other.
 │   │                               because measurements were taken from it.
 │   │                               Its README says which, and what replaced it.
 │   └── report/                     the printable technical report
-│       ├── senso-comune-report.pdf   built: A4, indexed
+│       ├── senso-comune-report.pdf   built: A4 trim, indexed. npm run
+│       │                             report:print writes a second file with
+│       │                             3mm bleed and crop marks (gitignored)
 │       ├── senso-comune-report.qmd   the source
 │       ├── preamble.tex              typesetting: fonts, heads, callouts, the
 │       │                             mark and the lockup as supplied, and the

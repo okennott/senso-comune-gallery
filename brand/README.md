@@ -25,4 +25,4 @@ redrawn, traced or recoloured:
 | Cut by | Into | What |
 |:--|:--|:--|
 | `scripts/build-icons.py` (`npm run icons`) | `public/` | `icon-32.png`, `favicon.ico`, `apple-touch-icon.png`, `logo-mark.png` for the masthead, and the manifest |
-| `docs/report/figures.py` | `docs/report/fig/` | both plates as supplied, the variations panel, the monogram for the running footer, the horizontal lockup for the title page, and the size plate |
+| `docs/report/figures.py` | `docs/report/fig/` | both plates as supplied, the variations panel, the monogram for the title page and the running footer, the size plate, and the page canvas |

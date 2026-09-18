@@ -464,10 +464,11 @@ def canvas_page():
     tokens = (ROOT / "src/styles/tokens.css").read_text(encoding="utf8")
     grain = re.search(r'--canvas-grain:\s*(url\("[^"]+"\));', tokens).group(1)
 
-    # A4 at 150 dpi. The tile is set to the share of the page width it has of a
-    # 1440 px browser window, so the grain reads at the same size relative to
-    # the surface it is on.
-    W, H, TILE = 1240, 1754, 345
+    # A4 at 300 dpi, because a press preflight flags anything under it and this
+    # is the one image on every page. The tile is set to the share of the page
+    # width it has of a 1440 px browser window, so the grain reads at the same
+    # size relative to the surface it is on.
+    W, H, TILE = 2480, 3508, 690
     # A <style> block, not a style attribute: the tile's data URI contains
     # double quotes, and an inline attribute would end at the first one.
     html = ("<!doctype html><style>html,body{margin:0}body{"
@@ -492,26 +493,6 @@ def canvas_page():
     lum = (a * np.array([0.299, 0.587, 0.114])).sum(2)
     print(f"    fig/page-canvas.jpg — {(OUT / 'page-canvas.jpg').stat().st_size:,} bytes, "
           f"{im.width}x{im.height}, grain σ {lum.std():.2f}")
-
-
-def lockup():
-    """The horizontal lockup as the sheet draws it, cut at its own size.
-
-    251 px wide in the supply, and not enlarged: at 46 mm on the title page
-    that is 139 dpi, which is as far as it goes. The report says so rather
-    than upscaling it into something that looks like more (open item 7).
-    """
-    sheet = Image.open(BRAND / "brand-sheet.png").convert("RGB")
-    a = np.asarray(sheet).astype(int)
-    box = (430, 805, 740, 905)
-    dark = a[box[1]:box[3], box[0]:box[2]].sum(2) < 3 * 170
-    ys, xs = np.nonzero(dark)
-    pad = 14
-    crop = sheet.crop((box[0] + int(xs.min()) - pad, box[1] + int(ys.min()) - pad,
-                       box[0] + int(xs.max()) + pad + 1, box[1] + int(ys.max()) + pad + 1))
-    crop.save(OUT / "lockup.png", optimize=True)
-    print(f"    fig/lockup.png — {(OUT / 'lockup.png').stat().st_size:,} bytes, "
-          f"{crop.width}x{crop.height}, as supplied")
 
 
 def mark_assets():
@@ -785,5 +766,5 @@ def _cream_ramp():
 if __name__ == "__main__":
     print("figures:")
     palette(); sage_limit(); payments(); oversell(); duty(); shipping()
-    mark_assets(); lockup(); canvas_page()
+    mark_assets(); canvas_page()
     mark_construction(); mark_sizes(); softness(); structure()

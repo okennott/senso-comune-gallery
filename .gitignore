@@ -46,3 +46,5 @@ desktop.ini
 # python bytecode
 __pycache__/
 *.pyc
+docs/report/*-print.pdf
+docs/report/bleed.on

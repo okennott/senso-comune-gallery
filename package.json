@@ -23,6 +23,7 @@
     "image": "python3 scripts/image.py",
     "report": "bash docs/report/build.sh",
     "report:pdf": "bash docs/report/build.sh",
+    "report:print": "BLEED=1 bash docs/report/build.sh",
     "install:linux": "npm install --os=linux --cpu=x64 --include=optional",
     "install:win": "npm install --os=win32 --cpu=x64 --include=optional"
   },

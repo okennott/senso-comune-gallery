@@ -60,7 +60,43 @@ tectonic -X compile --keep-intermediates --outfmt pdf "$DOC.tex" 2>&1 \
 # keep the source tree clean; the PDF and the sources are what matter
 rm -f "$DOC".{aux,log,toc,lof,lot,out,idx,ilg,ind,tex}
 
-printf '\n%s  —  %s pages, %s\n' \
+printf '\n%s  —  %s pages, %s, %s\n' \
   "$DOC.pdf" \
   "$(pdfinfo "$DOC.pdf" | awk '/^Pages/{print $2}')" \
-  "$(du -h "$DOC.pdf" | cut -f1)"
+  "$(du -h "$DOC.pdf" | cut -f1)" \
+  "$(pdfinfo "$DOC.pdf" | awk -F'[()]' '/^Page size/{print $2}')"
+
+# --- the press file ---------------------------------------------------------
+# BLEED=1 builds a SECOND pdf for the printer: the same document on 230x317mm
+# paper with the A4 trim centred in it, the edge artwork carried 3mm past where
+# the knife falls, and crop marks showing where that is. The reading PDF stays
+# exactly A4, because that is what it is for.
+#
+# The switch is a sentinel file rather than an environment variable because
+# tectonic gives no way to pass a macro in, and preamble.tex reads it with
+# \IfFileExists. It is removed again whatever happens.
+if [ "${BLEED:-}" = "1" ]; then
+  echo "==> press file: bleed and crop marks"
+  trap 'rm -f "$HERE/bleed.on"' EXIT
+  : > "$HERE/bleed.on"
+  quarto render "$DOC.qmd" --to latex >/dev/null
+  tectonic -X compile --keep-intermediates --outfmt pdf "$DOC.tex" >/dev/null 2>&1 || true
+  [ -f "$DOC.idx" ] && makeindex -q "$DOC.idx"
+  tectonic -X compile --keep-intermediates --outfmt pdf "$DOC.tex" 2>&1 \
+    | grep -viE "^note: downloading" | grep -iE "^error" && exit 1 || true
+  mv "$DOC.pdf" "$DOC-print.pdf"
+  rm -f "$HERE/bleed.on" "$DOC".{aux,log,toc,lof,lot,out,idx,ilg,ind,tex}
+
+  # …and put the reading PDF back, because the press file overwrote it.
+  quarto render "$DOC.qmd" --to latex >/dev/null
+  tectonic -X compile --keep-intermediates --outfmt pdf "$DOC.tex" >/dev/null 2>&1 || true
+  [ -f "$DOC.idx" ] && makeindex -q "$DOC.idx"
+  tectonic -X compile --outfmt pdf "$DOC.tex" >/dev/null 2>&1 || true
+  rm -f "$DOC".{aux,log,toc,lof,lot,out,idx,ilg,ind,tex}
+
+  printf '%s  —  %s pages, %s, %s  (trim 210x297mm, 3mm bleed, crop marks)\n' \
+    "$DOC-print.pdf" \
+    "$(pdfinfo "$DOC-print.pdf" | awk '/^Pages/{print $2}')" \
+    "$(du -h "$DOC-print.pdf" | cut -f1)" \
+    "$(pdfinfo "$DOC-print.pdf" | awk '/^Page size/{print $3"x"$5"pt"}')"
+fi

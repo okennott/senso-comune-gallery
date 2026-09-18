@@ -15,12 +15,10 @@ include-in-header:
 format:
   pdf:
     documentclass: report
-    papersize: a4
-    geometry:
-      - top=26mm
-      - bottom=26mm
-      - inner=28mm
-      - outer=24mm
+    # papersize and geometry are NOT set here: Quarto passes neither to this
+    # template — the class option comes out as letterpaper and the geometry
+    # package is never loaded — so the page is set in preamble.tex, where it
+    # is under this project's control. See the note there.
     fontsize: 10.5pt
     linestretch: 1.15
     pdf-engine: tectonic
@@ -397,13 +395,15 @@ the manifest; `logo-mark.png` in the masthead, where the mark and the name are
 a single link and a single tab stop; and this document, in the footer of every
 page. All from `brand/mark-lockup.png`, by one crop.
 
-This document's **title page** carries the other thing the sheet supplies: the
-**horizontal lockup**, as drawn, mounted on the dark bar on its own paper —
-which is the site's own device at title size. It is set at 52 mm because the
-supply is 279 px wide and that is 136 dpi; it is not enlarged past what it has.
-The site's masthead does not use it, for the reason in @tbl-mark: the two
-supplied lockups set the name in a different face from the one the site is
-already set in, while a title page has no such commitment.
+The sheet's **horizontal lockup** was tried on this document's title page and
+taken off again, which is worth recording because it puts a number on open
+item 7. The lockup is **279 px** wide in the supply. At the 52 mm a title page
+wants it, that is **136 dpi**, and its wordmark's capitals are about 2 mm tall —
+type at 136 dpi is visibly soft in print, and this report is going to be
+printed properly. The monogram survives the same test easily (256 px at 8.8 mm
+is 738 dpi) and Fraunces is an outline at any size, so the title page carries
+the monogram with the name set beside it, exactly as the site's masthead does.
+Nothing about that is a preference; it is the resolution ceiling, met.
 
 Nine assertions in `scripts/check-review.mjs` (F-01 to F-04) hold it together:
 that both originals are present and byte-for-byte the files that were supplied;
@@ -1788,6 +1788,18 @@ because Chrome will not lay a window out below 500 px (@sec-checks). The
 captures in @sec-built are taken from `dist/` by `docs/report/shots.sh` as part
 of this document's build, so they cannot show a version of the site that is no
 longer shipping.
+
+**If this is printed.** It is meant to be, so the things a printer asks for
+are settled rather than left to them.
+
+| | |
+|:------------------|:--------------------------------------------------------|
+| Trim | **A4, 210 × 297 mm.** Set in `preamble.tex`, not in the front matter — Quarto passes neither `papersize` nor its `geometry` list to this template, and the document was US Letter for its whole life while every margin in it was given in millimetres. Found by measuring the PDF |
+| Bleed | The sage band and the page canvas both run off the edge, so trim-size artwork is not enough. `npm run report:print` writes a second file, `…-print.pdf`: 230 × 317 mm, the A4 trim centred in it, the edge artwork carried **3 mm** past the knife, and crop marks 3 mm outside the trim and 4 mm long |
+| Fonts | All embedded and subset — Inter, Fraunces, Noto Serif SC and the Latin Modern the maths uses |
+| Colour | **RGB.** Ask the press to convert with a stated profile rather than converting it here blind; the palette is warm brown, sage and cream, which separates without drama |
+| Images | Every figure is **285 ppi or better** at its placed size, except three, all deliberate: the prototype sheet at 247, the lockup plate at 210 and the variations panel at 273 — all three are supply-limited (@sec-mark-issues, open item 7) — and the small tiles inside @fig-mark-sizes and @fig-mark-construction at 91, which are 16 px and 32 px renderings shown enlarged, where the pixels *are* the subject |
+| Ink | The page is tinted edge to edge. For a long run on a press that charges by coverage, `\canvaspaperfalse` in `preamble.tex` gives white pages and keeps the sage band |
 
 **The paper.** This document's pages are the site's own reading surface,
 `--wash-warm`, carrying the site's own canvas tile — not a second texture made
