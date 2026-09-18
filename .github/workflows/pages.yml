@@ -38,6 +38,13 @@ jobs:
       # sharp ships prebuilt binaries for linux-x64; no system libvips needed.
       - run: npm ci || npm install
 
+      # npm run check ends by running scripts/image.py's own selftest, which
+      # is the only thing in the suite that is Python. Three wheels, no system
+      # packages. Without them the check cannot run, and a check that cannot
+      # run is not allowed to pass quietly.
+      - name: Python tools
+        run: python3 -m pip install --quiet --disable-pip-version-check pillow numpy cairosvg
+
       # BASE_PATH: a project site serves from /<repo>/, so every absolute URL
       # needs that prefix. SITE_URL feeds canonical, og:url and the sitemap.
       # No RELEASE=1: this is a preview, which the build makes by default —

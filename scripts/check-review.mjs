@@ -888,6 +888,11 @@ check('TOOL', 'the image tool still converts exactly, both directions', () => {
   // renderer premultiplication and is the only slack it is given.
   const r = spawnSync('python3', [join(ROOT, 'scripts/image.py'), 'selftest'], { encoding: 'utf8' });
   const out = `${r.stdout ?? ''}${r.stderr ?? ''}`;
+  const missing = out.match(/No module named '(\w+)'/);
+  if (missing) {
+    return { ok: false,
+             detail: `${missing[1]} is not installed — pip install pillow numpy cairosvg` };
+  }
   const pass = r.status === 0 && /selftest: pass/.test(out);
   const cases = (out.match(/max \d+ \(allowed \d\)/g) ?? []).length;
   const containers = (out.match(/\.\w+\s+container:/g) ?? []).length;
