@@ -434,6 +434,86 @@ def _monogram():
     return bi.monogram(Image.open(BRAND / "mark-lockup.png").convert("RGB"))[0]
 
 
+def _chrome():
+    import shutil, os
+    return (os.environ.get("CHROME") or shutil.which("google-chrome")
+            or shutil.which("chromium") or shutil.which("chromium-browser"))
+
+
+def canvas_page():
+    """The report's own paper: the SITE's canvas tile, rendered by the same
+    engine, onto the site's own --wash-warm.
+
+    Not a second texture. The tile is lifted verbatim out of tokens.css and
+    composited in soft-light by Chrome, so the grain in this document and the
+    grain on the field of the site are the same drawing at the same strength.
+    Python cannot make it — feTurbulence is an SVG filter and CairoSVG does not
+    implement it — which is why this shells out to a browser.
+
+    Strength is not a matter of taste here either. On --wash-warm the tightest
+    pair the report sets type in is --muted at 4.90:1, which leaves ±0.260 of
+    room either side of neutral; the tile reaches ±0.250. It fits, by 0.010.
+    The site cannot do the same on ITS reading grounds because the binding pair
+    there is --muted-ui on --wash-blue at exactly 3.00:1 (report, "The canvas").
+    """
+    import re, subprocess, tempfile
+    chrome = _chrome()
+    if not chrome:
+        print("    fig/page-canvas.jpg — skipped, no Chrome on PATH")
+        return
+    tokens = (ROOT / "src/styles/tokens.css").read_text(encoding="utf8")
+    grain = re.search(r'--canvas-grain:\s*(url\("[^"]+"\));', tokens).group(1)
+
+    # A4 at 150 dpi. The tile is set to the share of the page width it has of a
+    # 1440 px browser window, so the grain reads at the same size relative to
+    # the surface it is on.
+    W, H, TILE = 1240, 1754, 345
+    # A <style> block, not a style attribute: the tile's data URI contains
+    # double quotes, and an inline attribute would end at the first one.
+    html = ("<!doctype html><style>html,body{margin:0}body{"
+            f"width:{W}px;height:{H}px;background-color:{PAPER};"
+            f"background-image:{grain};background-size:{TILE}px {TILE}px;"
+            "background-blend-mode:soft-light}</style><body></body>")
+    with tempfile.TemporaryDirectory() as tmp:
+        page = pathlib.Path(tmp) / "canvas.html"
+        page.write_text(html, encoding="utf8")
+        shot = pathlib.Path(tmp) / "canvas.png"
+        subprocess.run([chrome, "--headless", "--disable-gpu", "--no-sandbox",
+                        "--hide-scrollbars", f"--window-size={W},{H}",
+                        "--virtual-time-budget=4000",
+                        f"--user-data-dir={tmp}/profile",
+                        f"--screenshot={shot}", page.as_uri()],
+                       check=True, capture_output=True)
+        im = Image.open(shot).convert("RGB")
+    # Continuous tone, so JPEG at 95 with no chroma subsampling — the same
+    # policy the photographic plates follow, and one image the PDF stores once.
+    im.save(OUT / "page-canvas.jpg", quality=95, subsampling=0, optimize=True, progressive=True)
+    a = np.asarray(im).astype(float)
+    lum = (a * np.array([0.299, 0.587, 0.114])).sum(2)
+    print(f"    fig/page-canvas.jpg — {(OUT / 'page-canvas.jpg').stat().st_size:,} bytes, "
+          f"{im.width}x{im.height}, grain σ {lum.std():.2f}")
+
+
+def lockup():
+    """The horizontal lockup as the sheet draws it, cut at its own size.
+
+    251 px wide in the supply, and not enlarged: at 46 mm on the title page
+    that is 139 dpi, which is as far as it goes. The report says so rather
+    than upscaling it into something that looks like more (open item 7).
+    """
+    sheet = Image.open(BRAND / "brand-sheet.png").convert("RGB")
+    a = np.asarray(sheet).astype(int)
+    box = (430, 805, 740, 905)
+    dark = a[box[1]:box[3], box[0]:box[2]].sum(2) < 3 * 170
+    ys, xs = np.nonzero(dark)
+    pad = 14
+    crop = sheet.crop((box[0] + int(xs.min()) - pad, box[1] + int(ys.min()) - pad,
+                       box[0] + int(xs.max()) + pad + 1, box[1] + int(ys.max()) + pad + 1))
+    crop.save(OUT / "lockup.png", optimize=True)
+    print(f"    fig/lockup.png — {(OUT / 'lockup.png').stat().st_size:,} bytes, "
+          f"{crop.width}x{crop.height}, as supplied")
+
+
 def mark_assets():
     """What the page furniture sets: the mark in the running footer and on the
     title bar. Both are the artwork, cut once at 256 px — a plate of cream in
@@ -705,4 +785,5 @@ def _cream_ramp():
 if __name__ == "__main__":
     print("figures:")
     palette(); sage_limit(); payments(); oversell(); duty(); shipping()
-    mark_assets(); mark_construction(); mark_sizes(); softness(); structure()
+    mark_assets(); lockup(); canvas_page()
+    mark_construction(); mark_sizes(); softness(); structure()

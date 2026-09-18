@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Gallery site for a solo painter. Static output, no framework.",
   "engines": {
-    "node": ">=18"
+    "$comment": "sharp 0.35 requires 20.9. Nothing else here does, but sharp is the one dependency, so this is the floor.",
+    "node": ">=20.9"
   },
   "scripts": {
     "build": "npm run build:images && npm run build:site",

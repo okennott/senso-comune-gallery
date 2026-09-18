@@ -192,6 +192,28 @@
 % the OUTER edge and has to swap sides with the page parity. Suppressed on the
 % title page, which carries its own field.
 \newif\ifscmark \scmarktrue
+
+% --- the paper ------------------------------------------------------------
+% The document is printed on the site's own paper: --wash-warm, carrying the
+% same canvas tile the site's field carries, rendered by the same browser onto
+% the same colour (figures.py, canvas_page). It is ONE image, so the PDF stores
+% it once and places it seventy-one times.
+%
+% It may go here for the same reason it may not go on the site's reading
+% grounds: arithmetic. On --wash-warm the tightest pair this document sets type
+% in is --muted at 4.90:1, which leaves ±0.260 of room either side of neutral,
+% and the tile reaches ±0.250. The site's binding pair is --muted-ui on
+% --wash-blue at exactly 3.00:1, which leaves ±0.010. Same tile, same rule,
+% different answer because the ground is different.
+%
+% Registered before the sage band below, because eso-pic paints these in the
+% order they are added and the band belongs on top of the paper, not under it.
+% Suppressed on the title page, which paints its own ground edge to edge.
+\pagecolor{paper}
+\AddToShipoutPictureBG{%
+  \ifscmark
+  \put(0,0){\includegraphics[width=\paperwidth,height=\paperheight]{fig/page-canvas.jpg}}%
+  \fi}
 \AddToShipoutPictureBG{%
   \ifscmark
   \begin{tikzpicture}[remember picture,overlay]
@@ -277,9 +299,13 @@
     % the bar the site opens on
     \fill[fill=barink] ([yshift=-0mm]current page.north west)
       rectangle ([yshift=-38mm]current page.north east);
-    \node[anchor=west,text=paper,inner sep=0pt]
+    % The logo as Priscilla's sheet draws it — the horizontal lockup, on its
+    % own paper, mounted on the dark bar, which is the site's own device. It is
+    % set at 52mm because the supply is 279px wide and that is 136 dpi; it is
+    % not enlarged past what it has (open item 7).
+    \node[anchor=west,inner sep=0pt]
       at ([xshift=28mm,yshift=-19mm]current page.north west)
-      {\scmarkout{25}\hspace{9pt}\displayfont\LARGE Senso Comune Gallery};
+      {\includegraphics[width=52mm]{fig/lockup.png}};
     % the field below it
     \fill[fill=field!45] ([yshift=-38mm]current page.north west)
       rectangle (current page.south east);

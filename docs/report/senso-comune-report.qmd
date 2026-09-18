@@ -395,7 +395,15 @@ pixels — which is issue 2 above, arrived at twice from opposite directions.
 The icon set — `icon-32.png`, `favicon.ico`, the 180 px home-screen icon and
 the manifest; `logo-mark.png` in the masthead, where the mark and the name are
 a single link and a single tab stop; and this document, in the footer of every
-page and on the title page. All from `brand/mark-lockup.png`, by one crop.
+page. All from `brand/mark-lockup.png`, by one crop.
+
+This document's **title page** carries the other thing the sheet supplies: the
+**horizontal lockup**, as drawn, mounted on the dark bar on its own paper —
+which is the site's own device at title size. It is set at 52 mm because the
+supply is 279 px wide and that is 136 dpi; it is not enlarged past what it has.
+The site's masthead does not use it, for the reason in @tbl-mark: the two
+supplied lockups set the name in a different face from the one the site is
+already set in, while a title page has no such commitment.
 
 Nine assertions in `scripts/check-review.mjs` (F-01 to F-04) hold it together:
 that both originals are present and byte-for-byte the files that were supplied;
@@ -643,6 +651,16 @@ the largest single surface on the site, and it is.
 
 The check also fails the build if any rule ever paints a reading ground *and*
 textures it, so the rule is enforced rather than remembered.
+
+**This document is printed on it.** Every page of this report is `--wash-warm`
+carrying the same tile, rendered by the same browser onto the same colour —
+one image, which the PDF stores once and places on every page. It may go there
+for the same reason it may not go on the site's reading grounds, which is to
+say by the same arithmetic with a different answer: on `--wash-warm` the
+tightest pair this document sets type in is `--muted` at **4.90:1**, which
+leaves **±0.260** of room either side of neutral, and the tile reaches ±0.250.
+It fits, by 0.010. On `--wash-blue` the binding pair leaves ±0.010 and it does
+not. One tile, one rule, two grounds.
 
 ### How it is held {#sec-soft-held}
 
@@ -1191,8 +1209,15 @@ wrong description is worse than none, because it burns trust in the channel.
 ## Shape
 
 Plain Node, no framework. Thirty-six pages generated from three data files,
-with `sharp` the only dependency — which is the only architecture consistent
-with a design whose argument is restraint.
+with **one npm dependency** — `sharp`, and only for turning photographs into
+web derivatives — which is the only architecture consistent with a design whose
+argument is restraint. Generating the pages needs Node and nothing else.
+
+Three other things in this repository do need Python, and say so rather than
+pretending otherwise: the icon build, the image tool (@sec-image-tool) and this
+document. All three want Pillow; the report also wants matplotlib, fontTools
+and CairoSVG, and the image tool's trace mode wants VTracer. None of them is
+needed to build or check the site, with one exception noted in @sec-checks.
 
 ```
 src/data/        site.json · seller.json · artworks.json
@@ -1280,8 +1305,13 @@ payment stands and the second is refunded in full within 24 hours.*
 
 ## Checks that block the build {#sec-checks}
 
-`npm run check` runs the first four anywhere, in seconds. The rendering check
-needs Chrome; GitHub runs it on every preview, and the release runs all of them.
+`npm run check` runs the first four in seconds. The rendering check needs
+Chrome; GitHub runs it on every preview, and the release runs all of them.
+
+One of the four reaches outside Node: `check-review` ends by running the image
+tool's own selftest, which is Python. That was a deliberate choice over letting
+it skip when Python is bare — a check that can quietly not run is not a check —
+and the CI workflow installs the four wheels it needs so that it always does.
 
 ```{=latex}
 \Needspace*{16\baselineskip}
@@ -1295,6 +1325,7 @@ needs Chrome; GitHub runs it on every preview, and the release runs all of them.
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
 | `check-review` | **74 assertions over 48 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
 | `test-readiness` | Any of **44 tests** showing the gate opens only when it should (@sec-readiness-proof) |
+| `check-review`, last assertion | The image tool failing its own round-trip: two fixtures, both directions, byte-exact when the source is opaque and within one unit per channel when it is not (@sec-image-tool) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
 
 Headless Chrome will not lay a page out narrower than 500 px — asked for 390, it
@@ -1675,9 +1706,10 @@ readiness gate both require.
 
 # Open items {#sec-open}
 
-Six places where the evidence is thinner than the decision resting on it. Every
-one needs a person outside this project — a customs broker, a tax adviser, a
-carrier, a payment provider — and none can be closed by writing more code.
+Seven places where what is held is thinner than the decision resting on it.
+Every one needs a person outside this project — a customs broker, a tax adviser,
+a carrier, a payment provider, whoever drew the mark — and none can be closed by
+writing more code.
 
 : Unresolved, in rough order of cost if wrong {#tbl-open}
 
@@ -1689,6 +1721,7 @@ carrier, a payment provider — and none can be closed by writing more code.
 | 4 | Export declaration for a \$300 painting | Not established | Also determines what supports the bank's FX check |
 | 5 | Airwallex + HK sole proprietorship | Entity list verified for account opening only | Ask before incorporating |
 | 6 | Several works in one payment, and the largest single transaction | **Not established** on either route | Ask the provider in writing before the cart is built; the figure becomes `maxTransactionUSD` |
+| 7 | The mark has no vector source | The whole supply is one **1536 × 1024** raster; the monogram is about 590 px of it | Ask whoever drew it for the vector, or a much larger scan. Nothing on the site needs it — a 180 px icon and a 2× masthead mark are inside the ceiling — but a business card, a 15 mm foil stamp or a gallery window each want it, and it costs nothing to keep with the rest (@sec-mark-issues) |
 
 ## Settled in the build {#sec-closed}
 
@@ -1700,6 +1733,8 @@ carrier, a payment provider — and none can be closed by writing more code.
 | Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
 | A mark for two languages | An `SC` monogram — a device beside the name rather than a translation of it — used as the drawing Priscilla supplied, one crop serving the tab, the home screen, the masthead and this document | `brand/`, `scripts/build-icons.py` |
+| What the paper actually is | Measured off the artwork rather than chosen: 1/f spectrum, no weave periodicity, σ 4.87 of 255. A cold-press cotton-rag sheet, reproduced as one tile that cannot change a colour (@sec-soft-canvas) | `src/styles/tokens.css` |
+| Converting between a drawing and pixels | One tool, both directions, the fidelity of each mode stated rather than chosen quietly, and its own selftest inside `npm run check` (@sec-image-tool) | `scripts/image.py` |
 
 ## Content still outstanding {#sec-content}
 
@@ -1708,9 +1743,17 @@ the photographs, the titles and descriptions, and the contact details — the em
 and phone are not optional; they are the consumer-law requirement in
 @sec-disclosure.
 
-One design item is also still open. The Chinese-locale enquiry route should be
-WeChat rather than a `mailto:`, and that needs a QR image that does not exist
-yet.
+Three things that are not `NEEDS-INPUT` but are still owed:
+
+- **The Chinese-locale enquiry route** should be WeChat rather than a `mailto:`,
+  and that needs a QR image that does not exist yet. It is the one part of
+  design-review finding A-02 still open (@sec-review).
+- **The social handles.** Six channels are drawn in the footer and none has an
+  address yet, so each links to a route that does not exist and lands on the
+  404 page. Supplying a handle turns its mark into the real link; an explicit
+  `""` takes the channel off the site. Readiness rule ID-06 will not let a
+  release build while any of them is undecided.
+- **The mark's vector source** — open item 7 above.
 
 ```{=latex}
 \clearpage
@@ -1745,6 +1788,20 @@ because Chrome will not lay a window out below 500 px (@sec-checks). The
 captures in @sec-built are taken from `dist/` by `docs/report/shots.sh` as part
 of this document's build, so they cannot show a version of the site that is no
 longer shipping.
+
+**The paper.** This document's pages are the site's own reading surface,
+`--wash-warm`, carrying the site's own canvas tile — not a second texture made
+to look like it. `figures.py` reads the tile out of `tokens.css` and has Chrome
+composite it, because `feTurbulence` is an SVG filter that CairoSVG does not
+implement and Python cannot make the same grain any other way.
+
+**Figure quality.** Page captures are taken at 2×, resampled to 1772 px — 287 dpi
+where they are placed — and kept **lossless**: a screenshot is type and UI edges,
+and since the site acquired a texture a JPEG artefact in a capture of it cannot
+be told apart from the texture itself. The photographic plates — the prototype
+sheet, the lockup, the variations panel and the page canvas — are JPEG at
+quality 95 with no chroma subsampling, which is the right codec for continuous
+tone and visually lossless at this size.
 
 **The mark.** @fig-brand and @fig-mark are `brand/brand-sheet.png` and
 `brand/mark-lockup.png` reproduced as supplied, and the mark in this document's

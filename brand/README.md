@@ -14,8 +14,15 @@ so they were moved here to be kept.
 
 Both are 1536 × 1024 px. That is the whole supply: there is no vector source
 and no larger raster, which is the constraint behind most of what the report's
-mark section has to say. Do not regenerate or "clean up" these files — a
-derived copy replacing an original is how a brand loses its own artwork.
+mark section has to say, and is open item 7 in it. Do not regenerate or "clean
+up" these files — a derived copy replacing an original is how a brand loses its
+own artwork. Both are **pinned by hash** in `scripts/check-review.mjs` (F-01),
+so re-exporting either one fails `npm run check` and has to be a decision.
 
-Derivatives are cut by `scripts/build-icons.sh` (`npm run icons`) into
-`public/`, and by `docs/report/figures.py` into `docs/report/fig/`.
+Everything downstream is a crop and a resize of these two, and nothing is
+redrawn, traced or recoloured:
+
+| Cut by | Into | What |
+|:--|:--|:--|
+| `scripts/build-icons.py` (`npm run icons`) | `public/` | `icon-32.png`, `favicon.ico`, `apple-touch-icon.png`, `logo-mark.png` for the masthead, and the manifest |
+| `docs/report/figures.py` | `docs/report/fig/` | both plates as supplied, the variations panel, the monogram for the running footer, the horizontal lockup for the title page, and the size plate |

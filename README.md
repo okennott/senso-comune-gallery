@@ -379,10 +379,22 @@ carries a penalty onto a personal credit file.
 
 ## 2.1 Build
 
+**What it needs.** Node **20.9 or newer** — `sharp` 0.35 requires it, and
+`sharp` is the one npm dependency. Generating the pages needs nothing else.
+Three other jobs are Python and say so: the icon build, the image tool and the
+report. `pip install pillow numpy cairosvg` covers the first two; the report
+also wants matplotlib, fontTools and a Quarto/tectonic toolchain, and the image
+tool's trace mode wants `vtracer`.
+
+`sharp` ships a different binary per platform, and npm installs only the one it
+is running on — which is why a checkout shared between WSL and Windows needs
+both. That is what the two `install:` scripts are for.
+
 ```bash
 npm install
+npm run install:linux # or install:win — sharp's binary for the other platform
 npm run build        # a PREVIEW: images, then every page → dist/ (noindex, ribbon)
-npm run check        # contrast, structure, design review; all three block the build
+npm run check        # contrast, structure, design review; all of them block the build
 npm run preview      # one built page as a single self-contained file
 npm run fonts        # rebuild the webfonts, Latin and Chinese
 npm run mark         # re-cut the interim construction's letters (report only)
@@ -475,7 +487,7 @@ reading it from the other.
 │   ├── check-links.mjs             dead links, missing alt, missing width or
 │   │                               height, heading order, landmarks, hreflang,
 │   │                               CJK subset coverage
-│   ├── check-review.mjs            70 assertions over 46 findings: the design
+│   ├── check-review.mjs            74 assertions over 48 findings: the design
 │   │                               review, the mark, softness, the shop bar,
 │   │                               the structure, the flags and the gate,
 │   │                               against built pages
@@ -504,14 +516,21 @@ reading it from the other.
 │   └── report/                     the printable technical report
 │       ├── senso-comune-report.pdf   built: A4, indexed
 │       ├── senso-comune-report.qmd   the source
-│       ├── preamble.tex              typesetting: fonts, heads, callouts, and
-│       │                             the mark, included as the vector
-│       │                             scripts/mark.mjs produces
-│       ├── figures.py                vector figures, read from tokens.css
+│       ├── preamble.tex              typesetting: fonts, heads, callouts, the
+│       │                             mark and the lockup as supplied, and the
+│       │                             page canvas — this document is printed on
+│       │                             the site's own paper
+│       ├── figures.py                figures, read from tokens.css and brand/;
+│       │                             also cuts the page canvas, by asking
+│       │                             Chrome to composite the site's own tile
 │       ├── fonts.py                  static cuts of Fraunces and Inter, plus
 │       │                             the Chinese subset — derived from the
 │       │                             .qmd, so the prose cannot outgrow it
-│       ├── shots.sh                  the page screenshots, taken from dist/
+│       ├── shots.sh                  the page screenshots, taken from dist/ at
+│       │                             2x and resampled to 287 dpi, lossless
+│       ├── soft_plate.py             the pixels for the softness plate and the
+│       │                             captures — Pillow, so the report needs no
+│       │                             per-platform image binary
 │       ├── soft_shots.mjs            the softness plate: forced hover and glass
 │       │                             states, on a synthetic stand-in canvas
 │       │                             (cjk-chars.txt is an intermediate and is
@@ -605,9 +624,14 @@ that adds an unaudited third party able to inject arbitrary CSS.
 
 ## 2.5 Checks
 
-Five, and every one blocks. `npm run check` runs the first four anywhere;
+Five, and every one blocks. `npm run check` runs the first four in seconds;
 `npm run check:render` needs Chrome, and GitHub runs it on every preview. A
 release runs all five (§2.8).
+
+One of the four reaches outside Node: `check-review` ends by running
+`scripts/image.py`'s own selftest. That was chosen over letting it skip when
+Python is bare — a check that can quietly not run is not a check — and the CI
+workflow installs the four wheels it needs so that it always does.
 
 `check-contrast.mjs` recomputes every colour token against **the darkest ground
 it is ever painted on**. Checking against white instead is the trap that caught
