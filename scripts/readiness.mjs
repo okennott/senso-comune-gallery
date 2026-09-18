@@ -134,8 +134,8 @@ export const RULES = [
     id: 'ID-06', area: 'Identity and contact', severity: 'blocker', waivable: true,
     title: 'Optional channels are decided: supplied, or left out on purpose',
     basis: 'Undecided is not declined: an empty string removes the channel from the site',
-    fix: 'Set seller.artist.instagram and .xiaohongshu to the handle, or to "" to leave that channel off.',
-    check: ({ seller }) => ['instagram', 'xiaohongshu'].flatMap((k) => {
+    fix: 'Set each of seller.artist.instagram, .facebook, .x, .bluesky and .xiaohongshu to the handle, or to "" to leave that channel off. Until then its mark in the footer links to the site\'s 404 page.',
+    check: ({ seller }) => ['instagram', 'facebook', 'x', 'bluesky', 'xiaohongshu'].flatMap((k) => {
       const v = seller.artist?.[k];
       if (v === '') return [];
       if (isPlaceholder(v) || v === undefined) return [{ path: `seller.artist.${k}`, message: 'undecided — supply it, or set "" to leave it off' }];

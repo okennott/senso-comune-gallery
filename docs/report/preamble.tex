@@ -163,35 +163,25 @@
 % should not compete with a painting on the facing page.
 \usepackage{eso-pic}
 \usepackage{tikz}
+\usepackage{graphicx}   % the mark is an included vector, not a redrawing
 
 % --- the mark -------------------------------------------------------------
-% The logo the report recommends, drawn here so the document carries the thing
-% it argues for. Same geometry as scripts/mark.mjs, in the same 64-unit space:
-% a wall, a hanging datum at 144.78/244 of the height, and a 3:4 plate centred
-% on it. The numbers below are checked against mark.mjs by build.sh; they are
-% not free to drift.
+% The document carries the logo the site ships, and carries the file itself:
+% figures.py asks scripts/mark.mjs for the two renderings and writes them to
+% fig/mark.pdf and fig/mark-out.pdf as vector. Nothing is redrawn here.
 %
-%   \scmarkfig{<height in pt>}
+% It used to be redrawn, in TikZ, from the numbers in mark.mjs — which was
+% defensible while the mark was three rectangles and a line. The SC monogram
+% is two Fraunces outlines, and a TikZ copy of those would be a trace of a
+% trace. A footer still wants a vector, and an included PDF is one.
 %
-% y is measured UP here and DOWN in the SVG, so the plate's corners are
-% 64-44.692 and 64-7.358, and the datum is at 64-26.025.
+%   \scmarkfig{<height in pt>}   on cream: the running footer
+%   \scmarkout{<height in pt>}   on the bar: the title page
 \newcommand{\scmarkfig}[1]{%
-  \pgfmathsetmacro{\scmkS}{#1/64}%
-  \begin{tikzpicture}[x=\scmkS pt,y=\scmkS pt,baseline=0pt]
-    \fill[barink] (0,0) rectangle (64,64);
-    \draw[field,line width=\scmkS*2pt] (0,37.975) -- (64,37.975);
-    \fill[paper] (18,19.308) rectangle (46,56.642);
-  \end{tikzpicture}%
+  \raisebox{-0.22\dimexpr#1pt\relax}{\includegraphics[height=#1pt]{fig/mark.pdf}}%
 }
-% The knockout rendering, for the bar on the title page, where the ground is
-% already the wall.
 \newcommand{\scmarkout}[1]{%
-  \pgfmathsetmacro{\scmkS}{#1/64}%
-  \begin{tikzpicture}[x=\scmkS pt,y=\scmkS pt,baseline=0pt]
-    \draw[field,line width=\scmkS*1.5pt] (0.75,0.75) rectangle (63.25,63.25);
-    \draw[field,line width=\scmkS*2pt] (0,37.975) -- (64,37.975);
-    \fill[paper] (18,19.308) rectangle (46,56.642);
-  \end{tikzpicture}%
+  \raisebox{-0.22\dimexpr#1pt\relax}{\includegraphics[height=#1pt]{fig/mark-out.pdf}}%
 }
 % The geometry is two-sided (inner 28mm, outer 24mm), so the band belongs on
 % the OUTER edge and has to swap sides with the page parity. Suppressed on the

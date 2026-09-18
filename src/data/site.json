@@ -81,18 +81,40 @@
       "en": "View works",
       "zh": "浏览作品"
     },
+    "original": {
+      "$comment": [
+        "The sentence as van Gogh wrote it, in Dutch. Transcribed from the Van",
+        "Gogh Museum / Huygens ING edition of letter 143, sheet 1r:1, where it",
+        "closes 'Het is goed om zooveel lief te hebben als men kan...':",
+        "'en wat met liefde gedaan wordt dat wordt goed gedaan.' The leading",
+        "'en' and the full stop are dropped because the quotation starts mid-",
+        "sentence; not one other word, mark or spelling is changed — the",
+        "nineteenth-century 'wordt ... wordt' is his, not a typo.",
+        "",
+        "It carries its own line breaks for the same reason `title` does, and",
+        "it is broken into four lines so the original and the translation are",
+        "set in the same shape."
+      ],
+      "lang": "nl",
+      "text": "wat met liefde\ngedaan wordt\ndat wordt\ngoed gedaan",
+      "source": "https://vangoghletters.org/vg/letters/let143/letter.html"
+    },
     "$comment": [
       "The motto, in van Gogh's own words: letter 143 to Theo, Amsterdam, 3 April",
       "1878 — 'that which is done with love is well done' (vangoghletters.org/en/let143).",
+      "The Dutch original is set above the translation; see `original` above.",
       "",
       "`title` holds its line breaks (\\n). The motto is set as written, never",
       "re-wrapped by the browser, so the attribution can align to its real right",
-      "edge; a browser cannot shrink a box to the longest line of wrapped text."
+      "edge; a browser cannot shrink a box to the longest line of wrapped text.",
+      "",
+      "`attribution` is the full name. He signed the paintings 'Vincent'; the",
+      "name under a quotation is the man's, and his was Vincent Willem van Gogh."
     ],
     "ctaHref": "/works/",
     "attribution": {
-      "en": "Vincent van Gogh",
-      "zh": "文森特·梵高"
+      "en": "Vincent Willem van Gogh",
+      "zh": "文森特·威廉·梵高"
     }
   },
   "sections": {
@@ -466,6 +488,26 @@
       "search": "/search/",
       "account": "/account/",
       "cart": "/cart/"
+    },
+    "$social": [
+      "The same arrangement for the footer's channel marks. A channel whose",
+      "handle in seller.artist is still NEEDS-INPUT has no address to link to,",
+      "so its mark points here — a route that does not exist — and the click",
+      "lands on the 404 page, which says in both languages what is still being",
+      "built. Supplying the handle turns the mark into the real profile link",
+      "and takes it out of this set by itself.",
+      "",
+      "Kept separate from `routes` on purpose: those three are decision D1 and",
+      "are waived one by one for a release; these clear themselves when rule",
+      "ID-06 is satisfied, which a release build already requires."
+    ],
+    "social": {
+      "instagram":   "/elsewhere/instagram/",
+      "facebook":    "/elsewhere/facebook/",
+      "x":           "/elsewhere/x/",
+      "bluesky":     "/elsewhere/bluesky/",
+      "wechat":      "/elsewhere/wechat/",
+      "xiaohongshu": "/elsewhere/xiaohongshu/"
     }
   },
   "notFound": {

@@ -18,10 +18,11 @@
     "check:render": "node scripts/check-render.mjs",
     "preview": "node scripts/preview.mjs",
     "fonts": "bash scripts/build-fonts.sh",
+    "mark": "python3 scripts/build-mark-paths.py",
     "report": "bash docs/report/build.sh",
     "report:pdf": "bash docs/report/build.sh"
   },
   "devDependencies": {
-    "sharp": "^0.33.5"
+    "sharp": "^0.35.4"
   }
 }

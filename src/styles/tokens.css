@@ -232,6 +232,33 @@
   --glass-bar-opacity: 88%;
   --glass-blur:        14px;
 
+  /* The footer runs the same glass as the bar, but over the sage field rather
+     than over a painting, so its worst case is not a guess — it is a fixed,
+     computable colour: --bar at --glass-bar-opacity over --field. This token
+     IS that composite, and check-contrast.mjs solves every footer pair
+     against it instead of against the solid bar.
+       --paper-deep on it  8.96:1     (10.74 on the solid bar)
+       --paper on it       9.55:1     (11.45)
+     Over --field-deep, the darker half of the field, both are higher still,
+     so the value below is the worst case and not an average.              */
+  --glass-footer:      #45382D;
+
+  /* A frosted plate on the sheet: a panel that lets the wash beneath it come
+     through instead of stamping a second cream on top of the first.
+
+     Why this needs no new ground. The plate is cream over cream, and --paper
+     is LIGHTER than every wash: 72% --paper over --wash-blue, the darkest
+     reading surface on the site, composites to #F0E9DB, which is lighter than
+     --wash-blue itself. A plate can only make the ground under text paler
+     than the one check-contrast.mjs already solves against, never darker. */
+  --glass-plate:       color-mix(in srgb,var(--paper) 72%,transparent);
+  --glass-plate-blur:  10px;
+
+  /* The light a pane catches along its top edge. --paper at just over half,
+     never white: white on this warm palette reads as a chip in the surface
+     rather than as a highlight on it. */
+  --glass-rim:  inset 0 1px 0 color-mix(in srgb,var(--paper) 55%,transparent);
+
   /* --- targets -----------------------------------------------------------
      48px clears WCAG 2.5.8 (24px AA), 2.5.5 (44px AAA) and Android's 48dp
      simultaneously. Reached via padding, never via font size.             */

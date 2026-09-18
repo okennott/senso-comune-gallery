@@ -401,7 +401,7 @@ function renderIndex(loc) {
   <div class="hero__lede">
     <h1 class="visually-hidden">${esc(t(seller.artist.siteName, loc))}</h1>
     <figure class="hero__quote">
-      <blockquote><p class="hero__motto">${t(site.hero.title, loc).split('\n').map(esc).join('<br>')}</p></blockquote>
+      <blockquote cite="${esc(site.hero.original.source)}"><p class="hero__original" lang="${esc(site.hero.original.lang)}">${site.hero.original.text.split('\n').map(esc).join('<br>')}</p><p class="hero__motto">${t(site.hero.title, loc).split('\n').map(esc).join('<br>')}</p></blockquote>
       <figcaption class="hero__cite">— ${esc(t(site.hero.attribution, loc))}</figcaption>
     </figure>
     <a class="link-quiet" href="${lpath(loc, site, site.hero.ctaHref)}">${esc(t(site.hero.cta, loc))}</a>

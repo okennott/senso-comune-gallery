@@ -14,6 +14,10 @@ export const esc = (s = '') =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
+/** A field still owed. The build flags it wherever it reaches a page, and the
+ *  readiness gate refuses a release build while any remains. */
+export const PLACEHOLDER = 'NEEDS-INPUT';
+
 /** Pick a localised value from {en, zh}. */
 export const t = (field, loc) =>
   (field && typeof field === 'object' ? (field[loc] ?? field.en ?? '') : (field ?? ''));
@@ -187,7 +191,12 @@ const favicon = (asset) => `<link rel="icon" href="${asset('/icon.svg')}" type="
    be, so the wall is drawn as an outline instead of a fill. Decorative: the
    link's own text is the accessible name, and a second one here would violate
    2.5.3 Label in Name. */
-const MASTHEAD_MARK = markSvg({ wall: 'outline', tokens: true, className: 'wordmark__mark' });
+/* The masthead paints no field of its own: the bar is already the ground, and
+   an opaque square would show as a slab the moment the bar goes to glass. The
+   inlay between the two letters is cut with a mask instead, so the bar — or
+   the painting passing under it — shows through. currentColor takes the
+   wordmark's own --paper. */
+const MASTHEAD_MARK = markSvg({ variant: 'mono', tokens: true, className: 'wordmark__mark' });
 
 /* The shop bar's icons: 24-unit, one stroke weight, drawn in currentColor so
    they take the bar's text colour and are checked with it. */
@@ -197,6 +206,69 @@ const SHOP_ICONS = {
   account: icon('<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/>'),
   cart:    icon('<path d="M5.5 8h13l-1.1 12H6.6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>'),
 };
+
+/* ---------- social channels ----------
+   A link-in-bio business is found through its profiles, so the footer carries
+   them as marks rather than as a list of words: five 24-unit line drawings in
+   the same stroke idiom as the shop bar, in currentColor, on 48px targets.
+
+   They are DRAWINGS, not the companies' logo files: one weight, one grid, no
+   brand colour, so the row reads as one set and as part of this site. Each is
+   a link with a visually-hidden name, because an icon has no accessible name
+   of its own and voice control needs a word to match.
+
+   `url` builds the address from a handle, so a handle can never be mistyped
+   into someone else's profile. WeChat and 小红书 have no profile URL derivable
+   from a handle, so their marks go to the contact page, where it is printed.
+
+   Channels are declared in seller.artist. A channel set to "" is left out
+   altogether — declined on purpose. A channel whose handle is still owed has
+   no address yet, so its mark points at a dead route from
+   site.placeholders.social and the click lands on the 404 page: the same
+   arrangement decision D1 uses for search, account and cart, and the same one
+   check-links.mjs polices — the route must be declared, and must still be
+   dead. Supplying the handle turns the mark into the real link and takes it
+   out of the placeholder set by itself, which readiness rule ID-06 requires
+   of every channel before a release build will run. */
+const smark = (d) => `<svg class="social__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const dot = (cx, cy, r) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="currentColor" stroke="none"/>`;
+
+const SOCIAL = [
+  { key: 'instagram', name: 'Instagram',
+    url: (h) => `https://instagram.com/${h}`,
+    mark: smark(`<rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"/><circle cx="12" cy="12" r="4"/>${dot(17.1, 6.9, 0.95)}`) },
+  { key: 'facebook', name: 'Facebook',
+    url: (h) => `https://facebook.com/${h}`,
+    mark: smark('<path d="M14.4 21v-8h2.5l.5-3h-3V8.3c0-.9.3-1.4 1.6-1.4h1.6V4.2A22 22 0 0 0 15.3 4C13 4 11.4 5.4 11.4 8v2H8.9v3h2.5v8"/>') },
+  { key: 'x', name: 'X',
+    url: (h) => `https://x.com/${h}`,
+    mark: smark('<path d="M4.4 4.2l15.2 15.6"/><path d="M19.6 4.2L4.4 19.8"/>') },
+  { key: 'bluesky', name: 'Bluesky',
+    url: (h) => `https://bsky.app/profile/${h}`,
+    mark: smark('<path d="M12 14.4c-1.5-2.7-4.2-6.1-6-7-1.6-.8-2.5.1-2.5 1.9 0 1.9.4 4.3 1 5.1.7.9 2 1.1 3.5.9.4 0 .5.3.2.5-1.2.6-1.8 1.6-.6 3 1.3 1.5 3.3 1 4.4-1.2"/><path d="M12 14.4c1.5-2.7 4.2-6.1 6-7 1.6-.8 2.5.1 2.5 1.9 0 1.9-.4 4.3-1 5.1-.7.9-2 1.1-3.5.9-.4 0-.5.3-.2.5 1.2.6 1.8 1.6.6 3-1.3 1.5-3.3 1-4.4-1.2"/>') },
+  { key: 'xiaohongshu', name: '小红书', href: '/contact/',
+    mark: smark('<path d="M3.6 5.6h5.1c1.3 0 2.4.7 3.3 1.7.9-1 2-1.7 3.3-1.7h5.1v11.9h-5.1c-1.3 0-2.4.7-3.3 1.7-.9-1-2-1.7-3.3-1.7H3.6z"/><path d="M12 7.3v11.9"/>') },
+  { key: 'wechatId', name: 'WeChat', placeholder: 'wechat', href: '/contact/',
+    mark: smark(`<path d="M9.2 4.6c-3.4 0-6.2 2.3-6.2 5.1 0 1.6.9 3.1 2.3 4.1l-.7 2 2.5-1.2c.6.2 1.3.3 2.1.3"/>${dot(7.3, 8.6, 0.85)}${dot(11.1, 8.6, 0.85)}<path d="M21 14.4c0-2.5-2.4-4.5-5.4-4.5s-5.4 2-5.4 4.5 2.4 4.5 5.4 4.5c.6 0 1.2-.1 1.8-.2l2.2 1-.6-1.6c1.2-.8 2-2.1 2-3.7z"/>${dot(13.9, 13.5, 0.75)}${dot(17.3, 13.5, 0.75)}`) },
+];
+
+/** The footer's channel row. Nothing is drawn when every channel is declined. */
+export function socialRow(site, seller, loc) {
+  const items = SOCIAL.filter((c) => seller.artist[c.key]).map((c) => {
+    const handle = seller.artist[c.key];
+    const owed = handle === PLACEHOLDER;
+    const dead = site.placeholders?.social?.[c.placeholder ?? c.key];
+    const href = owed ? path(loc, site, dead)
+      : c.href ? path(loc, site, c.href)
+      : c.url(encodeURIComponent(handle));
+    const attrs = owed ? ` data-placeholder="${c.placeholder ?? c.key}"` : (c.href ? '' : ' rel="me noopener"');
+    return `<li><a class="social__link" href="${esc(href)}"${attrs}>` +
+           `${c.mark}<span class="visually-hidden">${esc(c.name)}</span></a></li>`;
+  });
+  return items.length
+    ? `<ul class="social" aria-label="${loc === 'zh' ? '社交账号' : 'Elsewhere'}">\n      ${items.join('\n      ')}\n    </ul>`
+    : '';
+}
 
 /* The long and short forms of the name, as the navigation does it (B-04):
    both are in the markup, CSS shows one, and whichever is visible is the
@@ -331,11 +403,7 @@ ${body}
     <ul>
       ${site.footer.links.map((l) => `<li><a href="${esc(path(loc, site, l.href))}">${esc(t(l.label, loc))}</a></li>`).join('\n      ')}
     </ul>
-    <ul>
-      ${seller.artist.instagram ? `<li><a href="https://instagram.com/${esc(seller.artist.instagram)}" rel="me noopener">Instagram</a></li>` : ''}
-      ${seller.artist.wechatId ? `<li><span>WeChat: ${esc(seller.artist.wechatId)}</span></li>` : ''}
-      ${seller.artist.xiaohongshu ? `<li><span>小红书: ${esc(seller.artist.xiaohongshu)}</span></li>` : ''}
-    </ul>
+    ${socialRow(site, seller, loc)}
   </div>
   ${decl ? `<div class="wrap"><p class="legal-declaration" lang="zh-CN">${esc(decl.zh)}</p>
   <p class="legal-declaration" style="border:0;margin-top:0;padding-top:0">${esc(decl.en)}</p></div>` : ''}

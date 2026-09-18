@@ -41,8 +41,21 @@ html{
 body{
   margin:0;
   /* The sage is the field the page sits in; the reading surfaces are laid on
-     top of it. Nothing sets text on the sage. */
-  background:var(--field);
+     top of it. Nothing sets text on the sage.
+
+     It used to be one flat fill from edge to edge: the largest single solid
+     on the site, and the only surface with nothing happening in it. It keeps
+     its colour and gains a slow fall from a lifted --field at the top to
+     --field-deep at the foot, so the sheet reads as mounted on a ground that
+     is lit rather than pasted onto a swatch. Both ends are palette values.
+     Fixed, so the fall belongs to the page and not to the scroll; and since
+     no text ever sits on the field, none of this is a contrast question. */
+  background-color:var(--field);
+  background-image:linear-gradient(in oklab,
+    color-mix(in oklab,var(--field) 90%,white) 0%,
+    var(--field) 34%,
+    var(--field-deep) 100%);
+  background-attachment:fixed;
   color:var(--body);
   font-family:var(--font-body);
   font-size:var(--size-body);
@@ -68,7 +81,10 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
   max-width:1240px;
   margin-inline:auto;
   background:var(--wash-warm);
-  box-shadow:var(--shadow-sheet);
+  /* The sheet's own shadow, plus the light a pane catches along its top
+     edge — which is what tells the eye the cream is lying ON the sage
+     rather than being a hole cut in it. */
+  box-shadow:var(--shadow-sheet),var(--glass-rim);
   border-radius:var(--radius-sheet);
 }
 /* The sheet floats on the sage — a mounted object, not a page that starts at

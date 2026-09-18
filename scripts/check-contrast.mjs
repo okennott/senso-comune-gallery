@@ -58,7 +58,7 @@ const GROUNDS = {
    one is what the cascade uses — and a rule that set a good colour and then
    overrode it with a bad one was exactly the B-01 defect. */
 const BAR = T['bar'];
-const ON_BAR_SELECTORS = /^\s*(\.masthead|\.wordmark|\.nav\b|\.nav__|\.lang-switch|\.shopbar|\.footer|\.legal-declaration)/;
+const ON_BAR_SELECTORS = /^\s*(\.masthead|\.wordmark|\.nav\b|\.nav__|\.lang-switch|\.shopbar|\.social|\.footer|\.legal-declaration)/;
 
 const barPairs = [];
 const ownGround = [];
@@ -74,9 +74,15 @@ const ownGround = [];
     const token = colours.at(-1)[1];           // the one the cascade keeps
     if (!T[token]) continue;
     const isLarge = /wordmark/.test(selector);  // the wordmark is display size
+    // A rule may declare the ground it is really read on. The footer paints
+    // itself in a color-mix() this script cannot composite — glass over the
+    // sage field — so it names the worst case instead, and that name wins
+    // over whatever background the rule also sets.
+    const declaredGround = (m[2].match(/--contrast-ground:\s*var\(--([a-z0-9-]+)\)/) ?? [])[1];
     // A rule that paints its own ground — the cart count's pill — is read
     // against that ground, not against the bar it happens to sit over.
-    const ground = ([...m[2].matchAll(/(?:^|[;\s])background(?:-color)?:\s*var\(--([a-z0-9-]+)\)/g)].at(-1) ?? [])[1];
+    const painted = ([...m[2].matchAll(/(?:^|[;\s])background(?:-color)?:\s*var\(--([a-z0-9-]+)\)/g)].at(-1) ?? [])[1];
+    const ground = T[declaredGround] ? declaredGround : painted;
     if (ground && T[ground]) {
       ownGround.push([selector.replace(/\s+/g, ' ').slice(0, 38), token, ground, isLarge ? 3.0 : 4.5]);
       continue;
@@ -163,7 +169,15 @@ for (const [selector, token, min, note] of barPairs) {
    The floor here is a design floor, not WCAG's: 7:1 for navigation-size text
    (AAA) and 4.5:1 for the display-size wordmark. WCAG's 4.5:1 would allow the
    bar down to 73%; the site chose a full AAA margin, and this is what holds it
-   there. Only masthead rules are affected — the footer does not float. */
+   there.
+
+   Only masthead rules are modelled against white. The footer runs the same
+   glass, but over the sage field rather than over a painting, so its worst
+   case is one fixed colour — --glass-footer — and the block below recomputes
+   that token from --bar, --glass-bar-opacity and --field and fails if the
+   value written in tokens.css has drifted from the composite it claims to be.
+   The footer's own pairs are then solved against it as ordinary own-ground
+   pairs, because the rules declare --contrast-ground. */
 {
   const alphaDecl = (readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8')
     .match(/--glass-bar-opacity:\s*([\d.]+)%/) ?? [])[1];
@@ -186,6 +200,27 @@ for (const [selector, token, min, note] of barPairs) {
       line(`  ${ok ? '✓' : '✗'} ${selector.padEnd(38)} --${token.padEnd(12)} ${r.toFixed(2)}  floor ${floor.toFixed(1)}`);
     }
   }
+}
+
+/* ---------- the glass footer ----------
+   --glass-footer is not a colour anyone chose: it is --bar at
+   --glass-bar-opacity over --field, written down so the rest of this script
+   can treat it as a ground. Recompute it and fail on any drift. */
+{
+  const css2 = readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8');
+  const a = Number((css2.match(/--glass-bar-opacity:\s*([\d.]+)%/) ?? [])[1]) / 100;
+  const rgb = (h) => [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16));
+  const hex = (c) => '#' + c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+  const over = (under) => hex(rgb(BAR).map((v, i) => a * v + (1 - a) * rgb(under)[i]));
+  const want = over(T['field']);
+  const got = (T['glass-footer'] ?? '').toUpperCase();
+  const ok = got === want.toUpperCase();
+  if (!ok) failures++;
+  line('\n  THE GLASS FOOTER — the bar over the sage field\n');
+  line(`  ${ok ? '✓' : '✗'} --glass-footer ${got || '(missing)'} = --bar at ${a * 100}% over --field ${want.toUpperCase()}`);
+  // --field is the lighter half of the field and therefore the worst case for
+  // light text; state the other end so the claim is visible rather than asserted.
+  line(`    over --field-deep it composites to ${over(T['field-deep']).toUpperCase()}, which is darker still`);
 }
 
 for (const [selector, token, ground, min] of ownGround) {

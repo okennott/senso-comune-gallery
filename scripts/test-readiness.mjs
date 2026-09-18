@@ -32,6 +32,9 @@ function ready() {
   seller.contact.address = { en: '88 Example Road, Xuhui District, Shanghai 200030, China', zh: '中国上海市徐汇区示例路88号 200030' };
   seller.artist.wechatId = 'priscilla_studio';
   seller.artist.instagram = '';            // declined, on purpose
+  seller.artist.facebook = '';
+  seller.artist.x = '';
+  seller.artist.bluesky = '';
   seller.artist.xiaohongshu = '';
   seller.donation.recipient = 'Shanghai Charity Foundation';
   seller.donation.recipientUrl = 'https://www.scf.org.cn/';
@@ -85,6 +88,7 @@ closes('address in one language only', 'ID-03', (d) => { d.seller.contact.addres
 closes('WeChat ID starting with a digit', 'ID-05', (d) => { d.seller.artist.wechatId = '9priscilla'; });
 closes('WeChat ID too short', 'ID-05', (d) => { d.seller.artist.wechatId = 'pris'; });
 closes('Instagram left undecided', 'ID-06', (d) => { d.seller.artist.instagram = 'NEEDS-INPUT'; });
+closes('Bluesky left undecided', 'ID-06', (d) => { d.seller.artist.bluesky = 'NEEDS-INPUT'; });
 closes('the SAMR declaration paraphrased', 'LG-01', (d) => { d.seller.entities.individual.registration.selfDeclaration.zh = SAMR_ART12.replace('依法', ''); });
 closes('Hong Kong entity active without its numbers', 'LG-02', (d) => { d.seller.activeEntity = 'hk-sole-prop'; });
 closes('returns shortened to 7 days', 'LG-03', (d) => { d.seller.returns.windowDays = 7; });

@@ -63,11 +63,12 @@ def on(bg, light="#FFFFFF", dark=None):
 
 
 # ------------------------------------------------------------ report faces
-# The logo figure has to SET the candidates, not describe them, so it needs the
+# Several figures have to SET type rather than describe it, so they need the
 # same static cuts the document is set in. fonts.py has already built them by
 # the time this runs; a missing file is a build-order bug, not a soft failure.
 FONTS = ROOT / "docs/report/fonts"
 FRAUNCES = FontProperties(fname=str(FONTS / "Fraunces-Display-SemiBold.ttf"))
+UI = FontProperties(fname=str(FONTS / "Inter-Regular.ttf"))
 _cjk = FONTS / "NotoSerifSC-report.otf"
 CJK = FontProperties(fname=str(_cjk)) if _cjk.exists() else None
 
@@ -394,116 +395,116 @@ def shipping():
     save(fig, "shipping")
 
 
-# ------------------------------------------------------- 7. the logo options
-def logo():
-    """The six candidates, each drawn twice: once at a size where anyone would
-    approve it, and once at 16 px, which is where it will actually spend its
-    life. Four of the six die in the second column."""
-    from scale_mark import MARK, GEOM   # the site's own geometry, imported
+# ------------------------------------------------------------ 7. the mark
+# The report draws the logo the site ships, not a redrawing of it. Every tile
+# below is the SVG scripts/mark.mjs produces, rasterised here, so the document
+# cannot end up arguing for a mark the site no longer has.
 
-    BAR_ = BAR
-    def tile(ax, x, y, s, kind, small=False):
-        """Draw candidate `kind` in a square of side `s` at (x, y)."""
-        ax.add_patch(Rectangle((x, y), s, s, facecolor=BAR_, edgecolor=MUTED,
-                               linewidth=.4, zorder=2))
-        k = s / 64.0                       # the marks are drawn in 64-unit space
-
-        if kind == "wordmark":
-            ax.text(x + s / 2, y + s / 2, "Senso\nComune\nGallery",
-                    fontproperties=FRAUNCES, color=PAPER, fontsize=s * 9.5,
-                    ha="center", va="center", linespacing=1.15, zorder=3)
-
-        elif kind == "sc":
-            ax.text(x + s / 2, y + s / 2, "SC", fontproperties=FRAUNCES,
-                    color=PAPER, fontsize=s * 30, ha="center", va="center", zorder=3)
-
-        elif kind == "pair":
-            ax.plot([x + s / 2, x + s / 2], [y, y + s], color=MUTED, lw=.4, zorder=3)
-            ax.text(x + s / 4, y + s / 2, "SC", fontproperties=FRAUNCES,
-                    color=PAPER, fontsize=s * 15, ha="center", va="center", zorder=3)
-            ax.text(x + 3 * s / 4, y + s / 2, "\u5e38",
-                    fontproperties=cjk_or_die("\u5e38"),
-                    color=PAPER, fontsize=s * 17, ha="center", va="center", zorder=3)
-
-        elif kind == "hatch":
-            # Leonardo ran upper-left to lower-right; the measured angle is 43.8 deg.
-            box = Rectangle((x, y), s, s, transform=ax.transData)
-            for t in np.arange(-1.2, 1.4, 0.22):
-                x0, y0 = x + t * s, y + s
-                line, = ax.plot([x0, x0 + s * 1.2],
-                                [y0, y0 - s * 1.2 * np.tan(np.radians(43.8))],
-                                color=PAPER, lw=s * 1.1, zorder=3)
-                line.set_clip_path(box)
-
-        elif kind == "sfumato":
-            g = np.linspace(-1, 1, 160)
-            gx, gy = np.meshgrid(g, g)
-            d = np.clip(1 - np.sqrt(gx ** 2 + gy ** 2) * 1.25, 0, 1) ** 1.5
-            ax.imshow(d, extent=(x, x + s, y, y + s), cmap=_cream_ramp(),
-                      vmin=0, vmax=1, zorder=3, interpolation="bilinear", aspect="auto")
-
-        elif kind == "plate":
-            ax.plot([x, x + s], [y + s - GEOM["cy"] * k] * 2,
-                    color=FIELD, lw=MARK["datumWidth"] * k * 2.2, zorder=3,
-                    solid_capstyle="butt")
-            ax.add_patch(Rectangle((x + GEOM["x"] * k, y + s - (GEOM["y"] + GEOM["plateH"]) * k),
-                                   MARK["plateW"] * k, GEOM["plateH"] * k,
-                                   facecolor=PAPER, edgecolor="none", zorder=4))
-
-    rows = [
-        ("wordmark", "Wordmark alone", "Where the site started",
-         "Nothing to put in a tab. Illegible below about 90 px, and there is no\n"
-         "second lockup for a share card or a WeChat avatar."),
-        ("sc", "SC monogram", "What shipped in September",
-         "Reads at 16 px. But the wordmark translates, and the Chinese one is not\n"
-         "spelled with Latin letters at all. It serves one of the two audiences."),
-        ("pair", "One monogram per locale", "The obvious repair",
-         "Two marks is two brands. The favicon is chosen by the origin, not by\n"
-         "the page, so a bilingual site cannot swap it per locale anyway."),
-        ("hatch", "Leonardo\u2019s hatching", "The debt, made literal",
-         "Announces the reference the brief asked to be carried quietly, and at\n"
-         "16 px it is four grey lines."),
-        ("sfumato", "Sfumato disc", "The principle, made literal",
-         "A soft edge cannot survive a 32 px ICO, a monochrome fax of an invoice\n"
-         "or an embroidered label. It has no outline to fall back to."),
-        ("plate", "A work on a wall", "Recommended",
-         "Carries no letterforms, so one file serves both locales. Its proportions\n"
-         "are the catalogue\u2019s own: a 3:4 portrait hung at 144.78 cm on a 244 cm wall."),
-    ]
-
-    BIG, SMALL, PITCH = 0.95, 0.30, 1.26
-    TEXT_X = 2.05
-    H = len(rows) * PITCH + 0.75
-
-    fig, ax = plt.subplots(figsize=(6.6, 6.6 * H / 10))
-    ax.set_xlim(0, 10); ax.set_ylim(0, H); ax.axis("off")
-    ax.set_aspect("equal")
-
-    ax.text(0, H - 0.20, "at display size", fontsize=6.0, color=BODY)
-    ax.text(1.32 + SMALL / 2, H - 0.20, "16 px", fontsize=6.0, color=BODY, ha="center")
-
-    for i, (kind, name, status, verdict) in enumerate(rows):
-        top = H - 0.42 - i * PITCH
-        y = top - BIG
-        tile(ax, 0.0, y, BIG, kind)
-        tile(ax, 1.32, y + (BIG - SMALL) / 2, SMALL, kind, small=True)
-
-        chosen = status == "Recommended"
-        if chosen:
-            ax.plot([TEXT_X - 0.16, TEXT_X - 0.16], [y + .02, top - .02],
-                    color=SANG, lw=2.0, solid_capstyle="butt")
-
-        ax.text(TEXT_X, top - 0.14, name, fontsize=8.4, weight="bold",
-                color=INK, va="center")
-        ax.text(TEXT_X, top - 0.40, status.upper(), fontsize=6.2,
-                color=SANG if chosen else MUTED, va="center")
-        ax.text(TEXT_X, top - 0.72, verdict, fontsize=6.9, color=BODY,
-                va="center", linespacing=1.5)
-
-    save(fig, "logo")
+def _mark_svgs(jobs):
+    """Ask Node for a batch of renderings. jobs: {name: options}."""
+    import json, subprocess
+    src = (
+        'const {markSvg} = await import(process.argv[1]);'
+        'const jobs = JSON.parse(process.argv[2]);'
+        'const out = {};'
+        'for (const [k, o] of Object.entries(jobs)) out[k] = markSvg(o);'
+        'process.stdout.write(JSON.stringify(out));'
+    )
+    r = subprocess.run(["node", "--input-type=module", "-e", src,
+                        str(ROOT / "scripts/mark.mjs"), json.dumps(jobs)],
+                       capture_output=True, text=True, check=True)
+    return json.loads(r.stdout)
 
 
-# ----------------------------------------------------- 8. the softness limits
+def _downgrade(pdf, version):
+    """Rewrite a PDF's header to an older version, in place. matplotlib's
+    figures are already 1.4; only the SVG conversions are not."""
+    raw = pdf.read_bytes()
+    if raw.startswith(b"%PDF-"):
+        pdf.write_bytes(b"%PDF-" + version.encode() + raw[8:])
+
+
+def mark_assets():
+    """The two renderings the preamble sets in the page furniture: the running
+    footer's mark, on cream, and the title bar's, where the ground is already
+    the bar. Vector PDF both times — a footer wants a vector."""
+    import cairosvg
+    svgs = _mark_svgs({
+        "mark":     {"variant": "reversed"},
+        "mark-out": {"variant": "mono", "ink": PAPER},
+    })
+    for name, svg in svgs.items():
+        pdf = OUT / f"{name}.pdf"
+        cairosvg.svg2pdf(bytestring=svg.encode("utf8"),
+                         output_width=64, output_height=64,
+                         write_to=str(pdf))
+        # cairosvg writes PDF 1.7; the document is set at 1.5, and xdvipdfmx
+        # warns on every inclusion of a file newer than its output setting.
+        # Two 64-unit line drawings need nothing 1.7 has, so say 1.5.
+        _downgrade(pdf, "1.5")
+        print(f"    fig/{name}.pdf")
+
+
+def mark():
+    """The monogram as the site ships it: the four renderings, and then the
+    one that matters — the same mark rasterised at the three sizes it is
+    actually cut to. The bottom row is the whole argument for taking the
+    hatching off below about 96 px."""
+    import io
+    import cairosvg
+    from PIL import Image
+
+    svgs = _mark_svgs({
+        "primary":  {"variant": "primary"},
+        "reversed": {"variant": "reversed"},
+        "black":    {"variant": "black"},
+        "hatched":  {"variant": "reversed", "hatch": True},
+        "small":    {"variant": "reversed"},
+    })
+
+    def raster(svg, px, ground):
+        buf = cairosvg.svg2png(bytestring=svg.encode("utf8"),
+                               output_width=px, output_height=px)
+        im = Image.open(io.BytesIO(buf)).convert("RGBA")
+        g = tuple(int(ground.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)) + (255,)
+        flat = Image.new("RGBA", im.size, g)
+        flat.alpha_composite(im)
+        return np.asarray(flat.convert("RGB"))
+
+    top = [("primary", "Primary — --field on the sheet", PAPER),
+           ("reversed", "Reversed — the tab, the masthead", PAPER),
+           ("black", "One colour — print", PAPER),
+           ("hatched", "Hatched — 45\u00b0, above ~96 px", PAPER)]
+    bottom = [(180, "180 px — the home screen"),
+              (32, "32 px — favicon.ico"),
+              (16, "16 px — the browser tab")]
+
+    fig, axes = plt.subplots(2, 4, figsize=(7.0, 4.0))
+    for ax in axes.ravel():
+        ax.set_axis_off()
+
+    for ax, (key, label, ground) in zip(axes[0], top):
+        ax.imshow(raster(svgs[key], 600, ground), interpolation="antialiased")
+        ax.set_title(label, fontproperties=UI, fontsize=6, color=MUTED, pad=5)
+
+    # The small row is drawn at ONE display size from three different rasters,
+    # so what the reader compares is what survives, not how big the tile is.
+    for ax, (px, label) in zip(axes[1], bottom):
+        img = Image.fromarray(raster(svgs["small"], px, PAPER)).resize(
+            (300, 300), Image.NEAREST)
+        ax.imshow(np.asarray(img), interpolation="nearest")
+        ax.set_title(label, fontproperties=UI, fontsize=6, color=MUTED, pad=5)
+    axes[1][3].text(0.0, 0.5,
+                    "All three are the same file, cut at\nthe size they are labelled with and\n"
+                    "then enlarged. The hatching is gone\nby 32 px; by 16 px the S is a\n"
+                    "suggestion and the C carries the mark.",
+                    fontproperties=UI, fontsize=6, color=BODY,
+                    ha="left", va="center", linespacing=1.6,
+                    transform=axes[1][3].transAxes)
+
+    save(fig, "mark-plate")
+
+
 def softness():
     """Two measured limits, both read from tokens.css. Left: how translucent the
     masthead may be before its text fails over a white passage of a painting.
@@ -663,4 +664,5 @@ def _cream_ramp():
 
 if __name__ == "__main__":
     print("figures:")
-    palette(); sage_limit(); payments(); oversell(); duty(); shipping(); logo(); softness(); structure()
+    palette(); sage_limit(); payments(); oversell(); duty(); shipping()
+    mark_assets(); mark(); softness(); structure()

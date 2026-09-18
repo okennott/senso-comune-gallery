@@ -449,12 +449,67 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   color:var(--paper-deep);
   border-top:0;
   font-size:var(--size-caption);
+  /* What this text is really read on, for check-contrast.mjs: the glass
+     below, not the solid bar. A rule painting itself in something the checker
+     cannot composite declares its worst-case ground here instead. */
+  --contrast-ground:var(--glass-footer);
+}
+/* Glass, on the same terms as the masthead — and with one thing easier.
+   Behind the bar is a painting, so its worst case has to be assumed white;
+   behind the footer is the sage field, so the worst case is a single
+   computable colour, and --glass-footer is it. The blur still earns its
+   place: the sheet's shadow and the fall of the field carry through the
+   footer instead of stopping dead at its top edge. Where backdrop-filter is
+   missing the footer stays solid, which is the more legible of the two. */
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .footer{
+    background-color:color-mix(in srgb,var(--bar) var(--glass-bar-opacity),transparent);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.06);
+            backdrop-filter:blur(var(--glass-blur)) saturate(1.06);
+  }
 }
 .footer__grid{ display:grid; gap:var(--space-4) }
-@media (min-width:760px){ .footer__grid{ grid-template-columns:2fr 1fr 1fr } }
-.footer a{ color:var(--paper); text-decoration:none }
+/* The channel column takes the width its six 48px targets need, rather than a
+   third of what is left, which wrapped the row onto two lines. */
+@media (min-width:760px){ .footer__grid{ grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,auto) } }
+.footer a{ color:var(--paper); text-decoration:none; --contrast-ground:var(--glass-footer) }
 .footer a:hover{ color:#fff; text-decoration:underline }
 .footer ul{ list-style:none; margin:0; padding:0; display:grid; gap:var(--space-1) }
+
+/* ---------- the channel row ----------
+   A link-in-bio business is found through its profiles, so the footer carries
+   them as marks: one 24-unit grid, one stroke weight, currentColor, no brand
+   colours — a set that belongs to this site rather than six logo files that
+   belong to six other companies. Each is a 48px target carrying a visually
+   hidden name, because an icon has no accessible name of its own and voice
+   control needs a word to match.
+
+   The row is in the footer and takes its glass, so it declares the same
+   worst-case ground: --paper on it is 9.55:1. It overrides .footer ul, which
+   stacks its links in a column. */
+.social{
+  list-style:none; padding:0;
+  display:flex; flex-wrap:wrap; align-items:center; gap:2px;
+  /* Top of its column, like the other two — and pulled up by half the
+     difference between the 48px target and the line it sits beside, so the
+     marks align optically with the first line of type rather than with the
+     top of their own hit areas. */
+  align-self:start;
+  margin:calc((var(--target-min) - 1.7em) / -2) 0 0;
+  --contrast-ground:var(--glass-footer);
+}
+.footer .social{ display:flex }
+.social__link{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:var(--target-min); min-height:var(--target-min);
+  color:var(--paper);
+  border-radius:var(--radius-ui);
+  --contrast-ground:var(--glass-footer);
+  transition:color var(--dur-quick) var(--ease-settle),
+             background-color var(--dur-quick) var(--ease-settle);
+}
+.footer .social__link:hover{ text-decoration:none }
+.social__icon{ width:21px; height:21px; display:block }
 
 /* SAMR Order 37 Art. 12 self-declaration. Quoted verbatim from the rule;
    a release build refuses to run if it is edited (readiness rule LG-01). */
@@ -463,8 +518,21 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   padding-top:var(--space-4);
   border-top:1px solid rgba(243,235,221,.22);
   color:var(--paper-deep);
+  --contrast-ground:var(--glass-footer);
   line-height:1.6;
 }
+
+/* ---------- the glass the bar's controls catch ----------
+   A translucent pane the width of the control, lit at --paper 12%, so a
+   hover is felt as the surface catching light rather than as a button
+   appearing. It paints nothing behind text that is not already solved:
+   --paper 12% over the bar is lighter than the bar, and every one of these
+   controls is checked at the bar's own worst case. */
+.shopbar__link,
+.lang-switch{ border-radius:var(--radius-ui) }
+.shopbar__link:hover,
+.social__link:hover,
+.lang-switch:hover{ background-color:color-mix(in srgb,var(--paper) 12%,transparent) }
 
 /* ---------- prose pages ---------- */
 .page{ padding-block:var(--space-6) var(--space-7) }
@@ -543,23 +611,66 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   .detail__aside{ position:static }
 }
 
-/* ---------- hero: the motto, attributed ----------
-   The motto is set with its line breaks as written and never re-wrapped, and
-   the quote shrinks to its longest line (width:max-content). That is what lets
-   the attribution sit flush with the motto's real right edge at every width —
-   a browser cannot shrink a box to the longest line of text it has wrapped
-   itself. On a screen too narrow for the longest line it wraps, and the
-   attribution aligns to the column instead. */
+/* ---------- hero: the original, the translation, the name ----------
+   Three registers, three drawings of type, one block:
+
+     the original     display face, ITALIC, at the body size, in --body.
+                      His Dutch, set as a hand rather than as a headline.
+     the translation  display face, roman, at --size-hero, in --ink. The motto.
+     the name         body face, caption size, tracked, in --muted. A museum
+                      label under a work. Set in capitals in the first draft,
+                      which made the line wider than the motto it is aligned
+                      to: the attribution then drove the width of the whole
+                      block and nothing was flush with anything. Tracking is
+                      .03em rather than --track-label for the same reason —
+                      "Vincent Willem van Gogh" is a long line to hang off
+                      thirteen characters of display type.
+
+   Both quotations are set with their line breaks as written and never
+   re-wrapped, and the quote shrinks to its longest line (width:max-content).
+   That is what lets the attribution sit flush with the block's real right
+   edge at every width — a browser cannot shrink a box to the longest line of
+   text it has wrapped itself. On a screen too narrow for the longest line it
+   wraps, and the attribution aligns to the column instead.
+
+   The original is broken into four lines and the English into four, so the
+   two stand in the same shape; check-render.mjs holds both against the
+   browser re-wrapping either of them. */
 .hero__quote{
   margin:0 0 var(--space-5);
   width:max-content; max-width:100%;
 }
 .hero__quote blockquote{ margin:0 }
+.hero__original{
+  font-family:var(--font-display);
+  font-size:var(--size-body);
+  font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1;
+  font-style:italic;
+  line-height:1.34;
+  letter-spacing:.005em;
+  color:var(--body);                 /* 5.73 on the paper */
+  margin:0 0 var(--space-3);
+}
+/* The hairline that separates what he wrote from what it says. Short, and
+   the softest rule on the site: it divides the two voices without ruling
+   them off from each other.
+
+   Painted as a background rather than as a ::after box on purpose. The
+   render check measures the quote by taking the client rects of a Range over
+   each paragraph's contents; an extra generated box inside that paragraph
+   would read as another line and report a re-wrap that never happened. */
+.hero__original{
+  padding-bottom:var(--space-3);
+  background-image:linear-gradient(var(--rule-soft),var(--rule-soft));
+  background-size:2.4rem 1px;
+  background-position:left bottom;
+  background-repeat:no-repeat;
+}
 .hero__cite{
   margin-top:var(--space-3);
   text-align:right;
   font-size:var(--size-caption);
-  letter-spacing:var(--track-label);
+  letter-spacing:.03em;
   color:var(--muted);
 }
 .hero__label{ margin:0 0 var(--space-4) }
@@ -680,15 +791,23 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
    Finding A-03. How to Buy asked the reader to get in touch three times and
    gave no way to do it; the only details were in the footer, where B-01 had
    them at 2.34:1. */
+/* The panel is a frosted plate rather than a second cream stamped on the
+   first: --paper at --glass-plate over whatever wash the page is set on,
+   blurred, with the rim light along its top edge. Cream over cream, so the
+   composite is always LIGHTER than the ground beneath it — the plate cannot
+   make any text on it worse than the wash it is laid on, which is the ground
+   check-contrast.mjs already solves every one of these tokens against. */
 .contact{
   margin-top:var(--space-6);
   border:1px solid var(--rule-soft);
   border-top:2px solid var(--sanguine);
-  background:var(--paper-deep);
+  background:var(--glass-plate);
+  -webkit-backdrop-filter:blur(var(--glass-plate-blur)) saturate(1.04);
+          backdrop-filter:blur(var(--glass-plate-blur)) saturate(1.04);
   padding:var(--space-4) var(--space-4) var(--space-5);
   max-width:var(--measure);
   border-radius:var(--radius-ui);
-  box-shadow:var(--shadow-mount);
+  box-shadow:var(--shadow-mount),var(--glass-rim);
 }
 .contact h2{ margin-top:0; font-size:var(--size-h3) }
 .contact__intro{ color:var(--body); margin-bottom:var(--space-4) }

@@ -22,8 +22,9 @@
  * The same pass covers the work videos, and the masthead: with search, account
  * and cart added it must still fit a phone — no horizontal overflow, at most
  * two rows below 720px, and every shop control at least 44px square — and the
- * homepage motto: set as written, its attribution flush with its right edge,
- * and read before the featured work.
+ * homepage quote: the Dutch original and the translation both set as written,
+ * the attribution flush with their right edge, and read before the featured
+ * work.
  *
  * PHONE WIDTHS. Headless Chrome will not lay a window out narrower than 500px:
  * --window-size=390 reports innerWidth 500 and a screenshot merely crops it.
@@ -92,19 +93,30 @@ const PROBE = `<script>addEventListener('load',()=>setTimeout(()=>{
   const mast={ overflow: inner.scrollWidth > inner.clientWidth + 1 || document.documentElement.scrollWidth > document.documentElement.clientWidth,
     rows: tops.length,
     small: [...document.querySelectorAll('.shopbar__link')].map((a)=>a.getBoundingClientRect()).filter((r)=>r.width<44||r.height<44).length };
-  // The motto is set as written and the attribution sits flush with its real
-  // right edge: no line the browser wrapped, no gap, and the motto before the
+  // The Dutch original and the translation are both set as written, and the
+  // attribution sits flush with the real right edge of the widest of their
+  // lines: no line the browser wrapped, no gap, and the quote before the
   // featured work in reading order at every width.
+  const original=document.querySelector('.hero__original');
+  const block=document.querySelector('.hero__quote');
   const motto=document.querySelector('.hero__motto'), cite=document.querySelector('.hero__cite');
   let quote=null;
   if (motto && cite) {
-    const r=document.createRange(); r.selectNodeContents(motto);
-    const lines=[...r.getClientRects()]; const written=motto.querySelectorAll('br').length+1;
+    const measure=(el)=>{
+      const r=document.createRange(); r.selectNodeContents(el);
+      const lines=[...r.getClientRects()];
+      return { wrapped: new Set(lines.map((x)=>Math.round(x.top))).size !== el.querySelectorAll('br').length+1,
+        right: Math.max(...lines.map((x)=>x.right)) };
+    };
+    const said=[original, motto].filter(Boolean).map(measure);
     const c=document.createRange(); c.selectNodeContents(cite);
     const feature=document.querySelector('.hero__feature');
-    quote={ wrapped: new Set(lines.map((x)=>Math.round(x.top))).size !== written,
-      gap: Math.round(Math.max(...lines.map((x)=>x.right)) - c.getBoundingClientRect().right),
-      first: !feature || motto.getBoundingClientRect().top <= feature.getBoundingClientRect().top };
+    quote={ wrapped: said.some((s)=>s.wrapped),
+      gap: Math.round(Math.max(...said.map((s)=>s.right)) - c.getBoundingClientRect().right),
+      // The quote leads, the featured work follows — measured from the top of
+      // the quote, which since the original was added is the Dutch line and
+      // not the motto.
+      first: !feature || block.getBoundingClientRect().top <= feature.getBoundingClientRect().top };
   }
   const payload=JSON.stringify({ viewport: document.documentElement.clientWidth, rows: out, mast, quote });
   if (window.parent !== window) { parent.document.getElementById('render-probe').textContent = payload; return; }
@@ -167,8 +179,8 @@ for (const page of PAGES) {
     const { viewport, rows, mast, quote } = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
     if (viewport !== width) { problems.push(`${page} @${width}: laid out at ${viewport}px, not ${width}px`); continue; }
     if (quote) {
-      if (quote.wrapped) problems.push(`${page} @${width}px: the motto was re-wrapped by the browser`);
-      if (Math.abs(quote.gap) > 1) problems.push(`${page} @${width}px: the attribution is ${quote.gap}px off the motto's right edge`);
+      if (quote.wrapped) problems.push(`${page} @${width}px: a line of the quote was re-wrapped by the browser`);
+      if (Math.abs(quote.gap) > 1) problems.push(`${page} @${width}px: the attribution is ${quote.gap}px off the quote's right edge`);
       if (!quote.first) problems.push(`${page} @${width}px: the featured work comes before the motto`);
     }
     if (mast.overflow) problems.push(`${page} @${width}px: the masthead overflows the viewport`);

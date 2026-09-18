@@ -19,13 +19,15 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { createRequire } from 'node:module';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
-const require = createRequire(join(ROOT, 'package.json'));
-const sharp = require('sharp');
 const run = promisify(execFile);
+/* The pixels are Pillow's, not sharp's. sharp is the site's only runtime
+   dependency and is built per platform; a report build should not fail
+   because an image library was installed for another operating system, and
+   figures.py already needs Pillow. See soft_plate.py. */
+const pixels = (...args) => run('python3', [join(HERE, 'soft_plate.py'), ...args]);
 const [origin] = process.argv.slice(2);
 const CHROME = process.env.CHROME || 'google-chrome';
 const DIST = join(ROOT, 'dist');
@@ -51,7 +53,9 @@ mkdirSync(TMP, { recursive: true });
     const n = (rnd() - .5) * 26;
     px[i] = Math.max(0, Math.min(255, r + n)); px[i + 1] = Math.max(0, Math.min(255, g + n)); px[i + 2] = Math.max(0, Math.min(255, b + n));
   }
-  await sharp(px, { raw: { width: W, height: H, channels: 3 } }).blur(1.2).webp({ quality: 82 }).toFile(join(STAGE, 'stand-in.webp'));
+  const raw = join(TMP, 'stand-in.raw');
+  writeFileSync(raw, px);
+  await pixels('canvas', raw, String(W), String(H), join(STAGE, 'stand-in.webp'));
 }
 
 const stage = (name, extra) => {
@@ -97,22 +101,7 @@ stage('band', `<style>.masthead{display:none!important}</style>${bring('.edge--w
 const [hover, glass, band] = await Promise.all([shoot('hover', 1440, 900), shoot('glass', 1440, 900), shoot('band', 1440, 520)]);
 
 /* ---- compose: hover on the left, glass and a boundary stacked on the right ---- */
-const W = 2000;
-const left = await sharp(hover).extract({ left: 1300, top: 0, width: 1500, height: 1800 }).resize(980).toBuffer();
-const lm = await sharp(left).metadata();
-const g = await sharp(glass).extract({ left: 1100, top: 0, width: 1700, height: 360 }).resize(1000).toBuffer();
-const gm = await sharp(g).metadata();
-const bd = await sharp(band).extract({ left: 200, top: 60, width: 1700, height: 920 }).resize(1000).toBuffer();
-const bm = await sharp(bd).metadata();
-const H = Math.max(lm.height, gm.height + 20 + bm.height);
-await sharp({ create: { width: W, height: H, channels: 3, background: '#FFFFFF' } })
-  .composite([
-    { input: left, left: 0, top: 0 },
-    { input: g, left: W - 1000, top: 0 },
-    { input: bd, left: W - 1000, top: gm.height + 20 },
-  ])
-  .png({ compressionLevel: 9 })
-  .toFile(join(HERE, 'fig', 'cap-soft.png'));
+await pixels('plate', hover, glass, band, join(HERE, 'fig', 'cap-soft.png'));
 
 rmSync(STAGE, { recursive: true, force: true });
 rmSync(TMP, { recursive: true, force: true });

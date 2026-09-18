@@ -16,8 +16,9 @@
 # quietly out of date: the fonts because XeTeX cannot drive the variable axes
 # the site uses and needs static instances; the screenshots because the section
 # that shows them claims to show what the build produces; the figures so the
-# palette, the contrast figures and the logo are read from the project's own
-# token file and mark geometry rather than transcribed.
+# palette and the contrast figures are read from the project's own token file
+# rather than transcribed, and the mark is asked of scripts/mark.mjs and
+# included as the vector it produces rather than redrawn.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -28,9 +29,6 @@ cd "$HERE"
 
 echo "==> fonts"
 python3 fonts.py
-
-echo "==> the mark"
-python3 scale_mark.py --check-preamble
 
 echo "==> screenshots"
 if [ -d "$ROOT/dist" ]; then

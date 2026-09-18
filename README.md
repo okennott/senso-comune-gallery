@@ -385,6 +385,7 @@ npm run build        # a PREVIEW: images, then every page → dist/ (noindex, ri
 npm run check        # contrast, structure, design review; all three block the build
 npm run preview      # one built page as a single self-contained file
 npm run fonts        # rebuild the webfonts, Latin and Chinese
+npm run mark         # re-cut the monogram's letters out of Fraunces
 npm run icons        # rebuild the favicon, home-screen icon and manifest
 npm run check:render # paintings keep their proportions in a real browser (needs Chrome)
 npm run readiness    # what is still owed before the site may go live
@@ -435,26 +436,34 @@ reading it from the other.
 │                                 dependency. Reports NEEDS-INPUT on exit.
 │
 ├── scripts/                      build and verification tools
-│   ├── mark.mjs                    the logo: one geometry, four renderings.
-│   │                               Read by build-icons.sh, by templates.js for
-│   │                               the masthead lockup, and by the report
+│   ├── mark.mjs                    the SC monogram: one geometry, four
+│   │                               renderings. Read by build-icons.sh, by
+│   │                               templates.js for the masthead lockup, and
+│   │                               by the report
+│   ├── build-mark-paths.py         cuts the monogram's S and C out of Fraunces
+│   │                               at a stated instance. Output is committed
+│   │                               (mark-paths.js), so a build needs only Node
+│   ├── mark-paths.js               GENERATED. Re-run with npm run mark
 │   ├── build-images.mjs            sRGB-tagged AVIF 4:4:4 + WebP, five widths,
 │   │                               capped at 2000px
 │   ├── build-fonts.sh              Latin subsets — 79.8 KB for both families
 │   ├── build-fonts-cjk.py          Chinese display face, subset to the ~100
 │   │                               glyphs that appear, 34 KB from 24 MB
 │   ├── build-icons.sh              favicon, home-screen icon and manifest,
-│   │                               all from mark.mjs. No letterforms, so one
-│   │                               file serves both locales and nothing
-│   │                               depends on a webfont that a favicon never
-│   │                               gets to load
+│   │                               all from mark.mjs. The letters are outlines
+│   │                               cut at build time, so nothing depends on a
+│   │                               webfont that a favicon never gets to load.
+│   │                               icon.svg needs Node alone; the two rasters
+│   │                               use sharp, or cairosvg where it is missing
 │   ├── check-contrast.mjs          every token against its worst-case ground,
 │   │                               including the dark bar, read from the CSS
 │   ├── check-links.mjs             dead links, missing alt, missing width or
 │   │                               height, heading order, landmarks, hreflang,
 │   │                               CJK subset coverage
-│   ├── check-review.mjs            47 assertions: the design review, the mark
-│   │                               and the softness pass, against built pages
+│   ├── check-review.mjs            70 assertions over 46 findings: the design
+│   │                               review, the mark, softness, the shop bar,
+│   │                               the structure, the flags and the gate,
+│   │                               against built pages
 │   ├── check-render.mjs            lays pages out in headless Chrome; fails if
 │   │                               a painting is distorted, rounded or
 │   │                               transformed. Needs Chrome, so CI runs it
@@ -480,13 +489,12 @@ reading it from the other.
 │       ├── senso-comune-report.pdf   built: A4, indexed
 │       ├── senso-comune-report.qmd   the source
 │       ├── preamble.tex              typesetting: fonts, heads, callouts, and
-│       │                             the mark, redrawn in TikZ for the footers
+│       │                             the mark, included as the vector
+│       │                             scripts/mark.mjs produces
 │       ├── figures.py                vector figures, read from tokens.css
 │       ├── fonts.py                  static cuts of Fraunces and Inter, plus
 │       │                             the Chinese subset — derived from the
 │       │                             .qmd, so the prose cannot outgrow it
-│       ├── scale_mark.py             reads scripts/mark.mjs, and fails the
-│       │                             build if preamble.tex has drifted from it
 │       ├── shots.sh                  the page screenshots, taken from dist/
 │       ├── soft_shots.mjs            the softness plate: forced hover and glass
 │       │                             states, on a synthetic stand-in canvas
@@ -607,8 +615,9 @@ matching the painting's proportions. It lays the built pages out in Chrome at
 1440, 900, 390, 360 and 320 px and fails if any painting's box drifts more than 1%
 from its own ratio, or carries a radius or a transform. It also fails if the
 masthead overflows, takes more than two rows or has a control under 44 px, and if
-van Gogh's line is re-wrapped, its attribution leaves its right edge, or the
-featured work comes before it on a phone.
+either half of van Gogh's line — the Dutch original or the translation under it
+— is re-wrapped, the attribution leaves the quote's right edge, or the featured
+work comes before the quote.
 
 Headless Chrome never lays a window out narrower than 500px — ask for 390 and
 you get a 500px layout cropped to 390. Phone widths are therefore laid out in
@@ -616,7 +625,7 @@ an iframe of exactly that width, with scrollbars hidden as a phone's are, and
 the check asserts the content width it actually received. `docs/report/shots.sh`
 takes the phone screenshot the same way.
 
-`check-review.mjs` holds 66 assertions over 46 findings — the September 2026
+`check-review.mjs` holds 70 assertions over 46 findings — the September 2026
 design review, the mark, softness, the shop bar and views, the structure, the
 red flags and the readiness gate — written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
@@ -624,7 +633,7 @@ also asserts that every `var(--token)` in the stylesheet resolves: a fix that
 referenced a token which did not exist fell back to inherited size, and a test
 that only matched the CSS text called it green.
 
-`test-readiness.mjs` proves the readiness gate with 43 tests: it opens on data
+`test-readiness.mjs` proves the readiness gate with 44 tests: it opens on data
 with every critical detail supplied, and closes on the named rule when any one
 of them is broken (§2.8).
 
@@ -641,18 +650,26 @@ block people outright.
   shows four latest works and a card per series, not the whole catalogue. Six
   reference sites agree on all of this except *How to Buy* in the header, which
   stays until the cart works.
-- **The logo carries no letterforms.** The wordmark translates — *Senso Comune
-  Gallery* and 常识画廊 — and a favicon is chosen by origin, not by page, so a
-  monogram can only ever serve one of the two audiences. The mark is a work
-  hung on a wall: a cream plate at the catalogue's modal 3:4, on the masthead
-  brown, crossed by a sage datum at the museum hanging height of 144.78 cm on a
-  244 cm wall. One geometry in `scripts/mark.mjs` generates the icon set, the
-  masthead lockup and the report's footer mark. `npm run icons` rebuilds it.
+- **The logo is an SC monogram**, adopted from Priscilla's own prototype sheet.
+  The wordmark still translates — *Senso Comune Gallery* and 常识画廊 — and a
+  favicon is chosen by origin, not by page, so the mark cannot say a different
+  name per locale. It does not: a monogram is a device that stands beside a
+  name, not a translation of one, which is what finding C-04's closure settled.
+  The letters are Fraunces outlines cut from the font at build time, the
+  proportion is 1 : √φ (the sheet's 1 : 1.618 makes the S read as a lowercase
+  s), and the hatching comes off below about 96 px because it fills in. One
+  geometry in `scripts/mark.mjs` generates the icon set, the masthead lockup
+  and the report's footer mark. `npm run mark` re-cuts the outlines;
+  `npm run icons` rebuilds the icon set.
 - **Softness without new colour.** Mats, radii, shadows, glass and section
   boundaries are all expressed through existing tokens; shadows are `--bar` at
   a few percent. The masthead's glass stops at 88% because the navigation must
   hold 7:1 over a white passage of a painting (the usual 60–70% fails WCAG
-  outright), and it only turns to glass once content scrolls beneath it.
+  outright), and it only turns to glass once content scrolls beneath it. The
+  footer runs the same glass over the sage field, where the worst case is one
+  computable colour — `--glass-footer`, recomputed by the contrast check on
+  every run — and the contact panel is a frosted plate, which is safe because
+  cream over cream is always lighter than the wash beneath it.
   Paintings are never rounded, zoomed or stretched. The report's Softness
   section lists every option considered, adopted and optional.
 - **The work page and the shop bar.** Decisions D1–D5 (report, Part 6): search,
@@ -827,9 +844,11 @@ backstop. An empty email, an address on `example.com`, a phone number without
 its country code, a price of 0, a returns window under 14 days, a Chinese
 registration declaration someone edited, a painting still showing its
 placeholder photograph, a payment link over `http` — each is its own rule.
-Optional channels (Instagram, 小红书) are either a handle or `""`, which leaves
-the channel off the site; left as `NEEDS-INPUT` they are *undecided*, and that
-blocks.
+Optional channels (Instagram, Facebook, X, Bluesky, 小红书) are either a handle
+or `""`, which leaves the channel off the site; left as `NEEDS-INPUT` they are
+*undecided*, and that blocks. Until a handle exists the channel's mark in the
+footer links to a dead route from `placeholders.social` and lands on the 404
+page, so nothing ever points at a profile that is not Priscilla's.
 
 **Some rules only apply sometimes.** Hong Kong registration numbers only while
 that entity is active; a transaction ceiling only once the cart takes payments;
@@ -843,7 +862,7 @@ waiver is printed in every report and recorded in the release's
 photographs and payment links cannot be waived: a waiver naming one keeps the
 gate shut.
 
-**Today** the gate reports 54 blockers. The largest group is the works'
+**Today** the gate reports 57 blockers. The largest group is the works'
 titles, descriptions and alt text; one that needs a decision rather than
 typing is the search, account and cart placeholders (rule SH-01), which block a
 release until those pages exist or a waiver is signed for them.

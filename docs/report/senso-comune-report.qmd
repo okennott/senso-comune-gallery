@@ -2,7 +2,7 @@
 title: "Senso Comune Gallery"
 subtitle: "Design, commerce and compliance report"
 author: "Prepared for Priscilla"
-date: "17 September 2026"
+date: "18 September 2026"
 lang: en
 toc: true
 toc-depth: 3
@@ -56,13 +56,13 @@ a data edit.
 \Needspace*{14\baselineskip}
 ```
 
-: The site on 17 September 2026 {#tbl-status}
+: The site on 18 September 2026 {#tbl-status}
 
 | | |
 |:--------------------|:--------------------------------------------------------------|
 | Built | 36 pages, 18 in each language: the homepage, the catalogue and its two series, six work pages, sold works, and seven pages of information |
 | Published | A **preview** on GitHub Pages: not indexed, labelled on every page, and unable to take an order |
-| Ready to sell | **No.** The readiness gate counts 54 details still owed (@sec-readiness-today), and a release refuses to build until they are supplied |
+| Ready to sell | **No.** The readiness gate counts 57 details still owed (@sec-readiness-today), and a release refuses to build until they are supplied |
 | Checked | Five checks on every build, and a sixth in a real browser (@sec-checks) |
 | Still to build | The buy box and disclosures on the work page; the cart, search and account behind the shop bar (@sec-next-todo) |
 
@@ -219,107 +219,142 @@ motion is a link in an Instagram or a WeChat bio, the surfaces that render
 most often are a browser tab, a share card and an avatar — and none of them
 can render a wordmark.
 
-### The constraint that decides it {#sec-mark-constraint}
+The mark it now carries is Priscilla's own: an interlocking **SC** monogram,
+adopted on 18 September 2026 from her prototype sheet, which arrives with a
+construction, a palette and a set of variations already worked out.
+
+### The constraint that used to decide it {#sec-mark-constraint}
 
 The wordmark translates: *Senso Comune Gallery* in English, 常识画廊\index{wordmark} in
-Chinese. That was a deliberate decision and it is the right one — a Chinese
-buyer should not have to read a Latin name to know where they are.
+Chinese. A favicon, by contrast, is chosen by **origin**, not by page: one file
+serves both URL trees, so a site cannot ship one mark per locale however much
+it would like to.
 
-It also settles the logo. A favicon is chosen by **origin**, not by page: one
-file serves both URL trees, so a site cannot ship one monogram per locale
-however much it would like to. Any mark built from letterforms therefore
-serves one audience and decorates the other. `SC` is not the initials of
-常识画廊.
+The first mark took that to its conclusion and carried no letterforms at all —
+a work on a wall, three rectangles and a hanging line — on the argument that
+`SC` is not the initials of 常识画廊 and would therefore serve one audience
+and decorate the other.
 
 ```{=latex}
-\begin{finding}{This is why the first icon was replaced}
+\begin{finding}{Why that argument no longer holds}
 ```
 
-The first icon was `SC`, cut from real Fraunces outlines. It read at 16 px, and
-it served only one of the two audiences: the problem is *make something that
-reads at 16 px in two languages*.
+Finding C-04 asked for the Latin wordmark to be kept constant in both locales,
+and was **closed by decision**: Priscilla keeps 常识画廊 as the Chinese name,
+because it reads as native to the domestic audience and that is worth more
+than one lockup in two languages.
+
+That decision is what frees the mark. A monogram is not a translation of a
+name — it is a *device* that stands beside one, and a device does not have to
+be readable as the name it accompanies any more than a crest does. The Latin
+device beside the Chinese name is the arrangement most international houses
+use in China. What is not allowed is a mark that says a *different* name in
+each locale, and the build asserts that the lockup is byte-identical on the
+English and Chinese homepages.
 
 ```{=latex}
 \end{finding}
 ```
 
-### The options {#sec-mark-options}
-
-Six were drawn. Four of them are eliminated by the same column of @fig-logo —
-the one that shows each candidate at the size it will actually be rendered at
-most of the time.
-
-![Six candidates, each drawn twice: at a size where anyone would approve it, and at 16 px, where it will spend its life.](fig/logo.pdf){#fig-logo width=100% fig-pos="H"}
-
-### What was chosen {#sec-mark-chosen}
-
-A work on a wall — the site's own structure, which is a cream sheet mounted on
-a sage field, reduced to three rectangles. It carries no letterforms, so one
-file serves both locales and it cannot fall back to the wrong typeface.
-
-Nothing in it is arbitrary. Every number is one the project had already
-committed to somewhere else.
+### What the sheet specifies, and what is adopted {#sec-mark-sheet}
 
 ```{=latex}
-\Needspace*{10\baselineskip}
+\Needspace*{14\baselineskip}
 ```
 
-: The mark, and where each of its numbers comes from {#tbl-mark}
+: The prototype sheet against the built mark {#tbl-mark}
 
-| Element | Value | Source |
-|:---------|:--------------------------------|:-----------------------------------------------------|
-| Wall | 64 × 64, `--bar` | The masthead. A piece of the site, not a badge applied to it |
-| Plate | 28 × 37.33 — **3:4** — `--paper` | The modal aspect of the catalogue, every work in which is portrait |
-| Datum | Full width, `--field`, at **59.34 %** | 144.78 cm on a 244 cm wall — the museum hanging standard the work-page scale diagram is already drawn to |
+| On the sheet | In the build |
+|:--------------------------------|:-----------------------------------------------|
+| Interlocking S and C | Adopted. The S sits upper left, the C lower right, overlapping by 45 % of the S's width |
+| Letter proportion S : C = 1 : 1.618 | Adopted as 1 : $\sqrt{\varphi}$ = 1 : 1.272 — see below |
+| Fibonacci / golden-rectangle grid | Adopted as the layout: the pair is sized to fill a square field with equal margins on four sides |
+| Diagonal hatching, upper left → lower right | Adopted at 45°, which is the angle and the direction the Leonardo hatch already runs at across the Tribute ground. Off below about 96 px |
+| Sage green `#969B7D` | Already `--field` |
+| Deep green `#737C61` | Already `--field-deep`; it is what the hatching is drawn in |
+| Warm ivory `#E9E2D3` | **Not added.** Within one step of `--wash-blue` `#E9E3D6`; a fifth cream is a fifth cream |
+| Charcoal black `#24241F` | **Not adopted.** The site's ink and bar are `#3A2B22`, a warm brown the whole palette is solved against; a cool near-black beside sage reads as a second, colder identity. The sheet's *black* variation is drawn in `--bar` |
+| Minimum size 15 mm, print | Adopted as the reason the hatching comes off, and extended: the mark is also cut at 32 px and 16 px, where 15 mm has no meaning |
 
-The datum runs the full width and passes *behind* the plate, so what is visible
-is two short sage segments either side of the work. That is what a hanging line
-looks like on a real wall, and it is the detail that stops the mark reading as
-a generic picture-frame glyph.
+### Two decisions taken here {#sec-mark-decisions}
 
-### Two renderings, one geometry {#sec-mark-two}
+**The letters are Fraunces.** There is no vector source for the drawing on the
+sheet, and a trace from a screenshot would be a worse object than a
+construction. Fraunces is the face the wordmark is already set in; at the
+display end of its optical-size axis (`opsz 40`, `wght 700`) it draws the heavy
+stems against fine hairlines that the prototype is built from. So the lockup —
+the mark beside *Senso Comune* — is one typeface rather than two. The outlines
+are cut from the font by `scripts/build-mark-paths.py` and committed as
+`scripts/mark-paths.js`, so building the site needs Node and nothing else.
 
-The wall is a **fill** where it can be seen and an **outline** where it cannot.
-In the tab, on the home screen and in this document's footer, the wall is
-painted. On the site's own masthead the ground is already `--bar`, so a filled
-wall would be no wall at all; there it is drawn as a 1.5-unit sage outline and
-everything else is identical.
+**The proportion is $\sqrt{\varphi}$, not $\varphi$.** This is the one number
+on the sheet not taken literally, and the reason is visible rather than
+theoretical. Drawn at 1 : 1.618 in a square field, Fraunces' S falls to about
+the C's x-height and stops reading as a capital — the mark reads *sC* — and
+the C's lower arm cannot reach far enough left to close the hole the small S
+leaves at the bottom of the square. At 1 : 1.272 the S is still plainly the
+smaller letter, which is what the sheet's own four variations show, and the
+pair fills the square. $\sqrt{\varphi}$ is the same construction one step in:
+the golden section of the golden section.
 
-Both are generated from `scripts/mark.mjs`. The report reads the same file —
-@fig-logo is drawn from it, not from a copy of its numbers — so the document
-cannot end up arguing for a mark the site no longer ships.
+### Four renderings, one geometry {#sec-mark-two}
+
+![The monogram as the site ships it. Every tile is the SVG `scripts/mark.mjs` produces, rasterised here rather than redrawn, so the report cannot argue for a mark the site no longer has.](fig/mark-plate.pdf){#fig-mark width=100% fig-pos="H"}
+
+The C's cap height is 68 % of the field and the S's is 54 %; the two are pushed
+together by 45 % of the S's width and the pair is then sized to leave the same
+margin on all four sides. Where the S crosses the C there is an **inlay** — a
+gap the width of twice `--inlay`, which is what makes the C pass *behind* the S
+rather than merge with it. On the icon that gap is stamped in the field colour;
+on the masthead, where there is no field to stamp with, it is cut with a mask,
+so the bar — or the painting passing under the bar once it goes to glass —
+shows through it.
+
+That distinction matters more than it sounds. The masthead paints **no field**
+at all: an opaque square behind the letters would have been invisible while the
+bar was solid and would have appeared as a slab the moment the bar became
+glass (@sec-soft).
 
 ### What it deliberately does not do {#sec-mark-not}
 
 - **It spends no accent.** Sanguine is 2.03:1 on the bar and would disappear at
-  tab size; the sage datum is 4.70:1. The accent stays reserved for calls to
-  action, which is most of what this palette is for.
-- **It depends on no font.** An SVG favicon is rendered *without* the page's
-  webfonts, so a mark set as `<text>` falls back to whatever serif the operating
-  system has. Three rectangles and a line have no such failure mode.
-- **It has no per-locale variant**, by construction. @sec-mark-constraint is the
-  reason, and the build asserts it: the masthead lockup is byte-identical on
-  the English and Chinese homepages.
+  tab size. The letters are `--paper` on `--bar` at **11.45:1**, the most
+  legible pair on the site, and the accent stays reserved for calls to action.
+- **It depends on no font at render time.** An SVG favicon is rendered
+  *without* the page's webfonts, so a mark set as `<text>` falls back to
+  whatever serif the operating system has — a different logo on every machine.
+  These are outlines, cut at build time. The check forbids live text and
+  requires outlines; it does not forbid letterforms any more.
+- **It has no per-locale variant**, by construction, for the reason in
+  @sec-mark-constraint.
+- **It does not carry its texture down to sizes the texture cannot survive.**
+  The bottom row of @fig-mark is the argument: the hatching is gone by 32 px
+  and would be mud at 16 px.
 
 WCAG contrast is defined on relative luminance, so converting the mark to
-greyscale leaves both of its ratios exactly where they are — 11.45:1 and 4.70:1
-— and it survives a monochrome print unchanged. Two cases have **not** been
-tested: single-ink reproduction, where plate and datum cannot be separated by
-lightness at all, and embroidery below about 15 mm. Neither is needed before
+greyscale leaves its ratio exactly where it is and it survives a monochrome
+print unchanged. Two cases have **not** been tested: single-ink reproduction of
+the hatched rendering, where hatch and letter cannot be separated by lightness
+at all, and embroidery below the sheet's own 15 mm. Neither is needed before
 launch.
 
 ### Where it is used {#sec-mark-where}
 
-`icon.svg`, `favicon.ico` at 32 px, `apple-touch-icon.png` at 180 px and
-`site.webmanifest`, all from one source; the masthead lockup, where the mark
-and the name are a single link and a single tab stop; and this document, in the
-footer of every page and on the title page.
+The icon set — `icon.svg` at 3.6 KB, the 32 px `favicon.ico`, the 180 px
+home-screen icon and the manifest — all from one source; the masthead lockup,
+where the mark and the name are a single link and a single tab stop; and this
+document, in the footer of every page and on the title page, included as the
+vector `mark.mjs` produces rather than redrawn in TikZ, which is what the
+footer carried while the mark was three rectangles.
 
-Seven assertions in `scripts/check-review.mjs` (F-01 to F-04) hold it together: that the icon
-is the geometry `mark.mjs` declares, that the masthead draws the same plate,
-that the mark contributes no accessible name of its own, that it is identical
-in both locales, that it spends no accent, and that the hanging figure is the
-one the work pages cite.
+Eight assertions in `scripts/check-review.mjs` (F-01 to F-04) hold it together:
+that the icon is the geometry `mark.mjs` declares, that the masthead is the
+same monogram with its field unpainted and its inlay masked, that the letters
+are Fraunces outlines from a stated instance and not live text, that the mark
+contributes no accessible name of its own, that it is byte-identical in both
+locales, that it spends no accent and holds its proportions at tab size, that
+the hatching is off in both the icon and the masthead while remaining
+available, and that the ratio is derived from $\varphi$ rather than typed in.
 
 ## Softness {#sec-soft}
 
@@ -415,6 +450,9 @@ the reason says so.
 | Glass | Masthead at 88%, scroll-driven, desktop | **Adopted** | 7.39:1 over white; solid at rest; nothing passes under it on a phone |
 | Glass | Masthead at 60–70% | Optional — *fails 4.5:1* | 3.06–4.11:1 over a white passage |
 | Glass | Translucent reading panels over the sage | Optional — *unbounded contrast* | The sheet is the reading surface; text on glass over a painting has no worst case to solve against |
+| Glass | Footer at 88% over the field | **Adopted** (18 Sep) | Behind it is the sage, not a painting, so the worst case is one computable colour: 8.96:1 |
+| Glass | Frosted plates on the sheet, at 72% | **Adopted** (18 Sep) | Cream over cream: the composite is always lighter than the wash beneath, so it cannot make any text worse |
+| Field | A fall from a lifted `--field` to `--field-deep` | **Adopted** (18 Sep) | The largest solid on the site, and the only surface with nothing happening in it. Carries no text at any width |
 | Boundaries | The field breathing through each band at 20% | **Adopted** | ΔE 5.3: plainly there when scrolling, a fifth of the way to the sage |
 | Boundaries | Bands named by, and fading between, their actual neighbours | **Adopted** | No hard step where a band meets the section beside it |
 | Boundaries | Each section its own sheet, with sage between | Optional | The most emphatic; replaces one mounted sheet with several and doubles the shadows |
@@ -435,10 +473,43 @@ the reason says so.
 
 ![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: the homepage boundary between Latest works and Series.](fig/cap-soft.png){#fig-soft width=100%}
 
-Nothing in the palette changed. All nine new softness tokens — two radii, three
-shadows, the mat, the glass opacity and blur, and the boundary breath — are
-expressed through colours that already existed, and a check fails the build if
-a literal colour appears among them.
+Nothing in the palette changed. Every softness token — two radii, three
+shadows, the mat, the glass values and the boundary breath — is expressed
+through colours that already existed, and a check fails the build if a literal
+colour appears among them.
+
+### The glass, extended {#sec-soft-glass}
+
+A second pass on 18 September took the same treatment to the three surfaces the
+first one left flat, on the same terms: **nothing is translucent over a ground
+whose colour cannot be named.**
+
+- **The field.** The sage ran as one fill from edge to edge — the largest solid
+  on the site. It keeps its colour and gains a slow fall from a lifted
+  `--field` at the top to `--field-deep` at the foot, fixed rather than
+  scrolling, so the sheet reads as mounted on a ground that is lit. Both ends
+  are palette values, and no text sits on the field at any width, so none of it
+  is a contrast question.
+- **The footer.** It runs the bar's own glass at 88%. Where the masthead's
+  worst case has to be *assumed* — a painting can put pure white under it — the
+  footer's is a single computable colour, because what is behind it is the
+  field. That composite is written down as `--glass-footer` `#45382D`, and
+  `check-contrast.mjs` recomputes it from `--bar`, `--glass-bar-opacity` and
+  `--field` on every run and fails on any drift. Footer text measures
+  **8.96:1** on it, and the contact details EU and Chinese law require to be
+  published are the text in question.
+- **Plates on the sheet.** The contact panel is now a frosted plate rather than
+  a second cream stamped on the first. The safety argument is arithmetic:
+  `--paper` is lighter than every wash, so 72% `--paper` over `--wash-blue` —
+  the darkest reading surface on the site — composites to `#F0E9DB`, *lighter*
+  than `--wash-blue`. A plate can only make the ground under text paler than
+  the one already solved against, never darker.
+
+So that a rule can say what it is really read on, a stylesheet rule may now
+declare a `--contrast-ground`. The check prefers it over whatever background
+the rule also paints, which is how a surface painted in a `color-mix()` the
+script cannot composite still gets solved against a real colour. The footer,
+the legal declaration and the channel row all declare one.
 
 ### How it is held {#sec-soft-held}
 
@@ -449,10 +520,11 @@ a literal colour appears among them.
   painting's box keeps the painting's own proportions to within 1%, with no
   radius and no transform (@sec-checks).
 - Six assertions in `check-review.mjs` (G-01 to G-06) cover the rest: no
-  literal colour in the new tokens, a mat and nothing that alters a painting,
-  glass solid at rest and gated, all new motion standing down for reduced
-  motion, one transition name per painting per page, and every band joining the
-  grounds actually either side of it.
+  literal colour in the new tokens — with one named exception, `--glass-footer`,
+  allowed only while the contrast check recomputes it — a mat and nothing that
+  alters a painting, glass solid at rest and gated, all new motion standing down
+  for reduced motion, one transition name per painting per page, and every band
+  joining the grounds actually either side of it.
 
 ## The two masters {#sec-masters}
 
@@ -588,13 +660,28 @@ with its own page, and the Works section's rooms are one quiet row of tabs.
   its homepage card are generated from it, and the build refuses a work that names
   an undeclared series or genre, or a slug that would collide with a page under
   `/works/`.
-- **The homepage is a front door, not the catalogue:** van Gogh's line beside
-  one *Featured work*, the four *Latest works* with a link to all of them and
-  their number, a card for each series, About, and How to Buy.
+- **The homepage is a front door, not the catalogue:** van Gogh's line — his
+  Dutch above the reader's language — beside one *Featured work*, the four
+  *Latest works* with a link to all of them and their number, a card for each
+  series, About, and How to Buy.
 - **Breadcrumbs from the second level down,** with the current page as text and a
   work's trail running through its one series (*Home / Works / Tribute / …*), and
   published as structured data. The top level has none: there is nothing above it
   to return to.
+- **The footer carries the channels as marks.** Instagram, Facebook, X,
+  Bluesky, 小红书 and WeChat, drawn on one 24-unit grid at one stroke weight in
+  the footer's own colour — a set that belongs to this site rather than six
+  logo files that belong to six other companies. Each is a 48 px target with a
+  visually hidden name, because an icon has no accessible name of its own.
+  A handle turns its mark into the real profile link; WeChat and 小红书, which
+  have no address derivable from a handle, go to the contact page where the
+  handle is printed. **Until a channel has its handle its mark still appears
+  and links to a route that does not exist,** so the click lands on the 404
+  page — the same arrangement decision D1 uses for search, account and cart,
+  and policed the same way: the route must be declared in
+  `site.placeholders.social`, and must still be dead. Readiness rule ID-06
+  requires every channel to be a handle or an explicit `""` before a release
+  will build, which is what clears the placeholders by itself.
 - **Nothing that was shared breaks.** Work pages keep their addresses. `/archive/`
   answers with a 301 on Cloudflare Pages and with a redirecting page on hosts that
   cannot send one.
@@ -606,8 +693,9 @@ The consensus decides the shape; the site keeps its own character inside it.
 - **Tribute keeps its room.** The van Gogh epigraph and the hatch texture that
   marked its homepage section now mark its series page — the room it belongs in —
   and it has a card of its own on the homepage.
-- **The front door keeps the gallery's voice:** the motto, one painting, and the
-  sfumato bands between sections, each still joining the grounds either side of it.
+- **The front door keeps the gallery's voice:** the motto in two languages and
+  one painting, and the sfumato bands between sections, each still joining the
+  grounds either side of it.
 - **One departure from the six.** None of them puts *How to Buy* in the header, and
   here it stays there. The six either take cards through an ordinary checkout or
   sell to collectors who expect to enquire. This site sells across a border, without
@@ -656,7 +744,7 @@ document is built, so they show the site as it is. The ribbon across the top of
 each page and the red `NEEDS-INPUT` flags are the preview's; a release has
 neither (@sec-readiness).
 
-![The homepage. Cream sheet mounted on the sage field, dark brown bar, the mark at the head of the wordmark, and search, account and cart at the right. Van Gogh's line, in his own words from letter 143 to Theo — *that which is done with love is well done* — is attributed beneath it, aligned to its longest line, beside the featured work; on a phone the line leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
+![The homepage. Cream sheet mounted on the sage field, dark brown bar, the SC monogram at the head of the wordmark, and search, account and cart at the right. Van Gogh's line stands twice: his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line. Beside it, the featured work; on a phone the quote leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
 
 ![A work page. The views of the work — front, detail, edge, back and video — sit in a strip with thumbnails always visible, grey placeholders until the photographs exist. The price is the boldest element in the block. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
 
@@ -685,10 +773,21 @@ is held by an assertion of the same number in `check-review.mjs`.
 | **E** Fonts | 2 | The Chinese subset's coverage is now asserted at build time, and each locale preloads only the face it uses |
 
 Two were not fixes. **C-04** proposed freezing the wordmark in English; it was
-declined, and the wordmark still translates — which is what later decided the
-logo (@sec-mark). And half of **B-03** was wrong: the scale diagram's painting
-and sofa were said to be off-axis, and are centred. Its contrast half was real,
-and is the measurement above.
+declined, and the wordmark still translates. That decision is what later freed
+the logo: a monogram is a device beside a name rather than a translation of
+one, which is why an `SC` mark can stand beside 常识画廊 (@sec-mark). And half
+of **B-03** was wrong: the scale diagram's painting and sofa were said to be
+off-axis, and are centred. Its contrast half was real, and is the measurement
+above.
+
+Re-checked on 18 September against the review as written: all nineteen are
+accounted for. Eighteen shipped and every one of them is green in
+`check-review.mjs` under its own number; C-04 is recorded there as decided
+rather than done. **One part of one finding is still open** — A-02 asked for a
+WeChat route for the `zh` locale alongside the enquiry button, and the QR image
+that needs does not exist yet. The contact details it depends on are owed too
+(@sec-readiness-today), so it is on the list in @sec-content rather than
+forgotten.
 
 # Money {#sec-money}
 
@@ -965,7 +1064,9 @@ src/styles/      tokens.css · base.css · gallery.css
 src/scripts/     gallery.js                   the work-page views, enhanced
 src/templates.js
 build.js         36 pages, two locales, and the 404
-scripts/         mark.mjs                     the logo, shared with this report
+scripts/         mark.mjs · mark-paths.js     the monogram, shared with
+                                              this report; its letters are
+                                              cut by build-mark-paths.py
                  build-fonts · build-fonts-cjk · build-images · build-icons
                  readiness · check-readiness · test-readiness · release
                  check-contrast · check-links · check-review · check-render
@@ -1016,9 +1117,9 @@ needs Chrome; GitHub runs it on every preview, and the release runs all of them.
 |:----------------------|:----------------------------------------------------------|
 | `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **66 assertions over 46 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
-| `test-readiness` | Any of **43 tests** showing the gate opens only when it should (@sec-readiness-proof) |
-| `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; van Gogh's line re-wrapped, its attribution off its edge, or the featured work ahead of it on a phone |
+| `check-review` | **70 assertions over 46 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `test-readiness` | Any of **44 tests** showing the gate opens only when it should (@sec-readiness-proof) |
+| `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
 
 Headless Chrome will not lay a page out narrower than 500 px — asked for 390, it
 lays out at 500 and crops. Phone widths are therefore laid out inside an iframe
@@ -1139,7 +1240,7 @@ checks what is in each field, and a release cannot be built while it is closed.
 - **The gate opens when it should.** A copy of the data with every critical detail
   supplied passes; 32 single breakages each close it on the named rule; five waiver
   cases — valid, expired, unsigned, scoped to another field, and aimed at a rule that
-  cannot be waived — each behave as specified. 43 tests, in `npm run check`; weakening
+  cannot be waived — each behave as specified. 44 tests, in `npm run check`; weakening
   the 14-day rule or the reserved-domain list turns them red.
 - **End to end, on completed data.** With the fields temporarily supplied and the
   three header placeholders waived, the release ran: 0 blockers, 36 pages, no
@@ -1151,8 +1252,8 @@ checks what is in each field, and a release cannot be built while it is closed.
 
 ### Today {#sec-readiness-today}
 
-The gate reports **54 blockers**: 36 in the works (titles, alt text and descriptions,
-in two languages), 5 photographs, 7 identity and contact details, the site's real
+The gate reports **57 blockers**: 36 in the works (titles, alt text and descriptions,
+in two languages), 5 photographs, 10 identity and contact details, the site's real
 address, the donation recipient, and the three header placeholders. Most are
 typing. One is a decision: search, account and cart block a release until those pages
 exist, or until someone signs a waiver for them.
@@ -1369,7 +1470,7 @@ readiness gate both require.
 |:--------|:--------------------------------------|:--------------------------------------|:-----|
 | Cart | Works gathered on the device; a total held under the entity's `maxTransactionUSD`; `availability.json` re-checked on open and before paying; several works paid in one payment where the provider allows it, otherwise work by work | A sold work is never counted in a total; no single payment exceeds the ceiling; a work in two carts cannot be paid for twice; order confirmation and withdrawal information reviewed against @sec-returns and @sec-disclosure | L |
 | Search | An index written by the build — title, medium, year and series, in both languages — searched in the browser, by substring so Chinese needs no word segmentation | English and Chinese queries both find titles and media; nothing outside the indexed fields matches | M |
-| Account | A server, a login, password recovery and a privacy regime, for an order history the payment provider already keeps | Reasonable only if the site moves to a hosted commerce platform that supplies accounts; not scheduled | — |
+| Account | A server, a login, password recovery and a privacy regime, for an order history the payment provider already has | Reasonable only if the site moves to a hosted platform that supplies accounts; not scheduled | — |
 
 ### Considered, and not planned
 
@@ -1422,11 +1523,11 @@ carrier, a payment provider — and none can be closed by writing more code.
 | CJK webfont strategy | The display face is subset to the characters that appear in headings, work titles and UI labels: **34 KB, from a 24 MB face.** `unicode-range` gates the fetch, so an English page never downloads it, and a character added before the next build falls through to the system face rather than rendering as tofu. Chinese body prose is deliberately not webfont-served. | `scripts/build-fonts-cjk.py` |
 | Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
-| A mark for two languages | A mark that carries no letterforms, so one file serves both locales, generated from a single geometry for the tab, the home screen, the masthead and this document | `scripts/mark.mjs` |
+| A mark for two languages | An `SC` monogram — a device beside the name rather than a translation of it — cut from Fraunces outlines and generated from one geometry for the tab, the home screen, the masthead and this document | `scripts/mark.mjs` |
 
-## Content still outstanding
+## Content still outstanding {#sec-content}
 
-The 54 details in @sec-readiness-today. The blocking ones that matter most are
+The 57 details in @sec-readiness-today. The blocking ones that matter most are
 the photographs, the titles and descriptions, and the contact details — the email
 and phone are not optional; they are the consumer-law requirement in
 @sec-disclosure.
@@ -1469,11 +1570,11 @@ captures in @sec-built are taken from `dist/` by `docs/report/shots.sh` as part
 of this document's build, so they cannot show a version of the site that is no
 longer shipping.
 
-**The mark.** @fig-logo and the mark in this document's footer are both drawn
-from `mark.mjs`, the one file the site's icons and its masthead are generated
-from. The TikZ copy of those numbers in the preamble is checked against it on
-every build. The hanging figure of 144.78 cm is the museum standard already
-used by the scale diagram on every work page.
+**The mark.** @fig-mark and the mark in this document's footer are the SVG
+that `mark.mjs` produces — asked of it at build time and included as a vector,
+not redrawn here. The letters are cut out of the shipped Fraunces subset by a
+generator script at a stated instance, so the document, the browser tab and
+the masthead cannot be three different drawings.
 
 ```{=latex}
 \cleardoublepage

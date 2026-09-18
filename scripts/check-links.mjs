@@ -56,6 +56,9 @@ const siteData = JSON.parse(readFileSync(join(ROOT, 'src/data/site.json'), 'utf8
 const declared = new Set();
 for (const l of Object.values(siteData.locales)) {
   for (const r of Object.values(siteData.placeholders?.routes ?? {})) declared.add((l.prefix + r).replace(/\/{2,}/g, '/'));
+  // …and the footer's channel marks, which point at a dead route until the
+  // handle that gives them a real address is supplied (site.placeholders.social).
+  for (const r of Object.values(siteData.placeholders?.social ?? {})) declared.add((l.prefix + r).replace(/\/{2,}/g, '/'));
 }
 let placeholderLinks = 0;
 const rel = (p) => p.replace(DIST, '').replace(/\\/g, '/') || '/';

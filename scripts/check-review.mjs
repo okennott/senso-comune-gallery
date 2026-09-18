@@ -110,12 +110,17 @@ check('B-01', 'footer text clears 4.5:1 on the bar', () => {
   return { ok: r >= 4.5, detail: `--${effective} on --bar = ${r.toFixed(2)}:1 (was --muted at 2.34:1)` };
 });
 
-check('B-01', 'the WeChat and 小红书 handles are not dimmed', () => {
-  // they are bare <span>s, so they inherit .footer and nothing else
-  const hasSpans = /<li><span>WeChat:/.test(home);
+check('B-01', 'the contact details the law requires are not dimmed', () => {
+  // The address, the email and the phone are bare text in the footer's first
+  // column, so they inherit .footer and nothing else — and the footer is now
+  // glass over the sage field, so they are solved against that composite
+  // rather than against the solid bar.
+  const foot = home.slice(home.indexOf('<footer'));
+  const plain = /<p>[\s\S]*?<a href="mailto:[\s\S]*?<a href="tel:[\s\S]*?<\/p>/.test(foot);
   const block = css.match(/\.footer\{([^}]*)\}/)[1];
-  const r = ratio(token([...block.matchAll(/color:\s*var\(--([a-z-]+)\)/g)].at(-1)[1]), token('bar'));
-  return { ok: hasSpans && r >= 4.5, detail: `inherited ${r.toFixed(2)}:1` };
+  const ground = (block.match(/--contrast-ground:\s*var\(--([a-z-]+)\)/) ?? [])[1] ?? 'bar';
+  const r = ratio(token([...block.matchAll(/(?:^|[;\s])color:\s*var\(--([a-z-]+)\)/g)].at(-1)[1]), token(ground));
+  return { ok: plain && r >= 4.5, detail: `inherited ${r.toFixed(2)}:1 on --${ground}` };
 });
 
 check('B-02', 'the checker reads the bar pairs out of the stylesheet', () => {
@@ -167,13 +172,17 @@ check('C-01', 'the icon set exists and is linked', () => {
   return { ok: onDisk.length === files.length && linked, detail: `${onDisk.length}/${files.length} built, linked ${linked}` };
 });
 
-check('C-01', 'the icon carries no letterforms and no font dependency', () => {
+check('C-01', 'the icon carries no font dependency', () => {
   // An SVG favicon renders without the page's webfonts, so a <text> mark falls
-  // back to whatever serif the OS has. Geometry has no such failure mode — and
-  // it is the reason the mark serves 常识画廊 as well as "Senso Comune Gallery".
+  // back to whatever serif the OS has — a different logo on every machine.
+  // The monogram adopted on 18 September 2026 does carry letterforms, but as
+  // OUTLINES cut from Fraunces at build time (scripts/build-mark-paths.py),
+  // which has no such failure mode. What is forbidden is live text.
   const svg = read('icon.svg');
-  const clean = !/<text|font-family|<path/.test(svg);
-  return { ok: clean, detail: `${statSync(join(DIST, 'icon.svg')).size} bytes, rect + line only` };
+  const clean = !/<text|font-family|@font-face/.test(svg);
+  const outlines = /<path d="/.test(svg);
+  return { ok: clean && outlines,
+           detail: `${statSync(join(DIST, 'icon.svg')).size} bytes, no live text ${clean}, drawn as outlines ${outlines}` };
 });
 
 check('C-01', 'theme-color matches the masthead bar', () => {
@@ -234,14 +243,33 @@ check('D-03', 'the language switch is divided from the navigation', () =>
 
 check('D-04', 'the homepage names a subject in its h1', () => {
   const h1 = home.match(/<h1[^>]*>([^<]*)<\/h1>/);
-  // the motto is set with its line breaks as written, and attributed (17 Sep 2026)
-  const motto = /<p class="hero__motto">That which<br>is done<br>with love<br>is well done\.<\/p><\/blockquote>\s*<figcaption class="hero__cite">— Vincent van Gogh<\/figcaption>/.test(home);
+  // the motto is set with its line breaks as written, and attributed in full
+  const motto = /<p class="hero__motto">That which<br>is done<br>with love<br>is well done\.<\/p><\/blockquote>\s*<figcaption class="hero__cite">— Vincent Willem van Gogh<\/figcaption>/.test(home);
   const zh = /<h1 class="visually-hidden">常识画廊<\/h1>/.test(zhHome);
   return { ok: h1 && h1[1] === 'Senso Comune Gallery' && motto && zh, detail: `h1 "${h1?.[1]}", motto kept ${motto}` };
 });
 
+// The original above the translation, in Dutch, marked as Dutch, word for word
+// as letter 143 has it — and on the Chinese page too, because the original is
+// the original in both. The blockquote cites the letter it comes from.
+check('D-04', 'van Gogh is quoted in his own language first', () => {
+  const nl = '<p class="hero__original" lang="nl">wat met liefde<br>gedaan wordt<br>dat wordt<br>goed gedaan</p>';
+  const cited = /<blockquote cite="https:\/\/vangoghletters\.org\/vg\/letters\/let143\/letter\.html">/;
+  const before = home.indexOf(nl) < home.indexOf('<p class="hero__motto">') && home.includes(nl);
+  return { ok: before && zhHome.includes(nl) && cited.test(home) && cited.test(zhHome),
+    detail: `original first ${before}, on the zh page ${zhHome.includes(nl)}` };
+});
+
 check('D-04', 'the motto still looks like the motto', () =>
   /\.hero__motto\{font-family:var\(--font-display\);font-size:var\(--size-hero\);/.test(flat));
+
+// Three registers, three drawings: the original italic at body size, the
+// translation roman at hero size, the name at caption size in the body face —
+// which it gets by not naming a family at all, the way the site's captions do.
+check('D-04', 'the original, the translation and the name are set apart', () =>
+  /\.hero__original\{font-family:var\(--font-display\);font-size:var\(--size-body\);[^}]*font-style:italic/.test(flat)
+  && /\.hero__cite\{[^}]*font-size:var\(--size-caption\)/.test(flat)
+  && !/\.hero__cite\{[^}]*font-family/.test(flat));
 
 check('D-05', 'the dead hero-blockquote rules are gone', () =>
   !/\.hero blockquote/.test(css) && /\.epigraph\{/.test(css));
@@ -272,34 +300,51 @@ check('E-02', 'zh pages preload the Chinese face, en pages the Latin one', () =>
 });
 
 /* ===================== F — the mark ===================== */
-/* Added 17 September 2026 with the logo. One geometry, rendered four ways; the
-   assertions below are what stops the four drifting apart. */
+/* The SC monogram, adopted 18 September 2026 from Priscilla's prototype sheet.
+   One geometry, four renderings; these assertions are what stops the four
+   drifting apart, and what stops the letters drifting from the font. */
 
 const markGeom = await import(join(ROOT, 'scripts/mark.mjs'));
 const MARK = markGeom.MARK;
 const G = markGeom.markGeometry();
+const { GLYPHS } = await import(join(ROOT, 'scripts/mark-paths.js'));
 
 check('F-01', 'the icon is the mark as scripts/mark.mjs draws it', () => {
   const svg = read('icon.svg');
-  const wall = new RegExp(`<rect width="${MARK.box}" height="${MARK.box}" fill="${MARK.ground}"/>`).test(svg);
-  const plate = svg.includes(`x="${G.x}" y="${+G.y.toFixed(3)}" width="${MARK.plateW}" height="${+G.plateH.toFixed(3)}"`);
-  const datum = svg.includes(`y1="${+G.cy.toFixed(3)}"`) && svg.includes(`stroke="${MARK.datum}"`);
-  return { ok: wall && plate && datum, detail: `wall ${wall}, plate ${plate}, datum ${datum}` };
+  const field = new RegExp(`<rect width="${MARK.box}" height="${MARK.box}" fill="${MARK.ground}"/>`).test(svg);
+  const letters = [...svg.matchAll(/<path d="([^"]+)"/g)].map((m) => m[1]);
+  const fromFont = letters.length >= 3
+    && letters.every((d) => d === GLYPHS.glyphs.S.d || d === GLYPHS.glyphs.C.d);
+  const inlay = new RegExp(`stroke="${MARK.ground}" stroke-width="${MARK.inlay * 2}"`).test(svg);
+  return { ok: field && fromFont && inlay,
+           detail: `field ${field}, ${letters.length} outlines, all cut from Fraunces ${fromFont}, inlay ${inlay}` };
 });
 
-check('F-01', 'the masthead lockup draws the same plate as the icon', () => {
-  // The masthead knocks the wall out to an outline, because the bar is already
-  // the wall. Everything else must be identical, or the tab and the header are
-  // two different logos.
+check('F-01', 'the masthead lockup is the same monogram as the icon', () => {
+  // The masthead paints NO field: the bar is already the ground, and an opaque
+  // square would show as a slab the moment the bar goes to glass. The inlay is
+  // cut with a mask there instead of stamped, so the bar shows through it.
   const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
   if (!m) return { ok: false, detail: 'no wordmark lockup' };
   const svg = m[1];
-  const outline = /fill="none" stroke="var\(--field\)"/.test(svg);
-  const filled = !/<rect width="64" height="64" fill=/.test(svg);
-  const plate = svg.includes(`x="${G.x}" y="${+G.y.toFixed(3)}"`);
-  const datum = svg.includes(`y1="${+G.cy.toFixed(3)}"`);
-  return { ok: outline && filled && plate && datum,
-           detail: `outline ${outline}, no fill ${filled}, same plate ${plate}, same datum ${datum}` };
+  const noField = !/<rect width="64" height="64" fill="(?!#fff)/.test(svg);
+  const masked = /<mask id="sc-inlay">/.test(svg) && /mask="url\(#sc-inlay\)"/.test(svg);
+  const sameLetters = svg.includes(GLYPHS.glyphs.S.d) && svg.includes(GLYPHS.glyphs.C.d);
+  const tokens = /fill="currentColor"/.test(svg);
+  return { ok: noField && masked && sameLetters && tokens,
+           detail: `no painted field ${noField}, inlay masked ${masked}, same outlines ${sameLetters}, takes the bar's colour ${tokens}` };
+});
+
+check('F-01', 'the letters are Fraunces outlines, not <text> and not a trace', () => {
+  // An SVG favicon renders without the page's webfonts, so <text> would fall
+  // back to whatever serif the OS has. The outlines are cut from the font by
+  // scripts/build-mark-paths.py at a stated instance.
+  const svg = read('icon.svg');
+  const noText = !/<text\b/.test(svg);
+  const instanced = GLYPHS.opsz === 40 && GLYPHS.wght === 700 && GLYPHS.upem === 2000;
+  const generator = /instantiateVariableFont/.test(src('scripts/build-mark-paths.py'));
+  return { ok: noText && instanced && generator,
+           detail: `no <text> ${noText}, opsz ${GLYPHS.opsz}/wght ${GLYPHS.wght} on ${GLYPHS.upem} upem, cut by the generator ${generator}` };
 });
 
 check('F-02', 'the mark is one link and one tab stop with the wordmark', () => {
@@ -314,7 +359,10 @@ check('F-02', 'the mark is one link and one tab stop with the wordmark', () => {
   return { ok: hidden && noName && named, detail: `aria-hidden ${hidden}, no name of its own ${noName}, wordmark still the name ${named}` };
 });
 
-check('F-02', 'the mark serves both locales unchanged', () => {
+check('F-02', 'the monogram serves both locales unchanged', () => {
+  // Finding C-04, closed by decision: the NAME stays translated — 常识画廊 on
+  // the Chinese page — and the monogram is the device that stands beside it,
+  // identical in both. A device is not a translation.
   const en = (home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/span>/) ?? [])[0];
   const zh = (zhHome.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/span>/) ?? [])[0];
   const enSvg = (en.match(/<svg[\s\S]*?<\/svg>/) ?? [])[0];
@@ -324,30 +372,45 @@ check('F-02', 'the mark serves both locales unchanged', () => {
            detail: `byte-identical ${enSvg === zhSvg}, zh wordmark still translated ${zhName}` };
 });
 
-check('F-03', 'the mark does not spend the accent', () => {
-  // Sanguine is reserved for calls to action. It is also 2.03:1 on the bar and
-  // would vanish at tab size; the sage datum is 4.70:1.
+check('F-03', 'the mark does not spend the accent, and holds at tab size', () => {
+  // Sanguine is reserved for calls to action, and is 2.03:1 on the bar. The
+  // letters are --paper on --bar, the most legible pair on the site.
   const svg = read('icon.svg');
-  const sanguine = token('sanguine');
-  const usesAccent = svg.toUpperCase().includes(sanguine.toUpperCase());
-  const r = ratio(MARK.datum, MARK.ground);
-  return { ok: !usesAccent && r >= 3, detail: `no sanguine ${!usesAccent}, datum on wall ${r.toFixed(2)}:1` };
+  const usesAccent = svg.toUpperCase().includes(token('sanguine').toUpperCase());
+  const r = ratio(MARK.paper, MARK.ground);
+  // The C's cap height as a share of the box. Below about a third the pair
+  // stops being two letters at 16px and becomes a smudge.
+  const share = G.hC / MARK.box;
+  return { ok: !usesAccent && r >= 4.5 && share > 0.33,
+           detail: `no sanguine ${!usesAccent}, letters on the field ${r.toFixed(2)}:1, C is ${(share * 100).toFixed(0)}% of the mark` };
 });
 
-check('F-03', 'the plate reads at tab size against the wall', () => {
-  const r = ratio(MARK.plate, MARK.ground);
-  const share = (MARK.plateW * G.plateH) / (MARK.box ** 2);
-  // At 16px the plate is 7px wide. Below about a sixth of the box it stops
-  // being a shape and starts being a speck.
-  return { ok: r >= 4.5 && share > 0.15, detail: `${r.toFixed(2)}:1, plate is ${(share * 100).toFixed(0)}% of the mark` };
+check('F-03', 'the hatching is off below the size it survives', () => {
+  // The sheet's own minimum is 15mm in print. At a 16px favicon the hatch
+  // fills in, so neither the icon nor the masthead carries it.
+  const icon = read('icon.svg');
+  const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
+  const off = !/-hatch/.test(icon) && !/-hatch/.test(m[1]);
+  // …and it is still available, at the sheet's own angle and direction.
+  const available = /-hatch/.test(markGeom.markSvg({ hatch: true }))
+    && MARK.hatchAngle === 45;
+  return { ok: off && available,
+           detail: `off in the icon and the masthead ${off}, available at ${MARK.hatchAngle}° ${available}` };
 });
 
-check('F-04', 'the hanging datum is the figure the work pages are drawn to', () => {
-  // 144.78 cm on a 244 cm wall: the same museum standard the scale diagram
-  // uses, so the mark and the diagram cannot state different numbers.
-  const fromWork = /144\.78/.test(work) || /144\.78/.test(src('src/templates.js'));
-  const declared = Math.abs(MARK.hang - 144.78 / 244) < 1e-9;
-  return { ok: fromWork && declared, detail: `work page cites 144.78 ${fromWork}, mark uses ${(MARK.hang * 100).toFixed(2)}%` };
+check('F-04', 'the proportion is the sheet\'s construction, and says where it departs', () => {
+  // S : C = 1 : sqrt(phi), not 1 : phi. The reason is written in mark.mjs; the
+  // assertion is that the number is derived from phi and not typed in.
+  const derived = Math.abs(MARK.ratio - Math.sqrt(MARK.phi)) < 1e-9;
+  const stated = /1 : sqrt\(phi\)/.test(src('scripts/mark.mjs'));
+  // The pair fills the square: equal margins on all four sides.
+  const rightMargin = MARK.box - (G.C.x + G.wC);
+  const bottomMargin = MARK.box - (G.C.y + G.hC);
+  const square = Math.abs(rightMargin - MARK.pad) < 1e-6
+    && Math.abs(bottomMargin - MARK.pad) < 1e-6
+    && Math.abs(G.S.x - MARK.pad) < 1e-6 && Math.abs(G.S.y - MARK.pad) < 1e-6;
+  return { ok: derived && stated && square,
+           detail: `ratio ${MARK.ratio.toFixed(4)} = sqrt(phi) ${derived}, departure documented ${stated}, fills the square ${square}` };
 });
 
 /* ===================== G — softness ===================== */
@@ -376,12 +439,21 @@ const allHtml = (() => {
 check('G-01', 'softness adds no colour: shadows, glass and bands are palette tokens', () => {
   const tokens = src('src/styles/tokens.css').replace(/\/\*[\s\S]*?\*\//g, '');
   const soft = [...tokens.matchAll(/--(shadow-[a-z]+|glass-[a-z-]+|mat|radius-[a-z]+|edge-breath)\s*:([^;]+);/g)];
-  const literal = soft.filter(([, , v]) => /#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(v)).map(([, n]) => n);
+  /* --glass-footer is the one hex here, and deliberately so: it is not a
+     colour anyone chose but the composite of --bar at --glass-bar-opacity
+     over --field, written down so the rest of the site can use it as a
+     ground. It is allowed only for as long as check-contrast.mjs recomputes
+     it from those three tokens and fails on drift — otherwise it is exactly
+     the hand-picked literal this assertion exists to keep out. */
+  const derived = new Set(['glass-footer']);
+  const literal = soft.filter(([, n, v]) => !derived.has(n) && /#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(v)).map(([, n]) => n);
+  const cc = src('scripts/check-contrast.mjs');
+  const recomputed = /T\['glass-footer'\]/.test(cc) && /--glass-bar-opacity/.test(cc) && /T\['field'\]/.test(cc);
   const shadowsUseBar = soft.filter(([, n]) => n.startsWith('shadow-')).every(([, , v]) => /var\(--bar\)/.test(v));
   const edgeRules = rulesFor(/\.edge\b/).join(';');
   const edgeLiteral = /#[0-9a-f]{3,8}\b|rgba?\(/i.test(edgeRules);
-  return { ok: soft.length >= 8 && !literal.length && shadowsUseBar && !edgeLiteral,
-           detail: `${soft.length} softness tokens, literals ${literal.join(' ') || 'none'}, shadows tinted --bar ${shadowsUseBar}, bands literal-free ${!edgeLiteral}` };
+  return { ok: soft.length >= 8 && !literal.length && recomputed && shadowsUseBar && !edgeLiteral,
+           detail: `${soft.length} softness tokens, literals ${literal.join(' ') || 'none'}, --glass-footer recomputed ${recomputed}, shadows tinted --bar ${shadowsUseBar}, bands literal-free ${!edgeLiteral}` };
 });
 
 check('G-02', 'paintings carry a mat, and nothing that rounds, scales or stretches them', () => {
@@ -481,11 +553,31 @@ check('H-01', 'search, account and cart, in that order, on every page', () => {
 
 check('H-01', 'each shop control is named by a word, in the page language', () => {
   const want = { en: ['Search', 'Account', 'Cart'], zh: ['搜索', '账户', '购物车'] };
-  const got = (html) => [...html.matchAll(/data-placeholder="[a-z]+">[\s\S]*?<span class="visually-hidden">([^<]+)<\/span>/g)].map((m) => m[1]);
+  const got = (html) => [...html.matchAll(/class="shopbar__link"[^>]*>[\s\S]*?<span class="visually-hidden">([^<]+)<\/span>/g)].map((m) => m[1]);
   const en = got(home).join(), zh = got(zhHome).join();
   const iconsHidden = [...home.matchAll(/<svg class="shopbar__icon"[^>]*>/g)].every((m) => /aria-hidden="true"/.test(m[0]));
   return { ok: en === want.en.join() && zh === want.zh.join() && iconsHidden,
            detail: `en ${en}, zh ${zh}, icons aria-hidden ${iconsHidden}` };
+});
+
+/* The footer's channel row. The names are proper nouns, so they are the same
+   in both locales — that is the point, not an untranslated string. Each mark
+   is a link with a hidden name and an aria-hidden drawing, and every channel
+   whose handle is still owed points at a declared route that does not exist,
+   so the click lands on the 404 page rather than on a profile that is not
+   Priscilla's. */
+check('H-01', 'every channel is a named mark, and an unset one lands on the 404', () => {
+  const names = (html) => [...html.matchAll(/class="social__link"[^>]*>[\s\S]*?<span class="visually-hidden">([^<]+)<\/span>/g)].map((m) => m[1]);
+  const want = ['Instagram', 'Facebook', 'X', 'Bluesky', '小红书', 'WeChat'].join();
+  const iconsHidden = [...home.matchAll(/<svg class="social__icon"[^>]*>/g)].every((m) => /aria-hidden="true"/.test(m[0]));
+  const dead = Object.values(siteJson.placeholders.social);
+  const marked = [...home.matchAll(/<a class="social__link" href="([^"]+)"([^>]*)>/g)];
+  const unset = marked.filter(([, , a]) => /data-placeholder=/.test(a));
+  const allDead = unset.every(([, href]) => dead.some((r) => href.endsWith(r)))
+    && dead.every((r) => !existsSync(join(DIST, r, 'index.html')));
+  return { ok: names(home).join() === want && names(zhHome).join() === want && iconsHidden
+           && marked.length === 6 && unset.length === 6 && allDead,
+           detail: `${marked.length} marks, ${unset.length} still owed, all dead ${allDead}, icons aria-hidden ${iconsHidden}` };
 });
 
 check('H-02', 'the placeholders land on a bilingual, unindexed 404', () => {
