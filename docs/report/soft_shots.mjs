@@ -1,5 +1,5 @@
 /**
- * The softness plate for the report: fig/cap-soft.jpg.
+ * The softness plate for the report: fig/cap-soft.png.
  *
  *   node docs/report/soft_shots.mjs <origin>      (called by shots.sh)
  *
@@ -103,9 +103,8 @@ const [hover, glass, band] = await Promise.all([shoot('hover', 1440, 900), shoot
 /* ---- compose: hover on the left, glass and a boundary stacked on the right ---- */
 const plate = join(HERE, 'fig', 'cap-soft.png');
 await pixels('plate', hover, glass, band, plate);
-await pixels('jpeg', plate, join(HERE, 'fig', 'cap-soft.jpg'));
-rmSync(plate, { force: true });
+await pixels('page', plate, plate);        // 300 dpi, lossless, like the captures
 
 rmSync(STAGE, { recursive: true, force: true });
 rmSync(TMP, { recursive: true, force: true });
-console.log('  fig/cap-soft.jpg  hover · glass · boundary  (synthetic stand-in canvas)');
+console.log('  fig/cap-soft.png  hover · glass · boundary  (synthetic stand-in canvas)');

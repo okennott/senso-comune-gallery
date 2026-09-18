@@ -283,14 +283,20 @@ a{ color:var(--sanguine) }
   .edge{ background:linear-gradient(var(--edge-from),var(--edge-to)) }
 }
 
-/* The band carries the same canvas as the field it opens onto — it used to
-   carry a noise dither of its own, at a different frequency and a different
-   strength, which is two textures pretending to be one surface. One token
-   now, blended the same way. It still does the dither's job: a nine-rem
-   gradient in eight bits bands visibly without something to break the steps. */
+/* Noise dither — the same tile as the canvas, at a fraction of its strength.
+   The band is not a material, it is a TRANSITION, and a nine-rem fade in eight
+   bits bands visibly without something to break the steps. What it needs is a
+   dither; what it must not become is a texture. At full canvas strength it
+   read as the noisiest thing on the page, sitting between two smooth stretches
+   of sheet — the texture's own rule (frame, never read on) says the band, which
+   is on the sheet, is not a surface to give tooth to.
+
+   One tile, two jobs, two strengths, both stated: --canvas-tile is the paper,
+   --dither-strength is how much of it a gradient needs to stop stepping. */
 .edge::after{
   content:'';
   position:absolute; inset:0;
+  opacity:var(--dither-strength);
   background-image:var(--canvas-grain);
   background-size:var(--canvas-tile) var(--canvas-tile);
   mix-blend-mode:soft-light;

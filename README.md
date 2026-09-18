@@ -684,11 +684,12 @@ block people outright.
   It is neutral grey with a mean of exactly 0.5 and is composited with
   `background-blend-mode: soft-light`, whose identity at 0.5 is what makes it
   incapable of changing a colour: the largest mean drift measured on any
-  ground is 0.9 of 255. It goes on the field, the bands and the mats, and on
-  nothing that is read — `--muted-ui` on `--wash-blue` is exactly 3.00:1
-  against a 3.0 floor, so the reading grounds have no room to be modulated at
-  all. `check-contrast` prints that allowance every build and fails if a
-  reading ground is ever textured.
+  ground is 0.9 of 255. It goes on the field and the mats, and on nothing that
+  is read — `--muted-ui` on `--wash-blue` is exactly 3.00:1 against a 3.0
+  floor, so the reading grounds have no room to be modulated at all. The bands
+  take the same tile at 30 %, as a dither rather than a texture: a nine-rem
+  fade in eight bits steps without one. `check-contrast` prints that allowance
+  every build and fails if a reading ground is ever textured.
 - **Softness without new colour.** Mats, radii, shadows, glass and section
   boundaries are all expressed through existing tokens; shadows are `--bar` at
   a few percent. The masthead's glass stops at 88% because the navigation must

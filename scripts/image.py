@@ -172,25 +172,69 @@ def vectorize_embed(source: Path, output: Path, w: int, h: int, metadata: dict) 
         out.write("</svg>\n")
 
 
-def vectorize_trace(img: Image.Image, output: Path, metadata: dict, profile: str) -> None:
+# VTracer's Python binding has two shapes in the wild. 0.6.x exposes plain
+# functions; the 1.0 alphas expose a Config object. Both are supported, because
+# which one a machine has is not something this project gets to decide — and a
+# tool that only works on the author's laptop is not a tool.
+#
+# 0.6.x has no built-in presets either, so these are THIS PROJECT'S parameter
+# sets, named for what they are for rather than borrowed from a preset list
+# that does not exist:
+#
+#   faithful  pixel mode, nothing filtered, full colour precision. As close to
+#             the source as tracing gets, and still an approximation.
+#   photo     splines and a wider layer difference, for continuous tone — a
+#             photograph traced at faithful settings is a million tiny regions.
+#   poster    fewer colours and more simplification, for flat art.
+TRACE_PROFILES = {
+    "faithful": dict(colormode="color", hierarchical="cutout", mode="pixel",
+                     filter_speckle=0, color_precision=8, layer_difference=0,
+                     path_precision=8),
+    "photo": dict(colormode="color", hierarchical="cutout", mode="spline",
+                  filter_speckle=4, color_precision=8, layer_difference=48,
+                  corner_threshold=180, length_threshold=4.0, max_iterations=10,
+                  splice_threshold=45, path_precision=8),
+    "poster": dict(colormode="color", hierarchical="stacked", mode="spline",
+                   filter_speckle=8, color_precision=6, layer_difference=16,
+                   corner_threshold=60, length_threshold=4.0, max_iterations=10,
+                   splice_threshold=45, path_precision=8),
+}
+
+
+def _trace_svg(img: Image.Image, profile: str) -> str:
     try:
         import vtracer
     except ImportError as exc:
-        raise SystemExit("trace mode needs VTracer:  pip install 'vtracer==1.0.0a4'") from exc
-    if profile == "faithful":
-        # Bias to fidelity: no speckle deletion, full colour precision,
-        # pixel-aligned geometry, no curve simplification.
-        cfg = vtracer.Config(clustering="color-cluster", hierarchical="cutout", mode="pixel",
-                             filter_speckle=0, color_precision=8, layer_difference=0,
-                             simplify=None, path_precision=4, optimize=0)
-    else:
-        cfg = getattr(vtracer.Config, profile)()
-    svg = cfg.convert_pixels(img.tobytes(), img.width, img.height)
+        raise SystemExit("trace mode needs VTracer:  pip install vtracer") from exc
+    opts = TRACE_PROFILES[profile]
+
+    if hasattr(vtracer, "convert_pixels_to_svg"):          # 0.6.x
+        rgba = list(map(tuple, np.asarray(img).reshape(-1, 4).tolist()))
+        return vtracer.convert_pixels_to_svg(rgba, (img.width, img.height), **opts)
+
+    if hasattr(vtracer, "Config"):                          # 1.0 alphas
+        cfg = vtracer.Config(**{k: v for k, v in opts.items() if k != "colormode"},
+                             clustering="color-cluster")
+        return cfg.convert_pixels(img.tobytes(), img.width, img.height)
+
+    raise SystemExit("VTracer is installed but exposes neither convert_pixels_to_svg "
+                     "nor Config; this binding is not one image.py knows.")
+
+
+def vectorize_trace(img: Image.Image, output: Path, metadata: dict, profile: str) -> None:
+    svg = _trace_svg(img, profile)
     audit = json.dumps(metadata, ensure_ascii=False, separators=(",", ":"))
     audit = audit.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    cut = svg.find(">")
+    # After the <svg> START TAG, not after the first ">" in the file — VTracer
+    # emits an XML declaration and a generator comment first, and metadata
+    # placed between them sits outside the root element, which is not a
+    # document any parser will read.
+    open_tag = svg.find("<svg")
+    cut = svg.find(">", open_tag) if open_tag != -1 else -1
     if cut != -1:
         svg = svg[:cut + 1] + f"\n<metadata>{audit}</metadata>" + svg[cut + 1:]
+    else:
+        raise SystemExit("VTracer returned something that is not an SVG document.")
     if output.suffix.lower() == ".svgz":
         with gzip.open(output, "wt", encoding="utf-8", newline="\n") as f:
             f.write(svg)
@@ -364,10 +408,29 @@ def selftest() -> int:
             if sha256_file(src) != before:
                 fails.append(f"{name}: the input was modified")
 
+        # trace is an approximation, so it is tested for being WIRED UP and
+        # bounded rather than for being exact: a real SVG, and a mean error
+        # that would catch the profile silently tracing nothing. When VTracer
+        # is not installed the line says so — this is the one capability the
+        # tool declares that it cannot always have.
+        img = Image.fromarray(opaque)
+        try:
+            for profile in TRACE_PROFILES:
+                svg = d / f"trace-{profile}.svg"
+                vectorize_trace(img, svg, {"generator": GENERATOR, "mode": "trace"}, profile)
+                r = verify(img, svg)
+                mae = r["visual_composited"]["white"]["mae_per_channel"]
+                ok = svg.stat().st_size > 200 and mae < 40
+                print(f"    trace  {profile:<9} mean error {mae:5.2f} of 255"
+                      f"{'' if ok else '   FAILED'}")
+                if not ok:
+                    fails.append(f"trace/{profile}")
+        except SystemExit as exc:
+            print(f"    trace  not run — {exc}")
+
         # Every declared vector container actually writes, and writes itself:
         # a format in the list that nobody has run is a format that is not
         # supported, it is only advertised.
-        img = Image.fromarray(opaque)
         magic = {".pdf": b"%PDF", ".ps": b"%!PS", ".eps": b"%!PS"}
         for ext in sorted(VECTOR):
             out = d / f"container{ext}"

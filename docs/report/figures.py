@@ -441,13 +441,16 @@ def mark_assets():
     _monogram().resize((256, 256), Image.LANCZOS).save(OUT / "mark.png", optimize=True)
     print(f"    fig/mark.png — {(OUT / 'mark.png').stat().st_size:,} bytes")
 
-    # The two plates, as supplied. JPEG because both are photographs of paper,
-    # where it is several times smaller than PNG at the same quality.
+    # The two plates, as supplied. JPEG at 95 with no chroma subsampling —
+    # visually lossless for continuous tone, and the right codec for it: these
+    # are photographs of paper, where PNG stores every fibre and pays for it.
+    # The page captures go the other way and stay lossless (soft_plate.page),
+    # because they are type and UI edges, not photographs.
     for name, width in (("brand-sheet", 1536), ("mark-lockup", 1200)):
         im = Image.open(BRAND / f"{name}.png").convert("RGB")
         if im.width != width:
             im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
-        im.save(OUT / f"{name}.jpg", quality=88, optimize=True, progressive=True)
+        im.save(OUT / f"{name}.jpg", quality=95, subsampling=0, optimize=True, progressive=True)
         print(f"    fig/{name}.jpg — {(OUT / f'{name}.jpg').stat().st_size:,} bytes, {im.width}x{im.height}")
 
     # The variations row, cropped from the sheet. At the size the whole sheet
@@ -456,7 +459,7 @@ def mark_assets():
     # drawing from the preferred one — solid letters, no construction lines.
     sheet = Image.open(BRAND / "brand-sheet.png").convert("RGB")
     sheet.crop((958, 600, 1525, 800)).resize((1701, 600), Image.LANCZOS).save(
-        OUT / "mark-variations.jpg", quality=90, optimize=True, progressive=True)
+        OUT / "mark-variations.jpg", quality=95, subsampling=0, optimize=True, progressive=True)
     print(f"    fig/mark-variations.jpg — {(OUT / 'mark-variations.jpg').stat().st_size:,} bytes")
 
 

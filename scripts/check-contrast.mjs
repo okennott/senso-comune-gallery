@@ -276,14 +276,20 @@ for (const [selector, token, min, note] of barPairs) {
     for (const m of sheets.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
       if (!/var\(--canvas-grain\)/.test(m[2])) continue;
       const ground = ([...m[2].matchAll(/background(?:-color)?:\s*var\(--([a-z0-9-]+)\)/g)].at(-1) ?? [])[1];
-      textured.push([m[1].trim().replace(/\s+/g, ' ').slice(0, 30), ground]);
+      // A surface may take the tile at less than full strength — the bands use
+      // it as a dither, not as a texture — and the line should say so.
+      const dim = (m[2].match(/opacity:\s*var\(--([a-z0-9-]+)\)/) ?? [])[1];
+      textured.push([m[1].trim().replace(/\s+/g, ' ').slice(0, 30), ground, dim]);
     }
     if (!textured.length) { line('  ✗ nothing references --canvas-grain — the texture is defined and unused'); failures++; }
     line('');
-    for (const [selector, ground] of textured) {
+    const strength = (name) => (readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8')
+      .match(new RegExp(`--${name}:\\s*([\\d.]+)`)) ?? [])[1];
+    for (const [selector, ground, dim] of textured) {
       const bad = ground && READING.has(ground);
       if (bad) failures++;
-      line(`  ${bad ? '✗' : '✓'} ${selector.padEnd(30)} textured${ground ? `, on --${ground}` : ''}`
+      const at = dim ? ` at ${Number(strength(dim)) * 100}% — a dither, not a texture` : '';
+      line(`  ${bad ? '✗' : '✓'} ${selector.padEnd(30)} textured${ground ? `, on --${ground}` : ''}${at}`
         + (bad ? '  — a reading ground may not be textured' : ''));
     }
   }

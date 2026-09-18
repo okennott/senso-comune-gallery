@@ -522,7 +522,7 @@ the reason says so.
 
 ### What was built {#sec-soft-built}
 
-![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: the homepage boundary between Latest works and Series.](fig/cap-soft.jpg){#fig-soft width=100%}
+![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: the homepage boundary between Latest works and Series.](fig/cap-soft.png){#fig-soft width=100%}
 
 Nothing in the palette changed. Every softness token — two radii, three
 shadows, the mat, the glass values and the boundary breath — is expressed
@@ -574,9 +574,15 @@ this is a **cold-press cotton-rag sheet** — paper fibre, not cloth. The site i
 a cream sheet mounted on a field, so paper is the right answer anyway.
 
 One tile in `tokens.css` reproduces it: `feTurbulence`, desaturated, its output
-compressed to a narrow band about 0.5, tiled at 240 px. Measured back out of
-Chrome on the built page, the field reads at **σ 5.1**, against the artwork's
-4.87.
+compressed to a narrow band about 0.5, tiled at 400 px. Getting the *character*
+right took as much measuring as getting the amplitude right — the first tile
+matched σ almost exactly and still read as a fine woven mesh rather than as
+paper, because a high octave count on an anisotropic base frequency makes
+`feTurbulence`'s own lattice visible. Six candidates were rendered beside a 1:1
+crop of the artwork and compared; what the paper has is broad, cloudy
+low-frequency mottle with a faint tooth over it, which is a low base frequency
+and many octaves. Measured back out of Chrome on the built page, the field
+reads at **σ 4.77** against the artwork's 4.87.
 
 ```{=latex}
 \begin{finding}{Why it cannot change a colour, and why that needed measuring}
@@ -602,8 +608,16 @@ different currency.
 
 **Where it may go** is decided by the same law the palette already follows:
 text lives on cream, the sage frames and never carries a word. The texture
-takes that line too — the **field**, the **bands** between sections and the
-**mat** around every painting, and nothing that is read.
+takes that line too — the **field** and the **mat** around every painting, and
+nothing that is read.
+
+The **bands** between sections get the same tile at 30 % and for a different
+reason. A band is not a material, it is a transition, and a nine-rem fade in
+eight bits steps visibly without something to break it; what it needs is a
+*dither*. At full canvas strength it was the noisiest thing on the page,
+speckling between two smooth stretches of sheet — and the band is on the sheet,
+which the rule above says is not a surface to give tooth to. One tile, two
+jobs, two strengths, both named in `tokens.css`.
 
 That is arithmetic, not taste. `check-contrast.mjs` solves how far a
 mean-neutral grain could move each reading ground before its tightest pair
@@ -867,13 +881,13 @@ document is built, so they show the site as it is. The ribbon across the top of
 each page and the red `NEEDS-INPUT` flags are the preview's; a release has
 neither (@sec-readiness).
 
-![The homepage. Cream sheet mounted on the sage field, dark brown bar, the SC monogram at the head of the wordmark, and search, account and cart at the right. Van Gogh's line stands twice: his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line. Beside it, the featured work; on a phone the quote leads and the work follows.](fig/cap-home.jpg){#fig-home width=100%}
+![The homepage. Cream sheet mounted on the sage field, dark brown bar, the SC monogram at the head of the wordmark, and search, account and cart at the right. Van Gogh's line stands twice: his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line. Beside it, the featured work; on a phone the quote leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
 
-![A work page. The views of the work — front, detail, edge, back and video — sit in a strip with thumbnails always visible, grey placeholders until the photographs exist. The price is the boldest element in the block. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.jpg){#fig-work width=100%}
+![A work page. The views of the work — front, detail, edge, back and video — sit in a strip with thumbnails always visible, grey placeholders until the photographs exist. The price is the boldest element in the block. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
 
-![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.jpg){#fig-sold width=100%}
+![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.png){#fig-sold width=100%}
 
-![The homepage on a 390 px phone. The masthead takes two rows — the short name and the shop bar, then the sections and the language switch — and does not stick: a sticky masthead that tall would take a third of the screen and hide the focused item. Van Gogh's line comes before the featured work.](fig/cap-mob.jpg){#fig-mob width=42%}
+![The homepage on a 390 px phone. The masthead takes two rows — the short name and the shop bar, then the sections and the language switch — and does not stick: a sticky masthead that tall would take a third of the screen and hide the focused item. Van Gogh's line comes before the featured work.](fig/cap-mob.png){#fig-mob width=42%}
 
 ## The design review {#sec-review}
 
@@ -1056,7 +1070,7 @@ rate, which is where the belief comes from. For a **China-origin** shipment in
 | United Kingdom | **0%**, ERGA OMNES (origin-neutral) | Reduced art rate | Verified |
 | European Union | 0% expected | Reduced art rate per member state | **Unverified — see @sec-open** |
 
-![The How to Buy page, which puts the duty figure in front of the buyer before they commit rather than after.](fig/cap-buy.jpg){#fig-buy width=100%}
+![The How to Buy page, which puts the duty figure in front of the buyer before they commit rather than after.](fig/cap-buy.png){#fig-buy width=100%}
 
 ## The donation pledge {#sec-donation}
 

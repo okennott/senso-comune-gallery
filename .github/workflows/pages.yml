@@ -39,11 +39,12 @@ jobs:
       - run: npm ci || npm install
 
       # npm run check ends by running scripts/image.py's own selftest, which
-      # is the only thing in the suite that is Python. Three wheels, no system
-      # packages. Without them the check cannot run, and a check that cannot
-      # run is not allowed to pass quietly.
+      # is the only thing in the suite that is Python. Four wheels, no system
+      # packages — vtracer among them, so the trace profiles are covered here
+      # rather than reported as "not run". Without these the check cannot run,
+      # and a check that cannot run is not allowed to pass quietly.
       - name: Python tools
-        run: python3 -m pip install --quiet --disable-pip-version-check pillow numpy cairosvg
+        run: python3 -m pip install --quiet --disable-pip-version-check pillow numpy cairosvg vtracer
 
       # BASE_PATH: a project site serves from /<repo>/, so every absolute URL
       # needs that prefix. SITE_URL feeds canonical, og:url and the sitemap.

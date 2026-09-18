@@ -3,7 +3,7 @@
 
     python3 soft_plate.py canvas <raw> <w> <h> <out.webp>
     python3 soft_plate.py plate  <hover> <glass> <band> <out.png>
-    python3 soft_plate.py jpeg   <in.png> <out.jpg>
+    python3 soft_plate.py page   <in.png> <out.png> [width]
 
 soft_shots.mjs drives Chrome and paints the stand-in canvas; everything that
 is pixels rather than pages happens here. It used to be sharp, which is the
@@ -39,13 +39,32 @@ def plate(hover, glass, band, out):
     sheet.save(out, "PNG", optimize=True)
 
 
-def jpeg(src, out, quality=88):
-    """A page capture, as JPEG. The captures carry the canvas grain, which is
-    noise, which is the one thing PNG cannot compress."""
-    Image.open(src).convert("RGB").save(out, quality=int(quality), optimize=True,
-                                        progressive=True, subsampling=0)
+# The report's figure box is about 150 mm wide, so 1772 px is 300 dpi — the
+# print standard, and the width every page capture is resampled to. The raw
+# capture is 2880 px, which is 488 dpi: two and a half times more data than any
+# printer or screen will use, and PNG has to store every pixel of the canvas
+# grain to give it to them.
+PAGE_WIDTH = 1772
+
+
+def page(src, out, width=PAGE_WIDTH):
+    """A page capture at print resolution, LOSSLESS.
+
+    Lossless because a screenshot is mostly type and UI edges, and because the
+    site now has a real texture: a JPEG artefact in a capture of a textured
+    page cannot be told apart from the texture, which makes the figure a worse
+    witness than the thing it is a witness to. Resampling to 300 dpi is not a
+    quality loss — it is the resolution the figure is placed at — and it has
+    the useful side effect of RESOLVING the grain rather than leaving it as
+    per-pixel noise nothing downstream can compress.
+    """
+    im = Image.open(src).convert("RGB")
+    width = int(width)
+    if im.width > width:
+        im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+    im.save(out, "PNG", optimize=True)
 
 
 if __name__ == "__main__":
     cmd, *rest = sys.argv[1:]
-    {"canvas": canvas, "plate": plate, "jpeg": jpeg}[cmd](*rest)
+    {"canvas": canvas, "plate": plate, "page": page}[cmd](*rest)
