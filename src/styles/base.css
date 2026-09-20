@@ -103,12 +103,11 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
    Rather than reduce her green to a thin divider, the whole content column
    becomes a SHEET mounted on the field — which is what a gallery does to a
    work on paper anyway. The sheet was cream until 20 September 2026, then
-   --wash-pale for an afternoon, and is now TRANSPARENT: it paints
-   --plate-sheet, and that token is transparent, so the field itself is what
-   shows through the content column. The mount is still there — the shadow and
-   the rim light are what say the sheet is lying on the field — but it is a
-   sheet of glass rather than of paper. See "the plates" in tokens.css for what
-   that costs in contrast and for the one line that brings the paper back. */
+   --wash-pale, then TRANSPARENT for an afternoon — a sheet of glass rather
+   than of paper, with the field showing through the content column — and is
+   --wash-pale again since AW-05, which has the bill the glass ran up. It
+   paints --plate-sheet either way: the mount, its shadow and its rim light do
+   not know which. See "the plates" in tokens.css. */
 .sheet{
   max-width:1240px;
   margin-inline:auto;

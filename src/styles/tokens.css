@@ -450,6 +450,13 @@
 
   /* The passe-partout. Scales with the viewport so a phone thumbnail does not
      become mostly mat. */
+  /* THE WALL a work hangs on, as a ratio. build.js overrides this with the
+     narrowest work in the catalogue, so the cell is always tall enough for the
+     tallest painting at full column width and no work is ever height-bound.
+     The value here is only what the stylesheet is worth on its own: 4:5, the
+     commonest canvas, so a hand-built page still hangs straight. */
+  --wall-ratio: 0.8;
+
   --mat: clamp(8px,1.4vw,18px);
 
   /* Glass. The masthead text is caption-size, so it needs 4.5:1 against

@@ -166,10 +166,8 @@
    itself — nothing paints a background here — held open by its padding and
    closed by the engraved line every section boundary now uses.
 
-   The four rules across its foot are the sheet's four brand colours, in the
-   order they can be seen on sage: the accent, her deep green, the bar's brown
-   and the cream. They are decoration and they say so — aria-hidden, no
-   meaning carried by any of them, and none of them is a link. */
+   It carried four decorative rules in the brand's four colours until AW-08
+   took them out; build.js has the reasoning. */
 .motto{
   padding-block:var(--space-4);
   border-bottom:1px solid var(--emboss-shade);
@@ -177,33 +175,21 @@
 }
 /* The band has a ceiling, and it is the fold. Finding A-01 put a painting on
    the opening screen; a quote that pushes it back off again would undo the
-   finding with better manners. Measured at 1440x900: masthead 110, band 330,
-   and the featured work's own heading at 520. */
-.motto .hero__quote{ margin-bottom:var(--space-4) }
-.motto__foot{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:var(--space-4) var(--space-5); flex-wrap:wrap;
-}
-.motto__rules{ display:flex; align-items:center; gap:var(--space-3) }
-.motto__rule{ display:block; width:clamp(2.6rem,7vw,7rem); height:3px; border-radius:1.5px }
-.motto__rule--sanguine{ background:var(--sanguine) }
-.motto__rule--deep{ background:var(--field-deep) }
-.motto__rule--bar{ background:var(--bar) }
-/* The one cream thing on the site that is not art, a mat or the bar: 4mm of
-   the sheet's Warm Ivory in a decorative rule. Named in L-01 for that. */
-.motto__rule--paper{ background:var(--paper) }
-/* On a phone the CTA drops under the rules rather than squeezing them. */
+   finding with better manners. AW-01 is the same argument once more: nothing
+   follows the quote inside the band now, so the band's own padding is all the
+   space it needs and the quote's 48px belongs to the painting. Measured at
+   1440x900 after both: masthead 118, band ends at 366, the painting at 501. */
+.motto .hero__quote{ margin-bottom:0 }
 @media (max-width:519px){
   .motto{ padding-block:var(--space-5) var(--space-4) }
-  .motto__rule{ height:2px }
 }
 
 /* ---------- hero ---------- */
 /* The band above it already separates the hero from the bar, so the hero's
-   own top padding came down with the move: at 1440x900 the featured painting
-   now starts at y=600 in a release build, which is what finding A-01 asked
-   for and what the motto in the left column had been costing. */
-.hero{ padding-block:var(--space-5) }
+   own top padding came down with the move. Tighter at the head than at the
+   foot since AW-01: every pixel above the painting is a pixel of the painting
+   the fold takes, and there is nothing above it but a four-word label. */
+.hero{ padding-block:var(--space-4) var(--space-6) }
 .hero h1{ max-width:var(--measure-sm); margin-bottom:var(--space-4) }
 /* The van Gogh quote that used to live here now opens Tribute as .epigraph.
    Finding D-05: the .hero blockquote rules it left behind matched nothing and
@@ -852,7 +838,7 @@ html[lang^="zh"] .page--about .prose{
   html{ scroll-padding-top:var(--space-4) }
   [id]{ scroll-margin-top:var(--space-4) }
 
-  .hero{ padding-block:var(--space-6) var(--space-5) }
+  .hero{ padding-block:var(--space-4) var(--space-5) }
   .section{ padding-block:var(--space-5) }
   .works{ gap:var(--space-6) }
   :root{ --edge-height:5rem }
@@ -923,7 +909,19 @@ html[lang^="zh"] .page--about .prose{
   letter-spacing:.03em;
   color:var(--muted);
 }
-.hero__label{ margin:0 0 var(--space-4) }
+/* A signpost, not a voice. Set as an h2 at 33.6px it was the largest thing on
+   the opening screen and the painting under it was 460px tall, which is the
+   wrong way round for a gallery. It keeps its level in the outline and takes
+   the site's label style, the one the filter bar and the portrait caption
+   already use. */
+.hero__label{
+  margin:0 0 var(--space-4);
+  font-family:var(--font-body);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label);
+  text-transform:uppercase;
+  color:var(--muted);
+}
 
 /* ---------- epigraph ----------
    Set smaller and quieter than the hero motto so Tribute opens with a breath
@@ -998,16 +996,53 @@ html[lang^="zh"] .page--about .prose{
 @media (max-width:519px){
   .hero__motto{ font-size:calc(var(--size-hero) * .72) }
 }
+/* AW-01 and AW-04. The featured work was a 375x460 box in a 1060px column at
+   both 1440 and 1920 — 12.5% of the screen's width, with 65% of its own block
+   empty — and its tombstone row was let out to the full column, which put the
+   price at x183 and its button at x992. Seven hundred and forty-two pixels
+   apart, on one line, reading as two unrelated things.
+
+   Both come from the same mistake: the figure was laid out as a band rather
+   than as an object with a label. It is now the work page's own idiom brought
+   forward — the painting, and its wall label at the foot of it. The work takes
+   the height it is given, the label is a column beside it, and the price and
+   its button are back inside the 32rem the base rule already caps them to and
+   already explains why. */
 .hero__work{ margin:0 }
+/* The featured work's own piece of wall: as tall as the opening screen can
+   afford and exactly as wide as the painting, so the link has a definite width
+   and the label next to it can stand at the painting's edge. */
+.hero__wall{
+  display:block;
+  height:min(62vh,38rem);
+  aspect-ratio:var(--work-ratio,var(--wall-ratio));
+}
 .hero__work img{
-  width:auto;
-  max-width:100%;
-  max-height:clamp(260px,48vh,460px);
+  width:auto; height:auto;
+  max-width:100%; max-height:100%;
   background:var(--paper);
   cursor:pointer;
 }
 .hero__work figcaption{ position:relative; margin-top:var(--space-4) }
-.hero__work .tombstone__row{ max-width:none }
+@media (min-width:900px){
+  .hero__work{
+    display:grid;
+    grid-template-columns:auto minmax(16rem,30ch);
+    column-gap:var(--space-6);
+    align-items:end;
+    /* An auto track absorbs the free space unless the tracks are packed, and
+       an absorbed track put the label 500px clear of the painting it labels. */
+    justify-content:start;
+  }
+  /* A wall label hangs at the foot of the work, not above its middle. */
+  .hero__work figcaption{ margin-top:0; padding-bottom:var(--space-2) }
+  .hero__work .tombstone__row{ flex-direction:column; align-items:flex-start; gap:var(--space-3) }
+}
+@media (max-width:899px){
+  /* Stacked, the wall is the column's width and the label follows it. */
+  .hero__wall{ height:auto; aspect-ratio:auto }
+  .hero__work img{ width:100% }
+}
 
 @media (min-width:900px){
   /* Capped so the two columns bracket a band rather than the full sheet: at
@@ -1036,11 +1071,16 @@ html[lang^="zh"] .page--about .prose{
   grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
   gap:var(--space-5) var(--space-4);
 }
-/* A fixed height keeps the row's baselines aligned. The width follows the
-   painting, so the mat hugs it: a full-width box would letterbox a portrait
-   work inside a wide band of mat — at 390px, a 0.75 painting in a 1.67 box,
-   which reads as a badly cut board. object-fit:contain stays as the guard. */
-.works--grid .work__img{ width:auto; max-width:100%; height:16rem; object-fit:contain }
+/* The same wall as the catalogue, in smaller cells — which is where the
+   contrast that carries the meaning now lives: 210px of wall for a work that
+   has gone, 280px and up for one that has not. The old rule set a 16rem fixed
+   HEIGHT on the image itself, which both capped the work and, being a height
+   on a box whose width was auto, left every painting on its own left edge. */
+.works--grid .work__figure{
+  display:flex; justify-content:flex-start; align-items:flex-end;
+  aspect-ratio:var(--wall-ratio);
+}
+.works--grid .work__img{ width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain }
 .works--grid .tombstone__title{ font-size:var(--size-body) }
 .works--grid .price{ font-size:var(--size-body) }
 /* In a 210px cell the sold label wraps, and .link-quiet is an inline-flex
@@ -1186,18 +1226,33 @@ html[lang^="zh"] .page--about .prose{
   align-items:end;
 }
 .works--catalogue .work{ gap:var(--space-3) }
-/* A fixed image height keeps a row's tombstones level; the width follows the
-   painting, so the mat hugs it — the archive grid's rule, at selling size. */
-.works--catalogue .work__figure{ display:flex; justify-content:center; align-items:flex-end; min-height:22rem }
-.works--catalogue .work__img{ width:auto; height:auto; max-width:100%; max-height:22rem; object-fit:contain }
+/* THE WALL. AW-02 and AW-03: this was a 22rem ceiling and a centred image, so
+   a painting was the same size on a 27-inch display as on a phone — and
+   SMALLER on the phone than its own column already offered, because a 40x30
+   portrait in a 307px column wants 409px, hit the 352px cap and shrank to 264
+   wide. Centring it then put every caption 16-30px to the left of its own
+   painting, and no two paintings in a row on the same line.
+
+   Now each cell is a piece of wall: an aspect-ratio box whose proportion is
+   --wall-ratio, the narrowest work in the catalogue (build.js derives it, and
+   says why). Every painting is therefore width-bound, hung to the bottom-left
+   of its cell — so one left line and one right line run down the page, the
+   tombstones stay level because the walls are, and the work grows with the
+   column at every width. Nothing is normalised: max-width and max-height with
+   auto dimensions scale a painting, they never letterbox it, and check-render
+   asserts that the content box still carries the painting's own ratio. */
+.works--catalogue .work__figure{
+  display:flex; justify-content:flex-start; align-items:flex-end;
+  aspect-ratio:var(--wall-ratio);
+}
+.works--catalogue .work__img{ width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain }
 .works--catalogue .tombstone__title{ font-size:var(--size-h3) }
 .works--catalogue .tombstone__row{
   flex-direction:column; align-items:flex-start; gap:var(--space-2);
 }
-@media (max-width:599px){
-  .works--catalogue .work__figure{ min-height:0 }
-  .works--catalogue .work__img{ height:auto; max-height:70vh }
-}
+/* The wall needs no phone exception: at one column it is the column's own
+   width by --wall-ratio, which is the largest a painting can honestly be on a
+   390px screen. The old rule capped it at 70vh and cost it a third of that. */
 .section__more{ margin:var(--space-5) 0 0 }
 
 /* Local navigation: the Works section's rooms, as one quiet row of tabs under

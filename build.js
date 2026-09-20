@@ -367,12 +367,18 @@ function renderIndex(loc) {
   const LATEST = 4;
   const latest = available.filter((w) => w !== heroWork).sort(byNewest).slice(0, LATEST);
 
+  /* The featured work hangs on a piece of wall of its OWN proportion, so the
+     link that carries it has a definite width and the label beside it can sit
+     at the painting's edge rather than wherever the grid decides. The ratio is
+     the work's, in centimetres — the photograph agrees with it to within 0.04%
+     and could not letterbox the painting in any case: the image keeps auto
+     dimensions inside the wall and only ever scales to fit it. */
   const heroFigure = heroWork ? `
   <section class="hero__feature" aria-labelledby="featured-h">
     <h2 id="featured-h" class="hero__label">${esc(t(S.featured.title, loc))}</h2>
     <figure class="hero__work">
-      <a href="${lpath(loc, site, `/works/${heroWork.slug}/`)}">
-        ${picture(heroWork, { eager: true, sizes: '(min-width:900px) 40vw, calc(100vw - 40px)' }, loc)}
+      <a class="hero__wall" style="--work-ratio:${(heroWork.widthCm / heroWork.heightCm).toFixed(4)}" href="${lpath(loc, site, `/works/${heroWork.slug}/`)}">
+        ${picture(heroWork, { eager: true, sizes: '(min-width:900px) 46vh, calc(100vw - 40px)' }, loc)}
       </a>
       <figcaption>
         ${tombstone(heroWork, loc, { level: 'h3' })}
@@ -420,7 +426,12 @@ function renderIndex(loc) {
    * is not a band. It carries no landmark of its own, so the page's    *
    * landmark count is what it was.                                     *
    * ---------------------------------------------------------------- */
-  const rule = (name) => `<span class="motto__rule motto__rule--${name}"></span>`;
+  /* AW-08. Four decorative rules in the brand's four colours used to run
+     across the band's foot, aria-hidden and carrying no meaning by design. On
+     sage they read as a progress bar or a palette chip, and the cream one read
+     as a stray highlight — the only unexplained ornament on a site whose whole
+     argument is that nothing here is unexplained. They are gone, and the band
+     is 40px shorter for it, which the painting below gets. */
   const strip = `
 <div class="motto">
   <div class="wrap motto__inner">
@@ -428,7 +439,6 @@ function renderIndex(loc) {
       <blockquote cite="${esc(site.hero.original.source)}"><p class="hero__original" lang="${esc(site.hero.original.lang)}">${site.hero.original.text.split('\n').map(esc).join('<br>')}</p><p class="hero__motto">${t(site.hero.title, loc).split('\n').map(esc).join('<br>')}</p></blockquote>
       <figcaption class="hero__cite">— ${esc(t(site.hero.attribution, loc))}</figcaption>
     </figure>
-    <span class="motto__rules" aria-hidden="true">${rule('sanguine')}${rule('deep')}${rule('bar')}${rule('paper')}</span>
   </div>
 </div>`;
 
@@ -1069,8 +1079,23 @@ const fingerprint = (name, body) => {
 const cjkCss = existsSync(join(ROOT, 'public/fonts/fonts-cjk.css'))
   ? readFileSync(join(ROOT, 'public/fonts/fonts-cjk.css'), 'utf8')
   : '';
+/* THE WALL, derived from the catalogue rather than typed.
+
+   Every painting in a grid is drawn at the full width of its cell, so the cell
+   has to be as tall as the TALLEST work in the catalogue is at that width —
+   which is the smallest width/height in the data. Set there, no work is ever
+   height-bound: each one spans its column exactly, and the page gets one left
+   line, one right line and a shelf across every row, without normalising a
+   single painting's proportions.
+
+   A landscape work entering the catalogue widens the wall for everyone. That
+   is correct. The wall is whatever holds the work, and it is a data edit like
+   all the rest of this. */
+const wallRatio = Math.min(...works.map((w) => w.widthCm / w.heightCm));
+const wallCss = `\n:root{ --wall-ratio:${wallRatio.toFixed(4)} }\n`;
+
 const css = [cjkCss, ...['tokens', 'base', 'gallery']
-    .map((f) => readFileSync(join(ROOT, `src/styles/${f}.css`), 'utf8'))]
+    .map((f) => readFileSync(join(ROOT, `src/styles/${f}.css`), 'utf8')), wallCss]
   .join('\n')
   .replace(/url\('\/fonts\//g, `url('${asset('/fonts/')}`);
 

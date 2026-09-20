@@ -82,11 +82,20 @@ check('A-01', 'a painting is in the hero, above the fold', () => {
   // the lifted work must not also appear among the latest works below it
   const latest = (home.match(/<section class="section ground--pale" id="latest">([\s\S]*?)<\/section>/) ?? [])[1] ?? '';
   const listed = [...latest.matchAll(/<div class="tombstone" data-work="([a-z0-9-]+)"/g)].map((m) => m[1]);
-  const heroSlug = (home.match(/<figure class="hero__work">\s*<a href="[^"]*\/works\/([a-z0-9-]+)\//) ?? [])[1];
-  const capped = /max-height:clamp\(260px,48vh,460px\)/.test(css);
+  const heroSlug = (home.match(/<figure class="hero__work">\s*<a [^>]*href="[^"]*\/works\/([a-z0-9-]+)\//) ?? [])[1];
+  // AW-01. The cap was a constant — clamp(260px,48vh,460px) — so the painting
+  // was 375x460 at 1440 and 375x460 at 1920, 12.5% of the screen. It is now a
+  // piece of WALL: the link carries the work's own ratio and a height taken
+  // from the viewport, so the painting grows with the screen and the label
+  // stands at its edge rather than 742px away across an empty row.
+  // The desktop rule, not the phone override that follows it and sets both
+  // back to auto: match the one that carries the viewport height.
+  const wall = /\.hero__wall\{display:block;height:min\(\d+vh,[\d.]+rem\);aspect-ratio:var\(--work-ratio,var\(--wall-ratio\)\);?\}/.test(flat)
+            && /--wall-ratio:[\d.]+/.test(flat);
+  const ratio = /<a class="hero__wall" style="--work-ratio:[\d.]+"/.test(home);
   return {
-    ok: hasSplit && heroFig && heroImg && heroSlug && !listed.includes(heroSlug) && capped,
-    detail: `hero work ${heroSlug}, alone in the hero ${hasSplit}; ${listed.length} latest works beneath, hero not repeated ${!listed.includes(heroSlug)}; height-capped ${capped}`,
+    ok: hasSplit && heroFig && heroImg && heroSlug && !listed.includes(heroSlug) && wall && ratio,
+    detail: `hero work ${heroSlug}, alone in the hero ${hasSplit}; ${listed.length} latest works beneath, hero not repeated ${!listed.includes(heroSlug)}; on a wall of its own ratio ${wall && ratio}`,
   };
 });
 
@@ -1347,13 +1356,14 @@ check('N-01', 'the motto is a band under the bar, not a column beside a painting
   const band = home.match(/<div class="motto">[\s\S]*?<\/div>\s*<main/);
   const betweenHeaderAndMain = home.indexOf('</header>') < home.indexOf('<div class="motto">')
                             && home.indexOf('<div class="motto">') < home.indexOf('<main');
-  // The band carries the quote and the palette rules and NOTHING ELSE. The
-  // "View works" link that came with it out of the hero was dropped on 20
-  // September 2026: the header's first item already goes there, the latest
-  // works end with the same link, and a third route to one page inside the
-  // page's own statement was a link asking to be counted rather than used.
+  // The band carries the quote and NOTHING ELSE. The "View works" link that
+  // came with it out of the hero was dropped on 20 September 2026: the
+  // header's first item already goes there, the latest works end with the same
+  // link, and a third route to one page inside the page's own statement was a
+  // link asking to be counted rather than used. The four palette rules went
+  // the same way at AW-08, one finding later.
   const carries = !!band && /<p class="hero__motto">/.test(band[0])
-                         && /<span class="motto__rules" aria-hidden="true">/.test(band[0])
+                         && !/motto__rule/.test(band[0])
                          && !/<a /.test(band[0]);
   // the hero keeps the painting and gives up the column the motto held
   const heroClean = /<section class="hero wrap">/.test(home) && !/hero__lede|hero--split/.test(home);
@@ -1362,18 +1372,21 @@ check('N-01', 'the motto is a band under the bar, not a column beside a painting
                            .filter(([, h]) => /class="motto"/.test(h)).length;
   const zh = /<div class="motto">/.test(zhHome);
   return { ok: betweenHeaderAndMain && carries && heroClean && zh && elsewhere === 0,
-           detail: `band between the bar and the sheet ${betweenHeaderAndMain}, quote and rules only ${carries}, hero is the painting alone ${heroClean}, on ${elsewhere} other pages` };
+           detail: `band between the bar and the sheet ${betweenHeaderAndMain}, the quote alone ${carries}, hero is the painting alone ${heroClean}, on ${elsewhere} other pages` };
 });
 
-check('N-01', 'the band\'s four rules are the palette, and say nothing', () => {
-  const want = ['sanguine', 'deep', 'bar', 'paper'];
-  const drawn = [...home.matchAll(/motto__rule motto__rule--([a-z]+)/g)].map((m) => m[1]);
-  const paints = { sanguine: '--sanguine', deep: '--field-deep', bar: '--bar', paper: '--paper' };
-  const css_ok = want.every((n) => new RegExp(`\\.motto__rule--${n}\\{background:var\\(${paints[n]}\\)\\}`).test(flat));
-  // decoration, and it says so: inside an aria-hidden wrapper, no link, no text
-  const quiet = /<span class="motto__rules" aria-hidden="true">(<span class="motto__rule[^"]*"><\/span>){4}<\/span>/.test(home);
-  return { ok: drawn.join() === want.join() && css_ok && quiet,
-           detail: `${drawn.join(' · ')}, painted from the palette ${css_ok}, aria-hidden and empty ${quiet}` };
+/* AW-08. Four decorative rules in the brand's four colours ran across the
+   band's foot — aria-hidden, carrying no meaning by design. On sage they read
+   as a progress bar or a palette chip and the cream one as a stray highlight:
+   the only unexplained ornament on a site whose argument is that nothing here
+   is unexplained. This assertion used to hold them in place; it now holds them
+   out, of the markup and of the stylesheet both, so they cannot come back
+   without someone deciding to. */
+check('N-01', 'the band carries no ornament, in the markup or the sheet', () => {
+  const inHtml = allHtml.filter(([, h]) => /motto__rule/.test(h)).length;
+  const inCss = /motto__rule/.test(flat);
+  return { ok: inHtml === 0 && !inCss,
+           detail: `on ${inHtml} pages, in the stylesheet ${inCss}` };
 });
 
 check('N-02', 'every section boundary states itself, in one pair of colours', () => {
@@ -1426,11 +1439,19 @@ check('N-03', 'the panel is a ground the contrast gate solves, and only one toke
    exists — the scale calls it --size-hero — so the motto silently fell back to
    inherited body size, and a test that only matched the CSS text called it
    green. Nothing else here can make that mistake again. */
+/* A property referenced WITH a fallback — var(--x,<something>) — cannot fall
+   back to the inherited value, so it is safe whether or not the sheet declares
+   it. That is how --work-ratio reaches the featured wall: build.js sets it
+   inline on the one element that needs it, per work, and the sheet names
+   --wall-ratio behind it for every other case. Only a bare reference has to be
+   declared, and those are what this counts. */
 check('CSS', 'every custom property referenced is actually defined', () => {
   const defined = new Set([...cssRaw.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
-  const used = new Set([...css.matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1]));
+  const bare = [...css.matchAll(/var\(\s*(--[a-z0-9-]+)\s*([,)])/g)]
+    .filter((m) => m[2] === ')').map((m) => m[1]);
+  const used = new Set(bare);
   const missing = [...used].filter((v) => !defined.has(v));
-  return { ok: missing.length === 0, detail: missing.length ? missing.join(' ') : `${used.size} referenced, all defined` };
+  return { ok: missing.length === 0, detail: missing.length ? missing.join(' ') : `${used.size} referenced without a fallback, all defined` };
 });
 
 /* Found on 20 September 2026 by a rule that would not paint. A comment in
