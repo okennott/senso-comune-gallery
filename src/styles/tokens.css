@@ -69,13 +69,41 @@
   --paper-deep:       #EDE4D3;
 
   /* --- field -------------------------------------------------------------
-     Her sage, at full strength. Carries no text: sand-on-sage is 2.44:1 and
-     ink-on-sage is 4.70:1, which is fine for a heading and nothing else. It
-     is the outer ground the sheet is mounted on, and what breathes through
-     the bands between sections. The reading grounds below are this colour's
-     own hue held at a lightness that can carry prose.                     */
-  --field:            #969B7D;
-  --field-deep:       #737C61;
+     The wall. Since the plates came off it is the whole page, which is why it
+     was re-solved on 20 September 2026 against the Netlify prototype — the
+     green Priscilla had been looking at all along. Measured off that capture,
+     the prototype's wall is a FLAT #868E6E: darker than her sheet's sage and,
+     to be exact about it, very slightly MORE chromatic. What reads as vintage
+     there is the lightness, not the saturation.
+
+     So this takes the prototype's lightness and the asked-for step down in
+     saturation, and holds the hue the rest of the palette is built on:
+
+                        L*      chroma    hue
+       sheet sage      67.7     0.043    115.2   her stated Primary
+       prototype       63.1     0.047    119.2   measured off the capture
+       --field         63.4     0.034    115.4   here
+
+     Chroma is 21% under her sheet's and 28% under the prototype's; lightness
+     is the prototype's. The hue does not move, because the wash ladder is
+     locked to the field's own hue within 2 degrees (check-review L-02) and
+     rotating the wall would have meant re-solving four reading grounds to
+     change a wall nobody reads on.
+
+     A DEPARTURE FROM THE SHEET, and the first one in the palette: her Primary
+     Sage #969B7D and Deep Green #737C61 are what the brand sheet states, and
+     they were --field and --field-deep exactly until today. They remain the
+     brand values — the mark, the icons and print use them — and the report's
+     sheet table says so. What changed is the WALL, because a colour that was
+     chosen as a margin now covers every page from the bar to the footer, and
+     at that scale her sage reads fresher and lighter than the site she was
+     shown.
+
+     What it carries: nothing, by design, and with the plates off that is no
+     longer true — see "the plates" below for what every pair now measures on
+     it. Darkening the wall costs contrast: ink-on-sage goes 4.70 → 3.96.  */
+  --field:            #898D76;   /* was her sheet's #969B7D */
+  --field-deep:       #6C705A;   /* was her sheet's #737C61 */
 
   /* --- bar ---------------------------------------------------------------
      Her dark brown masthead. Sand on it is 11.45:1 — the most legible
@@ -181,11 +209,11 @@
      the field is the one surface in this palette that was never solved for
      text. On --field and --field-deep, the two ends of the fall:
 
-       ink        4.70 / 3.09    was 11.56 on --wash-pale   headings
-       body       2.35 / 1.55         5.78    running text, needs 4.5
-       muted      2.01 / 1.32         4.94    captions, tombstone meta
-       sanguine   2.32 / 1.52         5.70    every link
-       muted-ui   1.33 / 1.14         3.27    icon strokes, borders
+       ink        3.96 / 2.65    was 11.56 on --wash-pale   headings
+       body       1.98 / 1.33         5.78    running text, needs 4.5
+       muted      1.69 / 1.13         4.94    captions, tombstone meta
+       sanguine   1.95 / 1.31         5.70    every link
+       muted-ui   1.12 / 1.33         3.27    icon strokes, borders
 
      That is contrast spent on quietness, which is the one thing the build
      report opens by forbidding. check-contrast.mjs now prints this table and
@@ -363,7 +391,7 @@
        --paper on it       9.55:1     (11.45)
      Over --field-deep, the darker half of the field, both are higher still,
      so the value below is the worst case and not an average.              */
-  --glass-footer:      #45382D;
+  --glass-footer:      #43372C;
 
   /* A frosted plate on the sheet: a panel that lets the wash beneath it come
      through instead of stamping a second ground on top of the first.

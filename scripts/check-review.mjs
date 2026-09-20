@@ -1081,6 +1081,33 @@ check('L-05', 'every surface that is read goes through a plate token', () => {
              : `${group.length} plates, all named in tokens.css; ${Object.keys(painted).length} read surfaces, none naming a wash` };
 });
 
+check('L-06', 'every literal copy of the wall colour is still the wall colour', () => {
+  /* --field is written out in full in two places that cannot use var(): the
+     lightbox backdrop's fallback for engines without color-mix(), and the
+     installed app's splash ground in the web manifest, which is JSON. Both
+     were correct on the day they were written and both would have gone quietly
+     wrong when the wall was re-solved on 20 September 2026 — a lightbox in the
+     old sage over a page in the new one, and a splash screen that does not
+     match the page it opens. So they are solved against the token. */
+  const field = token('field');
+  const rgb = [0, 2, 4].map((i) => parseInt(field.slice(i + 1, i + 3), 16));
+  const bad = [];
+
+  const g = src('src/styles/gallery.css');
+  const m = g.match(/dialog\.lightbox::backdrop\{ background:rgba\((\d+),(\d+),(\d+),\.94\) \}/);
+  if (!m) bad.push('no rgba() fallback for the lightbox backdrop');
+  else if (m.slice(1, 4).map(Number).join(',') !== rgb.join(',')) {
+    bad.push(`the lightbox fallback is rgba(${m.slice(1, 4).join(',')}) and --field is ${field} = rgb(${rgb.join(',')})`);
+  }
+
+  const manifest = JSON.parse(read('site.webmanifest'));
+  if ((manifest.background_color ?? '').toUpperCase() !== field.toUpperCase()) {
+    bad.push(`the manifest's background_color is ${manifest.background_color}, --field is ${field}`);
+  }
+  return { ok: !bad.length,
+           detail: bad.length ? bad.join('; ') : `2 literal copies, both ${field}` };
+});
+
 /* ===================== K — readiness ===================== */
 /* 17 September 2026 (report, "Readiness"): the site can only go live once
    every critical detail is supplied. These hold the build's half of that; the

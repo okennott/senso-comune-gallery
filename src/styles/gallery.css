@@ -384,7 +384,7 @@ dialog.lightbox::backdrop{
 }
 @supports not (background:color-mix(in oklab,red,blue)){
   /* --field at 94%, for engines without color-mix. Keep in step with the token. */
-  dialog.lightbox::backdrop{ background:rgba(150,155,125,.94) }
+  dialog.lightbox::backdrop{ background:rgba(137,141,118,.94) }
 }
 dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
 /* The lightbox is for looking closely, so the painting gets the whole frame:

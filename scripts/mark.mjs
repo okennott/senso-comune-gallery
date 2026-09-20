@@ -41,8 +41,8 @@
      diagonal hatching, upper-left to lower-right   adopted — and it is the
        same direction and angle as the Leonardo hatch already running across
        the Tribute ground (base.css, .hatch)
-     sage green   #969B7D                           already --field
-     deep green   #737C61                           already --field-deep
+     sage green   #969B7D                           the sheet's Primary
+     deep green   #737C61                           the sheet's Deep Green
      warm ivory   #E9E2D3                           NOT added: it is within
        one step of the mat cream, and a fifth cream is a fifth cream
      charcoal     #24241F                           NOT adopted. The site's
@@ -98,8 +98,12 @@ export const MARK = {
   hatchWidth: 0.55,
   ground: '#3A2B22',   /* --bar        */
   paper:  '#F3EBDD',   /* --paper      */
-  sage:   '#969B7D',   /* --field      */
-  sageDeep: '#737C61', /* --field-deep */
+  /* The sheet's own two greens. They were --field and --field-deep exactly
+     until 20 September 2026, when the wall was re-solved darker and less
+     saturated against the prototype; these stay as the sheet states them,
+     because this draws the MARK. See "field" in tokens.css. */
+  sage:   '#969B7D',   /* the sheet's Primary Sage */
+  sageDeep: '#737C61', /* the sheet's Deep Green   */
 };
 
 const f = (n) => (+n.toFixed(3)).toString();

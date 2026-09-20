@@ -100,7 +100,10 @@ def main():
             {"src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png"},
         ],
         "theme_color": "#3A2B22",
-        "background_color": "#969B7D",
+        # the wall the site actually is (--field), not the sheet's stated
+        # Primary Sage: a splash screen that does not match the page it opens
+        # is the same defect as a stylesheet that does not match its page
+        "background_color": "#898D76",
         "display": "browser",
         "start_url": "/",
     }, indent=2) + "\n", encoding="utf8")
