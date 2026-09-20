@@ -62,7 +62,7 @@ a data edit.
 | Published | A **preview** on GitHub Pages: not indexed, labelled on every page, and unable to take an order |
 | Ready to sell | **No.** The readiness gate counts 57 details still owed (@sec-readiness-today), and a release refuses to build until they are supplied |
 | Checked | Five checks on every build, and a sixth in a real browser (@sec-checks) |
-| Contrast | **Not AA as it stands.** The reading plates were switched off on the evening of 20 September: text is read on the sage field itself, where `--body` measures 1.98:1 against a floor of 4.5 — 2.35:1 until the wall was re-solved darker on the same day (@sec-wall). A decision, recorded, measured and reversible in four tokens (@sec-plates) |
+| Contrast | **AA, on the wall.** The plates are off and the wall is dark, so the ink ladder was re-solved for it the same evening: `--body` measures **4.92:1** on `--field` and `--muted` 4.62:1, against a floor of 4.5 (@sec-ink). The contrast check now solves the wall as an ordinary ground, so a regression blocks the build |
 | Still to build | The buy box and disclosures on the work page; the cart, search and account behind the shop bar (@sec-next-todo) |
 
 ## The seven findings that would have sunk it {#sec-blockers}
@@ -104,12 +104,15 @@ originals, plus 31.3 KB of italic that is fetched only where an italic is set.
 a lightness that can carry prose; cream is kept for the mat around a painting
 and paints no page surface (@sec-sage-ground).
 
-**The plates are off.** Later the same evening the reading surfaces were made
-transparent, so the field is the only background colour on the site. The
-lightness ladder that made those surfaces readable is still in the token file
-and still solved; it is simply not painted. What that costs is measured rather
-than estimated, and the contrast check prints the bill on every run without
-blocking the build (@sec-plates).
+**The plates are off, and the type was re-solved for what is left.** The
+reading surfaces are transparent, so the field is the only background colour on
+the site; the lightness ladder that made those surfaces readable is still in
+the token file, still solved, simply not painted (@sec-plates). Reading on a
+mid-tone then decided the ink: every text colour was re-solved against the
+wall, the lit fall was flattened because its foot could not carry an ink at
+all, and the accent was demoted to fills and large text (@sec-ink). The
+contrast check treats the wall as an ordinary ground, so all of it blocks the
+build.
 
 ```{=latex}
 \end{finding}
@@ -223,6 +226,13 @@ The old names — warm, violet, blue — were inherited from washes that had bee
 gone for months; all three were cream. They are now named for the only thing
 that separates them, which is lightness.
 
+Every ratio in that table is measured with the **ink of that morning**. The ink
+ladder was re-solved the same evening, for a wall rather than a plate
+(@sec-ink), so a plate now carries far more than the table claims — `--body` on
+`--wash-pale` is 14.37:1, not 5.78:1. The comparison is left as it was made,
+because what it was demonstrating is that moving the grounds onto the field's
+hue cost nothing, and that is still exactly what it shows.
+
 Every value in that table is still in the token file, still solved and still
 checked. None of them is currently **painted**: @sec-plates.
 
@@ -301,31 +311,37 @@ this palette that was never solved for text. It is also lit — `--field` at the
 top of the fall, `--field-deep` at the foot — so both columns below are real
 grounds on the same page, not a range.
 
-: What every reading pair measures with the plates off. The first column is the ground the palette was built for and still solves against. {#tbl-plates-cost}
+: What the plates cost the palette **as it then stood** — the ink of the morning, read on the wall of the evening. This is the bill that forced the type re-solve of @sec-ink, and every figure in it has since been superseded. {#tbl-plates-cost}
 
-| Token | On `--wash-pale` | On `--field` | On `--field-deep` | Floor |
+| Token, as it was | On `--wash-pale` | On `--field` | On `--field-deep` | Floor |
 |:----------------|-----------:|-----------:|----------:|------:|
-| `--ink` headings | 11.56 | 3.96 | 2.65 | 4.5 |
-| `--body` running text | 5.78 | **1.98** | **1.33** | 4.5 |
-| `--muted` captions | 4.94 | **1.69** | **1.13** | 4.5 |
-| `--sanguine` links | 5.70 | **1.95** | **1.31** | 4.5 |
-| `--muted-ui` strokes | 3.27 | **1.12** | **1.33** | 3.0 |
+| `--ink` `#3A2B22` | 11.56 | 3.96 | 2.65 | 4.5 |
+| `--body` `#66594B` | 5.78 | **1.98** | **1.33** | 4.5 |
+| `--muted` `#69655E` | 4.94 | **1.69** | **1.13** | 4.5 |
+| `--sanguine` `#8B4A3C` | 5.70 | **1.95** | **1.31** | 4.5 |
+| `--muted-ui` `#858279` | 3.27 | **1.12** | **1.33** | 3.0 |
 
-That is quietness bought with contrast, which is the one thing this report
+That was quietness bought with contrast, which is the one thing this report
 opens by forbidding: the draft failed its review because every call to action
-was `#A19E97` at 2.67:1, and `--body` on the field is worse than that at both
-ends of the page. It is recorded here in those terms because a decision taken
-with the number in front of you is a different act from the one the draft made.
+was `#A19E97` at 2.67:1, and `--body` on the field was worse than that at both
+ends of the page.
 
-**What the check does about it.** `check-contrast.mjs` reads the plate tokens.
-When any of them is transparent it prints @tbl-plates-cost as
-*"THE PLATES ARE OFF — what the page actually renders"*, marks every pair that
-fails, and states that it cannot certify the page as AA while they are off. It
-does **not** count them as failures and does not block the build: painting a
-plate is a decision, the token file is where that decision is taken, and a
-check that overrules a decision is a check that gets edited. What it will no
-longer do is finish by saying *all pairs pass against their worst-case ground*
-— with the plates off it says they pass against plates that are not painted.
+It stays in the record in those terms because it is what made the type re-solve
+necessary, and what the re-solve had to beat. It did: the ladder of @tbl-ink
+clears every floor on the wall, the fall was flattened because its foot could
+not carry an ink at all, and the accent was demoted to fills and large text.
+The plates being off is no longer a contrast debt; it is a constraint the type
+is now solved inside.
+
+**What the check does about it.** `check-contrast.mjs` reads the plate tokens,
+and when any of them is transparent it adds the **wall** to the grounds every
+foreground is solved against — so with the plates off, `--field` is checked
+exactly as a plate is, and a regression on it blocks the build. That is a change
+from the morning, when the same block could only *print* the bill and say it
+could not certify the page: there was no ladder that passed. There is now
+(@sec-ink), so the check binds instead of reporting. Beside the verdict it
+still prints the headroom — how much of the wall's own budget each rung is
+using — because the budget is what will bite if the wall moves again.
 
 `check-review.mjs` L-05 holds the mechanism rather than the value: the five
 plates must be declared, the five rules that paint a ground must name them —
@@ -414,12 +430,13 @@ of itself behind in a lightbox or on a splash screen.
 \end{finding}
 ```
 
-**It costs contrast, and the bill is above.** A darker wall under the same ink
-is a smaller ratio: `--ink` goes 4.70 → **3.96**, `--body` 2.35 → **1.98**, and
-@tbl-plates-cost is stated in the new numbers throughout. With the plates
-painted none of this would signify — the reading grounds are unchanged, and
-every pair on them still measures what @tbl-sage-ground says. It signifies
-because the plates are off, which is the other half of the same decision.
+**It cost contrast, and the type paid it.** A darker wall under the same ink is
+a smaller ratio: `--ink` went 4.70 → **3.96** and `--body` 2.35 → **1.98**,
+which is the state @tbl-plates-cost records. That bill is what forced the ink
+ladder to be re-solved the same evening — a new value for every text colour, a
+flat wall instead of a lit fall, and an accent that no longer sets small text
+(@sec-ink). With the plates painted none of it would have signified; it
+signified because they are off, which is the other half of the same decision.
 
 ### The warm-ground trap {#sec-trap}
 
@@ -453,6 +470,82 @@ The draft sets Fraunces at six optical sizes — 16.0, 16.8, 21.6, 27.2, 30.4 an
 38.4 — so the `opsz` axis must stay live; pinning it saves 19 KB and flattens
 the optical sizing the design depends on. And Fraunces' `WONK` axis defaults to
 **1, not 0**; pinning it to 0 changes the letterforms to save 140 bytes.
+
+### The ink, re-solved for the wall {#sec-ink}
+
+*Decision of 20 September 2026, and the reason the type section carries a
+colour problem at all.*
+
+Type colour is normally settled once with the palette. It had to be re-solved
+here because the ground moved twice in a day: the plates went transparent, and
+then the wall went darker — @sec-plates and @sec-wall — and between them every
+word on the site ended up on a **mid-tone**, which is the one kind of ground
+that is hard for text in both directions.
+
+: What the wall can hold at all. A mid-tone is squeezed from both ends: too dark for light text, too light for anything but a very dark ink. {#tbl-ink-budget}
+
+| On `--field` `#898D76` | Ratio | |
+|:-------------------------------|------:|:----------------------------|
+| Pure black on it | 6.14 | the ceiling for dark text |
+| Pure white on it | 3.42 | **light text is impossible** — it cannot reach 4.5:1 at any value |
+| The ink budget for 4.5:1 | | luminance Y ≤ **0.0182** |
+| The ink budget for 3.0:1 | | luminance Y ≤ **0.0523** |
+
+Her warm brown `#3A2B22` is Y 0.0274. On a cream plate it is 11.45:1 and on the
+wall it is 3.96:1 — which is a heading colour and nothing else. So the ladder
+keeps her **hue exactly** and drops its lightness until each rung clears the
+floor it has to carry:
+
+: The ink ladder, re-solved. "On a plate" is `--wash-pale`, for when the plates are painted again. {#tbl-ink}
+
+| Token | Was | Now | On the wall | On a plate | Carries |
+|:----------------|:----------|:----------|------:|-------:|:------------------------|
+| `--ink` | `#3A2B22` | `#160903` | **5.71** | 16.66 | headings, primary text, links |
+| `--body` | `#66594B` | `#261B0F` | **4.92** | 14.37 | running text |
+| `--muted` | `#69655E` | `#26221D` | **4.62** | 13.47 | captions, tombstone meta |
+| `--sanguine-deep` | `#63352B` | `#40150D` | **4.61** | 13.45 | small accent text, hover, sold |
+| `--ultramarine` | `#2E3A8C` | `#151566` | **4.61** | 13.45 | the Tribute accent |
+| `--sanguine` | `#8B4A3C` | `#67291D` | **3.21** | 9.36 | fills, rules, **large** accents |
+| `--muted-ui` | `#858279` | `#3F3C35` | **3.21** | 9.38 | icon strokes, borders |
+| `--rule` | `#8E7B9C` | `#473553` | **3.23** | 9.41 | rules that carry meaning |
+
+Three things follow from that table, and none of them is a preference.
+
+**The lit fall had to go flat.** The field ran from `--field` at the top to
+`--field-deep` at the foot, fixed, so the page was lit. At the foot,
+`--field-deep` holds **4.10:1 for pure black** — there is no ink, of any
+colour, that a paragraph could be set in there. One wall is one contrast
+problem and it is solvable; two walls are not. The fall returns with the
+plates, and `--field-deep` stays defined meanwhile: it is the sheet's Deep
+Green, and the mark is drawn against it.
+
+**The accent cannot set small text.** No red-brown that is still a red-brown
+reaches 4.5:1 on this ground — at that floor it is a maroon indistinguishable
+from the ink. `--sanguine` is therefore solved to the 3:1 tier and paints
+fills, rules and large accents only: the three-line drop cap on About keeps it,
+the contact panel's top border keeps it, the scale diagram's strokes keep it.
+Everything smaller takes `--sanguine-deep` at 4.61:1, and **links take the
+ink** — the underline was already doing the work of distinguishing them
+(technique G183), and the hover is what carries the accent now.
+
+**The ink is darker than the bar.** `--ink` and `--bar` were the same warm
+brown, which was one of the palette's neatnesses. The bar is still hers and
+still carries cream at 11.45:1, but the ink had to leave it: `#3A2B22` cannot
+be read on sage, and the bar cannot be darkened without leaving the brown the
+prototype and the sheet agree on (@tbl-proto).
+
+**What holds it.** `check-contrast.mjs` now solves every one of these against
+the wall as an ordinary ground rather than printing a bill beside them — with
+the plates off, `wall` is in the grounds list, so a regression blocks the build
+like any other. `check-review.mjs` L-07 holds the accent's division of labour
+by naming the two rules allowed to set `--sanguine` as text, and it earned its
+place immediately: it caught a breadcrumb and a series card still setting the
+accent at caption size.
+
+And the principle the whole ladder rests on is the one the report opens with —
+*buy quietness with size and whitespace, never with contrast*. The colour
+budget on this wall is spent; what is left to build hierarchy with is size,
+weight and space, which is what the scale (@sec-scale) is for.
 
 ### The italic the site was faking {#sec-italic}
 
@@ -516,6 +609,26 @@ that appear in display positions, so a page of Chinese prose set in it would
 render some characters in Noto and the rest in the system face — one paragraph,
 two typefaces. `--font-read-cjk` is a stack of system serifs instead, so the
 Chinese About page gets a book face for nothing, and gets it consistently.
+
+### The Chinese face, and what is not served {#sec-cjk}
+
+The display face is subset to the characters that actually appear in display
+positions — headings, work titles, UI labels: **34 KB, cut from a 24 MB face.**
+`unicode-range` gates the fetch, so an English page never downloads a byte of
+it, and a character Priscilla adds before the next build falls through to the
+system face rather than rendering as tofu.
+
+Chinese **body prose is deliberately not webfont-served**. The system serif is
+already on the device and costs nothing across a border, which matters more on
+this site than a uniform drawing does.
+
+That decision has one trap in it, and the token file carries the note: the
+Chinese About page cannot be set in `--font-display`, because that stack begins
+with the subset Noto Serif SC. A page of Chinese prose set in it would render
+the ~100 subset characters in Noto and everything else in the system face —
+one paragraph, two typefaces. It takes `--font-read-cjk` instead, which is
+system serifs all the way down, so the book page is consistent and free
+(@sec-about-type).
 
 ### The scale {#sec-scale}
 
@@ -986,9 +1099,9 @@ nothing. On the sage grounds it is no longer the constraint —
 
 | Ground | The tightest pair on it | Room either side of 0.5 | The tile needs |
 |:-----------------|:-------------------------------|-----------:|-----------:|
-| `--wash-pale` | `--muted-ui` at 3.27:1 | ±0.283 | ±0.250 |
-| `--wash-mid` | `--muted-ui` at 3.15:1 | ±0.126 | ±0.250 |
-| `--wash-deep` | `--muted-ui` at 3.06:1 | ±0.052 | ±0.250 |
+| `--wash-pale` | `--muted-ui` at 9.38:1 | ±0.500 | ±0.250 |
+| `--wash-mid` | `--muted-ui` at 9.25:1 | ±0.500 | ±0.250 |
+| `--wash-deep` | `--muted-ui` at 9.15:1 | ±0.500 | ±0.250 |
 
 — the palest reading ground could now carry the whole tile and be measurably
 fine. It does not get it, because it is a wall and not a board. The check still
@@ -1527,7 +1640,7 @@ providing services. The stronger argument for the work is commercial:
 
 | Criterion | What it required | Status |
 |:---|:---|:---|
-| 1.4.3 Contrast\index{WCAG} | Every CTA was 2.67:1 | Filled ink control at 11.45:1 |
+| 1.4.3 Contrast\index{WCAG} | Every CTA was 2.67:1 | Filled ink control at **16.51:1**, and every text pair re-solved for the wall (@sec-ink) |
 | 1.4.1 Use of colour | No accent reaches 3:1 against body text | Underlines on body links, structurally |
 | 2.4.7 / 1.4.11 Focus | A single-colour ring dies over a dark painting | Two-tone ring, works on any ground |
 | 2.4.11 Focus not obscured | Sticky nav can hide the focused item | `scroll-padding-top`; static on mobile |
@@ -1536,19 +1649,24 @@ providing services. The stronger argument for the work is commercial:
 | 2.4.4 Link purpose | Six identical "Buy" links in the links list | Visually-hidden span per control |
 
 ```{=latex}
-\begin{finding}{1.4.3 does not hold as the site now stands}
+\begin{finding}{1.4.3, re-solved on a ground that moved twice}
 ```
 
-The row above is the work as it was built, and every token in it is still
-solved. What changed on the evening of 20 September is the **ground**: with the
-reading plates transparent, body text, captions and links are read on the sage
-field at 1.98:1, 1.69:1 and 1.95:1 (@tbl-plates-cost). That is below 1.4.3's
-4.5:1 and, for the muted pair, below 1.4.11's 3:1 as well.
+For part of 20 September this criterion did not hold. The reading plates went
+transparent and the wall went darker, and between them body text, captions and
+links ended up on a mid-tone at 1.98:1, 1.69:1 and 1.95:1 — below 4.5:1, and
+below 1.4.11's 3:1 for the muted pair (@tbl-plates-cost).
 
-It is a deliberate visual decision, not a regression that slipped through — the
-contrast check prints it on every run — but it is the one item in this section
-a release cannot carry unexamined. Restoring the plates restores every figure in
-the table above exactly; see @sec-plates.
+It holds again, and not by putting the plates back: the ink ladder was
+re-solved for the wall the same evening (@sec-ink). `--body` is **4.92:1** on
+it, `--muted` 4.62:1, links take the ink at 5.71:1, and the non-text tier
+clears 3:1. Two structural consequences came with it — the lit fall was
+flattened, because at its foot no ink of any colour could pass, and the
+terracotta accent was demoted to fills, rules and large text, because no
+red-brown that is still a red-brown reaches 4.5:1 on sage.
+
+The check no longer reports this; it enforces it. With the plates off, the wall
+is one of the grounds `check-contrast.mjs` solves every foreground against.
 
 ```{=latex}
 \end{finding}
@@ -1743,7 +1861,7 @@ and the CI workflow installs the four wheels it needs so that it always does.
 |:----------------------|:----------------------------------------------------------|
 | `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white. With the plates off it also prints, without blocking, every pair as the page actually renders it (@sec-plates) |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **83 assertions over 55 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `check-review` | **84 assertions over 56 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
 | `test-readiness` | Any of **44 tests** showing the gate opens only when it should (@sec-readiness-proof) |
 | `check-review`, last assertion | The image tool failing its own round-trip: two fixtures, both directions, byte-exact when the source is opaque and within one unit per channel when it is not (@sec-image-tool) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
@@ -2149,7 +2267,7 @@ writing more code.
 
 | Item | Resolution | Where |
 |:-----|:----------|:---------|
-| CJK webfont strategy | The display face is subset to the characters that appear in headings, work titles and UI labels: **34 KB, from a 24 MB face.** `unicode-range` gates the fetch, so an English page never downloads it, and a character added before the next build falls through to the system face rather than rendering as tofu. Chinese body prose is deliberately not webfont-served. | `scripts/build-fonts-cjk.py` |
+| CJK webfont strategy | 34 KB cut from a 24 MB face, gated by `unicode-range`, with Chinese body prose left to the system serif on purpose — and the one trap that follows, which is that the Chinese book page cannot use the display stack (@sec-cjk) | `scripts/build-fonts-cjk.py` |
 | Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
 | A mark for two languages | An `SC` monogram — a device beside the name rather than a translation of it — used as the drawing Priscilla supplied, one crop serving the tab, the home screen, the masthead and this document | `brand/`, `scripts/build-icons.py` |

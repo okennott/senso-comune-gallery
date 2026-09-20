@@ -1108,6 +1108,38 @@ check('L-06', 'every literal copy of the wall colour is still the wall colour', 
            detail: bad.length ? bad.join('; ') : `2 literal copies, both ${field}` };
 });
 
+check('L-07', 'the accent paints fills, rules and large text — never small text', () => {
+  /* On the wall --sanguine is a 3.0 colour, not a 4.5 one: no red-brown that
+     is still a red-brown clears 4.5:1 on a mid-tone green. So it may fill, it
+     may rule, and it may set text only where the text is LARGE — the About
+     drop cap, three lines tall. Everything smaller that wants the accent takes
+     --sanguine-deep, which is solved at 4.61:1.
+
+     The division is the kind that decays silently — a caption given the accent
+     looks deliberate and measures 3.2:1 — so every rule that paints it as a
+     colour is named here, and a new one fails until it is either moved to
+     --sanguine-deep or added with a reason. */
+  const sheets = (src('src/styles/base.css') + src('src/styles/gallery.css'))
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const allowedText = new Set([
+    'html[lang="en"] .page--about .prose > p:first-of-type::first-letter', // the drop cap
+    '.scale__label--work',   // SVG label, and the diagram sits on the cream mat
+  ]);
+  const bad = [];
+  for (const m of sheets.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const sel = m[1].trim().replace(/\s+/g, ' ');
+    // `color:` and SVG `fill:` are text; background, border and stroke are not
+    if (!/(?:^|[;\s])(?:color|fill):\s*var\(--sanguine\)/.test(m[2])) continue;
+    if (!allowedText.has(sel)) bad.push(`${sel} sets small text in --sanguine`);
+  }
+  // and the link colour must be the ink, not the accent
+  const linkRule = /(?:^|\})a\{color:var\(--ink\)\}/.test(sheets.replace(/\s+/g, ''));
+  if (!linkRule) bad.push('a{} does not take --ink');
+  return { ok: !bad.length,
+           detail: bad.length ? bad.join('; ')
+             : `${allowedText.size} rules may set the accent as text, links take --ink` };
+});
+
 /* ===================== K — readiness ===================== */
 /* 17 September 2026 (report, "Readiness"): the site can only go live once
    every critical detail is supplied. These hold the build's half of that; the

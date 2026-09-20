@@ -442,7 +442,7 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   text-transform:uppercase; color:var(--body); text-decoration:none;
   display:inline-flex; align-items:center; min-height:var(--target-min);
 }
-.pager a:hover{ color:var(--sanguine) }
+.pager a:hover{ color:var(--sanguine-deep) }
 
 /* ---------- steps ---------- */
 .steps{ list-style:none; counter-reset:step; margin:0; padding:0; display:grid; gap:var(--space-4) }
@@ -456,7 +456,7 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
   font-family:var(--font-display);
   font-size:var(--size-body);
   font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1;
-  color:var(--sanguine);
+  color:var(--sanguine-deep);   /* body-size numerals: the 4.5 tier */
   font-variant-numeric:tabular-nums;
 }
 
@@ -838,7 +838,7 @@ html[lang^="zh"] .page--about .prose{
 }
 .detail__buyinfo a{ color:var(--body); text-decoration:underline;
   text-decoration-color:var(--muted-ui); text-underline-offset:.25em }
-.detail__buyinfo a:hover{ color:var(--sanguine); text-decoration-color:currentColor }
+.detail__buyinfo a:hover{ color:var(--sanguine-deep); text-decoration-color:currentColor }
 
 
 /* ---------- split hero ----------
@@ -951,7 +951,7 @@ html[lang^="zh"] .page--about .prose{
   text-decoration-color:var(--muted-ui); text-underline-offset:.25em;
   display:inline-flex; align-items:center; min-height:var(--target-min);
 }
-.contact__list a:hover{ color:var(--sanguine); text-decoration-color:currentColor }
+.contact__list a:hover{ color:var(--sanguine-deep); text-decoration-color:currentColor }
 @media (min-width:560px){
   .contact__list{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-4) }
 }
@@ -1101,7 +1101,7 @@ html[lang^="zh"] .page--about .prose{
 .breadcrumb li + li::before{ content:'/'; color:var(--muted-ui) }
 .breadcrumb a{
   display:inline-flex; align-items:center; min-height:44px;
-  color:var(--sanguine); text-underline-offset:.25em;
+  color:var(--sanguine-deep); text-underline-offset:.25em;   /* small text: 4.5 tier */
 }
 .breadcrumb [aria-current]{ color:var(--body) }
 
@@ -1134,7 +1134,7 @@ html[lang^="zh"] .page--about .prose{
 .series-card__more{ justify-self:start }
 @media (hover:hover) and (pointer:fine){
   .series-card__link:hover .work__img{ box-shadow:var(--shadow-lift) }
-  .series-card__link:hover .series-card__more{ color:var(--sanguine); text-decoration-color:currentColor }
+  .series-card__link:hover .series-card__more{ color:var(--sanguine-deep); text-decoration-color:currentColor }
 }
 
 /* The homepage shows four latest works: four across, two across, or one — never

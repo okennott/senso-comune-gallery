@@ -49,6 +49,12 @@ const GROUNDS = {
   pale:   T['wash-pale'],
   mid:    T['wash-mid'],
   deep:   T['wash-deep'],
+  /* The wall. It used to carry no text and was not a ground at all; with the
+     plates transparent it carries ALL of it, so it is solved here like any
+     other reading surface rather than reported beside them. One value, not
+     two, because the fall was flattened for exactly this reason: at the foot
+     of it pure black measured 4.10:1, so no ink could have passed. */
+  wall:   T['field'],
 };
 
 /* ---------- the plates ----------
@@ -119,15 +125,20 @@ const ownGround = [];
  * AA text = 4.5, AA large text / non-text UI = 3.0
  */
 const CHECKS = [
-  ['ink',           4.5, ['mat','pale','mid','deep'], 'headings'],
-  ['body',          4.5, ['mat','pale','mid','deep'], 'running text'],
-  ['muted',         4.5, ['mat','pale','mid','deep'], 'captions, tombstone meta'],
-  ['sanguine',      4.5, ['mat','pale','mid','deep'], 'links, accents'],
-  ['sanguine-deep', 4.5, ['mat','pale','mid','deep'], 'hover, sold'],
-  ['ultramarine',   4.5, ['mat','mid'],               'Tribute accent'],
-  ['sold',          4.5, ['mat','pale','mid','deep'], 'sold state is ACTIVE content'],
-  ['muted-ui',      3.0, ['mat','pale','mid','deep'], 'icon strokes, borders'],
-  ['rule',          3.0, ['mat','pale','mid','deep'], 'rules that carry meaning'],
+  ['ink',           4.5, ['mat','pale','mid','deep','wall'], 'headings, primary text, links'],
+  ['body',          4.5, ['mat','pale','mid','deep','wall'], 'running text'],
+  ['muted',         4.5, ['mat','pale','mid','deep','wall'], 'captions, tombstone meta'],
+  ['sanguine',      4.5, ['mat','pale','mid','deep'],        'small accent text — on a PLATE only'],
+  /* The accent's second row. On the wall no red-brown that is still a
+     red-brown reaches 4.5:1, so it is a 3.0 colour there: fills, rules and
+     large accents, never small text. check-review L-07 asserts which rules
+     may paint it, so this floor cannot be quietly borrowed by a caption. */
+  ['sanguine',      3.0, ['wall'],                           'fills, rules, large accents'],
+  ['sanguine-deep', 4.5, ['mat','pale','mid','deep','wall'], 'hover, sold, small accent text'],
+  ['ultramarine',   4.5, ['mat','mid','wall'],               'Tribute accent'],
+  ['sold',          4.5, ['mat','pale','mid','deep','wall'], 'sold state is ACTIVE content'],
+  ['muted-ui',      3.0, ['mat','pale','mid','deep','wall'], 'icon strokes, borders'],
+  ['rule',          3.0, ['mat','pale','mid','deep','wall'], 'rules that carry meaning'],
 ];
 
 /* Reversed pairs: white text on a filled control. */
@@ -144,7 +155,11 @@ const ON_FILL = [
    colour ALONE needs 3:1 against that prose. None of these reach it, which is
    why underlines on body-copy links are structural rather than stylistic.
    This check asserts the underline requirement still holds. */
-const G183 = [['sanguine', 'body'], ['ultramarine', 'body']];
+/* The link colour on the wall is --ink, so the pair to solve is ink vs body:
+   a link that differs from its surrounding prose by colour alone would need
+   3:1 between them, and two rungs of one ladder cannot reach it. The accent
+   pairs are kept because they still apply wherever a plate is painted. */
+const G183 = [['ink', 'body'], ['sanguine', 'body'], ['ultramarine', 'body']];
 
 let failures = 0;
 const line = (s) => process.stdout.write(s + '\n');
@@ -240,9 +255,10 @@ for (const [selector, token, min, note] of barPairs) {
   if (!ok) failures++;
   line('\n  THE GLASS FOOTER — the bar over the sage field\n');
   line(`  ${ok ? '✓' : '✗'} --glass-footer ${got || '(missing)'} = --bar at ${a * 100}% over --field ${want.toUpperCase()}`);
-  // --field is the lighter half of the field and therefore the worst case for
-  // light text; state the other end so the claim is visible rather than asserted.
-  line(`    over --field-deep it composites to ${over(T['field-deep']).toUpperCase()}, which is darker still`);
+  // The wall is flat as of 20 September 2026, so --field IS the footer's
+  // ground rather than the lighter of two. --field-deep is kept as the value
+  // the fall would return to, and stated here so the claim stays checkable.
+  line(`    the wall is flat; were the fall restored, --field-deep would composite to ${over(T['field-deep']).toUpperCase()}, darker still`);
 }
 
 /* ---------- the canvas ----------
@@ -343,28 +359,30 @@ for (const [link, text] of G183) {
   );
 }
 
-/* ---------- what the page actually renders ----------
-   Not counted as failures. Painting the plates is a decision, taken in
-   tokens.css under "the plates"; this block is the bill for it, printed where
-   it cannot be missed rather than enforced over the top of the decision. */
+/* ---------- the wall, while the plates are off ----------
+   This used to print the bill for reading on the field and say the check could
+   not certify the page. It no longer has to: the ink ladder was re-solved for
+   the wall on 20 September 2026 and 'wall' is one of the grounds above, so
+   every pair on it is enforced rather than reported. What is left here is the
+   headroom — how much of the wall's own budget each rung is using — because
+   the budget is the thing that will bite if the wall ever moves again. */
 if (PLATES_OFF.length) {
-  line('\n  THE PLATES ARE OFF — what the page actually renders\n');
-  line(`  ${PLATES_OFF.map((k) => `--${k}`).join(', ')} ${PLATES_OFF.length > 1 ? 'are' : 'is'} transparent,`);
-  line('  so every word on those surfaces is read on the sage field itself.');
-  line('  Solved against both ends of the fall — --field, and --field-deep at the foot:\n');
-  for (const [token, min, , why] of CHECKS) {
-    if (!T[token]) continue;
-    const top = ratio(T[token], T['field']);
-    const foot = ratio(T[token], T['field-deep']);
-    const ok = Math.min(top, foot) >= min;
-    line(
-      `  ${ok ? '✓' : '✗'} --${token.padEnd(14)} ${top.toFixed(2)} on --field, ` +
-      `${foot.toFixed(2)} on --field-deep   min ${min.toFixed(1)}  ${why}`
-    );
+  const wall = T['field'];
+  const black = ratio('#000000', wall);
+  const white = ratio('#FFFFFF', wall);
+  line('\n  THE WALL — the reading ground while the plates are off\n');
+  line(`  ${PLATES_OFF.map((k) => `--${k}`).join(', ')} ${PLATES_OFF.length > 1 ? 'are' : 'is'} transparent, so every word is read on --field ${wall}.`);
+  line(`  It holds ${black.toFixed(2)}:1 for pure black and ${white.toFixed(2)}:1 for pure white —`);
+  line('  light text is impossible on it, and dark text has a ceiling:\n');
+  for (const [token, min, grounds, why] of CHECKS) {
+    if (!T[token] || !grounds.includes('wall')) continue;
+    const r = ratio(T[token], wall);
+    const headroom = ((r - min) / min) * 100;
+    line(`  ${r >= min ? '✓' : '✗'} --${token.padEnd(14)} ${r.toFixed(2)}  floor ${min.toFixed(1)}  ` +
+         `${headroom >= 0 ? '+' : ''}${headroom.toFixed(0)}% headroom  ${why}`);
   }
-  line('\n  The pairs above are NOT counted below: the washes are still the grounds');
-  line('  this palette was solved for, and restoring the plates restores them.');
-  line('  While the plates are transparent this check cannot certify the page as AA.');
+  line(`\n  The wall's own ceiling: 4.5:1 needs an ink at or under Y ${(((lum(wall) + 0.05) / 4.5) - 0.05).toFixed(4)},`);
+  line(`  3.0:1 at or under Y ${(((lum(wall) + 0.05) / 3.0) - 0.05).toFixed(4)}. Everything above lives inside that.`);
 }
 
 line('');
@@ -373,5 +391,5 @@ if (failures) {
   process.exit(1);
 }
 line(PLATES_OFF.length
-  ? '  All pairs pass against the wash plates — which are not currently painted.\n'
+  ? '  All pairs pass against their worst-case ground — the wall included.\n'
   : '  All pairs pass against their worst-case ground.\n');

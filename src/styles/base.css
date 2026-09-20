@@ -70,13 +70,15 @@ body{
      not — and the field goes back to the plain fall Priscilla's own prototype
      had. Removing it costs nothing measurable: the tile is mean-neutral under
      soft-light, so the colour was never anything but --field either way. */
+  /* FLAT, as of 20 September 2026 — and the prototype's wall is flat too.
+     The fall was a lit ground back when nothing was read on it. With the
+     plates off it is a ground that carries every word on the site, and its
+     two ends cannot both carry them: at the foot, --field-deep holds 4.10:1
+     for PURE BLACK, so no ink of any colour reaches the 4.5:1 a paragraph
+     needs. One wall is one contrast problem, and it is solvable; two walls
+     are not. --field-deep is still defined — it is the sheet's Deep Green,
+     the mark is drawn against it, and the fall returns with the plates. */
   background-color:var(--field);
-  background-image:linear-gradient(in oklab,
-      color-mix(in oklab,var(--field) 90%,white) 0%,
-      var(--field) 34%,
-      var(--field-deep) 100%);
-  background-repeat:no-repeat;
-  background-attachment:fixed;
   color:var(--body);
   font-family:var(--font-body);
   font-size:var(--size-body);
@@ -171,7 +173,7 @@ p{ margin:0 0 var(--space-4); text-wrap:pretty }
   font-size:var(--size-caption);
   letter-spacing:var(--track-label);
   text-transform:uppercase;
-  color:var(--sanguine);
+  color:var(--sanguine-deep);   /* caption-size: the 4.5 tier, not the 3.0 */
   margin:0 0 var(--space-3);
 }
 
@@ -179,8 +181,13 @@ p{ margin:0 0 var(--space-4); text-wrap:pretty }
    A-02. --sanguine is 1.13:1 against --body, nowhere near the 3:1 that
    technique G183 requires for colour-alone differentiation. The underline
    is therefore structural. Standalone links (nav, CTA) are exempt because
-   they do not sit inside surrounding static text. */
-a{ color:var(--sanguine) }
+   they do not sit inside surrounding static text.
+
+   And since the plates came off, a link is not terracotta at all: on the wall
+   the accent is a 3:1 colour, which a link's small text may not use. It takes
+   the ink and keeps the underline that was already doing the work — the hover
+   is what carries the accent now, in --sanguine-deep at 4.61:1. */
+a{ color:var(--ink) }
 
 .prose a{
   text-decoration:underline;
@@ -254,7 +261,7 @@ a{ color:var(--sanguine) }
              color var(--dur-quick) var(--ease-settle);
 }
 .link-quiet::after{ content:'\00a0→' }   /* affordance that is not colour */
-.link-quiet:hover{ color:var(--sanguine); text-decoration-color:currentColor }
+.link-quiet:hover{ color:var(--sanguine-deep); text-decoration-color:currentColor }
 
 /* ---------- sfumato edges ----------
    D-02. Leonardo: lights and shadows united "senza tratti o segni".

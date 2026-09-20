@@ -112,24 +112,49 @@
   --bar:              #3A2B22;
 
   /* --- ink ---------------------------------------------------------------
-     Hers. Warmer and browner than the neutral it replaces, which is what
-     makes it sit correctly against sage and terracotta.                   */
-  --ink:              #3A2B22;   /* 11.45 / 10.74 */
-  --body:             #66594B;   /*  5.73 /  5.38 */
+     RE-SOLVED FOR THE WALL, 20 September 2026. Every word on the site is now
+     read on --field, and --field is a mid-tone: it holds 6.14:1 for pure
+     black and 3.42:1 for pure white, so light text is impossible and dark
+     text has a ceiling. Solving (Y_wall + 0.05) / (Y_ink + 0.05) at the
+     floors gives the whole budget the type has to live inside:
+
+       4.5:1 (body text, links, captions)   Y <= 0.0182
+       3.0:1 (non-text UI, large accents)   Y <= 0.0523
+
+     Her warm brown #3A2B22 is Y 0.0274 — fine on a cream plate at 11.45:1,
+     and 3.96:1 on the wall, which is under the floor for everything except a
+     heading. So the ladder keeps her HUE, exactly, and drops its lightness
+     until each rung clears the floor it has to. They are dark, and they are
+     meant to be: on this ground there is nowhere else for prose to stand.
+
+     A consequence worth naming: --ink is now DARKER than --bar, which it used
+     to equal. The bar is still her masthead brown, and it still carries cream
+     at 11.45:1; the ink had to leave it because the bar's lightness cannot
+     be read against sage.                                                 */
+  --ink:              #160903;   /*  5.71 on the wall · 16.66 on a plate   */
+  --body:             #261B0F;   /*  4.92 · 14.37 — running text           */
 
   /* --- accents -----------------------------------------------------------
      Her latest terracotta is #98564B; this keeps #8B4A3C, which is the same
      colour a shade deeper and carries more headroom on every ground
      (5.64 vs 4.71 on paper; 6.68 vs 5.57 for white-on-fill). It is also,
      within measurement error, sanguine — the red chalk Leonardo drew in.  */
-  --sanguine:         #8B4A3C;   /*  5.64 /  5.29 */
-  --sanguine-deep:    #63352B;   /*  8.55 /  8.02 */
-  --ultramarine:      #2E3A8C;   /*  8.45 /  7.92  — Tribute only */
+     RE-SOLVED with the ink, and the accent is the one that was demoted. No
+     red-brown that is still a red-brown clears 4.5:1 on the wall: at that
+     floor it is Y 0.0182, which is a maroon indistinguishable from the ink.
+     So --sanguine is solved to the 3:1 tier and may paint FILLS, RULES and
+     LARGE accents — the drop cap, the panel's top border, the diagram's
+     strokes — and no small text. Where an accent has to carry small text, on
+     a link's hover or a step number, --sanguine-deep does it at 4.61:1.
+     check-review L-07 holds that division by name.                        */
+  --sanguine:         #67291D;   /*  3.21 on the wall — fills, rules, large */
+  --sanguine-deep:    #40150D;   /*  4.61 — small accent text, hover, sold  */
+  --ultramarine:      #151566;   /*  4.61  — Tribute only                   */
 
   /* --- rules -------------------------------------------------------------
      Van Gogh told Theo the Bedroom walls were "of a pale violet"; they read
      blue today because the red lake faded. Re-solved for the new ground.  */
-  --rule:             #8E7B9C;   /* 3.02 worst */
+  --rule:             #473553;   /* 3.23 on the wall — meaningful rules */
   /* The decorative hairline, moved onto the field's hue with the grounds. Same
      OKLab lightness as the #E0D6C2 laid paper it replaces, so it is exactly as
      visible as it was — 1.22:1 on the palest ground, before and after — and no
@@ -141,11 +166,11 @@
      Solving against --paper-deep instead gave 4.46 / 2.96 / 2.97 and the
      contrast check blocked the build — the same warm-ground trap the report
      flags, caught for the third time by measuring rather than by eye.      */
-  --muted:            #69655E;   /* 4.52 worst */
-  --muted-ui:         #858279;   /* 3.01 worst */
+  --muted:            #26221D;   /* 4.62 on the wall — captions, meta     */
+  --muted-ui:         #3F3C35;   /* 3.21 on the wall — strokes, borders    */
 
   /* --- semantic ---------------------------------------------------------- */
-  --sold:             #63352B;   /* active content, must pass             */
+  --sold:             #40150D;   /* active content, must pass — 4.61      */
 
   /* --- placeholder flag --------------------------------------------------
      NOT brand colours. Every NEEDS-INPUT still showing on a page is marked in
@@ -215,11 +240,16 @@
        sanguine   1.95 / 1.31         5.70    every link
        muted-ui   1.12 / 1.33         3.27    icon strokes, borders
 
-     That is contrast spent on quietness, which is the one thing the build
-     report opens by forbidding. check-contrast.mjs now prints this table and
-     states that it cannot certify the page while the plates are off; it does
-     not block the build, because painting them is a decision and this block is
-     where the decision is taken.                                          */
+     THAT BILL WAS PAID, the same evening, by re-solving the type rather than
+     by putting the plates back: see "ink" above, and the report's "The ink,
+     re-solved for the wall". Every rung of the ladder now clears its floor on
+     --field, the fall was flattened because its foot could not carry an ink at
+     all, and the accent was demoted to fills and large text. The table above
+     is kept because it is the measurement that forced all three.
+
+     So check-contrast.mjs no longer reports this and declines to certify: with
+     the plates off it adds the WALL to the grounds every foreground is solved
+     against, and a regression there blocks the build like any other.                                          */
   --plate-sheet:      transparent;
   --plate-pale:       transparent;
   --plate-mid:        transparent;
