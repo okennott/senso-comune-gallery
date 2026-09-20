@@ -742,7 +742,11 @@ def softness():
     masthead may be before its text fails over a white passage of a painting.
     Right: the lightness profile down a section boundary, before and after."""
     import math
-    css_all = (ROOT / "src/styles/tokens.css").read_text()
+    # Comments stripped first. tokens.css documents how to restore a value by
+    # writing the declaration out in prose, and a regex that reads the file
+    # top to bottom finds the instruction before the declaration: this figure
+    # plotted a 20% band while the stylesheet was set to 0%.
+    css_all = re.sub(r"/\*.*?\*/", "", (ROOT / "src/styles/tokens.css").read_text(), flags=re.S)
     glass = float(re.search(r"--glass-bar-opacity:\s*([\d.]+)%", css_all).group(1)) / 100
     breath = float(re.search(r"--edge-breath:\s*([\d.]+)%", css_all).group(1)) / 100
     PD, WARM, VIOLET, BLUE = T["paper-deep"], T["wash-pale"], T["wash-mid"], T["wash-deep"]
@@ -803,17 +807,22 @@ def softness():
     weights["mid"] = (1.0, .5)
     grad = re.search(r"\.edge\{.*?background:linear-gradient\(in oklab,(.*?)\);", edge, re.S).group(1)
     F = oklab(FIELD)
-    stops = []
-    for name, pct in re.findall(r"var\(--edge-([a-z0-9]+)\)\s+(\d+)%", grad):
-        x = int(pct) / 100
-        k = 0.0 if name in ("from", "to") else weights[name][0]
-        stops.append((x, mix(oklab(WARM), F, breath * k)))   # a warm -> warm band
-    if len(stops) != 9:
-        raise SystemExit(f"  expected nine boundary stops in base.css, read {len(stops)}")
-    def at(x):
-        for (x0, c0), (x1, c1) in zip(stops, stops[1:]):
-            if x0 <= x <= x1: return mix(c0, c1, (x - x0) / (x1 - x0))
-    after = [dE(oklab(WARM), at(x)) for x in xs]
+
+    def profile(b):
+        """The band the rule draws at a breath of b, as dE from the ground."""
+        stops = []
+        for name, pct in re.findall(r"var\(--edge-([a-z0-9]+)\)\s+(\d+)%", grad):
+            x = int(pct) / 100
+            k = 0.0 if name in ("from", "to") else weights[name][0]
+            stops.append((x, mix(oklab(WARM), F, b * k)))   # a warm -> warm band
+        if len(stops) != 9:
+            raise SystemExit(f"  expected nine boundary stops in base.css, read {len(stops)}")
+        def at(x):
+            for (x0, c0), (x1, c1) in zip(stops, stops[1:]):
+                if x0 <= x <= x1: return mix(c0, c1, (x - x0) / (x1 - x0))
+        return [dE(oklab(WARM), at(x)) for x in xs]
+
+    after = profile(breath)
 
     ax2.axhspan(0, 2, color=MUTED, alpha=.10, lw=0)
     ax2.text(.02, 1.15, "under ~2: not seen", fontsize=6.0, color=BODY)
@@ -821,9 +830,20 @@ def softness():
     ax2.plot([1, 1], [before[-2], 0], color="#A81E14", lw=2.2, solid_capstyle="butt")
     ax2.annotate("hard seam", xy=(1, before[-2] / 2), xytext=(.63, 3.2), fontsize=6.4,
                  color="#A81E14", arrowprops=dict(arrowstyle="-", color="#A81E14", lw=.6))
-    ax2.plot(xs, after, color=FIELD, lw=2.0, label=f"after: the field at {breath * 100:.0f}%")
+    # With the plates off (--edge-breath 0) the band is flat, and a flat line is
+    # the whole of what the rule now draws. The profile it draws when the plates
+    # are painted is plotted beside it, dashed, so the measurement the softness
+    # pass made stays legible next to the state the site is actually in.
+    if breath == 0:
+        ax2.plot(xs, profile(.20), color=FIELD, lw=1.1, ls="--", alpha=.75,
+                 label="the same rule at 20%, with the plates painted")
+        ax2.plot(xs, after, color=FIELD, lw=2.0, label="as it stands: the plates off, breath 0%")
+        ax2.text(.5, .34, "flat: nothing to join", ha="center", fontsize=6.4, color=T["field-deep"])
+    else:
+        ax2.plot(xs, after, color=FIELD, lw=2.0, label=f"after: the field at {breath * 100:.0f}%")
     peak = max(after)
-    ax2.text(.57, peak - .1, f"dE {peak:.1f}", ha="left", fontsize=6.6, color=T["field-deep"])
+    if peak > 0.05:   # with the plates off the band is flat; "dE 0.0" is noise
+        ax2.text(.57, peak - .1, f"dE {peak:.1f}", ha="left", fontsize=6.6, color=T["field-deep"])
     ax2.set_xlim(0, 1.04); ax2.set_ylim(0, 7.8)
     ax2.set_xticks([0, .5, 1]); ax2.set_xticklabels(["section above", "band", "section below"])
     ax2.set_ylabel("dE from the ground (OKLab)", fontsize=7)

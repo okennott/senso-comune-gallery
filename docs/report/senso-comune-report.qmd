@@ -62,6 +62,7 @@ a data edit.
 | Published | A **preview** on GitHub Pages: not indexed, labelled on every page, and unable to take an order |
 | Ready to sell | **No.** The readiness gate counts 57 details still owed (@sec-readiness-today), and a release refuses to build until they are supplied |
 | Checked | Five checks on every build, and a sixth in a real browser (@sec-checks) |
+| Contrast | **Not AA as it stands.** The reading plates were switched off on the evening of 20 September: text is read on the sage field itself, where `--body` measures 2.35:1 against a floor of 4.5. A decision, recorded, measured and reversible in four tokens (@sec-plates) |
 | Still to build | The buy box and disclosures on the work page; the cart, search and account behind the shop bar (@sec-next-todo) |
 
 ## The seven findings that would have sunk it {#sec-blockers}
@@ -102,6 +103,13 @@ originals, plus 31.3 KB of italic that is fetched only where an italic is set.
 **Adopt Priscilla's sage palette** — all of it. The walls are her sage, held at
 a lightness that can carry prose; cream is kept for the mat around a painting
 and paints no page surface (@sec-sage-ground).
+
+**The plates are off.** Later the same evening the reading surfaces were made
+transparent, so the field is the only background colour on the site. The
+lightness ladder that made those surfaces readable is still in the token file
+and still solved; it is simply not painted. What that costs is measured rather
+than estimated, and the contrast check prints the bill on every run without
+blocking the build (@sec-plates).
 
 ```{=latex}
 \end{finding}
@@ -165,8 +173,9 @@ Her green stays dominant at the margins, and nothing sets text on the field.
 \end{finding}
 ```
 
-That sheet was cream for the first three months of the project. It is sage now,
-and the cream has gone back to being the mat: @sec-sage-ground.
+That sheet was cream for the first three months of the project. It was sage for
+an afternoon — @sec-sage-ground — and by that evening it was painting nothing at
+all: @sec-plates.
 
 ### Sage as the reading ground {#sec-sage-ground}
 
@@ -207,6 +216,9 @@ The old names — warm, violet, blue — were inherited from washes that had bee
 gone for months; all three were cream. They are now named for the only thing
 that separates them, which is lightness.
 
+Every value in that table is still in the token file, still solved and still
+checked. None of them is currently **painted**: @sec-plates.
+
 **Then where does cream go?** It keeps the job it was drawn for in her mockup
 and gives up the one the build invented for it. Cream paints:
 
@@ -228,6 +240,101 @@ One new token came out of it. The frosted plate behind the contact panel was
 thing it was laid on*. It is now `--wash-lift`, one step lighter than every
 ground, so the plate is visible on all three and still cannot darken what is
 read on it.
+
+### The plates, switched off {#sec-plates}
+
+*Decision of 20 September 2026, later the same evening.*
+
+The brief for this one was also a line: make the backgrounds behind the text
+transparent, so that nothing of `#EBEFDB` shows anywhere and the only
+background colour on the site is the sage. It is @sec-sage-ground read
+backwards. That pass asked what a reading ground may be; this one asks what is
+left when there is none.
+
+**Nothing was deleted to do it.** A background that is edited away is an
+afternoon's work to put back, and the request was explicitly for a switch
+rather than a demolition. So every surface that is read now paints a token of
+its own, and those tokens are what is transparent:
+
+: What paints a surface that is read {#tbl-plates}
+
+| Surface | The rule | The token | Painted |
+|:--------------------|:----------------------------------|:------------------|:-------------|
+| The mounted content column | `.sheet` | `--plate-sheet` | transparent |
+| Works, How to Buy, the hero | `.ground--pale` | `--plate-pale` | transparent |
+| Tribute | `.ground--mid` | `--plate-mid` | transparent |
+| About | `.ground--deep` | `--plate-deep` | transparent |
+| A boundary between sections | `.edge--*` | both neighbours' plates | transparent |
+| Behind an opened work | `dialog.lightbox::backdrop` | `--plate-lightbox` | `--field` at 94% |
+
+Putting the paper back is those four values and one more, with no rule touched:
+`--plate-sheet` and `--plate-pale` to `var(--wash-pale)`, `--plate-mid` and
+`--plate-deep` to their own washes, and `--edge-breath` to 20%. Any other value
+is equally available — one section can be given a ground of its own, in a
+colour that is not in the ladder at all, without opening the stylesheet.
+
+Two details are worth the words. **A band's ends are the plates of the sections
+either side of it, not the washes those plates happen to hold** — which is what
+keeps the finding of @sec-soft-options true through a change of plate: a
+boundary cannot fade to the wrong neighbour because it does not know what
+colour its neighbours are. And `--edge-breath` goes to **0%**: a band exists to
+join two grounds through the field, and with no grounds to join, a fifth of the
+sage laid over the sage would be invisible in the middle of the fall and a
+faint horizontal smudge at either end of it. The bands keep their 9 rem, which
+is section spacing, and paint nothing.
+
+**The lightbox is the exception, and has to be.** A backdrop exists to hide the
+page behind an opened work, so transparent is not available to it. The
+equivalent of letting the field through is the field itself, at the same 94%.
+
+**What it costs.** The washes exist for a reason, and it should not be possible
+to switch them off without reading the bill. Every foreground the site sets on
+a reading surface is now read on the field, and the field is the one surface in
+this palette that was never solved for text. It is also lit — `--field` at the
+top of the fall, `--field-deep` at the foot — so both columns below are real
+grounds on the same page, not a range.
+
+: What every reading pair measures with the plates off. The first column is the ground the palette was built for and still solves against. {#tbl-plates-cost}
+
+| Token | On `--wash-pale` | On `--field` | On `--field-deep` | Floor |
+|:----------------|-----------:|-----------:|----------:|------:|
+| `--ink` headings | 11.56 | 4.70 | 3.09 | 4.5 |
+| `--body` running text | 5.78 | **2.35** | **1.55** | 4.5 |
+| `--muted` captions | 4.94 | **2.01** | **1.32** | 4.5 |
+| `--sanguine` links | 5.70 | **2.32** | **1.52** | 4.5 |
+| `--muted-ui` strokes | 3.27 | **1.33** | **1.14** | 3.0 |
+
+That is quietness bought with contrast, which is the one thing this report
+opens by forbidding: the draft failed its review because every call to action
+was `#A19E97` at 2.67:1, and `--body` on the field is worse than that at both
+ends of the page. It is recorded here in those terms because a decision taken
+with the number in front of you is a different act from the one the draft made.
+
+**What the check does about it.** `check-contrast.mjs` reads the plate tokens.
+When any of them is transparent it prints @tbl-plates-cost as
+*"THE PLATES ARE OFF — what the page actually renders"*, marks every pair that
+fails, and states that it cannot certify the page as AA while they are off. It
+does **not** count them as failures and does not block the build: painting a
+plate is a decision, the token file is where that decision is taken, and a
+check that overrules a decision is a check that gets edited. What it will no
+longer do is finish by saying *all pairs pass against their worst-case ground*
+— with the plates off it says they pass against plates that are not painted.
+
+`check-review.mjs` L-05 holds the mechanism rather than the value: the five
+plates must be declared, the five rules that paint a ground must name them —
+the bands are G-06's — and **no rule anywhere may name a wash directly**. A hardcoded `--wash-pale` in a rule is how
+a surface falls out of the switch and stops being reversible, which is the only
+way this decision could quietly become permanent.
+
+**What is still painted.** Cream keeps the mat, the image box and the bar
+(@sec-sage-ground, L-01), and the frosted contact panel keeps its `--wash-lift`
+at 72%. That panel is now the one plate left on the site, and the arithmetic of
+@sec-soft-glass has turned around with it: over the field it composites to
+`#D7DAC6`, where `--body` measures **4.76:1** at the top of the fall and 4.38 at
+the foot. The plate that could only ever make text paler is now the most
+legible reading surface on the site. The sheet itself keeps its shadow and its
+rim light, which are the only things left saying that the content column is
+mounted on the field rather than cut out of it.
 
 ### The warm-ground trap {#sec-trap}
 
@@ -580,7 +687,7 @@ reduced motion.
 
 ### Research notes {#sec-soft-research}
 
-![Left: how translucent the masthead may be, measured as navigation text over a white passage of a painting. Right: the lightness of a section boundary from top to bottom, before and after. Both panels are computed from the live token file.](fig/softness.pdf){#fig-softness width=100% fig-pos="H"}
+![Left: how translucent the masthead may be, measured as navigation text over a white passage of a painting. Right: the lightness of a section boundary from top to bottom, before and after — and, dashed, the profile the same rule draws when the plates are painted, since with them off (@sec-plates) a boundary is flat. Both panels are computed from the live token file.](fig/softness.pdf){#fig-softness width=100% fig-pos="H"}
 
 **Glass has a hard floor, and it is high.** The usual glassmorphism panel runs
 at 60–70% opacity. Over a white passage that puts the navigation at
@@ -606,7 +713,9 @@ actually either side of it, and be visible enough to be felt.
 evenly weighted stops draws a pointed profile, and the eye finds the point. The
 adopted band follows a raised cosine across nine stops, which is what the
 right-hand panel of @fig-softness plots — read back out of the stylesheet rather
-than redrawn.
+than redrawn. The nine stops are still in the rule; the curve is drawn dashed
+there because `--edge-breath` is currently 0% (@sec-plates) and the band it
+draws is flat.
 
 **Motion on this site must settle, not perform.** The motion tokens already
 say *leave quickly, settle slowly, never overshoot*. Cross-document view
@@ -661,7 +770,7 @@ the reason says so.
 
 ### What was built {#sec-soft-built}
 
-![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: the homepage boundary between Latest works and Series.](fig/cap-soft.png){#fig-soft width=100%}
+![The adopted treatment, with a synthetic stand-in canvas in place of photography that does not exist yet. Left: hover — the navigation underline drawn, the mount lifted, the button raised one pixel. Top right: the glass bar at its scrolled state, with the canvas's near-white highlight beneath it. Bottom right: the homepage boundary between Latest works and Series, which with the plates off (@sec-plates) is now flat sage: the mat, the shadows and the glass are what the pass left behind, and the band is what it took away.](fig/cap-soft.png){#fig-soft width=100%}
 
 Nothing in the palette changed. Every softness token — two radii, three
 shadows, the mat, the glass values and the boundary breath — is expressed
@@ -693,7 +802,10 @@ whose colour cannot be named.**
   `--wash-lift` is lighter than every reading ground, so 72% of it over
   `--wash-deep` — the darkest of the three — composites to `#EBEFDD`, *lighter*
   than `--wash-deep`. A plate can only make the ground under text paler than
-  the one already solved against, never darker.
+  the one already solved against, never darker. Since the plates came off the
+  ground beneath it is the field (@sec-plates), and the same arithmetic now
+  works the other way round: the panel is the one surface on the site that
+  lifts its text back over 4.5:1.
 
 So that a rule can say what it is really read on, a stylesheet rule may now
 declare a `--contrast-ground`. The check prefers it over whatever background
@@ -802,9 +914,15 @@ selectors are the mat and the video's mat, and there are two of them.
 **This document is no longer printed on it.** Every page of this report used to
 be `--wash-warm` carrying the same tile, on the argument that it was the site's
 own paper. The site's paper is untextured now, so the argument has expired: the
-report is printed on `--wash-pale`, flat, which is exactly what the site's
-reading surfaces are. It also removes a 300 dpi image from underneath every
-page, which is one less thing between the press and the type.
+report is printed on `--wash-pale`, flat. It also removes a 300 dpi image from
+underneath every page, which is one less thing between the press and the type.
+
+The page you are holding therefore carries a colour the site itself no longer
+paints (@sec-plates), and keeps it deliberately. A screen is lit and a page is
+not; a printed page has no field behind it to show through, and every word of
+this document is a word that has to be read. `--wash-pale` is the lightest
+ground the project ever solved for prose, which is the right paper for a
+document whichever way the site's own switch is set.
 
 ### How it is held {#sec-soft-held}
 
@@ -817,17 +935,20 @@ page, which is one less thing between the press and the type.
 - Three more (G-07) cover the canvas: one tile, defined once and referenced
   exactly twice; the tile neutral, symmetric about 0.5, declared in sRGB and
   blended with soft-light; and the textured selectors exactly the two mats.
-- Four more (L-01 to L-04) cover the decisions of 20 September 2026: the fifteen
+- Five more (L-01 to L-05) cover the decisions of 20 September 2026: the fifteen
   rules allowed to paint cream and no sixteenth; the three reading grounds all
   at the field's own hue and all above the lightness where `--muted-ui` fails;
-  the italic a real file with synthesis off; and About set as a book page in
-  both languages, including the two refusals on the Chinese one.
+  the italic a real file with synthesis off; About set as a book page in both
+  languages, including the two refusals on the Chinese one; and every surface
+  that is read painting a plate token, with no rule naming a wash directly, so
+  that the plates stay reversible from the token file alone (@sec-plates).
 - Six assertions in `check-review.mjs` (G-01 to G-06) cover the rest: no
   literal colour in the new tokens — with one named exception, `--glass-footer`,
   allowed only while the contrast check recomputes it — a mat and nothing that
   alters a painting, glass solid at rest and gated, all new motion standing down
   for reduced motion, one transition name per painting per page, and every band
-  joining the grounds actually either side of it.
+  joining the grounds actually either side of it — by their plate tokens, so the
+  join holds whatever those plates are painted.
 
 ## The two masters {#sec-masters}
 
@@ -1047,13 +1168,13 @@ document is built, so they show the site as it is. The ribbon across the top of
 each page and the red `NEEDS-INPUT` flags are the preview's; a release has
 neither (@sec-readiness).
 
-![The homepage. A pale sage sheet mounted on the sage field, with cream kept for the mat around the work, dark brown bar, the SC monogram at the head of the wordmark, and search, account and cart at the right. Van Gogh's line stands twice: his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line. Beside it, the featured work; on a phone the quote leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
+![The homepage as it now stands, with the plates off (@sec-plates): one sage field from the bar to the footer, the content column visible only as a shadow and a rim light, and cream kept for the mat around the work. Dark brown bar, the SC monogram at the head of the wordmark, and search, account and cart at the right. Van Gogh's line stands twice: his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line. Beside it, the featured work; on a phone the quote leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
 
 ![A work page. The views of the work — front, detail, edge, back and video — sit in a strip with thumbnails always visible, grey placeholders until the photographs exist. The price is the boldest element in the block. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
 
 ![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.png){#fig-sold width=100%}
 
-![About, set as a book page: the display face at 19.2 px, a lede, a three-line drop cap in sanguine, and the closing quotation in Fraunces' real italic. The mount comes in to 660 px around a 34 rem column. The Chinese page is the same page in a system serif, without the drop cap or the italic (@sec-about-type).](fig/cap-about.png){#fig-about width=100%}
+![About, set as a book page: the display face at 19.2 px, a lede, a three-line drop cap in sanguine, and the closing quotation in Fraunces' real italic. The mount comes in to 660 px around a 34 rem column, and with its plate transparent it is the shadow and the rim that draw it. The Chinese page is the same page in a system serif, without the drop cap or the italic (@sec-about-type).](fig/cap-about.png){#fig-about width=100%}
 
 ![The homepage on a 390 px phone. The masthead takes two rows — the short name and the shop bar, then the sections and the language switch — and does not stick: a sticky masthead that tall would take a third of the screen and hide the focused item. Van Gogh's line comes before the featured work.](fig/cap-mob.png){#fig-mob width=42%}
 
@@ -1329,6 +1450,25 @@ providing services. The stronger argument for the work is commercial:
 | 1.1.1 Non-text content | Six paintings, no alt text | Three-layer description per work |
 | 2.4.4 Link purpose | Six identical "Buy" links in the links list | Visually-hidden span per control |
 
+```{=latex}
+\begin{finding}{1.4.3 does not hold as the site now stands}
+```
+
+The row above is the work as it was built, and every token in it is still
+solved. What changed on the evening of 20 September is the **ground**: with the
+reading plates transparent, body text, captions and links are read on the sage
+field at 2.35:1, 2.01:1 and 2.32:1 (@tbl-plates-cost). That is below 1.4.3's
+4.5:1 and, for the muted pair, below 1.4.11's 3:1 as well.
+
+It is a deliberate visual decision, not a regression that slipped through — the
+contrast check prints it on every run — but it is the one item in this section
+a release cannot carry unexamined. Restoring the plates restores every figure in
+the table above exactly; see @sec-plates.
+
+```{=latex}
+\end{finding}
+```
+
 ### Describing a painting {#sec-alt}
 
 The "125-character limit" is folklore — there is none in the HTML specification
@@ -1471,9 +1611,9 @@ and the CI workflow installs the four wheels it needs so that it always does.
 
 | Check | What fails it |
 |:----------------------|:----------------------------------------------------------|
-| `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white |
+| `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white. With the plates off it also prints, without blocking, every pair as the page actually renders it (@sec-plates) |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **78 assertions over 52 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `check-review` | **79 assertions over 53 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
 | `test-readiness` | Any of **44 tests** showing the gate opens only when it should (@sec-readiness-proof) |
 | `check-review`, last assertion | The image tool failing its own round-trip: two fixtures, both directions, byte-exact when the source is opaque and within one unit per channel when it is not (@sec-image-tool) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
@@ -1953,6 +2093,16 @@ are settled rather than left to them.
 | Colour | **RGB.** Ask the press to convert with a stated profile rather than converting it here blind; the palette is warm brown, sage and cream, which separates without drama |
 | Images | Every figure is **285 ppi or better** at its placed size, except three, all deliberate: the prototype sheet at 247, the lockup plate at 210 and the variations panel at 273 — all three are supply-limited (@sec-mark-issues, open item 7) — and the small tiles inside @fig-mark-sizes and @fig-mark-construction at 91, which are 16 px and 32 px renderings shown enlarged, where the pixels *are* the subject |
 | Ink | The page is tinted edge to edge. For a long run on a press that charges by coverage, `\canvaspaperfalse` in `preamble.tex` gives white pages and keeps the sage band |
+
+**A cross-reference that became a footnote number.** Every `@sec-plates` in
+this document rendered as *1* for one build: a line inside a bullet list began
+`(@sec-plates) the ground beneath…`, and in Pandoc a line that starts with
+`(@label)` followed by a space is an **example-list item**, not a reference. It
+defined an example called `sec-plates`, and from then on every reference to
+that label resolved to the example's number instead of the section. Nothing
+warned: the label was valid, the section was numbered, and the output was a
+plausible-looking numeral. Keep a parenthesised reference off the start of a
+line, or follow it with punctuation rather than a space.
 
 **The paper.** This document's pages are the site's own reading surface,
 `--wash-pale`, flat. They carried the site's canvas tile until 20 September

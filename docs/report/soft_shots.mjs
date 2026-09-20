@@ -62,7 +62,9 @@ const stage = (name, extra) => {
   let h = readFileSync(join(DIST, 'index.html'), 'utf8');
   h = h.replace(/<source[^>]*>/g, '')
        .replace(/(<img[^>]*?)\ssrcset="[^"]*"/g, '$1')
-       .replace(/(<img[^>]*?\bclass="work__img"[^>]*?)\ssrc="[^"]*"/g, '$1 src="/_report/stand-in.webp"')
+       // relative, not root-absolute: the staged page and the stand-in sit in the
+       // same directory, so this resolves under a file:// origin as well as http
+       .replace(/(<img[^>]*?\bclass="work__img"[^>]*?)\ssrc="[^"]*"/g, '$1 src="stand-in.webp"')
        .replace(/loading="lazy"/g, 'loading="eager"')
        .replace('</head>', `${extra}</head>`);
   writeFileSync(join(STAGE, `${name}.html`), h);

@@ -100,14 +100,17 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
 
    Rather than reduce her green to a thin divider, the whole content column
    becomes a SHEET mounted on the field — which is what a gallery does to a
-   work on paper anyway. The sheet was cream until 20 September 2026 and is now
-   --wash-pale: the same green, held at the lightness prose can be read on. The
-   sage stays dominant at the margins, the reading happens on a lighter cut of
-   it, and the only cream left on the page is the mat around a painting. */
+   work on paper anyway. The sheet was cream until 20 September 2026, then
+   --wash-pale for an afternoon, and is now TRANSPARENT: it paints
+   --plate-sheet, and that token is transparent, so the field itself is what
+   shows through the content column. The mount is still there — the shadow and
+   the rim light are what say the sheet is lying on the field — but it is a
+   sheet of glass rather than of paper. See "the plates" in tokens.css for what
+   that costs in contrast and for the one line that brings the paper back. */
 .sheet{
   max-width:1240px;
   margin-inline:auto;
-  background:var(--wash-pale);
+  background:var(--plate-sheet);
   /* The sheet's own shadow, plus the light a pane catches along its top
      edge — which is what tells the eye the sheet is lying ON the field
      rather than being a hole cut in it. With both now the same hue, this
@@ -278,11 +281,21 @@ a{ color:var(--sanguine) }
    The sage belongs here. It is the wall the works hang on — the same field
    the mark draws — seen for a moment between rooms. No text ever sits on a
    band, so the contrast rules that keep the sage off reading surfaces are
-   untouched. */
-.edge--pale-pale{ --edge-from:var(--wash-pale); --edge-to:var(--wash-pale) }
-.edge--pale-mid{  --edge-from:var(--wash-pale); --edge-to:var(--wash-mid)  }
-.edge--mid-deep{  --edge-from:var(--wash-mid);  --edge-to:var(--wash-deep) }
-.edge--deep-pale{ --edge-from:var(--wash-deep); --edge-to:var(--wash-pale) }
+   untouched.
+
+   AS IT STANDS, the paragraph above describes a mechanism that is switched
+   off rather than one you can see: with the plates transparent a band has
+   no two grounds to join, --edge-breath is 0%, and all four paint nothing.
+   The rules stay, and they stay correct — each band's ends are the PLATES of
+   the sections either side of it, not the washes those plates happen to be
+   painted with, so a boundary cannot come apart from its neighbours when a
+   plate changes value, which is the one way a soft edge turns back into a
+   seam. Restore the plates and --edge-breath and the bands return, already
+   joined to the right sections. Until then a boundary is 9rem of spacing. */
+.edge--pale-pale{ --edge-from:var(--plate-pale); --edge-to:var(--plate-pale) }
+.edge--pale-mid{  --edge-from:var(--plate-pale); --edge-to:var(--plate-mid)  }
+.edge--mid-deep{  --edge-from:var(--plate-mid);  --edge-to:var(--plate-deep) }
+.edge--deep-pale{ --edge-from:var(--plate-deep); --edge-to:var(--plate-pale) }
 
 .edge{
   /* The breath follows a raised cosine, (1 - cos 2πx) / 2, sampled at nine
@@ -324,11 +337,13 @@ a{ color:var(--sanguine) }
    So the bands are bare, and the canvas tile is now on one material only: the
    mat. See CANVAS in tokens.css. */
 
-/* Section grounds, so the wash continues behind content rather than
-   appearing only in the band. */
-.ground--pale{   background:var(--wash-pale) }
-.ground--mid{ background:var(--wash-mid) }
-.ground--deep{   background:var(--wash-deep) }
+/* Section grounds, so a plate continues behind content rather than appearing
+   only in the band. All three are transparent as of 20 September 2026 and the
+   sections separate by whitespace alone; the rules stay, painting the tokens,
+   so giving any one section a ground of its own is a value in tokens.css. */
+.ground--pale{   background:var(--plate-pale) }
+.ground--mid{ background:var(--plate-mid) }
+.ground--deep{   background:var(--plate-deep) }
 
 /* ---------- Leonardo hatch ----------
    D-03. Left-handed: the stroke runs upper-left to lower-right. Measured at

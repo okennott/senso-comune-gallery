@@ -153,6 +153,54 @@
      lands 2.3 L* above that ground, and over --wash-pale, 0.7.           */
   --wash-lift:        #F0F3E2;   /* L* 95.6 — the frosted plate only       */
 
+  /* --- the plates --------------------------------------------------------
+     20 September 2026, later the same day. What paints a surface that is READ
+     — the sheet, the three section grounds, and the ends of the bands between
+     them — goes through these four tokens, and all four are TRANSPARENT. The
+     sage field shows through every one of them, so the page is one colour and
+     nothing of --wash-pale is visible anywhere on it.
+
+     Nothing was deleted to get there, which is the whole point of the
+     indirection. Every rule that used to paint a wash still paints a ground;
+     it paints one of these tokens rather than a hex. Bringing the plates back
+     is four values and one more, with no rule touched:
+
+       --plate-sheet: var(--wash-pale);     the mounted content column
+       --plate-pale:  var(--wash-pale);     Works, How to Buy, the hero
+       --plate-mid:   var(--wash-mid);      Tribute
+       --plate-deep:  var(--wash-deep);     About
+       --edge-breath: 20%;                  the bands have ends to join again
+
+     Any other value is equally available: one plate can be tinted on its own,
+     or given a colour that is not in the wash ladder at all, without opening
+     base.css.
+
+     WHAT IT COSTS, measured, because the washes exist for a reason and it
+     should not be possible to switch them off without reading the bill. With
+     the plates transparent, every word on the site is read on the field, and
+     the field is the one surface in this palette that was never solved for
+     text. On --field and --field-deep, the two ends of the fall:
+
+       ink        4.70 / 3.09    was 11.56 on --wash-pale   headings
+       body       2.35 / 1.55         5.78    running text, needs 4.5
+       muted      2.01 / 1.32         4.94    captions, tombstone meta
+       sanguine   2.32 / 1.52         5.70    every link
+       muted-ui   1.33 / 1.14         3.27    icon strokes, borders
+
+     That is contrast spent on quietness, which is the one thing the build
+     report opens by forbidding. check-contrast.mjs now prints this table and
+     states that it cannot certify the page while the plates are off; it does
+     not block the build, because painting them is a decision and this block is
+     where the decision is taken.                                          */
+  --plate-sheet:      transparent;
+  --plate-pale:       transparent;
+  --plate-mid:        transparent;
+  --plate-deep:       transparent;
+  /* The lightbox backdrop, which is the only one of these that cannot be
+     transparent: it exists to hide the page behind an opened work. So the
+     "let the field through" of the four above is, here, the field itself. */
+  --plate-lightbox:   var(--field);
+
   /* ======================================================================
      TYPE — the Vitruvian scale
 
@@ -239,7 +287,14 @@
      boundary was only ever seen where it broke into a hard seam. The field
      at 20% is dE 5.3 from the warm ground: plainly there as you scroll, and
      still only a fifth of the way to the sage itself (dE 26.7).          */
-  --edge-breath: 20%;
+  /* 0% as of 20 September 2026, with the plates. A band exists to join two
+     grounds through the field; with the plates transparent there are no two
+     grounds to join and the field is already the whole page, so a breath of it
+     would only be a film of sage laid over sage — invisible in the middle of
+     the fall and a faint horizontal smudge at either end of it. The bands keep
+     their height, which is section spacing, and paint nothing. Restore this to
+     20% when the plates come back. */
+  --edge-breath: 0%;
 
   /* ======================================================================
      MOTION

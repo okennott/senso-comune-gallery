@@ -35,7 +35,11 @@ export const ratio = (a, b) => {
 };
 
 /* ---------- read tokens ---------- */
-const css = readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8');
+/* Comments stripped: tokens.css documents how to restore a plate by writing the
+   declaration out in prose, and a reader that does not strip them finds the
+   instruction as well as the declaration. */
+const css = readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, '');
 const T = Object.fromEntries(
   [...css.matchAll(/--([a-z0-9-]+):\s*(#[0-9A-Fa-f]{6})\s*;/g)].map((m) => [m[1], m[2]])
 );
@@ -46,6 +50,22 @@ const GROUNDS = {
   mid:    T['wash-mid'],
   deep:   T['wash-deep'],
 };
+
+/* ---------- the plates ----------
+   The sheet and the three section grounds do not paint a wash any more: they
+   paint --plate-*, and a plate may be transparent, in which case the ground
+   under the text is not the wash below but the FIELD showing through. This
+   script solves the washes either way — they are still the grounds the palette
+   was built for, and the plates are one value away from being painted again —
+   but it may not print "all pairs pass" while the surfaces those pairs are
+   solved against are not on screen. So: read the plates, and if any of them is
+   transparent, print what the page actually renders. */
+const PLATES = Object.fromEntries(
+  [...css.matchAll(/--(plate-[a-z]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()])
+);
+const PLATES_OFF = Object.entries(PLATES)
+  .filter(([, v]) => v === 'transparent')
+  .map(([k]) => k);
 
 /* Finding B-02. The grounds above are the light family: the three sage reading
    surfaces, and the cream mat, which carries no prose but does carry a
@@ -323,9 +343,35 @@ for (const [link, text] of G183) {
   );
 }
 
+/* ---------- what the page actually renders ----------
+   Not counted as failures. Painting the plates is a decision, taken in
+   tokens.css under "the plates"; this block is the bill for it, printed where
+   it cannot be missed rather than enforced over the top of the decision. */
+if (PLATES_OFF.length) {
+  line('\n  THE PLATES ARE OFF — what the page actually renders\n');
+  line(`  ${PLATES_OFF.map((k) => `--${k}`).join(', ')} ${PLATES_OFF.length > 1 ? 'are' : 'is'} transparent,`);
+  line('  so every word on those surfaces is read on the sage field itself.');
+  line('  Solved against both ends of the fall — --field, and --field-deep at the foot:\n');
+  for (const [token, min, , why] of CHECKS) {
+    if (!T[token]) continue;
+    const top = ratio(T[token], T['field']);
+    const foot = ratio(T[token], T['field-deep']);
+    const ok = Math.min(top, foot) >= min;
+    line(
+      `  ${ok ? '✓' : '✗'} --${token.padEnd(14)} ${top.toFixed(2)} on --field, ` +
+      `${foot.toFixed(2)} on --field-deep   min ${min.toFixed(1)}  ${why}`
+    );
+  }
+  line('\n  The pairs above are NOT counted below: the washes are still the grounds');
+  line('  this palette was solved for, and restoring the plates restores them.');
+  line('  While the plates are transparent this check cannot certify the page as AA.');
+}
+
 line('');
 if (failures) {
   line(`  ${failures} contrast failure${failures > 1 ? 's' : ''}. Build blocked.\n`);
   process.exit(1);
 }
-line('  All pairs pass against their worst-case ground.\n');
+line(PLATES_OFF.length
+  ? '  All pairs pass against the wash plates — which are not currently painted.\n'
+  : '  All pairs pass against their worst-case ground.\n');

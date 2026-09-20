@@ -372,13 +372,19 @@ dialog.lightbox{
   background:transparent; overflow:visible;
 }
 dialog.lightbox::backdrop{
-  /* A sfumato wash, not the default black. The wall, at 94%: a work opened for
-     a closer look is still hanging in the same room. */
-  background:color-mix(in oklab,var(--wash-pale) 94%,transparent);
+  /* The wall, at 94%, not the default black: a work opened for a closer look is
+     still hanging in the same room. It was --wash-pale until 20 September 2026,
+     when the plates went transparent and the wall became the field itself — so
+     this follows the wall rather than staying the one surface on the site still
+     painted the old pale sage. A backdrop cannot be transparent, which is why
+     it takes --plate-lightbox and that token is a colour: its job is to hide
+     the page, and 94% of the field over the field is exactly the room. */
+  background:color-mix(in oklab,var(--plate-lightbox) 94%,transparent);
   backdrop-filter:blur(3px);
 }
 @supports not (background:color-mix(in oklab,red,blue)){
-  dialog.lightbox::backdrop{ background:rgba(235,239,219,.94) }
+  /* --field at 94%, for engines without color-mix. Keep in step with the token. */
+  dialog.lightbox::backdrop{ background:rgba(150,155,125,.94) }
 }
 dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
 /* The lightbox is for looking closely, so the painting gets the whole frame:

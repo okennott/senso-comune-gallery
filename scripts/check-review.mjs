@@ -511,7 +511,10 @@ check('G-05', 'every page names each painting once, and the lightbox copy not at
 check('G-06', 'every boundary band joins the grounds actually either side of it', () => {
   // A band's endpoints must BE its neighbours, or the soft edge breaks into a
   // hard seam — three of four did before this pass. The hero sits on the bare
-  // sheet, which is --wash-pale — the palest of the three sages.
+  // sheet, which is the pale plate. Since 20 September 2026 a band names its
+  // neighbours' PLATE tokens rather than the washes those plates are painted
+  // with, so the join survives a change of plate — including the current one,
+  // where every plate is transparent and a band paints nothing at all.
   const bad = [];
   let bands = 0;
   for (const [p, html] of [['/', home], ['/zh/', zhHome]]) {
@@ -527,7 +530,7 @@ check('G-06', 'every boundary band joins the grounds actually either side of it'
     });
     // and the CSS for each band must fade between the grounds its name says
     for (const [, a, b] of html.matchAll(/\bedge--([a-z]+)-([a-z]+)\b/g)) {
-      const rule = new RegExp(`\\.edge--${a}-${b}\\{--edge-from:var\\(--wash-${a}\\);--edge-to:var\\(--wash-${b}\\)\\}`);
+      const rule = new RegExp(`\\.edge--${a}-${b}\\{--edge-from:var\\(--plate-${a}\\);--edge-to:var\\(--plate-${b}\\)\\}`);
       if (!rule.test(flat)) bad.push(`CSS for edge--${a}-${b} does not fade ${a} → ${b}`);
     }
   }
@@ -957,6 +960,49 @@ check('L-04', 'About is set as a book page, in both languages', () => {
     bad.push('a paragraph ends in a quotation and it is not marked for the italic');
   if (/<em class="quoted">/.test(zh)) bad.push('the Chinese quotation is marked — there is no CJK italic to set it in');
   return { ok: !bad.length, detail: bad.length ? bad.join('; ') : 'serif at --size-read, lede, drop cap (English, @supports), system serif for Chinese, quotation in the real italic' };
+});
+
+check('L-05', 'every surface that is read goes through a plate token', () => {
+  // 20 September 2026, the plates. The sheet, the three section grounds, the
+  // four bands and the lightbox backdrop are the surfaces a reader reads on,
+  // and all of them are currently transparent — the sage field, straight
+  // through. What this check holds is not the value but the INDIRECTION: no
+  // rule may name a wash directly, so the plates can be repainted, one at a
+  // time or all at once, from tokens.css and nowhere else. A wash hardcoded
+  // into a rule is how a surface ends up unreachable from the switch.
+  // Comments stripped from the token file too: the plates block documents how
+  // to restore each one by writing the declaration out, semicolon and all, so a
+  // reader that keeps comments would find those instructions and call the
+  // plates declared even if the real declarations were deleted.
+  const tokens = src('src/styles/tokens.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const sheets = (src('src/styles/base.css') + src('src/styles/gallery.css'))
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const flatS = sheets.replace(/\s+/g, '');
+  const bad = [];
+
+  const group = ['plate-sheet', 'plate-pale', 'plate-mid', 'plate-deep', 'plate-lightbox'];
+  for (const t of group) {
+    if (!new RegExp(`--${t}:\\s*[^;]+;`).test(tokens)) bad.push(`--${t} is not declared in tokens.css`);
+  }
+  // the rules that must go through one
+  const painted = {
+    '.sheet': /\.sheet\{[^}]*background:var\(--plate-sheet\)/,
+    '.ground--pale': /\.ground--pale\{background:var\(--plate-pale\)\}/,
+    '.ground--mid': /\.ground--mid\{background:var\(--plate-mid\)\}/,
+    '.ground--deep': /\.ground--deep\{background:var\(--plate-deep\)\}/,
+    'dialog.lightbox::backdrop': /var\(--plate-lightbox\)/,
+  };
+  for (const [sel, re] of Object.entries(painted)) {
+    if (!re.test(flatS)) bad.push(`${sel} does not paint its plate token`);
+  }
+  // …and no rule anywhere may paint a wash itself
+  for (const m of sheets.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const hits = [...m[2].matchAll(/(?:^|[;\s])background(?:-color|-image)?:[^;]*var\(--(wash-[a-z]+)\)/g)];
+    if (hits.length) bad.push(`${m[1].trim().replace(/\s+/g, ' ')} paints --${hits[0][1]} directly`);
+  }
+  return { ok: !bad.length,
+           detail: bad.length ? bad.join('; ')
+             : `${group.length} plates, all named in tokens.css; ${Object.keys(painted).length} read surfaces, none naming a wash` };
 });
 
 /* ===================== K — readiness ===================== */
