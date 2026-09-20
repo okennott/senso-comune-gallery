@@ -655,6 +655,81 @@ def mark_assets():
     print(f"    fig/mark-variations.jpg — {(OUT / 'mark-variations.jpg').stat().st_size:,} bytes")
 
 
+def mark_vector():
+    """The reduction, stage by stage, and what the vector does that the drawing
+    cannot. Everything here is computed by scripts/build-mark-vector.py itself
+    — the same code that writes the file the site ships — so the figure cannot
+    describe a derivation the build does not perform."""
+    import importlib.util, io, re
+    spec = importlib.util.spec_from_file_location("bmv", ROOT / "scripts/build-mark-vector.py")
+    bmv = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bmv)
+    import cairosvg
+    from PIL import Image, ImageFilter
+
+    mono = _monogram()
+    side = mono.size[0]
+    g = np.asarray(mono.convert("L")).astype(float)
+    paper = np.percentile(g, 85)
+    ink = np.clip((paper - g) / paper, 0, 1)
+    dens = np.asarray(Image.fromarray((ink * 255).astype(np.uint8))
+                      .filter(ImageFilter.GaussianBlur(radius=bmv.SIGMA_FRAC * side))).astype(float)
+    dens /= dens.max()
+    mask = bmv.letters(mono)
+    d = re.search(r'd="([^"]+)"', (ROOT / "public/mark-sc.svg").read_text()).group(1)
+
+    def draw(px, fg, bg):
+        svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {bmv.BOX} {bmv.BOX}">'
+               f'<path fill="{fg}" d="{d}"/></svg>')
+        im = Image.open(io.BytesIO(cairosvg.svg2png(bytestring=svg.encode(),
+                                                    output_width=px, output_height=px))).convert("RGBA")
+        return Image.alpha_composite(Image.new("RGBA", (px, px), bg), im).convert("RGB")
+
+    fig = plt.figure(figsize=(7.0, 3.5))
+    gs = fig.add_gridspec(2, 4, hspace=0.18, wspace=0.10)
+    curves = d.count("C")
+    stages = [(np.asarray(mono), None, "the drawing, as supplied"),
+              (dens, "gray_r", f"density — blurred at {bmv.SIGMA_FRAC * 100:.1f}% of the side"),
+              (np.where(mask, 255, 0).astype(np.uint8), "gray_r",
+               f"letters — density over {bmv.LEVEL:.2f}"),
+              (np.asarray(draw(side, "#160903", (255, 255, 255, 255))), None,
+               f"traced: one path, {curves} curves")]
+    for i, (img, cmap, label) in enumerate(stages):
+        ax = fig.add_subplot(gs[0, i]); ax.set_axis_off()
+        ax.imshow(img, cmap=cmap, interpolation="bilinear")
+        ax.set_title(label, fontproperties=UI, fontsize=5.6, color=MUTED, pad=4)
+
+    # What it is for: one shape, three grounds, and the sizes the tab asks for.
+    grounds = [(T["field"], T["ink"], "on the wall"),
+               (T["bar"], T["paper"], "reversed, on the bar"),
+               (T["paper"], T["bar"], "on the mat")]
+    for i, (bg, fg, label) in enumerate(grounds):
+        ax = fig.add_subplot(gs[1, i]); ax.set_axis_off()
+        bgc = tuple(int(bg.lstrip("#")[k:k + 2], 16) for k in (0, 2, 4)) + (255,)
+        # Drawn at twice the placed size: the appendix's 285 ppi floor is a
+        # rule this document keeps, and a 380 px plate on a 1.6 in column
+        # would arrive at 237.
+        plate = Image.new("RGB", (760, 360), bg)
+        plate.paste(draw(300, fg, bgc), (32, 30))
+        # and the two sizes a tab asks for, enlarged so the page can see what
+        # the browser will: the vector holds its counters where the drawing
+        # has gone to haze (@fig-mark-sizes)
+        for k, px in enumerate((32, 16)):
+            plate.paste(draw(px, fg, bgc).resize((152, 152), Image.NEAREST),
+                        (384 + k * 184, 30 + 74))
+        ax.imshow(np.asarray(plate), interpolation="bilinear")
+        ax.set_title(label, fontproperties=UI, fontsize=5.6, color=MUTED, pad=4)
+    ax = fig.add_subplot(gs[1, 3]); ax.set_axis_off()
+    ax.text(0.0, 0.5,
+            "One colour, so it takes the\ncolour of whatever it is set in —\n"
+            "which the drawing cannot do at\nall. What it cannot carry is the\n"
+            "interlock: one colour cannot say\nwhich stroke passes in front, and\n"
+            "the two letters fuse where they\ncross.",
+            fontproperties=UI, fontsize=5.8, color=BODY,
+            ha="left", va="center", linespacing=1.6, transform=ax.transAxes)
+    save(fig, "mark-vector")
+
+
 def mark_construction():
     """The Fraunces construction: what the site carried between the decision to
     use a monogram and the arrival of the drawing. Kept because the argument it
@@ -918,4 +993,4 @@ if __name__ == "__main__":
     print("figures:")
     palette(); sage_limit(); sage_ground(); read_size()
     payments(); oversell(); duty(); shipping(); mark_assets()
-    mark_construction(); mark_sizes(); softness(); structure()
+    mark_construction(); mark_sizes(); mark_vector(); softness(); structure()

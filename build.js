@@ -443,12 +443,10 @@ function renderIndex(loc) {
 <section class="section ground--deep" id="about">
   <div class="wrap">
     <div class="section__head">
-      <div class="section__aside">
-        <h2>${esc(t(S.about.title, loc))}</h2>
-        ${portraitFrame(loc, 'section')}
-      </div>
+      <h2>${esc(t(S.about.title, loc))}</h2>
       <div class="prose measure">
         ${t(site.about.paragraphs, loc).slice(0, 2).map((p) => `<p>${esc(p)}</p>`).join('\n        ')}
+        ${portraitFrame(loc, 'section')}
         <p><a class="link-quiet" href="${lpath(loc, site, '/about/')}">${loc === 'zh' ? '继续阅读' : 'Read the rest'}</a></p>
       </div>
     </div>
@@ -708,14 +706,13 @@ ${jsonLd(w, site, seller, loc, origin)}`;
  * It is NOT a work: it is not in artworks.json, has no price, no      *
  * lightbox and no view transition, and it is never zoomable.          *
  *                                                                     *
- * WHERE IT SITS, in each of the two places About is featured:         *
- *   the homepage section — in the heading column under the h2, so it  *
- *     stands beside the prose at every width that column is beside    *
- *     it, and above the prose on a phone, with no new breakpoint;     *
- *   the About page — as a frontispiece over the title. That page's    *
- *     mount is 660px around a 34rem measure (finding D-01) and there  *
- *     is no room beside the column for a plate. A book puts the       *
- *     portrait on the leaf facing the title; this is that leaf.       *
+ * WHERE IT SITS: at the FOOT of the prose, in both places, like a     *
+ * sign-off. Not at the head — About is about the work and the pledge  *
+ * rather than about the artist, so a portrait leading it would        *
+ * announce a different page from the one that follows. At the end it  *
+ * is what it actually is: who wrote that. It closes the text and the  *
+ * onward links come after it, so the last thing in the column is the  *
+ * way out rather than a picture.                                      *
  *                                                                     *
  * WHILE THERE IS NO PHOTOGRAPH the frame holds the image pipeline's   *
  * placeholder card, so the layout is real and can be judged at every  *
@@ -732,10 +729,10 @@ function portraitFrame(loc, where) {
   if (!portraitShown()) return '';
   const m = VIEWS.portrait ?? { width: 960, height: 1200, placeholder: true };
   const srcset = (ext) => PORTRAIT_WIDTHS.map((x) => `${asset(`/img/portrait-${x}.${ext}`)} ${x}w`).join(', ');
-  // The plate is capped in CSS at 13.5rem in the section and 15rem on the
-  // page; the widths above cover both at 3x. A length, not a percentage:
-  // the box never tracks the viewport.
-  const sizes = where === 'page' ? '15rem' : '13.5rem';
+  // A sign-off is small: the plate is capped in CSS at 9rem in the section
+  // and 10.5rem on the page, and the widths above cover both at 3x. A length,
+  // not a percentage: the box never tracks the viewport.
+  const sizes = where === 'page' ? '10.5rem' : '9rem';
   return `<figure class="portrait portrait--${where}">
       <picture>
         <source type="image/avif" srcset="${srcset('avif')}" sizes="${sizes}">
@@ -764,10 +761,10 @@ function renderAbout(loc) {
   const paras = t(site.about.paragraphs, loc);
   const body = `
 <section class="page page--about wrap">
-  ${portraitFrame(loc, 'page')}
   <h1>${esc(t(site.sections.about.title, loc))}</h1>
   <div class="prose measure">
     ${paras.map((x) => `<p>${quoted(esc(x), loc)}</p>`).join('\n    ')}
+    ${portraitFrame(loc, 'page')}
     <p><a href="${lpath(loc, site, '/giving/')}">${loc === 'zh' ? '查看捐赠记录' : 'See the giving record'}</a> · <a href="${lpath(loc, site, '/how-to-buy/')}">${esc(t(site.sections.buy.title, loc))}</a></p>
   </div>
 </section>`;
@@ -1095,12 +1092,14 @@ for (const f of ['fraunces-latin.woff2', 'fraunces-italic-latin.woff2',
   if (existsSync(src)) cpSync(src, join(DIST, 'fonts', f));
 }
 
-/* Finding C-01. The icon set, built by scripts/build-icons.sh. Copied by name
-   rather than by globbing public/, so a stray file there cannot ship. */
-for (const f of ['icon-32.png', 'favicon.ico', 'apple-touch-icon.png', 'logo-mark.png', 'site.webmanifest']) {
+/* Finding C-01. The icon set, built by scripts/build-icons.sh, and the two
+   vector files built by scripts/build-mark-vector.py. Copied by name rather
+   than by globbing public/, so a stray file there cannot ship. */
+for (const f of ['icon-32.png', 'favicon.ico', 'apple-touch-icon.png', 'logo-mark.png',
+                 'site.webmanifest', 'icon.svg', 'mark-sc.svg']) {
   const src = join(ROOT, 'public', f);
   if (existsSync(src)) cpSync(src, join(DIST, f));
-  else console.log(`  note: public/${f} missing — run: npm run icons`);
+  else console.log(`  note: public/${f} missing — run: npm run ${f.endsWith('.svg') ? 'mark:vector' : 'icons'}`);
 }
 
 /* images, if the build has produced any yet */

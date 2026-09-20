@@ -239,20 +239,29 @@
    About is the one part of the site that is a person rather than a catalogue,
    and until now it had no face. The photograph is mounted as a painting is —
    the mat rule above names it — and differs in exactly three ways, each of
-   which says that this is not a work: it is capped in width, it carries a
-   caption, and nothing about it invites a click.
+   which says that this is not a work: it is small, it carries a caption, and
+   nothing about it invites a click.
 
-   The cap is what keeps it a plate rather than a picture. 13.5rem beside the
-   homepage's 22ch heading column and 15rem over the About page's 34rem
-   measure; on a phone both stop at the column's own width, so the portrait
-   never becomes the largest thing on the screen above the prose it belongs
-   to. build.js gives the <img> the same numbers in `sizes`. */
-.portrait{ margin:0; display:grid; gap:var(--space-2); justify-items:start }
+   IT IS A SIGN-OFF, not a frontispiece. It sits at the foot of the prose,
+   inside the same column, because About is about the work and the pledge
+   rather than about the artist: leading with a portrait would announce a
+   different page from the one that follows. At the end it is what it is —
+   who wrote that — and the onward links come after it.
+
+   Small enough to read as a signature rather than as a plate: 9rem in the
+   homepage section, 10.5rem on the page, and on a phone both stop at the
+   column's own width. build.js gives the <img> the same numbers in `sizes`. */
+.portrait{
+  margin:var(--space-5) 0 var(--space-4);
+  display:grid; gap:var(--space-2); justify-items:start;
+}
 .portrait__img{ display:block; width:100%; height:auto }
-.portrait--section{ max-width:min(100%,13.5rem) }
-.portrait--page{ max-width:min(100%,15rem); margin-bottom:var(--space-5) }
+.portrait--section{ max-width:min(100%,9rem) }
+.portrait--page{ max-width:min(100%,10.5rem) }
 /* A caption, not a label: the name of the person in the frame, in the same
-   small caps a tombstone uses. --muted is 4.62:1 on the wall. */
+   small caps a tombstone uses. --muted is 4.62:1 on the wall. The About page
+   sets its prose in the display face, and a signature is not running text, so
+   the caption keeps the interface face in both places. */
 .portrait__cap{
   font-family:var(--font-body);
   font-size:var(--size-caption);
@@ -260,11 +269,6 @@
   text-transform:uppercase;
   color:var(--muted);
 }
-
-/* The heading column of a section, when it carries more than the heading.
-   The gap is the one between a heading and the thing under it, not the one
-   between two sections. */
-.section__aside{ display:grid; gap:var(--space-5); align-content:start; justify-items:start }
 
 
 

@@ -49,7 +49,10 @@ shoot work "/works/harbour-light/"          1440 900  2
 shoot sold "/works/long-afternoon/"         1440 620  2
 shoot buy  "/how-to-buy/"                   1440 900  2
 # About is the one page that is only prose, and the only one set as a book page.
-shoot about "/about/"                       1440 900  2
+# Taller than the rest: the page ends with the artist's portrait as a sign-off
+# (the mark section's neighbour, sec-portrait), and a 900px window would cut
+# the figure off above the one thing that section added.
+shoot about "/about/"                       1440 1620 2
 # Headless Chrome will not lay a window out below 500px: asked for 390 it lays
 # out at 500 and the screenshot crops it. The phone view is therefore shot
 # through an iframe of exactly 390px, which is a real 390px viewport.

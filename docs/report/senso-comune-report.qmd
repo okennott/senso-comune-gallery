@@ -766,21 +766,100 @@ as it is.
 
 ![The variations panel, enlarged from @fig-brand. These are a *different drawing* from the preferred option — solid letters, no construction lines — and they are what the sheet offers for the sizes and grounds the preferred one cannot hold.](fig/mark-variations.jpg){#fig-mark-variations width=100% fig-pos="H"}
 
-**3 — The mark is now a photograph of paper, not a shape.** It cannot take
+**3 — The mark is a photograph of paper, not a shape.** It cannot take
 `currentColor`, cannot invert for a dark theme, cannot be recoloured for a
 seasonal card, and cannot be knocked out of a coloured ground. The site works
 with that rather than against it: the artwork is opaque cream, so on the dark
 masthead it arrives as a small mounted plate — a cream sheet on a dark ground,
-which is the site's central visual idea at wordmark size.
+which is the site's central visual idea at wordmark size. **Since 20 September
+2026 there is also a shape**, traced from the drawing for the surfaces that
+cannot hold a photograph; what that costs is @sec-mark-vector, and the
+masthead is not one of them.
 
-**4 — The SVG favicon is gone.** The site shipped an `icon.svg`; a vector
-favicon is sharp at every size and is what a tab would rather have. There is no
-vector of this mark to ship, and an SVG wrapping a raster would be the same
-pixels behind a vector's promise. The set is now a 32 px PNG, the `.ico`, the
-180 px home-screen icon and the manifest, all cut from the artwork by the icon
-build.
+**4 — The SVG favicon went away with it, and has come back.** The site once
+shipped an `icon.svg`; a vector favicon is sharp at every size and is what a
+tab would rather have. It was dropped because there was no vector of this mark
+to ship, and an SVG wrapping a raster would be the same pixels behind a
+vector's promise. That is the one issue here now closed rather than stated:
+the tab is served a real shape again (@sec-mark-vector), with the 32 px PNG,
+the `.ico`, the 180 px home-screen icon and the manifest behind it, all still
+cut from the artwork by the icon build.
 
 ![The adopted artwork at the three sizes the build cuts, each enlarged from the file that actually ships.](fig/mark-sizes.pdf){#fig-mark-sizes width=100% fig-pos="H"}
+
+### The mark, vectorized {#sec-mark-vector}
+
+Issues 3 and 4 above are one missing object. A mark that cannot take a colour
+cannot sit on a ground the site has not already decided, and a tab cannot be
+given a drawing; both want a **shape**. There is no vector source — open item
+7 — so one was made from the artwork, and this section is what it costs, since
+a derivative that does not say what it is, is how a brand loses its own
+artwork.
+
+**Why a threshold does not do it.** The letters in the drawing are not solid:
+they are built from hatching, at about a 3 px pitch in a 592 px monogram. At
+any single threshold a stroke therefore comes out striped, and morphology
+wide enough to close the stripes is also wide enough to close the counters.
+What *is* solid is the hatching's **density**, so the ink is blurred at a
+little over the hatch's own pitch first, and the letters are the region where
+that density stands above a level:
+
+: The reduction, and what each number was solved against {#tbl-mark-vector}
+
+| Step | Value | Why that one |
+|:-----|:------|:-------------|
+| paper | the 85th percentile of $L$ | The sheet, rather than the brightest pixel: a specular fleck would otherwise set the white point |
+| blur | 0.5 % of the crop's side | A shade over the hatch's pitch. Under it the stripes survive as ripples in the outline — at 0.34 % the trace needs eight more curves and leaves a notch in the S's counter, where the ribbon's lit side falls under the level. Far over it, the thin joins of the S melt into the counter |
+| level | 0.22 of the maximum | Where the C's left arm arrives whole without the construction lines arriving with it. By 0.34 the arm starts to break; under 0.18 the sheet's own construction circle is inside the letter |
+| clean | close, then open, at 7 px | Closes what the hatch left open, then takes off the ticks and the paper grain. Pockets the hatching left *inside* a stroke are filled: they are not counters, they are places where the drawing is pale |
+| trace | crack following, then Schneider | The boundary is walked on the pixel lattice with the ink kept on the left, smoothed out of its staircase by four 1–2–1 passes, simplified at 1 px, and fitted with cubics to 1.2 px |
+
+![The reduction, stage by stage, and what it is for. Top: the drawing as supplied; its ink blurred at 0.5 % of the crop's side, which turns hatching into tone; the letters that stand above 0.22 of that tone's maximum; and the single path fitted to their boundary. Bottom: the same path on the wall, reversed on the bar and on the mat — it is one colour, so it is whatever colour it is set in — each with the 32 px and 16 px renderings enlarged beside it. Drawn by `docs/report/figures.py` from `scripts/build-mark-vector.py` itself, so the figure cannot describe a derivation the build does not perform.](fig/mark-vector.pdf){#fig-mark-vector width=100% fig-pos="H"}
+
+The result is **one closed path, 64 curves, 2.9 KB**, and it is measured
+rather than admired: the builder renders its own output back to pixels and
+reports the intersection-over-union against the reduction it came from, which
+is **0.974**. `npm run check` re-runs the entire derivation and compares the
+committed file byte for byte, so the vector cannot quietly become something
+somebody edited by hand.
+
+**What the reduction cannot recover is which stroke passes in front.** In the
+drawing the S crosses the C and is told apart from it by tone and by a drawn
+outline. One colour has neither, so the two letters fuse where they cross.
+Three ways to put the interlock back were tried and none survived being
+looked at: the light *valley* between the strokes cuts into the lit side of
+the S's own ribbon rather than between the letters; separating the dark cores
+never yields two components, because at every threshold that keeps the letters
+whole the strokes stay connected; and the drawing's own outline, which a ridge
+filter does recover, cuts cleanly in two places out of four, which reads as
+damage rather than as an interlock.
+
+The sheet's answer to this is a **different drawing** — the Monochrome and
+Reversed variations (@fig-mark-variations), which resolve the overlap by hand
+— and they are supplied at about 110 px, which is not enough to trace. So the
+fused silhouette is what ships, and open item 7 gains its second reason: the
+vector source would settle the interlock as well as the resolution.
+
+**Where it is used, and where it is not.** The tab, in both themes: `icon.svg`
+carries the site's `--bar` for a light tab strip and its `--paper` for a dark
+one, because a favicon has no page to inherit a colour from. Beside it,
+`mark-sc.svg` carries no colour at all — inlined in a page it is whatever the
+text around it is, and handed to a printer it is a shape rather than a
+photograph of one.
+
+The **masthead is deliberately not one of them**. The artwork's own cream
+paper is the plate there, which is the site's central visual idea at wordmark
+size, and at 34 px on a phone the drawing still holds. Swapping it is one line
+in `templates.js` and it is Priscilla's decision, not the build's — and the
+first place to look before making it is whether the vector source exists.
+
+Four assertions, F-05: that the committed vector re-derives from the pinned
+artwork exactly, at an IoU of at least 0.95; that the inlinable copy names no
+colour at all while the tab copy names the site's own two; that the SVG icon
+is offered first with the raster set behind it, identically in both locales;
+and that both files are stamped with the source and its hash, that nothing is
+written back into `brand/`, and that this section still states what the
+reduction costs.
 
 ### What was built before the artwork arrived {#sec-mark-construction}
 
@@ -822,14 +901,21 @@ pixels — which is issue 2 above, arrived at twice from opposite directions.
   gallery's name and nothing else — 2.5.3 Label in Name, and 2.4.4.
 - **It is not cleaned up.** No tracing, no background removal, no contrast
   boost, no redrawing of the construction lines. `scripts/build-icons.py` is
-  asserted to do nothing but crop, resize and save.
+  asserted to do nothing but crop, resize and save. The vector in
+  @sec-mark-vector does trace — that is what it is for — but it is a second,
+  declared object beside the artwork rather than a tidied version of it: the
+  original is untouched, still pinned by hash, and still what the masthead and
+  every raster icon are cut from.
 
 ### Where it is used {#sec-mark-where}
 
 The icon set — `icon-32.png`, `favicon.ico`, the 180 px home-screen icon and
 the manifest; `logo-mark.png` in the masthead, where the mark and the name are
 a single link and a single tab stop; and this document, in the footer of every
-page. All from `brand/mark-lockup.png`, by one crop.
+page. All from `brand/mark-lockup.png`, by one crop. Beside them, from that
+same crop by way of the reduction in @sec-mark-vector: `icon.svg`, which the
+tab is offered first, and `mark-sc.svg`, which carries no colour and is there
+for anything that has to supply its own.
 
 The sheet's **horizontal lockup** was tried on this document's title page and
 taken off again, which is worth recording because it puts a number on open
@@ -841,7 +927,7 @@ is 738 dpi) and Fraunces is an outline at any size, so the title page carries
 the monogram with the name set beside it, exactly as the site's masthead does.
 Nothing about that is a preference; it is the resolution ceiling, met.
 
-Nine assertions in `scripts/check-review.mjs` (F-01 to F-04) hold it together:
+Thirteen assertions in `scripts/check-review.mjs` (F-01 to F-05) hold it together:
 that both originals are present and byte-for-byte the files that were supplied;
 that every derivative is a crop and a resize of the lockup and of nothing else,
 with no drawing, tracing or recolouring in the builder; that the masthead
@@ -849,7 +935,9 @@ carries the artwork at a declared size and mounted as a plate; that the mark
 takes no accessible name of its own and is identical in both locales; that
 nothing the site builds redraws it; that the costs in @sec-mark-issues are
 still stated rather than quietly absorbed; and that this section still quotes
-the sheet's own values rather than paraphrasing them.
+the sheet's own values rather than paraphrasing them; and that the vector
+re-derives from the artwork exactly, names no colour of its own, and says in
+its own file what it came from.
 
 ## Softness {#sec-soft}
 
@@ -1333,21 +1421,21 @@ the one part of it that is a person rather than a catalogue — the pledge, the
 reason there are not many works, the sentence about pausing in front of one —
 and it was set as an essay with nobody in it.
 
-It is now framed in both the places About appears, and the two places take it
-differently because the pages are different shapes.
+It is now framed in both the places About appears, and in both it sits at the
+**foot of the prose**, in the same column, like a sign-off.
 
-**On the homepage** the frame sits in the heading column, under *About*, so it
-stands beside the prose at every width that column is beside it and above the
-prose on a phone. It needs no breakpoint of its own: the section head is
-already a two-column grid at 760 px and the portrait is simply the second
-thing in the first column.
+Not at the head. About is about the work and the pledge rather than about the
+artist, and a portrait leading it would announce a different page from the one
+that follows — a biography, which this is not. At the end it is what it
+actually is: who wrote that. The onward links come after it, so the last thing
+in the column is the way out rather than a picture.
 
-**On the About page** it is a frontispiece, over the title. It could not be
-anything else. That page's mount is 660 px around a 34 rem measure — finding
-D-01 brought it in to the column, because an 860 px mount left a third of it
-empty — and 660 less the 544 px the measure takes leaves 116 px, which is a
-margin, not a plate. A book with a portrait in it puts it on the leaf facing
-the title page, and that is the arrangement the page already has.
+It is small for the same reason: 9 rem in the homepage section and 10.5 rem on
+the page, capped at the column's own width on a phone. A signature, not a
+plate. The About page could not have given it a column beside the text in any
+case — that page's mount is 660 px around a 34 rem measure, because finding
+D-01 brought it in to the column, and 660 less the 544 px the measure takes
+leaves 116 px, which is a margin.
 
 **It is mounted as a painting.** The same cream mat, the same board grain, the
 same mount shadow, from the same rule: the stylesheet names `.portrait__img`
@@ -1356,7 +1444,9 @@ the artist's photograph is an object on a wall like everything else on it.
 What it does not take is everything that would make it a work — no zoom
 cursor, no lightbox, no view transition, no entry in the catalogue, no price.
 The caption under it is the artist's name, in the small caps a tombstone uses,
-in `--muted` at 4.62:1 on the wall.
+in `--muted` at 4.62:1 on the wall; the About page sets its prose in the
+display face, and the caption keeps the interface face in both places, because
+a signature is not running text.
 
 **While there is no photograph** the frame holds the image pipeline's own
 placeholder card, so the layout is real and can be judged at every width, and
@@ -1376,11 +1466,12 @@ Supplying `masters/portrait.jpg` and running the image build is the whole of
 turning the frame on; the photograph keeps its own proportions, because the
 frame is built from the size the pipeline recorded.
 
-Four assertions, M-01: that both places carry the frame in both languages, the
-frontispiece before the title; that it is matted like a painting, carries its
-own width and height so it costs no layout shift, and is in no way a work; that
-an empty frame is marked as a placeholder and is gated out of a release; and
-that the description rule is unwaivable, conditional and owns its own field.
+Four assertions, M-01: that both places sign off with the frame, in both
+languages, after the prose and before the links; that it is matted like a
+painting, carries its own width and height so it costs no layout shift, and is
+in no way a work; that an empty frame is marked as a placeholder and is gated
+out of a release; and that the description rule is unwaivable, conditional and
+owns its own field.
 
 ### How it grows {#sec-structure-growth}
 
@@ -1428,7 +1519,7 @@ neither (@sec-readiness).
 
 ![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.png){#fig-sold width=100%}
 
-![About, set as a book page: the display face at 19.2 px, a lede, a three-line drop cap in sanguine, and the closing quotation in Fraunces' real italic. The mount comes in to 660 px around a 34 rem column, and with its plate transparent it is the shadow and the rim that draw it. Over the title, the artist's portrait as a frontispiece, matted as a painting is and holding the pipeline's placeholder card until the photograph exists (@sec-portrait). The Chinese page is the same page in a system serif, without the drop cap or the italic (@sec-about-type).](fig/cap-about.png){#fig-about width=100%}
+![About, set as a book page: the display face at 19.2 px, a lede, a three-line drop cap in sanguine, and the closing quotation in Fraunces' real italic. The mount comes in to 660 px around a 34 rem column, and with its plate transparent it is the shadow and the rim that draw it. At the foot of the prose, the artist's portrait as a sign-off, matted as a painting is and holding the pipeline's placeholder card until the photograph exists (@sec-portrait). The Chinese page is the same page in a system serif, without the drop cap or the italic (@sec-about-type).](fig/cap-about.png){#fig-about width=100%}
 
 ![The homepage on a 390 px phone. The masthead takes two rows — the short name and the shop bar, then the sections and the language switch — and does not stick: a sticky masthead that tall would take a third of the screen and hide the focused item. Van Gogh's line comes before the featured work.](fig/cap-mob.png){#fig-mob width=42%}
 
@@ -1917,7 +2008,7 @@ and the CI workflow installs the four wheels it needs so that it always does.
 |:----------------------|:----------------------------------------------------------|
 | `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white. With the plates off it also prints, without blocking, every pair as the page actually renders it (@sec-plates) |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **88 assertions over 57 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `check-review` | **92 assertions over 58 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
 | `test-readiness` | Any of **48 tests** showing the gate opens only when it should (@sec-readiness-proof) |
 | `check-review`, last assertion | The image tool failing its own round-trip: two fixtures, both directions, byte-exact when the source is opaque and within one unit per channel when it is not (@sec-image-tool) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
@@ -2315,7 +2406,7 @@ writing more code.
 | 4 | Export declaration for a \$300 painting | Not established | Also determines what supports the bank's FX check |
 | 5 | Airwallex + HK sole proprietorship | Entity list verified for account opening only | Ask before incorporating |
 | 6 | Several works in one payment, and the largest single transaction | **Not established** on either route | Ask the provider in writing before the cart is built; the figure becomes `maxTransactionUSD` |
-| 7 | The mark has no vector source | The whole supply is one **1536 × 1024** raster; the monogram is about 590 px of it | Ask whoever drew it for the vector, or a much larger scan. Nothing on the site needs it — a 180 px icon and a 2× masthead mark are inside the ceiling — but a business card, a 15 mm foil stamp or a gallery window each want it, and it costs nothing to keep with the rest (@sec-mark-issues) |
+| 7 | The mark has no vector source | The whole supply is one **1536 × 1024** raster; the monogram is about 590 px of it. A one-colour vector has since been traced from it (@sec-mark-vector), which answers the tab and any coloured ground — and cannot answer the interlock, because one colour cannot say which stroke passes in front | Ask whoever drew it for the vector, or a much larger scan. Nothing on the site needs it — a 180 px icon and a 2× masthead mark are inside the ceiling — but a business card, a 15 mm foil stamp or a gallery window each want it, the interlock wants it, and it costs nothing to keep with the rest (@sec-mark-issues) |
 
 ## Settled in the build {#sec-closed}
 
@@ -2327,6 +2418,7 @@ writing more code.
 | Leonardo's hatching angle | Recorded in the stylesheet as a measurement rather than a citation, with the caveat that two chalk sheets ran the other way | `src/styles/base.css` |
 | Mona Lisa glaze layer count | The thickness is cited; the count is not, and the comment says why | `src/styles/tokens.css` |
 | A mark for two languages | An `SC` monogram — a device beside the name rather than a translation of it — used as the drawing Priscilla supplied, one crop serving the tab, the home screen, the masthead and this document | `brand/`, `scripts/build-icons.py` |
+| A mark that can take a colour | The drawing reduced to one colour and traced — a second, declared object beside the artwork, measured against what it came from and re-derived by the checks. The tab has a shape again; the interlock is what one colour cannot carry (@sec-mark-vector) | `scripts/build-mark-vector.py` |
 | What the paper actually is | Measured off the artwork rather than chosen: 1/f spectrum, no weave periodicity, σ 4.87 of 255. A cold-press cotton-rag sheet, reproduced as one tile that cannot change a colour (@sec-soft-canvas) | `src/styles/tokens.css` |
 | Converting between a drawing and pixels | One tool, both directions, the fidelity of each mode stated rather than chosen quietly, and its own selftest inside `npm run check` (@sec-image-tool) | `scripts/image.py` |
 | Whether her sage could carry the reading after all | Yes, and the failure was one-dimensional: lightness, not hue or chroma. The three grounds keep their measured lightness and rotate onto the field's hue, which cost no foreground token and improved every pair (@sec-sage-ground) | `src/styles/tokens.css` |

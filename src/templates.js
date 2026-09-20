@@ -189,11 +189,18 @@ const OG_LOCALE = { en: 'en_US', 'zh-CN': 'zh_CN' };
 const ogLocale = (lang) => OG_LOCALE[lang] ?? lang.replace('-', '_');
 
 /* Finding C-01. The tab, the home-screen icon and the browser chrome were all
-   defaults. The icons are cut from brand/mark-lockup.png — Priscilla's own
-   artwork — by scripts/build-icons.py. There is no SVG in the set any more:
-   the mark is a drawing, and an SVG carrying a raster would be the same
-   pixels behind a vector's promise. */
-const favicon = (asset) => `<link rel="icon" href="${asset('/icon-32.png')}" type="image/png" sizes="32x32">
+   defaults. The raster icons are cut from brand/mark-lockup.png — Priscilla's
+   own artwork — by scripts/build-icons.py.
+
+   THE SVG IS BACK, and it is not a raster in a vector's wrapper, which is why
+   it went away: scripts/build-mark-vector.py reduces the drawing to one
+   colour and traces THAT, so the tab gets a shape. It is offered first and
+   the PNG and .ico stay behind it, so a browser that does not take an SVG
+   icon is not left without one. The file carries the site's ink for a light
+   tab strip and its paper for a dark one, because a favicon has no page to
+   inherit a colour from (report, "The mark, vectorized"). */
+const favicon = (asset) => `<link rel="icon" href="${asset('/icon.svg')}" type="image/svg+xml" sizes="any">
+<link rel="icon" href="${asset('/icon-32.png')}" type="image/png" sizes="32x32">
 <link rel="icon" href="${asset('/favicon.ico')}" sizes="32x32">
 <link rel="apple-touch-icon" href="${asset('/apple-touch-icon.png')}">
 <link rel="manifest" href="${asset('/site.webmanifest')}">`;

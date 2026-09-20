@@ -195,9 +195,11 @@ package manager): it is converted to H.264 at up to 1080 px, with the sound
 track removed and the first frame taken as the poster. Without ffmpeg the
 placeholder stays, and the build says so.
 
-**Your own portrait.** *About* carries a frame for a photograph of you — beside
-the section on the homepage, and above the title on the About page itself. It
-works exactly like a view: put the file in `masters/portrait.jpg` and rebuild.
+**Your own portrait.** *About* carries a frame for a photograph of you at the
+end of the text — on the homepage section and on the About page, in both cases
+as a sign-off rather than as an opening image, because those pages are about
+the work rather than about you. It works exactly like a view: put the file in
+`masters/portrait.jpg` and rebuild.
 
 ```
 masters/portrait.jpg
@@ -417,6 +419,7 @@ npm run fonts        # rebuild the webfonts, Latin and Chinese
 npm run mark         # re-cut the interim construction's letters (report only)
 npm run image        # vectorize / rasterize, with the fidelity stated
 npm run icons        # rebuild the favicon, home-screen icon and manifest
+npm run mark:vector  # re-trace the one-colour vector of the mark (icon.svg)
 npm run check:render # paintings keep their proportions in a real browser (needs Chrome)
 npm run readiness    # what is still owed before the site may go live
 npm run build:release # the only build that may go live; refuses while anything is owed
@@ -479,6 +482,12 @@ reading it from the other.
 │   ├── build-icons.py              the icon set and the masthead mark, cut
 │   │                               from brand/mark-lockup.png by crop and
 │   │                               resize alone. Nothing is redrawn
+│   ├── build-mark-vector.py        the same artwork reduced to ONE COLOUR and
+│   │                               traced: public/icon.svg for the tab and
+│   │                               public/mark-sc.svg in currentColor. A
+│   │                               declared derivative — the drawing is
+│   │                               untouched — and npm run check re-derives
+│   │                               it and compares byte for byte
 │   ├── image.py                    raster → vector and vector → raster, with
 │   │                               the fidelity said out loud: pixel (exact
 │   │                               geometry), embed (the bytes in a wrapper)
@@ -506,7 +515,7 @@ reading it from the other.
 │   ├── check-links.mjs             dead links, missing alt, missing width or
 │   │                               height, heading order, landmarks, hreflang,
 │   │                               CJK subset coverage
-│   ├── check-review.mjs            78 assertions over 52 findings: the design
+│   ├── check-review.mjs            92 assertions over 58 findings: the design
 │   │                               review, the mark, softness, the shop bar,
 │   │                               the structure, the flags and the gate,
 │   │                               against built pages
@@ -521,10 +530,13 @@ reading it from the other.
 │   ├── placeholders/
 │   │   └── work-video.mp4          4.8 KB, shared by every work until its own
 │   │                               video exists; committed, so CI needs no ffmpeg
-│   └── icon-32.png                 built by build-icons.sh, alongside
-│                                   favicon.ico, apple-touch-icon.png,
-│                                   logo-mark.png and
-│                                   site.webmanifest
+│   ├── icon-32.png                 built by build-icons.sh, alongside
+│   │                               favicon.ico, apple-touch-icon.png,
+│   │                               logo-mark.png and
+│   │                               site.webmanifest
+│   └── icon.svg                    built by build-mark-vector.py, alongside
+│                                   mark-sc.svg. The tab is offered the SVG
+│                                   first and falls back to the PNG
 │
 ├── docs/                         one folder per document, each with its
 │   │                             own build
@@ -692,7 +704,7 @@ an iframe of exactly that width, with scrollbars hidden as a phone's are, and
 the check asserts the content width it actually received. `docs/report/shots.sh`
 takes the phone screenshot the same way.
 
-`check-review.mjs` holds 88 assertions over 57 findings — the September 2026
+`check-review.mjs` holds 92 assertions over 58 findings — the September 2026
 design review, the mark, softness, the shop bar and views, the structure, the
 red flags and the readiness gate — written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
@@ -725,10 +737,16 @@ block people outright.
   artwork is `brand/mark-lockup.png`, kept unmodified and pinned by hash;
   `npm run icons` cuts the icon set and the masthead mark out of it by crop
   and resize alone. Three costs come with a drawn mark and are set out in the
-  report rather than worked around: there is no vector and the raster is
-  1536 × 1024; it does not survive 16 px; and it cannot take `currentColor`.
-  The Fraunces construction that stood in before it arrived is kept in
-  `scripts/mark.mjs` for the report's figure only.
+  report rather than worked around: there is no vector source and the raster
+  is 1536 × 1024; it does not survive 16 px; and the drawing itself cannot
+  take `currentColor`. For the surfaces that need a colour rather than a
+  photograph — the browser tab, and any ground the site has not already chosen
+  — `npm run mark:vector` reduces the drawing to one colour and traces that,
+  as a declared derivative beside the artwork. What one colour cannot carry is
+  the interlock: it cannot say which stroke passes in front, so the two
+  letters fuse where they cross, and that is the second reason to ask for the
+  vector source. The Fraunces construction that stood in before the artwork
+  arrived is kept in `scripts/mark.mjs` for the report's figure only.
 - **Sage is the wall; cream is the mat.** The three reading grounds are
   `--wash-pale`, `--wash-mid` and `--wash-deep`: the field's own hue, held at
   the lightness ladder that was already measured safe. A reading ground fails

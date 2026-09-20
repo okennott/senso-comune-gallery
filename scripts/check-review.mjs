@@ -495,6 +495,67 @@ check('F-04', 'the sheet\'s own specification is reproduced, not paraphrased', (
            detail: `${values.length - missing.length}/${values.length} values quoted${missing.length ? ` — missing ${missing.join(', ')}` : ''}, both plates shown ${figures}` };
 });
 
+check('F-05', 'the mark has a vector, and it is the drawing\'s own shape', () => {
+  // Issues 3 and 4 of the mark section: the artwork cannot take a colour, and
+  // the SVG favicon went with it. Both are the same missing object — a shape.
+  // scripts/build-mark-vector.py reduces the drawing to one colour and traces
+  // that; this asserts the result is still exactly what the drawing gives,
+  // by re-deriving it. --check re-runs the whole reduction and the whole fit
+  // and compares byte for byte, so an SVG edited by hand fails here.
+  const r = spawnSync('python3', [join(ROOT, 'scripts/build-mark-vector.py'), '--check'], { encoding: 'utf8' });
+  const out = `${r.stdout ?? ''}${r.stderr ?? ''}`;
+  const missing = out.match(/No module named '(\w+)'/);
+  if (missing) return { ok: false, detail: `${missing[1]} is not installed — pip install pillow numpy cairosvg` };
+  if (r.error || r.status === null) return { ok: false, detail: `python3 would not run: ${r.error?.message ?? 'no exit status'}` };
+  const iou = Number((out.match(/IoU ([\d.]+)/) ?? [])[1]);
+  return { ok: r.status === 0 && iou >= 0.95,
+           detail: r.status === 0 ? `re-derived from brand/mark-lockup.png, identical, IoU ${iou}`
+                                  : (out.trim().split('\n').pop() || `exit ${r.status}`) };
+});
+
+check('F-05', 'the vector takes a colour, and the tab has one to take', () => {
+  const inline = read('mark-sc.svg');
+  const icon = read('icon.svg');
+  // the inlinable copy names no colour at all: it is whatever it is set in
+  const onlyCurrent = /fill="currentColor"/.test(inline) && !/#[0-9A-Fa-f]{6}/.test(inline.replace(/<!--[\s\S]*?-->/g, ''));
+  // the tab copy does, because a favicon has no cascade — and both of them
+  // are the site's own, so the tab cannot drift from the page
+  const T = { bar: token('bar'), paper: token('paper') };
+  const light = new RegExp(`path\\{fill:${T.bar}\\}`, 'i').test(icon);
+  const dark = new RegExp(`prefers-color-scheme:dark\\)\\{path\\{fill:${T.paper}\\}`, 'i').test(icon);
+  // one path, one shape: a trace that came out in pieces would be a mark in pieces
+  const single = (inline.match(/<path/g) ?? []).length === 1;
+  return { ok: onlyCurrent && light && dark && single,
+           detail: `currentColor only ${onlyCurrent}, tab ink ${T.bar}/${T.paper} ${light && dark}, one path ${single}` };
+});
+
+check('F-05', 'the SVG icon is offered first, with the raster set behind it', () => {
+  const links = [...home.matchAll(/<link rel="icon"[^>]*>/g)].map((m) => m[0]);
+  const svgFirst = /icon\.svg/.test(links[0] ?? '') && /type="image\/svg\+xml"/.test(links[0] ?? '');
+  const fallback = links.some((l) => /icon-32\.png/.test(l)) && links.some((l) => /favicon\.ico/.test(l));
+  const bothLocales = (zhHome.match(/<link rel="icon"[^>]*>/g) ?? []).join() === links.join();
+  return { ok: svgFirst && fallback && bothLocales,
+           detail: `${links.length} icon links, SVG first ${svgFirst}, png+ico behind it ${fallback}, identical in both locales ${bothLocales}` };
+});
+
+check('F-05', 'the derivative says what it is, and the artwork stays the artwork', () => {
+  const py = src('scripts/build-mark-vector.py');
+  // it reads the pinned artwork and nothing else, and writes nothing into brand/
+  const reads = [...py.matchAll(/ROOT \/ "([^"]+)"/g)].map((m) => m[1]);
+  const onlyArtwork = reads.filter((f) => f.startsWith('brand/')).join() === 'brand/mark-lockup.png';
+  const writesNothingToBrand = !reads.some((f) => f.startsWith('brand/') && f !== 'brand/mark-lockup.png');
+  // every copy carries the source and its hash, so a derived file can always
+  // be traced back to what it came from
+  const stamp = sha(ART).slice(0, 16);   // the same pin F-01 holds
+  const stamped = [read('mark-sc.svg'), read('icon.svg')]
+    .every((f) => f.includes('brand/mark-lockup.png') && f.includes(stamp) && /DERIVATIVE/.test(f));
+  // and the report says what the reduction costs rather than absorbing it
+  const r = src('docs/report/senso-comune-report.qmd');
+  const stated = /which stroke passes in front/i.test(r) && /sec-mark-vector/.test(r);
+  return { ok: onlyArtwork && writesNothingToBrand && stamped && stated,
+           detail: `reads ${reads.join(' + ')}, stamped with the source hash ${stamped}, cost stated ${stated}` };
+});
+
 /* ===================== G — softness ===================== */
 /* Added with the softness pass: soft edges, elevation, glass, motion and
    section boundaries, with the palette unchanged. The paintings' own promise —
@@ -1184,17 +1245,19 @@ check('K-03', 'a release is refused while blocked — and leaves the last site u
 const aboutPage = read('about/index.html');
 const zhAboutPage = read('zh/about/index.html');
 
-check('M-01', 'both the places About appears carry the portrait frame', () => {
+check('M-01', 'both the places About appears sign off with the portrait', () => {
+  // A sign-off, not a frontispiece: in both places the frame comes AFTER the
+  // prose and before the onward links, because About is about the work and
+  // the pledge rather than about the artist.
   const inSection = (h) => {
     const sec = (h.match(/<section class="section ground--deep" id="about">([\s\S]*?)<\/section>/) ?? [])[1] ?? '';
-    return /<figure class="portrait portrait--section">/.test(sec) && /<h2>/.test(sec);
+    return /<\/p>\s*<figure class="portrait portrait--section">[\s\S]*?<\/figure>\s*<p><a class="link-quiet"/.test(sec);
   };
-  // on the page it is the frontispiece: the frame comes BEFORE the title
-  const onPage = (h) => /<figure class="portrait portrait--page">[\s\S]*?<\/figure>\s*<h1>/.test(h);
+  const onPage = (h) => /<\/p>\s*<figure class="portrait portrait--page">[\s\S]*?<\/figure>\s*<p><a href/.test(h);
   const pages = [['home', inSection(home)], ['zh home', inSection(zhHome)],
                  ['about', onPage(aboutPage)], ['zh about', onPage(zhAboutPage)]];
   const bad = pages.filter(([, ok]) => !ok).map(([n]) => n);
-  return { ok: !bad.length, detail: bad.length ? `missing on ${bad.join(', ')}` : 'section and frontispiece, both locales' };
+  return { ok: !bad.length, detail: bad.length ? `out of place on ${bad.join(', ')}` : 'after the prose, before the links, in both places and both locales' };
 });
 
 check('M-01', 'the portrait is mounted as a painting, and is not one', () => {

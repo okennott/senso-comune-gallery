@@ -20,6 +20,7 @@
     "preview": "node scripts/preview.mjs",
     "fonts": "bash scripts/build-fonts.sh",
     "mark": "python3 scripts/build-mark-paths.py",
+    "mark:vector": "python3 scripts/build-mark-vector.py",
     "image": "python3 scripts/image.py",
     "report": "bash docs/report/build.sh",
     "report:pdf": "bash docs/report/build.sh",
