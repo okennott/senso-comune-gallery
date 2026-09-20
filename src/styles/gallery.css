@@ -1335,11 +1335,12 @@ html[lang^="zh"] .page--about .prose{
 @media (min-width:600px){
   .series-card__link{ grid-template-columns:minmax(0,11rem) minmax(0,1fr); align-items:start }
 }
-.series-card__cover{ display:flex; justify-content:center }
-/* Both dimensions capped, both left auto: a replaced element resolved that way
-   keeps its own ratio. A fixed height inside an 11rem column did not — the
-   render check measured a 0.80 painting drawn at 0.745. */
-.series-card__cover .work__img{ width:auto; height:auto; max-width:100%; max-height:14rem; object-fit:contain; cursor:pointer }
+/* The wall again, in the 11rem column a series card gives its cover. Both the
+   image's dimensions stay auto under two caps: a replaced element resolved
+   that way keeps its own ratio, where a fixed height inside this column did
+   not — the render check measured a 0.80 painting drawn at 0.745. */
+.series-card__cover{ display:flex; justify-content:flex-start; align-items:flex-end; aspect-ratio:var(--wall-ratio) }
+.series-card__cover .work__img{ width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain; cursor:pointer }
 .series-card__text{ display:grid; gap:var(--space-1); align-content:start }
 .series-card__title{
   font-family:var(--font-display); font-size:var(--size-h3);
@@ -1359,8 +1360,10 @@ html[lang^="zh"] .page--about .prose{
 #latest .works--catalogue{ grid-template-columns:minmax(0,1fr) }
 @media (min-width:600px){ #latest .works--catalogue{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
 @media (min-width:1100px){ #latest .works--catalogue{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--space-5) var(--space-4) } }
-#latest .works--catalogue .work__img{ max-height:17rem }
-#latest .works--catalogue .work__figure{ min-height:17rem }
+/* A 17rem cap and a 17rem floor used to stand here, from before the wall.
+   They outlived it by a day: on a phone, where #latest is one column 307px
+   wide, they held a 40x30 painting to 208px of it. The wall is the cell, at
+   every width and on every page that lists work. */
 
 /* ---------- readiness ----------
    Report, "Readiness". Every build that is not a release says so in a ribbon
