@@ -51,8 +51,18 @@
 
   // Derive the deployment base from this script's own URL, so the same file
   // works at a domain root and at a GitHub Pages project subpath.
-  const base = (document.currentScript || document.querySelector('script[src$="availability.js"]'))
-    ?.getAttribute('src')?.replace(/availability\.js$/, '') || '/';
+  //
+  // The name is content-addressed — availability.<hash>.js — so the hash is
+  // part of what has to be stripped, and the selector cannot match on a fixed
+  // ending either. Stripping "availability.js" alone left the whole filename
+  // in the base and sent the fetch to /availability.<hash>.jsavailability.json,
+  // which 404s into the catch below and leaves every sold work showing as for
+  // sale, with nothing in the console. check-review.mjs E-03 now solves this
+  // expression against the name the build actually writes.
+  const self = document.currentScript
+    || document.querySelector('script[src*="availability."][src$=".js"]');
+  const base = self?.getAttribute('src')
+    ?.replace(/availability(\.[0-9a-f]+)?\.js$/, '') || '/';
 
   const check = () => {
     // cache:'no-store' plus a short max-age on the file itself — this endpoint

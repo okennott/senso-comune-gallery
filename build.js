@@ -23,8 +23,9 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   esc, t, dims, money, path as lpath, asset, BASE, scaleSvg, jsonLd, layout,
-  RELEASE, setReadiness,
+  RELEASE, setReadiness, setFingerprints, hashed,
 } from './src/templates.js';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { loadAndAssess } from './scripts/check-readiness.mjs';
 
@@ -651,7 +652,7 @@ ${(w.views ?? []).filter((v) => v.kind !== 'video' && viewShown(w, v)).map((v) =
   <img src="${asset(`/img/${key}-2000.webp`)}" alt="${esc(t(v.alt, loc))}" width="${m.width}" height="${m.height}" loading="lazy">
 </dialog>`;
 }).join('\n')}
-<script src="${asset('/gallery.js')}" defer></script>
+<script src="${hashed('/gallery.js')}" defer></script>
 
 ${jsonLd(w, site, seller, loc, origin)}`;
 
@@ -935,6 +936,51 @@ function renderPage(p, def, loc) {
 rmSync(DIST, { recursive: true, force: true });
 mkdirSync(DIST, { recursive: true });
 
+/* ---------- the code assets, content-addressed ----------
+   The stylesheet and the two scripts are written FIRST, because every page
+   then has to name them, and the name each one gets contains a hash of its
+   own bytes.
+
+   Why the plain names were not safe. A page and its stylesheet are fetched
+   separately and cached separately, and each host decides for how long.
+   GitHub Pages — the preview target — sends `max-age=600` on both and does
+   not read _headers, so for ten minutes after a deploy a returning visitor
+   can be handed yesterday's /styles.css with today's /index.html. That is not
+   a stale site but a wrong one: the two halves disagree, and the disagreement
+   looks exactly like a change that did not ship. It was mistaken for one on
+   20 September 2026.
+
+   A name that contains the bytes cannot be served for other bytes. Old page,
+   old stylesheet, together, until the page expires; new page, new stylesheet,
+   at once. Nothing here shortens the ten minutes — no file in this repository
+   can, on a host that ignores _headers — but the page a visitor gets is at
+   every moment the page as it was built. On the production host it also earns
+   the three of them a year in cache, immutable (see _headers below).       */
+const fingerprint = (name, body) => {
+  const h = createHash('sha256').update(body).digest('hex').slice(0, 8);
+  const stamped = name.replace(/\.(\w+)$/, `.${h}.$1`);
+  writeFileSync(join(DIST, stamped), body);
+  return `/${stamped}`;
+};
+
+/* one stylesheet, concatenated in cascade order. Font urls are rewritten for
+   the deployment base so the same source works at a root and at a subpath. */
+const cjkCss = existsSync(join(ROOT, 'public/fonts/fonts-cjk.css'))
+  ? readFileSync(join(ROOT, 'public/fonts/fonts-cjk.css'), 'utf8')
+  : '';
+const css = [cjkCss, ...['tokens', 'base', 'gallery']
+    .map((f) => readFileSync(join(ROOT, `src/styles/${f}.css`), 'utf8'))]
+  .join('\n')
+  .replace(/url\('\/fonts\//g, `url('${asset('/fonts/')}`);
+
+/* the lightbox, and the client-side availability check */
+const ASSETS = {
+  '/styles.css':      fingerprint('styles.css', css),
+  '/gallery.js':      fingerprint('gallery.js', readFileSync(join(ROOT, 'src/scripts/gallery.js'))),
+  '/availability.js': fingerprint('availability.js', readFileSync(join(ROOT, 'src/scripts/availability.js'))),
+};
+setFingerprints(ASSETS);
+
 let pageCount = 0;
 /* The 404. GitHub Pages and Cloudflare Pages both serve /404.html for any
    missing path, including the search, account and cart placeholders, before
@@ -981,24 +1027,10 @@ for (const loc of LOCALES) {
   }
 }
 
-/* client-side availability check */
-cpSync(join(ROOT, 'src/scripts/availability.js'), join(DIST, 'availability.js'));
-cpSync(join(ROOT, 'src/scripts/gallery.js'), join(DIST, 'gallery.js'));
 cpSync(join(ROOT, 'public/placeholders'), join(DIST, 'placeholders'), { recursive: true });
 if (existsSync(join(ROOT, 'public/video'))) {
   cpSync(join(ROOT, 'public/video'), join(DIST, 'video'), { recursive: true });
 }
-
-/* one stylesheet, concatenated in cascade order. Font urls are rewritten for
-   the deployment base so the same source works at a root and at a subpath. */
-const cjkCss = existsSync(join(ROOT, 'public/fonts/fonts-cjk.css'))
-  ? readFileSync(join(ROOT, 'public/fonts/fonts-cjk.css'), 'utf8')
-  : '';
-const css = [cjkCss, ...['tokens', 'base', 'gallery']
-    .map((f) => readFileSync(join(ROOT, `src/styles/${f}.css`), 'utf8'))]
-  .join('\n')
-  .replace(/url\('\/fonts\//g, `url('${asset('/fonts/')}`);
-writeFileSync(join(DIST, 'styles.css'), css);
 
 /* fonts */
 mkdirSync(join(DIST, 'fonts'), { recursive: true });
@@ -1066,10 +1098,21 @@ writeFileSync(join(DIST, '_redirects'),
   LOCALES.map((l) => `${lpath(l, site, '/archive/')} ${lpath(l, site, '/works/sold/')} 301`).join('\n') + '\n');
 
 /* headers — long, immutable caching on hashed assets */
+/* Read by Cloudflare Pages, the production target; GitHub Pages ignores it and
+   sends max-age=600 on everything, which is the whole reason the three code
+   assets carry a hash in their names (see "the code assets" above). Because
+   the name changes with the bytes, they can be kept for a year and never
+   revalidated — a page only ever asks for the one it was built with. */
 writeFileSync(join(DIST, '_headers'),
 `/fonts/*
   Cache-Control: public, max-age=31536000, immutable
 /img/*
+  Cache-Control: public, max-age=31536000, immutable
+/styles.*.css
+  Cache-Control: public, max-age=31536000, immutable
+/gallery.*.js
+  Cache-Control: public, max-age=31536000, immutable
+/availability.*.js
   Cache-Control: public, max-age=31536000, immutable
 /availability.json
   Cache-Control: public, max-age=60

@@ -30,7 +30,14 @@ const zhHome = read('zh/index.html');
 const work = read('works/harbour-light/index.html');
 const buy = read('how-to-buy/index.html');
 const archive = read('works/sold/index.html');   // formerly /archive/
-const cssRaw = read('styles.css');
+/* The stylesheet is content-addressed — /styles.<hash>.css — so it is found
+   by the name the built page actually asks for, not by a fixed one. */
+const cssName = home.match(/href="[^"]*\/(styles\.[0-9a-f]+\.css)"/)?.[1];
+if (!cssName) {
+  console.error('  the home page names no /styles.<hash>.css — run: npm run build');
+  process.exit(1);
+}
+const cssRaw = read(cssName);
 const css = cssRaw.replace(/\/\*[\s\S]*?\*\//g, '');  // rules only — a comment may name a selector it removed
 const flat = css.replace(/\s+/g, '');                    // whitespace-insensitive matching
 
@@ -307,6 +314,75 @@ check('E-02', 'zh pages preload the Chinese face, en pages the Latin one', () =>
   const zhNoFraunces = !/preload"[^>]*fraunces-latin\.woff2/.test(zhHome);
   const enFraunces = /preload"[^>]*fraunces-latin\.woff2/.test(home);
   return { ok: zhPre && zhNoFraunces && enFraunces, detail: `zh→noto ${zhPre}, zh drops fraunces ${zhNoFraunces}, en→fraunces ${enFraunces}` };
+});
+
+check('E-03', 'the code assets are content-addressed, so no cache can mix two builds', () => {
+  /* A page and its stylesheet expire independently. GitHub Pages sends
+     max-age=600 on both and ignores _headers, so for ten minutes after a
+     deploy a returning visitor could be served the previous stylesheet with
+     the current page — which reads as a change that never shipped, and was
+     read as one on 20 September 2026. A hashed name makes that impossible:
+     the page asks for the bytes it was built against, by name.
+
+     Asserted here rather than trusted: every reference on every built page
+     carries a hash, each one resolves to a file, and no plain-named copy is
+     left in dist/ for a stale page to find. */
+  const want = ['styles.css', 'gallery.js', 'availability.js'];
+  const pages = [home, zhHome, work, buy, archive, read('404.html')];
+  const stamped = /^(styles|gallery|availability)\.[0-9a-f]{8}\.(css|js)$/;
+
+  const refs = new Set();
+  for (const p of pages) {
+    for (const m of p.matchAll(/(?:href|src)="[^"]*\/((?:styles|gallery|availability)\.[^"/]+)"/g)) refs.add(m[1]);
+    for (const w of want) if (new RegExp(`(?:href|src)="[^"]*/${w.replace('.', '\\.')}"`).test(p)) refs.add(w);
+  }
+  const unstamped = [...refs].filter((r) => !stamped.test(r));
+  const missing = [...refs].filter((r) => stamped.test(r) && !exists(r));
+  const plainLeft = want.filter((w) => exists(w));
+
+  return {
+    ok: refs.size >= 2 && unstamped.length === 0 && missing.length === 0 && plainLeft.length === 0,
+    detail: `${refs.size} references, ${unstamped.length} unhashed, ${missing.length} dangling, ${plainLeft.length} plain-named copies in dist/`,
+  };
+});
+
+check('E-03', 'the hashed names are cached for a year, and nothing else at the root is', () => {
+  const h = read('_headers');
+  const immutable = ['/styles.*.css', '/gallery.*.js', '/availability.*.js']
+    .every((pat) => new RegExp(`${pat.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\n\\s*Cache-Control: public, max-age=31536000, immutable`).test(h));
+  // the one root file that must NOT be frozen: the sold check the shop reads
+  const availability = /\/availability\.json\n\s*Cache-Control: public, max-age=60/.test(h);
+  return { ok: immutable && availability, detail: `hashed immutable ${immutable}, availability.json still 60s ${availability}` };
+});
+
+check('E-03', 'the sold check can still strip its own name to find the base', () => {
+  /* availability.js works out the deployment base by stripping its own
+     filename off its own src, so one file serves a domain root and a Pages
+     subpath. When that filename gained a hash the fixed expression stopped
+     matching: the base became the whole script URL, the fetch went to
+     /availability.<hash>.jsavailability.json, and a 404 there lands in the
+     catch that exists for being offline — so every sold work would have gone
+     on showing as for sale, with nothing in the console to say so.
+
+     Asserted, not read: the expression is taken out of the shipped script and
+     solved against the name the build actually wrote, at a root and under a
+     base path, and the answer has to be the base and nothing else. */
+  const js = src('src/scripts/availability.js');
+  const m = js.match(/\.replace\((\/[\s\S]*?\/), *''\)/);
+  const built = readdirSync(DIST).filter((f) => /^availability\.[0-9a-f]{8}\.js$/.test(f));
+  if (!m || built.length !== 1) {
+    return { ok: false, detail: `expression found ${!!m}, hashed builds in dist/ ${built.length}` };
+  }
+  const body = m[1].slice(1, m[1].lastIndexOf('/'));
+  const re = new RegExp(body);
+  const solved = [`/${built[0]}`, `/senso-comune-gallery/${built[0]}`, '/availability.js']
+    .map((u) => [u, u.replace(re, '')]);
+  const bad = solved.filter(([u, base]) => !base.endsWith('/') || u.slice(base.length).includes('/'));
+  // and the selector it falls back to must match the hashed name too
+  const sel = /script\[src\*="availability\."\]\[src\$="\.js"\]/.test(js);
+  return { ok: !bad.length && sel,
+           detail: bad.length ? bad.map(([u, b]) => `${u} → ${b}`).join('; ')
+             : `${solved.length} names solved to their base, fallback selector matches a hashed name ${sel}` };
 });
 
 /* ===================== F — the mark ===================== */

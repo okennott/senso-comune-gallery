@@ -41,14 +41,23 @@ const dataUri = (abs) => {
   return `data:${MIME[extname(abs).toLowerCase()] || 'application/octet-stream'};base64,${b.toString('base64')}`;
 };
 
-/* 1. stylesheet, with its font urls inlined */
-let css = readFileSync(join(DIST, 'styles.css'), 'utf8');
+/* 1. stylesheet, with its font urls inlined.
+      The name is content-addressed — /styles.<hash>.css — so it is read off the
+      page rather than assumed, and the basename is what locates the file at the
+      root of dist/ whether or not the build carries a base path. See "the code
+      assets, content-addressed" in build.js. */
+const cssHref = html.match(/<link rel="stylesheet" href="([^"]+)">/)?.[1];
+if (!cssHref) {
+  console.error(`  ${pagePath} names no stylesheet\n  run: npm run build`);
+  process.exit(1);
+}
+let css = readFileSync(join(DIST, cssHref.replace(/^.*\//, '')), 'utf8');
 css = css.replace(/url\('\/fonts\/([^']+)'\)/g, (m, f) => {
   const abs = join(DIST, 'fonts', f);
   return existsSync(abs) ? `url('${dataUri(abs)}')` : m;
 });
 html = html.replace(
-  /<link rel="stylesheet" href="\/styles\.css">/,
+  `<link rel="stylesheet" href="${cssHref}">`,
   `<style>\n${css}\n</style>`
 );
 

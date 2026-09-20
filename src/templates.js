@@ -72,6 +72,17 @@ export const path = (loc, site, p = '/') => {
 /** Absolute-from-root asset URL, base-aware. */
 export const asset = (p) => (BASE + p).replace(/\/{2,}/g, '/');
 
+/* The content-addressed name of each code asset, set once by build.js before
+   any page is rendered — same arrangement as the readiness verdict above.
+   Empty during a build that has not reached them yet, and hashed() then falls
+   back to the plain name, which is the name the file would have had. */
+let FINGERPRINTS = {};
+export const setFingerprints = (f) => { FINGERPRINTS = f; };
+
+/** Asset URL that changes whenever the file's bytes change. See "the code
+    assets, content-addressed" in build.js for why these three are hashed. */
+export const hashed = (p) => asset(FINGERPRINTS[p] ?? p);
+
 /* ---------- scale diagram (N-06) ----------
    Artsy's production "View in Room" is ~120 lines of CSS compositing with no
    AR and no library, calibrated by one hard-coded constant pair, and it leaves
@@ -364,7 +375,7 @@ ${loc === 'zh'
   ? `<link rel="preload" href="${asset('/fonts/notoserifsc-subset.woff2')}" as="font" type="font/woff2" crossorigin>`
   : `<link rel="preload" href="${asset('/fonts/fraunces-latin.woff2')}" as="font" type="font/woff2" crossorigin>`}
 <link rel="preload" href="${asset('/fonts/inter-latin.woff2')}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="${asset('/styles.css')}">
+<link rel="stylesheet" href="${hashed('/styles.css')}">
 </head>
 <body class="${bodyClass}">
 <a class="skip-link" href="#main">${esc(t(ui.skipToContent, loc))}</a>
@@ -408,7 +419,7 @@ ${body}
   ${decl ? `<div class="wrap"><p class="legal-declaration" lang="zh-CN">${esc(decl.zh)}</p>
   <p class="legal-declaration" style="border:0;margin-top:0;padding-top:0">${esc(decl.en)}</p></div>` : ''}
 </footer>
-<script src="${asset('/availability.js')}" defer></script>
+<script src="${hashed('/availability.js')}" defer></script>
 </body>
 </html>`;
 }

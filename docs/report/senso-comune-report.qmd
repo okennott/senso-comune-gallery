@@ -1532,6 +1532,51 @@ docs/            brief/ · report/
 The page count follows the data: eighteen pages per locale for six works in two
 series, of which six are work pages.
 
+### The code assets carry their own hash {#sec-fingerprints}
+
+*20 September 2026.*
+
+A page and its stylesheet are two requests, cached separately, and each host
+decides for how long. GitHub Pages — the preview target — sends `max-age=600`
+on both and does not read `_headers`. So for ten minutes after a deploy a
+returning visitor can be handed the previous `/styles.css` with the current
+`/index.html`: not a stale site but a **wrong** one, whose two halves disagree
+in a way that looks exactly like a change that failed to ship. It was read as
+one on 20 September 2026.
+
+The three code assets — the stylesheet and the two scripts — are therefore
+written before any page, under names that contain a hash of their own bytes
+(`styles.cd55845f.css`), and each page names the files it was built against. A
+name that contains the bytes cannot be served for other bytes: old page with
+old stylesheet, together, until the page expires; new page with new stylesheet,
+at once. Nothing here shortens the ten minutes — no file in this repository can,
+on a host that ignores `_headers` — but whatever a visitor is holding is
+internally consistent. On Cloudflare Pages, which does read `_headers`, the
+same names earn the three of them a year, `immutable`.
+
+Three assertions hold it, and the third is the one worth reading:
+
+- every reference on every built page carries a hash, each resolves to a file,
+  and **no plain-named copy is left in `dist/`** for a stale page to find;
+- the hashed names are frozen for a year and `availability.json` is still 60
+  seconds — the one file at the root that must not be frozen, because it is how
+  a page finds out it has sold;
+- `availability.js` works out the deployment base by stripping its own filename
+  off its own `src`, so that one file serves a domain root and a Pages subpath.
+  The hash broke that expression. The base became the whole script URL, the
+  sold check fetched `/availability.<hash>.jsavailability.json`, and the 404
+  landed in the `catch` that is there for being offline — so every sold work
+  would have gone on showing as for sale, with nothing in the console to say
+  so. The expression is now solved in the check against the name the build
+  actually writes, at a root and under a base path.
+
+Which is the general lesson, and it is cheap to state: content-addressing a
+file changes its name, and **everything that parses that name is part of the
+change** — here, the sold check, `check-review.mjs`, which finds the stylesheet
+in order to read it, and `preview.mjs`, which inlines it into a single-file
+review copy. Each of them now takes the name from the page rather than assuming
+it.
+
 ### Converting between a drawing and pixels {#sec-image-tool}
 
 `scripts/image.py` (`npm run image`) is the one place the project converts
@@ -1613,7 +1658,7 @@ and the CI workflow installs the four wheels it needs so that it always does.
 |:----------------------|:----------------------------------------------------------|
 | `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white. With the plates off it also prints, without blocking, every pair as the page actually renders it (@sec-plates) |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **79 assertions over 53 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `check-review` | **82 assertions over 54 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
 | `test-readiness` | Any of **44 tests** showing the gate opens only when it should (@sec-readiness-proof) |
 | `check-review`, last assertion | The image tool failing its own round-trip: two fixtures, both directions, byte-exact when the source is opaque and within one unit per channel when it is not (@sec-image-tool) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
