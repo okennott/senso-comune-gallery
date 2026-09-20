@@ -635,6 +635,9 @@ function renderSold(loc) {
       ${tombstone(w, loc, { level: 'h2' })}
     </li>`).join('\n    ')}
   </ol>
+  <p class="section__more">
+    <a class="link-quiet" href="${lpath(loc, site, '/works/')}">${esc(t(S.works.allWorks, loc))} (${works.filter((w) => !w.sold).length})</a>
+  </p>
 </section>`;
   return layout({
     site, seller, loc, current: 'works',

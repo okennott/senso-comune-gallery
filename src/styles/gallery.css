@@ -1289,7 +1289,7 @@ html[lang^="zh"] .page--about .prose{
 .localnav ul::-webkit-scrollbar{ display:none }
 .localnav a{
   position:relative;
-  display:inline-flex; align-items:center; gap:.4em;
+  display:inline-flex; align-items:baseline; gap:.45em;
   min-height:var(--target-min); white-space:nowrap;
   font-size:var(--size-caption); letter-spacing:var(--track-label); text-transform:uppercase;
   color:var(--body); text-decoration:none;
@@ -1304,7 +1304,20 @@ html[lang^="zh"] .page--about .prose{
 .localnav a:hover::after{ transform:scaleX(1); background:var(--muted-ui) }
 .localnav a[aria-current]{ color:var(--ink) }
 .localnav a[aria-current]::after{ transform:scaleX(1); background:var(--ink) }
-.localnav__count{ color:var(--muted); font-variant-numeric:tabular-nums; letter-spacing:0 }
+/* AW-11. Set in the tabs' own face at the tabs' own size, "ORIGINAL WORKS 3"
+   read as one phrase rather than a room and its count. The numeral goes to the
+   display face — the same move the price makes, and the reason a serif figure
+   beside sans capitals reads as a different KIND of thing without needing to
+   be louder or quieter than one. */
+.localnav__count{
+  color:var(--muted);
+  font-family:var(--font-display);
+  font-size:1.15em;
+  font-optical-sizing:auto;
+  font-variation-settings:'SOFT' 0,'WONK' 1;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:0;
+}
 
 /* Breadcrumbs: one line under the global navigation, from the second level
    down. The current page is text, not a link. */

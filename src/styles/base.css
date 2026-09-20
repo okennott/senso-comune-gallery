@@ -385,6 +385,12 @@ a{ color:var(--ink) }
    texture across the Tribute ground only: present if you look, invisible if
    you don't, which is the whole point.
 
+   THE ALPHA IS TUNED TO THE GROUND. 7% was measured on the sage, where the
+   ground sits at L* 57; on --wash-mid at L* 93 the same brown line has half
+   again the contrast and the hatch stops being subliminal and starts being
+   stripes. 4% puts it back where it was meant to be. A ground that moves
+   moves this with it.
+
    ONE section. Never a page background, never behind body text. */
 .hatch{
   position:relative;
@@ -397,13 +403,13 @@ a{ color:var(--ink) }
   pointer-events:none;
   background-image:repeating-linear-gradient(
     45deg,
-    color-mix(in oklab,var(--sanguine) 7%,transparent) 0 1px,
+    color-mix(in oklab,var(--sanguine) 4%,transparent) 0 1px,
     transparent 1px 9px
   );
 }
 @supports not (color:color-mix(in oklab,red,blue)){
   .hatch::before{
-    background-image:repeating-linear-gradient(45deg,rgba(139,74,60,.07) 0 1px,transparent 1px 9px);
+    background-image:repeating-linear-gradient(45deg,rgba(139,74,60,.04) 0 1px,transparent 1px 9px);
   }
 }
 
