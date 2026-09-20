@@ -772,23 +772,38 @@ const isWork = (p) => { const m = p.match(/\/works\/([a-z0-9-]+)\/index\.html$/)
 const workPages = allHtml.filter(([p]) => isWork(p));
 const notWorkPages = allHtml.filter(([p]) => !isWork(p));
 
-check('H-01', 'search, account and cart, in that order, on every page', () => {
+/* Decision D1 put search, account and cart in the masthead with placeholder
+   destinations. AW-07 took them out: three e-commerce icons in the most
+   valuable strip on the site, for a catalogue of six unique objects sold by
+   enquiry, read as a store template — and all three were SH-01 blockers for
+   the same underlying reason, a control that leads nowhere.
+
+   The two assertions that held the three controls in place now hold the bar
+   to its DATA instead, in both directions: the masthead carries exactly the
+   controls site.json declares a route for, in declaration order, and no <ul>
+   at all when it declares none. Put a route back and the control comes back,
+   named in both languages, and this says so. */
+check('H-01', 'the masthead carries exactly the shop controls that have a route', () => {
+  const want = Object.keys(siteJson.placeholders.routes);
   const bad = [];
   for (const [p, html] of allHtml) {
-    const bar = (html.match(/<ul class="shopbar">([\s\S]*?)<\/ul>/) ?? [])[1] ?? '';
-    const roles = [...bar.matchAll(/data-placeholder="([a-z]+)"/g)].map((m) => m[1]).join(' ');
-    if (roles !== 'search account cart') bad.push(`${p}: ${roles || 'none'}`);
+    const bar = (html.match(/<ul class="shopbar">([\s\S]*?)<\/ul>/) ?? [])[1];
+    const roles = [...(bar ?? '').matchAll(/data-placeholder="([a-z]+)"/g)].map((m) => m[1]);
+    // no routes, no list: an empty <ul> is a list of nothing, still announced
+    if (!want.length && bar !== undefined) bad.push(`${p}: an empty bar`);
+    if (roles.join(' ') !== want.join(' ')) bad.push(`${p}: ${roles.join(' ') || 'none'}`);
   }
-  return { ok: !bad.length, detail: bad.length ? bad.slice(0, 3).join('; ') : `${allHtml.length} pages` };
+  return { ok: !bad.length, detail: bad.length ? bad.slice(0, 3).join('; ') : `${want.length || 'no'} controls, ${allHtml.length} pages` };
 });
 
-check('H-01', 'each shop control is named by a word, in the page language', () => {
-  const want = { en: ['Search', 'Account', 'Cart'], zh: ['搜索', '账户', '购物车'] };
+check('H-01', 'each shop control there is, is named by a word in the page language', () => {
+  const words = { search: ['Search', '搜索'], account: ['Account', '账户'], cart: ['Cart', '购物车'] };
+  const want = (i) => Object.keys(siteJson.placeholders.routes).map((r) => words[r][i]).join();
   const got = (html) => [...html.matchAll(/class="shopbar__link"[^>]*>[\s\S]*?<span class="visually-hidden">([^<]+)<\/span>/g)].map((m) => m[1]);
   const en = got(home).join(), zh = got(zhHome).join();
   const iconsHidden = [...home.matchAll(/<svg class="shopbar__icon"[^>]*>/g)].every((m) => /aria-hidden="true"/.test(m[0]));
-  return { ok: en === want.en.join() && zh === want.zh.join() && iconsHidden,
-           detail: `en ${en}, zh ${zh}, icons aria-hidden ${iconsHidden}` };
+  return { ok: en === want(0) && zh === want(1) && iconsHidden,
+           detail: `en ${en || '—'}, zh ${zh || '—'}, icons aria-hidden ${iconsHidden}` };
 });
 
 /* The footer's channel row. The names are proper nouns, so they are the same

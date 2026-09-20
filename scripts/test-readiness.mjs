@@ -27,6 +27,7 @@ function ready() {
 
   site.url = 'https://sensocomune.art';
   site.placeholders.routes = {};
+  site.shop = { cart: true };   // a ready site that can take a payment
   seller.contact.email = 'studio@sensocomune.art';
   seller.contact.phone = '+86 138 0013 8000';
   seller.contact.address = { en: '88 Example Road, Xuhui District, Shanghai 200030, China', zh: '中国上海市徐汇区示例路88号 200030' };
@@ -138,8 +139,8 @@ closes('the cart live with no transaction ceiling', 'PY-02', (d) => { d.seller.e
 closes('a placeholder in a field no rule names', 'GN-01', (d) => { d.site.about.paragraphs.en[0] = 'NEEDS-INPUT'; });
 
 /* ---------- conditions ---------- */
-test('the transaction ceiling is not required while the cart is a placeholder', () => {
-  const d = ready(); d.site.placeholders.routes = { cart: '/cart/' };
+test('the transaction ceiling is not required while there is no cart', () => {
+  const d = ready(); d.site.shop = { cart: false };
   d.seller.entities.individual.checkout.maxTransactionUSD = 'NEEDS-INPUT';
   const r = assess(d);
   return { ok: !r.blockers.some((b) => b.rule === 'PY-02' || b.path.endsWith('maxTransactionUSD')), detail: r.blockers.map((b) => b.rule).join(',') };

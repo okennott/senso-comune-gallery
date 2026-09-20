@@ -494,6 +494,17 @@
       }
     ]
   },
+  "$shop": [
+    "Whether this site can take a payment without an enquiry. It used to be",
+    "inferred — a cart route missing from placeholders.routes meant the cart had",
+    "been BUILT — and that inference broke the moment AW-07 took the cart control",
+    "out because there is no cart, rather than because there is one. The readiness",
+    "gate reads this instead: PY-02 asks for a transaction ceiling only once there",
+    "is something for it to cap."
+  ],
+  "shop": {
+    "cart": false
+  },
   "placeholders": {
     "$comment": [
       "Decision D1. The masthead shows search, account and cart, and each links to a",
@@ -501,13 +512,22 @@
       "controls are real links with real accessible names; only their destinations",
       "are missing. check-links.mjs requires every link marked data-placeholder to be",
       "listed here AND to be dead: when one of these pages is built, its entry must",
-      "come out of this list, or the build fails. README, 'Scripting still needed'."
+      "come out of this list, or the build fails. README, 'Scripting still needed'.",
+      "",
+      "EMPTY since AW-07. Three e-commerce icons in the most valuable strip on the",
+      "site, for a catalogue of six unique objects sold by enquiry, say 'store",
+      "template' — which is the wrong first signal for a one-artist gallery and the",
+      "wrong one for anyone judging the design. All three were blockers under SH-01",
+      "for the same underlying reason: a control that leads nowhere. The masthead is",
+      "now the wordmark, four words of navigation and the language switch, which is",
+      "the control on this site that actually changes something.",
+      "",
+      "Nothing was deleted to get here. The bar is built from this object, so a",
+      "route put back puts its control back — icon, accessible name in both",
+      "languages, 44px target — and SH-01 asks for the page it points at, exactly",
+      "as before."
     ],
-    "routes": {
-      "search": "/search/",
-      "account": "/account/",
-      "cart": "/cart/"
-    },
+    "routes": {},
     "$social": [
       "The same arrangement for the footer's channel marks. A channel whose",
       "handle in seller.artist is still NEEDS-INPUT has no address to link to,",

@@ -343,7 +343,11 @@ export const RULES = [
     title: 'A transaction ceiling, once the cart takes payments',
     basis: 'Decision D3: any number of works, limited by the largest single transaction the route accepts',
     fix: 'Set checkout.maxTransactionUSD on the active entity to the provider\'s confirmed figure.',
-    when: ({ site }) => !('cart' in (site.placeholders?.routes ?? {})),
+    /* Once there is a cart. This used to read the ABSENCE of a cart route from
+       placeholders.routes and take it for a cart that had been built; AW-07
+       took the control out because there is no cart, and an inference that
+       cannot tell those two apart was going to say so sooner or later. */
+    when: ({ site }) => site.shop?.cart === true,
     check: ({ entity }) => (Number(entity.checkout?.maxTransactionUSD) > 0
       ? [] : [{ path: `seller.entities.${entity.id}.checkout.maxTransactionUSD`, message: 'missing' }]),
   },

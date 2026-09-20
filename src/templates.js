@@ -357,7 +357,11 @@ export function layout({ site, seller, loc, title, description, body, ogImage, o
      routes are declared in site.json, and check-links fails the build if a
      marked link starts resolving without the marker being removed. The icons
      are aria-hidden: each link's name is the word, which is what a screen
-     reader announces and what voice control needs to match. */
+     reader announces and what voice control needs to match.
+
+     The route list is EMPTY since AW-07, so this builds nothing and the bar
+     does not appear; site.json says why, and putting a route back puts its
+     control back with everything below still true of it. */
   const shopLinks = Object.entries(site.placeholders.routes).map(([role, route]) => {
     const label = esc(t(ui[role], loc));
     const count = role === 'cart'
@@ -365,6 +369,9 @@ export function layout({ site, seller, loc, title, description, body, ogImage, o
     return `<li><a class="shopbar__link" href="${esc(path(loc, site, route))}" data-placeholder="${role}">` +
            `${SHOP_ICONS[role]}<span class="visually-hidden">${label}</span>${count}</a></li>`;
   }).join('\n      ');
+  /* No routes, no bar. An empty <ul> is a list of nothing that a screen reader
+     still announces, and three icons' worth of masthead held open for it. */
+  const shopbar = shopLinks ? `<ul class="shopbar">\n      ${shopLinks}\n    </ul>` : '';
 
   const other = loc === 'en' ? 'zh' : 'en';
   const otherHref = altLocales.find(([l]) => l === other)?.[1] ?? path(other, site, '/');
@@ -418,9 +425,7 @@ ${PREVIEW ? `<div class="readiness-ribbon" role="note">${esc(t(READINESS.ready ?
     </nav>
     <span class="lang-rule" aria-hidden="true"></span>
     <a class="lang-switch" href="${esc(otherHref)}" lang="${site.locales[other].lang}" rel="alternate">${esc(t(ui.langSwitch, loc))}</a>
-    <ul class="shopbar">
-      ${shopLinks}
-    </ul>
+    ${shopbar}
   </div>
 </header>
 ${strip}

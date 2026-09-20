@@ -1109,9 +1109,10 @@ setFingerprints(ASSETS);
 
 let pageCount = 0;
 /* The 404. GitHub Pages and Cloudflare Pages both serve /404.html for any
-   missing path, including the search, account and cart placeholders, before
-   anything knows the visitor's language — so it speaks both. Not indexed, no
-   canonical, not in the sitemap. */
+   missing path, including the footer's channel marks whose handles are still
+   owed, before anything knows the visitor's language — so it speaks both. Not
+   indexed, no canonical, not in the sitemap. (It caught the masthead's search,
+   account and cart too, until AW-07 took those three out.) */
 {
   const NF = site.notFound;
   const both = (field, tag, cls = '') => LOCALES.map((l) =>
