@@ -369,7 +369,8 @@
 /* On a detail page the title IS the page heading, so it takes display size. */
 h1.tombstone__title{
   font-size:var(--size-h3);
-  font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1;
+  font-optical-sizing:auto;
+  font-variation-settings:'SOFT' 0,'WONK' 1;
 }
 /* On the index each work sits under the section's h2. */
 h3.tombstone__title{ font-size:var(--size-body) }
@@ -396,7 +397,8 @@ h3.tombstone__title{ font-size:var(--size-body) }
 .price{
   font-family:var(--font-display);
   font-size:var(--size-h3);
-  font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1;
+  font-optical-sizing:auto;
+  font-variation-settings:'SOFT' 0,'WONK' 1;
   font-weight:600;
   color:var(--ink);
   font-variant-numeric:tabular-nums lining-nums;
@@ -693,7 +695,8 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
    a sibling rather than a subhead. Stepped down to the next size. */
 .page h2{
   font-size:var(--size-h3);
-  font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1;
+  font-optical-sizing:auto;
+  font-variation-settings:'SOFT' 0,'WONK' 1;
   margin:var(--space-6) 0 var(--space-3);
 }
 .page h2:first-of-type{ margin-top:var(--space-5) }
@@ -1357,7 +1360,8 @@ html[lang^="zh"] .page--about .prose{
 .series-card__text{ display:grid; gap:var(--space-1); align-content:start }
 .series-card__title{
   font-family:var(--font-display); font-size:var(--size-h3);
-  font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1;
+  font-optical-sizing:auto;
+  font-variation-settings:'SOFT' 0,'WONK' 1;
   line-height:var(--lh-head); color:var(--ink);
 }
 .series-card__count{ font-size:var(--size-caption); letter-spacing:var(--track-label); text-transform:uppercase; color:var(--muted) }
