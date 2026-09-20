@@ -41,6 +41,11 @@ def ratio(a, b):
 INK, BODY, PAPER = T["ink"], T["body"], T["paper"]
 SANG, FIELD, BAR = T["sanguine"], T["field"], T["bar"]
 MUTED, RULE = T["muted"], T["rule"]
+# The reading ground, since 20 September 2026: the palest of the three sages.
+# PAPER is no longer a page surface — it is the mat around a painting — so
+# every ratio in these figures is solved on the wall, which is where the site
+# actually sets its type.
+WALL, WALL_MID, WALL_DEEP = T["wash-pale"], T["wash-mid"], T["wash-deep"]
 
 plt.rcParams.update({
     "font.family": "DejaVu Sans",
@@ -87,7 +92,12 @@ def cjk_or_die(ch):
 
 
 def save(fig, name):
-    fig.savefig(OUT / f"{name}.pdf", facecolor="white")
+    # Transparent, not white. The figure is printed ON the paper, and the paper
+    # is --wash-pale — or plain white if this is ever run with \canvaspaperfalse
+    # for a long press run. A figure with its own white ground is a white
+    # rectangle on a tinted page in the first case and correct only in the
+    # second; no ground at all is correct in both.
+    fig.savefig(OUT / f"{name}.pdf", facecolor="none", transparent=True)
     plt.close(fig)
     print(f"  fig/{name}.pdf")
 
@@ -99,13 +109,14 @@ def palette():
     # for missing a threshold that does not apply to it would be a lie.
     rows = [
         ("Bar / masthead",    BAR,   None,    None, "Hers. Sand on it: 11.45:1"),
-        ("Field / sage",      FIELD, None,    None, "Frames the sheet"),
-        ("Paper / reading",   PAPER, None,    None, "Every foreground solved here"),
-        ("Ink / headings",    INK,   "paper", 4.5,  "Hers. Warmer than the neutral"),
-        ("Body",              BODY,  "paper", 4.5,  "Hers"),
-        ("Sanguine / accent", SANG,  "paper", 4.5,  "Red chalk. Chosen by eye"),
-        ("Muted / captions",  MUTED, "paper", 4.5,  "The white-ground value failed"),
-        ("Rule",              RULE,  "paper", 3.0,  "Needs 3:1, not 4.5"),
+        ("Field / sage",      FIELD, None,    None, "The wall at full strength"),
+        ("Wall / reading",    WALL,  None,    None, "Her sage, held light enough to read"),
+        ("Mat / cream",       PAPER, None,    None, "The board under a painting, and nothing else"),
+        ("Ink / headings",    INK,   "wall",  4.5,  "Hers. Warmer than the neutral"),
+        ("Body",              BODY,  "wall",  4.5,  "Hers"),
+        ("Sanguine / accent", SANG,  "wall",  4.5,  "Red chalk. Chosen by eye"),
+        ("Muted / captions",  MUTED, "wall",  4.5,  "The white-ground value failed"),
+        ("Rule",              RULE,  "wall",  3.0,  "Needs 3:1, not 4.5"),
     ]
     # The swatch is wide enough to carry its own name and value, so the colour
     # and the number that describes it are never read apart. A hex printed in a
@@ -129,7 +140,7 @@ def palette():
         ax.plot([mx(t), mx(t)], [0.16, len(rows) + .02], color=c, lw=.8, ls=ls, zorder=1)
     ax.text(mx(3.0) - .04, len(rows) + .40, "3:1", ha="right", fontsize=6.2, color=BODY)
     ax.text(mx(4.5) + .04, len(rows) + .40, "4.5:1", ha="left", fontsize=6.2, color=INK)
-    ax.text(MT_X, len(rows) + .66, "contrast on cream", fontsize=6.6, color=BODY)
+    ax.text(MT_X, len(rows) + .66, "contrast on the wall", fontsize=6.6, color=BODY)
 
     for i, (name, hexv, against, minimum, note) in enumerate(rows):
         y = len(rows) - i - 1
@@ -145,7 +156,7 @@ def palette():
         ax.text(NOTE_X, y + .50, note, fontsize=7.0, color=BODY, va="center")
 
         if against:
-            r = ratio(hexv, PAPER)
+            r = ratio(hexv, WALL)
             passes = r >= minimum
             c = hexv if passes else "#A81E14"
             ax.add_patch(Rectangle((MT_X, y + .39), mx(r) - MT_X, .22,
@@ -161,6 +172,187 @@ def palette():
     save(fig, "palette")
 
 
+# ------------------------------------- 2b. where a reading ground may live
+def _oklab(h):
+    """sRGB hex -> OKLab. Bjorn Ottosson's matrices, as used by CSS color-mix."""
+    r, g, b = (_chan(int(h.lstrip("#")[i:i + 2], 16)) for i in (0, 2, 4))
+    l = (.4122214708 * r + .5363325363 * g + .0514459929 * b) ** (1 / 3)
+    m = (.2119034982 * r + .6806995451 * g + .1073969566 * b) ** (1 / 3)
+    s_ = (.0883024619 * r + .2817188376 * g + .6299787005 * b) ** (1 / 3)
+    return (.2104542553 * l + .7936177850 * m - .0040720468 * s_,
+            1.9779984951 * l - 2.4285922050 * m + .4505937099 * s_,
+            .0259040371 * l + .7827717662 * m - .8086757660 * s_)
+
+
+def _from_oklab(L, a, b):
+    l = (L + .3963377774 * a + .2158037573 * b) ** 3
+    m = (L - .1055613458 * a - .0638541728 * b) ** 3
+    s_ = (L - .0894841775 * a - 1.2914855480 * b) ** 3
+    out = []
+    for v in (4.0767416621 * l - 3.3077115913 * m + .2309699292 * s_,
+              -1.2684380046 * l + 2.6097574011 * m - .3413193965 * s_,
+              -.0041960863 * l - .7034186147 * m + 1.7076147010 * s_):
+        v = 12.92 * v if v <= .0031308 else 1.055 * max(v, 0) ** (1 / 2.4) - .055
+        out.append(min(255, max(0, round(v * 255))))
+    return "#" + "".join(f"{v:02X}" for v in out)
+
+
+def _lch(h):
+    import math
+    L, a, b = _oklab(h)
+    return L, math.hypot(a, b), (math.degrees(math.atan2(b, a)) + 360) % 360
+
+
+def sage_ground():
+    """The research behind moving the reading surfaces onto the sage.
+
+    Every ground in the plane of the field's own hue, solved against every
+    foreground the site sets on a reading surface. The point the figure has to
+    make is that the failure is one-dimensional: the boundary is FLAT, so
+    chroma is free and only lightness binds.
+    """
+    import math
+    HUE = _lch(FIELD)[2]
+    FG = [("ink", 4.5), ("body", 4.5), ("muted", 4.5), ("sanguine", 4.5),
+          ("sanguine-deep", 4.5), ("sold", 4.5), ("ultramarine", 4.5),
+          ("muted-ui", 3.0), ("rule", 3.0)]
+
+    def ground(L, C):
+        return _from_oklab(L, C * math.cos(math.radians(HUE)), C * math.sin(math.radians(HUE)))
+
+    def headroom(g):   # worst pair as a fraction of its own floor
+        return min(ratio(T[k], g) / mn for k, mn in FG)
+
+    fig, ax = plt.subplots(figsize=(6.6, 3.15))
+    Ls = np.arange(.845, .9701, .0025)
+    Cs = np.arange(.002, .0461, .002)
+    for L in Ls:
+        for C in Cs:
+            ax.add_patch(Rectangle((C - .001, L * 100 - .125), .002, .25,
+                                   facecolor=ground(L, C), edgecolor="none", zorder=1))
+    # the boundary itself, solved per column rather than assumed flat
+    edge = []
+    for C in Cs:
+        lo, hi = .845, .97
+        for _ in range(28):
+            mid = (lo + hi) / 2
+            if headroom(ground(mid, C)) >= 1: hi = mid
+            else: lo = mid
+        edge.append(hi * 100)
+    # everything under the boundary, veiled rather than recoloured: the colours
+    # are still the colours, they are simply not available.
+    ax.fill_between(Cs, 84.4, edge, color="#FFFFFF", alpha=.62, zorder=2, lw=0)
+    ax.plot(Cs, edge, color="#A81E14", lw=1.1, zorder=4)
+    ax.text(.0455, min(edge) - .45, "below this line --muted-ui falls through 3.0:1\n"
+            "— at every chroma, which is the whole finding",
+            fontsize=6.2, color="#A81E14", ha="right", va="top", linespacing=1.3,
+            fontproperties=UI)
+
+    # what was there, and what is there now
+    for k, lab, mk in (("wash-pale", "--wash-pale", "o"), ("wash-mid", "--wash-mid", "o"),
+                       ("wash-deep", "--wash-deep", "o")):
+        L, C, _ = _lch(T[k])
+        ax.plot([C], [L * 100], mk, ms=7, mfc=T[k], mec=INK, mew=.9, zorder=6)
+        ax.annotate(lab, (C, L * 100), xytext=(9, 0), textcoords="offset points",
+                    fontsize=6.4, color=INK, va="center", fontproperties=UI)
+    # The three creams they replace. Plotted at their own lightness and chroma,
+    # which is all that can be shown here: their hue is 82-86°, not this plane's
+    # 115°, so the swatch under each of them is not the colour they were.
+    olds = [_lch(k) for k in ("#F3EBDD", "#EDE4D3", "#E9E3D6")]
+    for L, C, _ in olds:
+        ax.plot([C], [L * 100], "o", ms=5.5, mfc="none", mec=MUTED, mew=.9, zorder=5)
+    ax.annotate("the three creams they replace,\nat their own L* and chroma\n"
+                "(their hue is 82–86°, not this plane's)",
+                xy=(olds[1][1], olds[1][0] * 100), xytext=(-14, 16),
+                textcoords="offset points", fontsize=5.9, color=MUTED, ha="right",
+                va="center", linespacing=1.35, fontproperties=UI,
+                arrowprops=dict(arrowstyle="-", color=MUTED, lw=.6))
+    fL, fC, _ = _lch(FIELD)
+    ax.annotate(f"the field itself is L* {fL*100:.1f} at chroma {fC:.3f} — 24 points of\n"
+                "lightness below anything that can carry prose, which is why\n"
+                "her sage could not be read on as drawn",
+                xy=(fC, 84.55), xytext=(fC - .0005, 86.1), fontsize=6.1, color=BODY,
+                ha="center", va="bottom", linespacing=1.35, fontproperties=UI,
+                arrowprops=dict(arrowstyle="-|>", color=BODY, lw=.7, shrinkB=0))
+
+    ax.set_xlim(.001, .047); ax.set_ylim(84.4, 96.6)
+    ax.set_xlabel("chroma, in OKLab", fontsize=7)
+    ax.set_ylabel("lightness, L*", fontsize=7)
+    ax.set_title("Every ground at the field's hue of "
+                 f"{HUE:.1f}°, solved against all nine foregrounds",
+                 fontsize=7.4, color=INK, pad=6)
+    for sp in ("top", "right"): ax.spines[sp].set_visible(False)
+    ax.tick_params(labelsize=6.4)
+    save(fig, "sage-ground")
+
+
+# ------------------------------------------- 2c. the serif's reading size
+def _site_face(woff2, axes):
+    """A FontProperties for one of the SITE's shipped subsets, instanced at the
+    axis settings the CSS asks for, plus its x-height in em.
+
+    The report's own faces are cut at their own optical sizes (fonts.py), so
+    drawing this specimen with them would illustrate a different pair of fonts
+    from the one the measurement is about. This reads the file the browser
+    downloads."""
+    import tempfile
+    from fontTools.ttLib import TTFont
+    from fontTools.varLib.instancer import instantiateVariableFont
+    from fontTools.pens.boundsPen import BoundsPen
+    f = TTFont(ROOT / "public/fonts" / woff2)
+    if "fvar" in f:
+        f = instantiateVariableFont(f, axes, inplace=True, updateFontNames=False)
+    gs = f.getGlyphSet()
+    pen = BoundsPen(gs); gs["x"].draw(pen)
+    xh = (pen.bounds[3] - pen.bounds[1]) / f["head"].unitsPerEm
+    out = pathlib.Path(_site_face.tmp) / woff2.replace(".woff2", ".ttf")
+    f.flavor = None
+    f.save(out)
+    return FontProperties(fname=str(out)), xh
+
+
+def read_size():
+    """Why About is set at 19.2px and not at 16.8.
+
+    A serif set at the sans's point size makes a page of prose quietly smaller,
+    because the size that matters to a reader is the x-height, not the em. The
+    figure is drawn at 1 data unit = 1 pt, so a specimen set at 16.8 here is
+    16.8 CSS px on the page."""
+    import tempfile
+    _site_face.tmp = tempfile.mkdtemp()
+    inter, xh_i = _site_face("inter-latin.woff2", {"wght": 400})
+    fr, xh_f = _site_face("fraunces-latin.woff2", {"opsz": 16.8, "wght": 400})
+    fr19, _ = _site_face("fraunces-latin.woff2", {"opsz": 19.2, "wght": 400})
+
+    W, H = 6.6, 1.95
+    fig = plt.figure(figsize=(W, H))
+    ax = fig.add_axes([0, 0, 1, 1]); ax.axis("off")
+    ax.set_xlim(0, W * 72); ax.set_ylim(0, H * 72)
+
+    SPEC = "These paintings are my"
+    rows = [(inter, 16.8, xh_i, "Inter 16.8 px — what About used to be set in"),
+            (fr,    16.8, xh_f, "Fraunces 16.8 px — the same number, a smaller page"),
+            (fr19,  19.2, xh_f, "Fraunces 19.2 px — --size-read, the hero halved")]
+    x0 = 14
+    for i, (fp, size, xh, note) in enumerate(rows):
+        base = H * 72 - 34 - i * 41
+        # the rules go UNDER the specimen: the letterforms are the evidence
+        ax.plot([x0 - 5, x0 + 205], [base + size * xh] * 2, color=SANG, lw=.7,
+                ls=(0, (2.4, 2.0)), zorder=1)
+        ax.plot([x0 - 5, x0 + 205], [base] * 2, color=MUTED, lw=.5, zorder=1)
+        ax.text(x0, base, SPEC, fontproperties=fp, fontsize=size, color=INK,
+                va="baseline", ha="left", zorder=3)
+        ax.text(x0 + 213, base + size * xh / 2, f"x-height {size * xh:.2f} px",
+                fontproperties=UI, fontsize=6.4, color=SANG, va="center", zorder=3)
+        ax.text(x0 + 292, base + size * xh / 2, note, fontproperties=UI,
+                fontsize=6.4, color=BODY, va="center", zorder=3)
+    ax.text(x0, 12, f"Inter's x-height is {xh_i:.4f} em and Fraunces' is {xh_f:.4f} em at opsz 16.8, "
+                    f"so the serif needs {16.8 * xh_i / xh_f:.2f} px to read at the same size. "
+                    "19.2 px is within 0.5 %.",
+            fontproperties=UI, fontsize=6.4, color=BODY, va="baseline")
+    save(fig, "read-size")
+
+
 # -------------------------------------------- 2. why sage carries no text
 def sage_limit():
     # (label, foreground, ground, minimum). Each row is drawn as a SPECIMEN —
@@ -174,8 +366,8 @@ def sage_limit():
         ("Body text on sage",       BODY,      FIELD, 4.5),
         ("Terracotta on sage",      "#98564B", FIELD, 4.5),
         ("The draft's failed grey", DRAFT_GREY, "#FFFFFF", 4.5),
-        ("Body text on cream",      BODY,      PAPER, 4.5),
-        ("Heading ink on cream",    INK,       PAPER, 4.5),
+        ("Body text on the wall",   BODY,      WALL,  4.5),
+        ("Heading ink on the wall", INK,       WALL,  4.5),
     ]
 
     SP_X, SP_W = 0.0, 2.15          # specimen chip
@@ -434,67 +626,6 @@ def _monogram():
     return bi.monogram(Image.open(BRAND / "mark-lockup.png").convert("RGB"))[0]
 
 
-def _chrome():
-    import shutil, os
-    return (os.environ.get("CHROME") or shutil.which("google-chrome")
-            or shutil.which("chromium") or shutil.which("chromium-browser"))
-
-
-def canvas_page():
-    """The report's own paper: the SITE's canvas tile, rendered by the same
-    engine, onto the site's own --wash-warm.
-
-    Not a second texture. The tile is lifted verbatim out of tokens.css and
-    composited in soft-light by Chrome, so the grain in this document and the
-    grain on the field of the site are the same drawing at the same strength.
-    Python cannot make it — feTurbulence is an SVG filter and CairoSVG does not
-    implement it — which is why this shells out to a browser.
-
-    Strength is not a matter of taste here either. On --wash-warm the tightest
-    pair the report sets type in is --muted at 4.90:1, which leaves ±0.260 of
-    room either side of neutral; the tile reaches ±0.250. It fits, by 0.010.
-    The site cannot do the same on ITS reading grounds because the binding pair
-    there is --muted-ui on --wash-blue at exactly 3.00:1 (report, "The canvas").
-    """
-    import re, subprocess, tempfile
-    chrome = _chrome()
-    if not chrome:
-        print("    fig/page-canvas.jpg — skipped, no Chrome on PATH")
-        return
-    tokens = (ROOT / "src/styles/tokens.css").read_text(encoding="utf8")
-    grain = re.search(r'--canvas-grain:\s*(url\("[^"]+"\));', tokens).group(1)
-
-    # A4 at 300 dpi, because a press preflight flags anything under it and this
-    # is the one image on every page. The tile is set to the share of the page
-    # width it has of a 1440 px browser window, so the grain reads at the same
-    # size relative to the surface it is on.
-    W, H, TILE = 2480, 3508, 690
-    # A <style> block, not a style attribute: the tile's data URI contains
-    # double quotes, and an inline attribute would end at the first one.
-    html = ("<!doctype html><style>html,body{margin:0}body{"
-            f"width:{W}px;height:{H}px;background-color:{PAPER};"
-            f"background-image:{grain};background-size:{TILE}px {TILE}px;"
-            "background-blend-mode:soft-light}</style><body></body>")
-    with tempfile.TemporaryDirectory() as tmp:
-        page = pathlib.Path(tmp) / "canvas.html"
-        page.write_text(html, encoding="utf8")
-        shot = pathlib.Path(tmp) / "canvas.png"
-        subprocess.run([chrome, "--headless", "--disable-gpu", "--no-sandbox",
-                        "--hide-scrollbars", f"--window-size={W},{H}",
-                        "--virtual-time-budget=4000",
-                        f"--user-data-dir={tmp}/profile",
-                        f"--screenshot={shot}", page.as_uri()],
-                       check=True, capture_output=True)
-        im = Image.open(shot).convert("RGB")
-    # Continuous tone, so JPEG at 95 with no chroma subsampling — the same
-    # policy the photographic plates follow, and one image the PDF stores once.
-    im.save(OUT / "page-canvas.jpg", quality=95, subsampling=0, optimize=True, progressive=True)
-    a = np.asarray(im).astype(float)
-    lum = (a * np.array([0.299, 0.587, 0.114])).sum(2)
-    print(f"    fig/page-canvas.jpg — {(OUT / 'page-canvas.jpg').stat().st_size:,} bytes, "
-          f"{im.width}x{im.height}, grain σ {lum.std():.2f}")
-
-
 def mark_assets():
     """What the page furniture sets: the mark in the running footer and on the
     title bar. Both are the artwork, cut once at 256 px — a plate of cream in
@@ -614,7 +745,7 @@ def softness():
     css_all = (ROOT / "src/styles/tokens.css").read_text()
     glass = float(re.search(r"--glass-bar-opacity:\s*([\d.]+)%", css_all).group(1)) / 100
     breath = float(re.search(r"--edge-breath:\s*([\d.]+)%", css_all).group(1)) / 100
-    PD, WARM, VIOLET, BLUE = T["paper-deep"], T["wash-warm"], T["wash-violet"], T["wash-blue"]
+    PD, WARM, VIOLET, BLUE = T["paper-deep"], T["wash-pale"], T["wash-mid"], T["wash-deep"]
 
     def rgb(h): return [int(h.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)]
     def hexc(c): return "#" + "".join(f"{round(v):02X}" for v in c)
@@ -765,6 +896,6 @@ def _cream_ramp():
 
 if __name__ == "__main__":
     print("figures:")
-    palette(); sage_limit(); payments(); oversell(); duty(); shipping()
-    mark_assets(); canvas_page()
+    palette(); sage_limit(); sage_ground(); read_size()
+    payments(); oversell(); duty(); shipping(); mark_assets()
     mark_construction(); mark_sizes(); softness(); structure()

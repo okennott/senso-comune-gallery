@@ -129,6 +129,13 @@
 \definecolor{sanguine}{HTML}{8B4A3C}
 \definecolor{field}{HTML}{969B7D}
 \definecolor{paper}{HTML}{F3EBDD}
+% The site's reading ground since 20 September 2026: her sage, held at a
+% lightness that carries prose. What this document is printed on.
+\definecolor{wall}{HTML}{EBEFDB}
+% --wash-lift: the site's frosted plate, one step lighter than every ground.
+% What a callout is laid on here, for the same reason: it has to be visible on
+% the paper without being a second colour.
+\definecolor{walllift}{HTML}{F0F3E2}
 \definecolor{paperdeep}{HTML}{EDE4D3}
 \definecolor{muted}{HTML}{69655E}
 \definecolor{crit}{HTML}{A81E14}
@@ -199,7 +206,7 @@
   \fancyfoot[R]{\uifont\footnotesize\color{muted}\scfolio}}
 
 % --- the mark in the margin ----------------------------------------------
-% Not a stamped watermark. The site is a cream sheet mounted on a sage field;
+% Not a stamped watermark. The site is a pale sage sheet on a sage field;
 % the page repeats that, as a narrow sage band down the outer edge with a
 % single hatch stroke at Leonardo's 45 degrees. It is almost subliminal at
 % print size and disappears entirely in greyscale, which is the intent: it
@@ -223,7 +230,7 @@
 % One file serves both: the artwork is opaque cream, so it reads as a small
 % mounted plate on the title bar exactly as it does in the site's masthead.
 %
-%   \scmarkfig{<height in pt>}   on cream: the running footer
+%   \scmarkfig{<height in pt>}   on the wall: the running footer
 %   \scmarkout{<height in pt>}   on the bar: the title page
 \newcommand{\scmarkfig}[1]{%
   \raisebox{-0.22\dimexpr#1pt\relax}{\includegraphics[height=#1pt]{fig/mark.png}}%
@@ -237,31 +244,23 @@
 \newif\ifscmark \scmarktrue
 
 % --- the paper ------------------------------------------------------------
-% The document is printed on the site's own paper: --wash-warm, carrying the
-% same canvas tile the site's field carries, rendered by the same browser onto
-% the same colour (figures.py, canvas_page). It is ONE image, so the PDF stores
-% it once and places it seventy-one times.
+% The document is printed on the site's own reading ground: --wash-pale.
 %
-% It may go here for the same reason it may not go on the site's reading
-% grounds: arithmetic. On --wash-warm the tightest pair this document sets type
-% in is --muted at 4.90:1, which leaves ±0.260 of room either side of neutral,
-% and the tile reaches ±0.250. The site's binding pair is --muted-ui on
-% --wash-blue at exactly 3.00:1, which leaves ±0.010. Same tile, same rule,
-% different answer because the ground is different.
+% It used to be --wash-warm carrying the site's canvas tile, on the argument
+% that this was the site's own paper. That argument expired on 20 September
+% 2026, when the tile came off every surface but the mat around a painting and
+% the reading grounds moved onto the sage: the site's paper is a flat, pale
+% green, so this is too. It also takes a 300 dpi image out from underneath
+% every page, which is one less thing between the press and the type.
 %
 % Registered before the sage band below, because eso-pic paints these in the
 % order they are added and the band belongs on top of the paper, not under it.
-% Suppressed on the title page, which paints its own ground edge to edge.
 % One switch. Set \canvaspaperfalse for white pages with the sage band and
 % nothing else — which is what to do if this is ever printed in quantity,
 % because a tinted page means the press lays ink across every sheet.
 \newif\ifcanvaspaper \canvaspapertrue
 \ifcanvaspaper
-  \pagecolor{paper}
-  \AddToShipoutPictureBG{%
-    \ifscmark
-    \put(0,0){\includegraphics[width=\paperwidth,height=\paperheight]{fig/page-canvas.jpg}}%
-    \fi}
+  \pagecolor{wall}
 \fi
 % \scedge is how far in from the PAPER edge the band's inner boundary sits. On
 % the reading PDF that is the 9mm it has always been; on the press file the
@@ -331,7 +330,7 @@
 
 % --- callouts
 \newtcolorbox{finding}[1]{
-  colback=paper, colframe=sanguine, boxrule=0.6pt, arc=1pt,
+  colback=walllift, colframe=sanguine, boxrule=0.6pt, arc=1pt,
   left=7pt, right=7pt, top=6pt, bottom=6pt, parbox=false,
   fonttitle=\bfseries\small, title={#1}, coltitle=white,
   colbacktitle=sanguine}
@@ -366,7 +365,7 @@
 \newcommand{\scfolio}{\ifscfolioarabic\thepage\,/\,\pageref{LastPage}\else\thepage\fi}
 
 % --- title page ----------------------------------------------------------
-% Set like the site: a dark bar, the wordmark, the cream sheet, a sanguine
+% Set like the site: a dark bar, the wordmark, the sheet, a sanguine
 % rule. Pandoc's \maketitle is replaced rather than decorated, because the
 % default stacks four centred lines and says nothing.
 \usepackage{titling}

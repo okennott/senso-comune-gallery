@@ -41,13 +41,15 @@ const T = Object.fromEntries(
 );
 
 const GROUNDS = {
-  paper:  T['paper'],
-  warm:   T['wash-warm'],
-  violet: T['wash-violet'],
-  blue:   T['wash-blue'],
+  mat:    T['paper'],
+  pale:   T['wash-pale'],
+  mid:    T['wash-mid'],
+  deep:   T['wash-deep'],
 };
 
-/* Finding B-02. The grounds above are the cream family. The dark bar carries
+/* Finding B-02. The grounds above are the light family: the three sage reading
+   surfaces, and the cream mat, which carries no prose but does carry a
+   caption's worth of ink in the scale diagram. The dark bar carries
    the masthead, the navigation, the footer and every legal disclosure, and it
    was not among them — which is how a 2.34:1 footer shipped through a build
    that blocks on contrast.
@@ -97,15 +99,15 @@ const ownGround = [];
  * AA text = 4.5, AA large text / non-text UI = 3.0
  */
 const CHECKS = [
-  ['ink',           4.5, ['paper','warm','violet','blue'], 'headings'],
-  ['body',          4.5, ['paper','warm','violet','blue'], 'running text'],
-  ['muted',         4.5, ['paper','warm','violet','blue'], 'captions, tombstone meta'],
-  ['sanguine',      4.5, ['paper','warm','violet','blue'], 'links, accents'],
-  ['sanguine-deep', 4.5, ['paper','warm','violet','blue'], 'hover, sold'],
-  ['ultramarine',   4.5, ['paper','violet'],               'Tribute accent'],
-  ['sold',          4.5, ['paper','warm','violet','blue'], 'sold state is ACTIVE content'],
-  ['muted-ui',      3.0, ['paper','warm','violet','blue'], 'icon strokes, borders'],
-  ['rule',          3.0, ['paper','warm','violet','blue'], 'rules that carry meaning'],
+  ['ink',           4.5, ['mat','pale','mid','deep'], 'headings'],
+  ['body',          4.5, ['mat','pale','mid','deep'], 'running text'],
+  ['muted',         4.5, ['mat','pale','mid','deep'], 'captions, tombstone meta'],
+  ['sanguine',      4.5, ['mat','pale','mid','deep'], 'links, accents'],
+  ['sanguine-deep', 4.5, ['mat','pale','mid','deep'], 'hover, sold'],
+  ['ultramarine',   4.5, ['mat','mid'],               'Tribute accent'],
+  ['sold',          4.5, ['mat','pale','mid','deep'], 'sold state is ACTIVE content'],
+  ['muted-ui',      3.0, ['mat','pale','mid','deep'], 'icon strokes, borders'],
+  ['rule',          3.0, ['mat','pale','mid','deep'], 'rules that carry meaning'],
 ];
 
 /* Reversed pairs: white text on a filled control. */
@@ -229,11 +231,16 @@ for (const [selector, token, min, note] of barPairs) {
    individual pixels, by up to --canvas-slope / 2 either side of 0.5, and on a
    ground that carries text that is a contrast question.
 
-   The site's answer is that textured surfaces carry no text. This block is
-   what holds that answer to arithmetic rather than to assertion: it solves
-   how much excursion each READING ground could take before its tightest pair
-   fell through the floor, prints it next to what the tile actually has, and
-   fails if any rule ever paints a reading ground AND textures it. */
+   The site's answer is that the tile goes on one material — the mat — and that
+   textured surfaces carry no text. This block is what holds the second half of
+   that to arithmetic rather than to assertion: it solves how much excursion
+   each READING ground could take before its tightest pair fell through the
+   floor, prints it next to what the tile actually has, and fails if any rule
+   ever paints a reading ground AND textures it.
+
+   Since the grounds moved onto the sage hue the arithmetic no longer binds —
+   --wash-pale could carry the whole tile — so what keeps the texture off them
+   is now the material rule, which check-review.mjs asserts by name. */
 {
   const slope = Number((readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8')
     .match(/--canvas-slope:\s*([\d.]+)/) ?? [])[1]);
@@ -262,34 +269,28 @@ for (const [selector, token, min, note] of barPairs) {
       return lo;
     };
     const onCream = CHECKS.map(([tok, min]) => [tok, min]);
-    for (const g of ['wash-warm', 'wash-violet', 'wash-blue']) {
+    for (const g of ['wash-pale', 'wash-mid', 'wash-deep']) {
       const a = allowance(g, onCream.filter(([, , ] ) => true));
       const verdict = a >= k ? 'could carry the tile' : `could carry only ±${a.toFixed(3)}`;
       line(`    --${g.padEnd(12)} tightest pair leaves ±${a.toFixed(3)};  the tile is ±${k.toFixed(3)}  — ${verdict}`);
     }
 
     // …and the rule that follows from it: a reading ground is never textured.
-    const READING = new Set(['wash-warm', 'wash-violet', 'wash-blue', 'paper']);
+    const READING = new Set(['wash-pale', 'wash-mid', 'wash-deep', 'paper']);
     const sheets = ['src/styles/base.css', 'src/styles/gallery.css']
       .map((f) => readFileSync(join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')).join('\n');
     const textured = [];
     for (const m of sheets.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
       if (!/var\(--canvas-grain\)/.test(m[2])) continue;
       const ground = ([...m[2].matchAll(/background(?:-color)?:\s*var\(--([a-z0-9-]+)\)/g)].at(-1) ?? [])[1];
-      // A surface may take the tile at less than full strength — the bands use
-      // it as a dither, not as a texture — and the line should say so.
-      const dim = (m[2].match(/opacity:\s*var\(--([a-z0-9-]+)\)/) ?? [])[1];
-      textured.push([m[1].trim().replace(/\s+/g, ' ').slice(0, 30), ground, dim]);
+      textured.push([m[1].trim().replace(/\s+/g, ' ').slice(0, 30), ground]);
     }
     if (!textured.length) { line('  ✗ nothing references --canvas-grain — the texture is defined and unused'); failures++; }
     line('');
-    const strength = (name) => (readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8')
-      .match(new RegExp(`--${name}:\\s*([\\d.]+)`)) ?? [])[1];
-    for (const [selector, ground, dim] of textured) {
+    for (const [selector, ground] of textured) {
       const bad = ground && READING.has(ground);
       if (bad) failures++;
-      const at = dim ? ` at ${Number(strength(dim)) * 100}% — a dither, not a texture` : '';
-      line(`  ${bad ? '✗' : '✓'} ${selector.padEnd(30)} textured${ground ? `, on --${ground}` : ''}${at}`
+      line(`  ${bad ? '✗' : '✓'} ${selector.padEnd(30)} textured${ground ? `, on --${ground}` : ''}`
         + (bad ? '  — a reading ground may not be textured' : ''));
     }
   }

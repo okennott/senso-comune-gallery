@@ -11,7 +11,7 @@ THE SOURCE IS brand/mark-lockup.png, unmodified: the preferred option from
 Priscilla's prototype sheet, the monogram as drawn with the wordmark beneath.
 Everything below is a crop and a resize of that one file. Nothing is redrawn,
 recoloured or traced, and the artwork's own paper is kept as the ground — it
-measures #E4DCCC, within a step of the site's own --wash-blue.
+measures #E4DCCC, within a step of the cream the mats are cut from.
 
 Two consequences of the source being a raster, both stated rather than worked
 around (report, "The mark"):

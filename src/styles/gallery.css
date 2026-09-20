@@ -188,8 +188,9 @@
    are part of the editorial rhythm. width/height on the <img> give CLS 0. */
 /* Her mockup sets each painting on a light cream plate against the sage.
    That is the move that makes the whole scheme work: it separates the object
-   from the field, and it is why text can live on cream while the sage frames.
-   Adopted. */
+   from the field. Adopted, and since 20 September 2026 it is the ONLY place
+   cream is allowed to paint a surface — the walls went sage, and the plate
+   under a painting is what the cream was always for. */
 .work__img{
   width:100%; height:auto;
   cursor:zoom-in;
@@ -371,12 +372,13 @@ dialog.lightbox{
   background:transparent; overflow:visible;
 }
 dialog.lightbox::backdrop{
-  /* A sfumato wash, not the default black. */
-  background:color-mix(in oklab,var(--wash-warm) 94%,transparent);
+  /* A sfumato wash, not the default black. The wall, at 94%: a work opened for
+     a closer look is still hanging in the same room. */
+  background:color-mix(in oklab,var(--wash-pale) 94%,transparent);
   backdrop-filter:blur(3px);
 }
 @supports not (background:color-mix(in oklab,red,blue)){
-  dialog.lightbox::backdrop{ background:rgba(250,247,242,.94) }
+  dialog.lightbox::backdrop{ background:rgba(235,239,219,.94) }
 }
 dialog.lightbox img{ max-height:88vh; width:auto; margin-inline:auto }
 /* The lightbox is for looking closely, so the painting gets the whole frame:
@@ -455,7 +457,7 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
 /* ---------- footer ---------- */
 /* The footer closes the page on the same dark bar the masthead opens it on. */
 /* Finding B-01. This rule used to set --paper-deep and then override it with
-   --muted two declarations later. --muted is solved for cream; on the bar it
+   --muted two declarations later. --muted is solved for the wall; on the bar it
    measures 2.34:1, and what it dimmed was the copyright line, the postal
    address and the WeChat and 小红书 handles — the contact details the CRD and
    SAMR Order 37 require to be available. --paper-deep is 10.74:1. */
@@ -566,6 +568,106 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
 .page .prose{ max-width:var(--measure) }
 .page .prose p{ color:var(--body) }
 
+/* ---------- About, set as a book page ----------
+   Decision of 20 September 2026. About is the only page on the site that is
+   nothing but prose — no works, no prices, no controls — and it was set in the
+   interface face, at interface size, in a column the same shape as How to Buy.
+   It read as a form with an essay in it.
+
+   Nothing here is a new typeface. The page is set in the display face the site
+   already loads and preloads, at the one size where that face is the same
+   READING SIZE as the sans it replaces (--size-read, and see the measurement
+   beside it), with the optical-size axis moved to match — which is the whole
+   reason opsz was kept live in the font build.
+
+   Four moves, and the first three cost nothing to download:
+     1. the display face at --size-read, opsz tied to it;
+     2. a lede: the first paragraph at --size-mark in --ink, so the page opens
+        with a voice rather than with a paragraph;
+     3. a drop cap, three lines, in sanguine — the one place on the site where
+        a flourish is not a costume, because a personal statement is where a
+        book would put one;
+     4. the quotation that closes the page in the REAL italic, which the site
+        now ships (base.css) instead of asking the browser to slant a roman.
+
+   What was researched and NOT done, with the numbers, because each was an
+   obvious candidate: Fraunces has no old-style figures and no small caps —
+   its whole GSUB is case, liga, rvrn, ss01 — so "10%" is set in the lining
+   figures it draws and nothing is faked; keeping the SOFT axis live to soften
+   the terminals would take the roman from 50.6 KB to 89.2 KB, +76% on a
+   render-blocking, border-crossing file, for one page's worth of prettiness;
+   and no second family was added, because the site already has two and a
+   third would be the fourth thing to go wrong in a Chinese TCP handshake. */
+.page--about .prose{
+  font-family:var(--font-display);
+  font-size:var(--size-read);
+  font-variation-settings:'opsz' 19.2,'SOFT' 0,'WONK' 1;
+  /* Bigger type carries its own leading: 1.70 at 16.8px and 1.62 at 19.2px
+     are the same 32.6px between baselines, on the same measure. */
+  line-height:1.62;
+}
+/* The measure is set in ch, which resolves against the element's own font, so
+   the serif would otherwise be given a longer line than the sans was. 34rem is
+   the same column in absolute terms — about 68 characters of Fraunces. */
+.page--about .prose{ max-width:34rem }
+
+/* The lede. --ink on the palest ground is 11.56:1. */
+.page--about .prose > p:first-of-type{
+  font-size:var(--size-mark);
+  font-variation-settings:'opsz' 22.4,'SOFT' 0,'WONK' 1;
+  line-height:1.5;
+  color:var(--ink);
+}
+
+/* The drop cap. Three lines, in the display face at its largest optical size,
+   in sanguine — 5.70:1 on --wash-pale, so it is a heading by contrast as well
+   as by size.
+
+   English only. The Chinese page opens on 这, and a dropped CJK character is
+   not the same typographic device — it is a character taken out of a grid
+   that has no ascender line to hang from.
+
+   initial-letter is the property that does this properly: it sizes the glyph
+   by LINES and sinks it, rather than guessing a font-size and a float. Where
+   it is unsupported the @supports test fails and the paragraph simply opens
+   with an ordinary capital; nothing is lost but the flourish. */
+@supports (initial-letter:3) or (-webkit-initial-letter:3){
+  html[lang="en"] .page--about .prose > p:first-of-type::first-letter{
+    -webkit-initial-letter:3;
+            initial-letter:3;
+    font-variation-settings:'opsz' 40,'SOFT' 0,'WONK' 1;
+    color:var(--sanguine);
+    margin-inline-end:.09em;
+  }
+}
+
+/* The Chinese page is a book page too, in a face the reader already has. It
+   must not use --font-display: see --font-read-cjk in tokens.css for why one
+   paragraph would otherwise be set in two typefaces. No drop cap and no
+   italic either — neither is a Chinese typographic device, and both would be
+   synthesised. */
+html[lang^="zh"] .page--about .prose{
+  font-family:var(--font-read-cjk);
+  font-variation-settings:normal;
+  line-height:1.8;            /* CJK carries more leading than Latin */
+}
+
+/* The quotation that closes the page, in the italic Fraunces actually draws:
+   a different letter, not a slanted one. build.js marks it. */
+.page--about .quoted{
+  font-style:italic;
+  font-variation-settings:'opsz' 19.2;
+}
+
+/* On a phone the lede would otherwise take four of the first five lines. */
+@media (max-width:519px){
+  .page--about .prose{ font-size:var(--size-body); line-height:var(--lh-body);
+                       font-variation-settings:'opsz' 16.8,'SOFT' 0,'WONK' 1 }
+  .page--about .prose > p:first-of-type{ font-size:var(--size-read);
+                       font-variation-settings:'opsz' 19.2,'SOFT' 0,'WONK' 1 }
+  .page--about .quoted{ font-variation-settings:'opsz' 16.8 }
+}
+
 /* ---------- narrow screens ----------
    Found by screenshotting at 390px: the nav wrapped to three rows and the
    sticky masthead grew to ~280px — a third of a phone viewport, and enough to
@@ -577,7 +679,7 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
    it has to, so the page never scrolls sideways. */
 @media (max-width:719px){
   /* Was `background:var(--paper)` from when the masthead was light. With the
-     dark bar adopted that made light nav text invisible on a cream ground —
+     dark bar adopted that made light nav text invisible on a light ground —
      the bar keeps its own colour; only the stickiness is dropped. */
   .masthead{ position:static }
   .masthead__inner{
@@ -808,12 +910,14 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
    Finding A-03. How to Buy asked the reader to get in touch three times and
    gave no way to do it; the only details were in the footer, where B-01 had
    them at 2.34:1. */
-/* The panel is a frosted plate rather than a second cream stamped on the
-   first: --paper at --glass-plate over whatever wash the page is set on,
-   blurred, with the rim light along its top edge. Cream over cream, so the
+/* The panel is a frosted plate rather than a second ground stamped on the
+   first: --wash-lift at --glass-plate over whatever wash the page is set on,
+   blurred, with the rim light along its top edge. A lift of the wall, so the
    composite is always LIGHTER than the ground beneath it — the plate cannot
    make any text on it worse than the wash it is laid on, which is the ground
-   check-contrast.mjs already solves every one of these tokens against. */
+   check-contrast.mjs already solves every one of these tokens against. It was
+   cream over cream, which on the palest ground made it the same colour as the
+   thing it was laid on. */
 .contact{
   margin-top:var(--space-6);
   border:1px solid var(--rule-soft);

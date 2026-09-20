@@ -44,7 +44,7 @@
      sage green   #969B7D                           already --field
      deep green   #737C61                           already --field-deep
      warm ivory   #E9E2D3                           NOT added: it is within
-       one step of --wash-blue #E9E3D6, and a fifth cream is a fifth cream
+       one step of the mat cream, and a fifth cream is a fifth cream
      charcoal     #24241F                           NOT adopted. The site's
        ink and bar are #3A2B22, a warm brown the whole palette is solved
        against; a cool near-black beside sage reads as a second, colder

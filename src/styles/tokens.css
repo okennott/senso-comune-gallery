@@ -21,28 +21,59 @@
      already right and are kept as-is: the warm browns, and a FILLED
      terracotta button — she arrived at finding A-01 independently.
 
-     What could not be adopted as drawn is body text on the sage. Measured:
+     WHERE EACH COLOUR IS ALLOWED, which is the decision of 20 September 2026:
+
+       sage  is everything. The field, the sheet, every section ground, every
+             band between them, the lightbox behind a work — all sage.
+       cream is the MAT. Three roles, and check-review L-01 names every rule
+             that may take it: the board around a painting and the box an
+             image arrives in; light ink on the dark bar; and the focus halo,
+             which has to survive being drawn over a dark painting. It no
+             longer paints a surface anyone reads on.
+
+     The sage her mockup used carries no text — measured on --field:
 
        ink        on sage   4.70:1   ok, large text only
        ink-soft   on sage   2.35:1   FAILS
        terracotta on sage   1.93:1   FAILS — worse than the #A19E97 it replaced
 
-     The resolution was already in her own mockup: she puts the paintings on
-     light cream plates against the sage. So sage is the FIELD — the outer
-     ground and the bands between sections — and cream is the READING
-     SURFACE. Text lives on cream. Sage frames it and never carries a word.
+     …which is why the reading used to happen on cream. The resolution is not
+     to abandon her green but to find out what part of it the failure was
+     actually about, and that is answerable: LIGHTNESS, not hue, and not
+     chroma. Solving every foreground over a grid of grounds at the field's own
+     hue (research notes, report "Sage as the reading ground"):
+
+       - the binding pair on any reading ground is --muted-ui at 3.0:1 — an
+         icon stroke, not prose — and it fails below L* 91.5 whatever the
+         chroma is;
+       - at L* 92 and above, chroma is FREE: a ground can carry the field's
+         full chroma, 0.043, and --muted-ui still measures 3.05:1.
+
+     So the three reading grounds keep the lightness ladder that was measured
+     safe and rotate onto the field's hue. Every pair on them is better than
+     it was on the cream they replace — --muted-ui goes from exactly 3.00:1 to
+     3.06:1 at the worst — so this is a contrast improvement, not a debt.
      ====================================================================== */
 
-  /* --- reading surfaces --------------------------------------------------
-     From her palette. Every foreground below is solved against --paper-deep,
-     the darker of the two, so nothing fails on either.                    */
+  /* --- the mat -----------------------------------------------------------
+     From her palette, and now the ONLY cream on the site: the board around a
+     painting, the box that holds an image before its bytes arrive, and light
+     ink on the dark bar. Every foreground below is solved against
+     --paper-deep, the darker of the two, so nothing fails on either.
+
+     Cream is kept for this job rather than retired because a mat is a
+     different MATERIAL from a wall, and one step of hue is what says so:
+     against --wash-deep the mat is dE 1.8 in OKLab — a boundary you see and
+     cannot name, which is what a passe-partout should be.                 */
   --paper:            #F3EBDD;
   --paper-deep:       #EDE4D3;
 
   /* --- field -------------------------------------------------------------
-     Her sage. Carries no text: sand-on-sage is 2.44:1 and ink-on-sage is
-     4.70:1, which is fine for a heading and nothing else. Used for the
-     bands between sections and the page's outer ground.                   */
+     Her sage, at full strength. Carries no text: sand-on-sage is 2.44:1 and
+     ink-on-sage is 4.70:1, which is fine for a heading and nothing else. It
+     is the outer ground the sheet is mounted on, and what breathes through
+     the bands between sections. The reading grounds below are this colour's
+     own hue held at a lightness that can carry prose.                     */
   --field:            #969B7D;
   --field-deep:       #737C61;
 
@@ -71,10 +102,14 @@
      Van Gogh told Theo the Bedroom walls were "of a pale violet"; they read
      blue today because the red lake faded. Re-solved for the new ground.  */
   --rule:             #8E7B9C;   /* 3.02 worst */
-  --rule-soft:        #E0D6C2;   /* decorative — aged laid paper          */
+  /* The decorative hairline, moved onto the field's hue with the grounds. Same
+     OKLab lightness as the #E0D6C2 laid paper it replaces, so it is exactly as
+     visible as it was — 1.22:1 on the palest ground, before and after — and no
+     longer the one warm line left on a green page.                        */
+  --rule-soft:        #D6DAC4;   /* decorative — the wall, one step down   */
 
   /* --- muted -------------------------------------------------------------
-     Solved against --wash-blue, the DARKEST reading surface on the site.
+     Solved against --wash-deep, the DARKEST reading surface on the site.
      Solving against --paper-deep instead gave 4.46 / 2.96 / 2.97 and the
      contrast check blocked the build — the same warm-ground trap the report
      flags, caught for the third time by measuring rather than by eye.      */
@@ -97,15 +132,26 @@
   --flag-rule:        #B3261E;
 
   /* --- sfumato grounds ---------------------------------------------------
-     Three reading surfaces, a half-step apart, so sections separate without
-     a rule. All three are cream: text never sits on the sage.
+     Three reading surfaces, a half-step apart, so sections separate without a
+     rule. All three are SAGE: oklch(L 0.027-0.033 115.2), the field's own hue
+     at a lightness that measures safe for prose. They were cream — named
+     warm / violet / blue for washes that had already gone — and are now named
+     for the only thing that separates them, which is lightness.
 
      Leonardo: lights and shadows united "senza tratti o segni" — without
-     strokes or lines. The bands BETWEEN them carry the sage, which is where
-     Priscilla's green actually belongs.                                  */
-  --wash-warm:        #F3EBDD;   /* Original Works */
-  --wash-violet:      #EDE4D3;   /* Tribute        */
-  --wash-blue:        #E9E3D6;   /* About          */
+     strokes or lines. The bands BETWEEN them carry the field at full
+     strength, which is still where Priscilla's darkest green belongs.
+
+     The ladder is the one that was already measured safe on cream: L* 94.4,
+     93.1, 92.1. Nothing moved down, so nothing needed re-solving.        */
+  --wash-pale:        #EBEFDB;   /* L* 94.4 — the sheet, Works, How to Buy */
+  --wash-mid:         #E7EBD5;   /* L* 93.1 — Tribute                      */
+  --wash-deep:        #E4E8CF;   /* L* 92.1 — About                        */
+  /* One step lighter than the palest ground, and the only thing it paints is
+     the frosted plate. Its whole job is to be lighter than every ground so the
+     plate can never darken what is read on it: 72% of this over --wash-deep
+     lands 2.3 L* above that ground, and over --wash-pale, 0.7.           */
+  --wash-lift:        #F0F3E2;   /* L* 95.6 — the frosted plate only       */
 
   /* ======================================================================
      TYPE — the Vitruvian scale
@@ -126,6 +172,16 @@
   --font-display: 'Fraunces', 'NotoSerifSC Subset', Georgia,
                   'Songti SC', 'Times New Roman', serif;
 
+  /* A Chinese SERIF, for the one page that is set as a book page. It is
+     deliberately not --font-display: that stack begins with the subset Noto
+     Serif SC, which carries only the ~100 CJK glyphs that appear in display
+     positions, so a page of Chinese prose set in it would render some
+     characters in Noto and the rest in the system face — one paragraph, two
+     typefaces. These are all system faces, so the Chinese About page gets a
+     book face for nothing and gets it consistently. */
+  --font-read-cjk: 'Songti SC', 'SimSun', 'Noto Serif CJK SC',
+                   'Source Han Serif SC', serif;
+
   /* Chinese body prose is deliberately NOT webfont-served. The system face is
      native, already on the device, and costs nothing across a border. */
   --font-body:    'Inter', system-ui, -apple-system, 'PingFang SC',
@@ -137,6 +193,17 @@
   --size-mark:    22.4px;   /* wordmark                */
   --size-body:    16.8px;   /* the unit                */
   --size-caption: 12.6px;   /* less 1/4                */
+  /* The serif reading size, added 20 September 2026 for the About page.
+     Not a new step invented for it: 19.2px is half the hero, which is where
+     the Vitruvian fractions already put it. It is also, to within 0.5%, the
+     size at which Fraunces' x-height MATCHES Inter's at --size-body —
+     measured off the shipped subsets at their own optical sizes:
+       Inter    wght 400            x-height 0.5391 em → 9.06 px at 16.8
+       Fraunces opsz 16.8 wght 400  x-height 0.4695 em → 9.01 px at 19.2
+     Setting a serif at the sans's point size is the usual way a page of
+     prose ends up looking smaller after a face change; this is what stops
+     that from being an accident either way.                              */
+  --size-read:    19.2px;   /* the hero halved; the serif reading size */
 
   --lh-tight:  1.12;
   --lh-head:   1.22;
@@ -244,14 +311,17 @@
   --glass-footer:      #45382D;
 
   /* A frosted plate on the sheet: a panel that lets the wash beneath it come
-     through instead of stamping a second cream on top of the first.
+     through instead of stamping a second ground on top of the first.
 
-     Why this needs no new ground. The plate is cream over cream, and --paper
-     is LIGHTER than every wash: 72% --paper over --wash-blue, the darkest
-     reading surface on the site, composites to #F0E9DB, which is lighter than
-     --wash-blue itself. A plate can only make the ground under text paler
-     than the one check-contrast.mjs already solves against, never darker. */
-  --glass-plate:       color-mix(in srgb,var(--paper) 72%,transparent);
+     Why this needs no contrast work of its own. The plate is --wash-lift, and
+     --wash-lift is LIGHTER than every reading ground: 72% of it over
+     --wash-deep, the darkest of the three, composites to #EBEFDD, which is
+     lighter than --wash-deep itself. A plate can only make the ground under
+     text paler than the one check-contrast.mjs already solves against, never
+     darker. It used to be cream over cream, which on the palest ground made
+     it the same colour as what it was laid on; a lift of the wall is visible
+     on all three.                                                        */
+  --glass-plate:       color-mix(in srgb,var(--wash-lift) 72%,transparent);
   --glass-plate-blur:  10px;
 
   /* The light a pane catches along its top edge. --paper at just over half,
@@ -281,17 +351,26 @@
      and the "identity" tile lightens everything it touches. That was caught by
      measuring a render, not by reading the spec.
 
-     WHERE IT MAY GO. The same law the palette already follows — text lives on
-     cream; the sage frames and never carries a word — decides this too. The
-     texture goes on the surfaces that FRAME: the field, the bands between
-     sections, and the mat around every painting. It goes on nothing that is
-     read, and that is arithmetic rather than taste: --muted-ui on --wash-blue
-     measures 3.00:1 against a 3.0 floor and --muted measures 4.53:1 against
-     4.5, so the reading grounds have no room to be modulated in either
-     direction. check-contrast.mjs solves every textured ground against the
-     tile's worst excursion and fails the build if a textured surface ever
-     acquires text. Texturing the reading surfaces means moving those two
-     tokens first, which is a palette decision and not this one.
+     WHERE IT MAY GO — as decided on 20 September 2026, ONE MATERIAL. The tile
+     is on the mat around a painting and on nothing else. A board has tooth; a
+     wall does not, and a fade between two walls is not a material at all.
+
+     It was on three things. The field came off because the field is the
+     largest area on the site, which made the grain most of what you saw rather
+     than something you found; the bands came off because the dither they used
+     it as was measured against the browser's own gradient dithering and lost
+     (base.css, .edge). Nothing was lost in colour either way: the tile is
+     mean-neutral under soft-light, so every surface it left is the exact
+     token it was already painted with.
+
+     The rule that it never goes on a surface that is READ is now a statement
+     about material rather than about arithmetic, because the arithmetic
+     stopped binding when the grounds moved onto the sage hue. check-contrast
+     prints what each ground could take: --wash-pale could carry the whole tile
+     (±0.283 against the tile's ±0.250) and --wash-deep could take ±0.052. The
+     palest reading ground is no longer the constraint; it is simply not a
+     board. check-contrast.mjs still fails the build if a textured surface ever
+     acquires text.
      ====================================================================== */
   --canvas-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='t' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.1' numOctaves='7' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncG type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncB type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncA type='discrete' tableValues='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23t)'/%3E%3C/svg%3E");
   --canvas-tile:  400px;
@@ -299,12 +378,6 @@
      of 0.5 that any pixel of it can reach: slope / 2. Stated as a token so the
      contrast check can read it rather than be told it. */
   --canvas-slope: 0.5;
-  /* How much of the same tile a gradient needs to stop stepping in eight bits.
-     A dither, not a texture: the bands are on the sheet, and the sheet is a
-     reading surface. Tuned by eye against the one thing it has to beat, which
-     is a visible step in a nine-rem fade. */
-  --dither-strength: 0.3;
-
   /* --- targets -----------------------------------------------------------
      48px clears WCAG 2.5.8 (24px AA), 2.5.5 (44px AAA) and Android's 48dp
      simultaneously. Reached via padding, never via font size.             */

@@ -410,9 +410,9 @@ function renderIndex(loc) {
 
 <!-- Every band is named by the two grounds it joins, and nothing sits on the
      bare sheet between a band and its section. -->
-<div class="edge edge--warm-warm" aria-hidden="true"></div>
+<div class="edge edge--pale-pale" aria-hidden="true"></div>
 
-<section class="section ground--warm" id="latest">
+<section class="section ground--pale" id="latest">
   <div class="wrap">
     <div class="section__head">
       <h2>${esc(t(S.latest.title, loc))}</h2>
@@ -423,9 +423,9 @@ function renderIndex(loc) {
   </div>
 </section>
 
-<div class="edge edge--warm-violet" aria-hidden="true"></div>
+<div class="edge edge--pale-mid" aria-hidden="true"></div>
 
-<section class="section ground--violet" id="series">
+<section class="section ground--mid" id="series">
   <div class="wrap">
     <div class="section__head">
       <h2>${esc(t(S.seriesIndex.title, loc))}</h2>
@@ -437,9 +437,9 @@ function renderIndex(loc) {
   </div>
 </section>
 
-<div class="edge edge--violet-blue" aria-hidden="true"></div>
+<div class="edge edge--mid-deep" aria-hidden="true"></div>
 
-<section class="section ground--blue" id="about">
+<section class="section ground--deep" id="about">
   <div class="wrap">
     <div class="section__head">
       <h2>${esc(t(S.about.title, loc))}</h2>
@@ -451,9 +451,9 @@ function renderIndex(loc) {
   </div>
 </section>
 
-<div class="edge edge--blue-warm" aria-hidden="true"></div>
+<div class="edge edge--deep-pale" aria-hidden="true"></div>
 
-<section class="section ground--warm wrap" id="buy">
+<section class="section ground--pale wrap" id="buy">
   <div class="section__head">
     <h2>${esc(t(S.buy.title, loc))}</h2>
     <div class="prose measure">
@@ -693,13 +693,26 @@ ${jsonLd(w, site, seller, loc, origin)}`;
  * a link, and let /works/ carry the grid. Nothing here caps the       *
  * count — the decision is editorial, not structural.                  *
  * ------------------------------------------------------------------ */
+/* The About page is the one page that is only prose, so it is the one page
+   set as a page of a book rather than as a screen: the display face, a lede,
+   a drop cap and a real italic. See "About, set as a book page" in the report.
+
+   This is the only markup the treatment needs. A quotation that ends a
+   paragraph — van Gogh, in the third — is given an <em> so it can be set in
+   the italic the site now ships, instead of sitting in the running text
+   distinguished by nothing but its quotation marks. English only: the Chinese
+   text quotes with 「」, and a slanted CJK face is not an italic. Run over
+   ESCAPED text, so it can only ever match the marks the escaper leaves alone. */
+const quoted = (html, loc) => (loc !== 'en' ? html
+  : html.replace(/(\u201C[^\u201C\u201D]+\u201D)\s*$/, '<em class="quoted">$1</em>'));
+
 function renderAbout(loc) {
   const paras = t(site.about.paragraphs, loc);
   const body = `
-<section class="page wrap">
+<section class="page page--about wrap">
   <h1>${esc(t(site.sections.about.title, loc))}</h1>
   <div class="prose measure">
-    ${paras.map((x) => `<p>${esc(x)}</p>`).join('\n    ')}
+    ${paras.map((x) => `<p>${quoted(esc(x), loc)}</p>`).join('\n    ')}
     <p><a href="${lpath(loc, site, '/giving/')}">${loc === 'zh' ? '查看捐赠记录' : 'See the giving record'}</a> · <a href="${lpath(loc, site, '/how-to-buy/')}">${esc(t(site.sections.buy.title, loc))}</a></p>
   </div>
 </section>`;
@@ -707,7 +720,9 @@ function renderAbout(loc) {
     site, seller, loc, current: 'about',
     title: `${t(site.sections.about.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: paras[0].slice(0, 180),
-    body, ogImage: null, bodyClass: 'prose-page',
+    /* about-page narrows the mount: the serif column is 34rem, and D-01's
+       860px sheet was cut for a 62ch sans column. */
+    body, ogImage: null, bodyClass: 'prose-page about-page',
     canonical: lpath(loc, site, '/about/'),
     altLocales: altFor('/about/'),
   });
@@ -987,8 +1002,8 @@ writeFileSync(join(DIST, 'styles.css'), css);
 
 /* fonts */
 mkdirSync(join(DIST, 'fonts'), { recursive: true });
-for (const f of ['fraunces-latin.woff2', 'inter-latin.woff2',
-                 'notoserifsc-subset.woff2',
+for (const f of ['fraunces-latin.woff2', 'fraunces-italic-latin.woff2',
+                 'inter-latin.woff2', 'notoserifsc-subset.woff2',
                  'OFL-Fraunces.txt', 'OFL-Inter.txt']) {
   const src = join(ROOT, 'public/fonts', f);
   if (existsSync(src)) cpSync(src, join(DIST, 'fonts', f));

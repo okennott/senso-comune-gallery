@@ -19,6 +19,15 @@
   font-display:swap;
 }
 
+/* Not preloaded: no text above the fold waits on it. */
+@font-face{
+  font-family:'Fraunces';
+  src:url('/fonts/fraunces-italic-latin.woff2') format('woff2');
+  font-weight:400;              /* the site sets no bold italic */
+  font-style:italic;
+  font-display:swap;
+}
+
 @font-face{
   font-family:'Inter';
   src:url('/fonts/inter-latin.woff2') format('woff2');

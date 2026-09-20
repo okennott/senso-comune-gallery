@@ -433,7 +433,7 @@ reading it from the other.
 │   ├── styles/
 │   │   ├── tokens.css              palette, type scale, spacing, motion, all
 │   │   │                           of it solved against contrast
-│   │   ├── base.css                the cream sheet, sfumato bands, hatching
+│   │   ├── base.css                the sheet, sfumato bands, hatching
 │   │   └── gallery.css             masthead, tombstone, scale diagram, lightbox
 │   ├── scripts/
 │   │   ├── availability.js         ~40 lines, client-side sold check; the only
@@ -479,7 +479,8 @@ reading it from the other.
 │   ├── mark-paths.js               GENERATED. Re-run with npm run mark
 │   ├── build-images.mjs            sRGB-tagged AVIF 4:4:4 + WebP, five widths,
 │   │                               capped at 2000px
-│   ├── build-fonts.sh              Latin subsets — 79.8 KB for both families
+│   ├── build-fonts.sh              Latin subsets — 79.8 KB preloaded, plus
+│   │                                 31.3 KB of italic, fetched where used
 │   ├── build-fonts-cjk.py          Chinese display face, subset to the ~100
 │   │                               glyphs that appear, 34 KB from 24 MB
 │   ├── build-icons.sh              one line of shell around build-icons.py
@@ -488,7 +489,7 @@ reading it from the other.
 │   ├── check-links.mjs             dead links, missing alt, missing width or
 │   │                               height, heading order, landmarks, hreflang,
 │   │                               CJK subset coverage
-│   ├── check-review.mjs            74 assertions over 48 findings: the design
+│   ├── check-review.mjs            78 assertions over 52 findings: the design
 │   │                               review, the mark, softness, the shop bar,
 │   │                               the structure, the flags and the gate,
 │   │                               against built pages
@@ -521,11 +522,11 @@ reading it from the other.
 │       ├── senso-comune-report.qmd   the source
 │       ├── preamble.tex              typesetting: fonts, heads, callouts, the
 │       │                             mark and the lockup as supplied, and the
-│       │                             page canvas — this document is printed on
-│       │                             the site's own paper
-│       ├── figures.py                figures, read from tokens.css and brand/;
-│       │                             also cuts the page canvas, by asking
-│       │                             Chrome to composite the site's own tile
+│       │                             paper — this document is printed on the
+│       │                             site's own reading ground, --wash-pale
+│       ├── figures.py                figures, read from tokens.css and brand/,
+│       │                             including the two that carry the research
+│       │                             behind the sage grounds and --size-read
 │       ├── fonts.py                  static cuts of Fraunces and Inter, plus
 │       │                             the Chinese subset — derived from the
 │       │                             .qmd, so the prose cannot outgrow it
@@ -606,7 +607,13 @@ debugged from outside the country.
 |:--|--:|
 | Fraunces, `opsz` 14–40, `wght` 400–700, `SOFT=0 WONK=1` | 51,868 |
 | Inter, `opsz` 18, `wght` 400–600 | 29,856 |
-| **Total, both families, latin subset** | **81,724** |
+| **Total, both families, latin subset — preloaded** | **81,724** |
+| Fraunces Italic, `opsz` 14–30, `wght` 400 — fetched only where an italic is set | 32,080 |
+
+The italic is a real file because the site asks for italic in four places and
+the browser was slanting the roman in all four. `font-synthesis-style: none`
+now forbids the browser inventing the style anywhere, including for the Chinese
+face, which has no italic.
 
 Two axis choices to preserve: the draft uses **six optical sizes** (16.0 →
 38.4), so Fraunces' `opsz` must stay live — pinning it saves 19 KB and flattens
@@ -668,7 +675,7 @@ an iframe of exactly that width, with scrollbars hidden as a phone's are, and
 the check asserts the content width it actually received. `docs/report/shots.sh`
 takes the phone screenshot the same way.
 
-`check-review.mjs` holds 74 assertions over 48 findings — the September 2026
+`check-review.mjs` holds 78 assertions over 52 findings — the September 2026
 design review, the mark, softness, the shop bar and views, the structure, the
 red flags and the readiness gate — written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
@@ -705,18 +712,27 @@ block people outright.
   1536 × 1024; it does not survive 16 px; and it cannot take `currentColor`.
   The Fraunces construction that stood in before it arrived is kept in
   `scripts/mark.mjs` for the report's figure only.
-- **One canvas, on the surfaces that frame.** The ground of the artwork was
-  measured — a cold-press cotton-rag sheet, 1/f spectrum, luminance σ 4.87 of
-  255 — and reproduced as a single tile in `tokens.css` (`--canvas-grain`).
-  It is neutral grey with a mean of exactly 0.5 and is composited with
+- **Sage is the wall; cream is the mat.** The three reading grounds are
+  `--wash-pale`, `--wash-mid` and `--wash-deep`: the field's own hue, held at
+  the lightness ladder that was already measured safe. A reading ground fails
+  on lightness and nothing else — below L\* 91.5 `--muted-ui` drops through
+  3.0:1, and above it chroma is free — so moving them onto the sage cost no
+  foreground token and improved every pair. Cream paints the mat around a
+  painting, the box that holds an image, light ink on the dark bar and the
+  focus halo; it paints no page surface, and `check-review` L-01 lists the
+  fifteen rules allowed to use it.
+- **One canvas, on one material.** The ground of the artwork was measured — a
+  cold-press cotton-rag sheet, 1/f spectrum, luminance σ 4.87 of 255 — and
+  reproduced as a single tile in `tokens.css` (`--canvas-grain`). It is neutral
+  grey with a mean of exactly 0.5 and is composited with
   `background-blend-mode: soft-light`, whose identity at 0.5 is what makes it
   incapable of changing a colour: the largest mean drift measured on any
-  ground is 0.9 of 255. It goes on the field and the mats, and on nothing that
-  is read — `--muted-ui` on `--wash-blue` is exactly 3.00:1 against a 3.0
-  floor, so the reading grounds have no room to be modulated at all. The bands
-  take the same tile at 30 %, as a dither rather than a texture: a nine-rem
-  fade in eight bits steps without one. `check-contrast` prints that allowance
-  every build and fails if a reading ground is ever textured.
+  ground is 0.9 of 255. It goes on the **mat** and nowhere else. It came off
+  the field, which was where it was most of what you saw, and off the bands,
+  where it had been a dither until the dither was measured and found to make
+  the banding slightly worse than the browser's own (row-mean residual 0.195
+  of 255 with it, 0.173 without). `check-contrast` still prints how much
+  texture each reading ground could take and fails if one is ever textured.
 - **Softness without new colour.** Mats, radii, shadows, glass and section
   boundaries are all expressed through existing tokens; shadows are `--bar` at
   a few percent. The masthead's glass stops at 88% because the navigation must
@@ -724,8 +740,9 @@ block people outright.
   outright), and it only turns to glass once content scrolls beneath it. The
   footer runs the same glass over the sage field, where the worst case is one
   computable colour — `--glass-footer`, recomputed by the contrast check on
-  every run — and the contact panel is a frosted plate, which is safe because
-  cream over cream is always lighter than the wash beneath it.
+  every run — and the contact panel is a frosted plate of `--wash-lift`, which
+  is safe because a lift of the wall is always lighter than the ground it is
+  laid on.
   Paintings are never rounded, zoomed or stretched. The report's Softness
   section lists every option considered, adopted and optional.
 - **The work page and the shop bar.** Decisions D1–D5 (report, Part 6): search,

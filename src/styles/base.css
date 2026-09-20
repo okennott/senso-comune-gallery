@@ -7,7 +7,7 @@
      A-03  two-tone focus ring that survives being over a dark painting
      A-05  48px targets via padding; visually-hidden utility
      N-07  scroll-padding-top so the sticky nav cannot obscure focus (2.4.11)
-     D-02  sfumato section edges, oklab, noise-dithered
+     D-02  sfumato section edges, oklab
      D-03  Leonardo hatching at 45°, "\" direction, one use only
      D-05  easing tokens; all motion gated on prefers-reduced-motion
    =========================================================================== */
@@ -16,6 +16,21 @@
   font-family:'Fraunces';
   src:url('/fonts/fraunces-latin.woff2') format('woff2');
   font-weight:400 700; font-style:normal; font-display:swap;
+}
+/* The real italic, added 20 September 2026. The site sets italic in four
+   places — the hero's Dutch original, the Tribute epigraph, and every work
+   title, on the index and as an h1 — and until now shipped no italic face, so
+   the browser slanted the roman by 12° in all four. Fraunces' own italic is a
+   different drawing, not a slanted one: single-storey a, cursive e, a −16°
+   angle the letterforms were made for.
+
+   31.3 KB, opsz 14-30, one weight — see scripts/build-fonts.sh for why those
+   are the right bounds. Deliberately NOT preloaded: nothing above the fold
+   waits on it, and font-display:swap paints the roman meanwhile. */
+@font-face{
+  font-family:'Fraunces';
+  src:url('/fonts/fraunces-italic-latin.woff2') format('woff2');
+  font-weight:400; font-style:italic; font-display:swap;
 }
 @font-face{
   font-family:'Inter';
@@ -41,35 +56,36 @@ html{
 body{
   margin:0;
   /* The sage is the field the page sits in; the reading surfaces are laid on
-     top of it. Nothing sets text on the sage.
+     top of it, and they are sage too. Nothing sets text on the FULL-strength
+     sage, which is this.
 
-     It used to be one flat fill from edge to edge: the largest single solid
-     on the site, and the only surface with nothing happening in it. It keeps
-     its colour and gains a slow fall from a lifted --field at the top to
-     --field-deep at the foot, so the sheet reads as mounted on a ground that
-     is lit rather than pasted onto a swatch. Both ends are palette values.
-     Fixed, so the fall belongs to the page and not to the scroll; and since
-     no text ever sits on the field, none of this is a contrast question. */
+     It is one fall of her green, lit: a lifted --field at the top to
+     --field-deep at the foot. Both ends are palette values. Fixed, so the
+     fall belongs to the page and not to the scroll; and since no text ever
+     sits on the field, none of this is a contrast question.
+
+     NOT TEXTURED, as of 20 September 2026. The canvas tile was here, and the
+     field is the largest area on the site, so it was also where the grain was
+     most of what you saw. The mat keeps it — a board has tooth and a wall does
+     not — and the field goes back to the plain fall Priscilla's own prototype
+     had. Removing it costs nothing measurable: the tile is mean-neutral under
+     soft-light, so the colour was never anything but --field either way. */
   background-color:var(--field);
-  /* Two layers: the canvas grain, then the fall of the field beneath it. The
-     grain scrolls with the page, because paper does not stay still while what
-     is printed on it moves; the fall is fixed, because it belongs to the
-     page rather than to the scroll. Soft-light against a 0.5-mean tile leaves
-     the colour exactly where the token put it — see CANVAS in tokens.css. */
-  background-image:var(--canvas-grain),
-    linear-gradient(in oklab,
+  background-image:linear-gradient(in oklab,
       color-mix(in oklab,var(--field) 90%,white) 0%,
       var(--field) 34%,
       var(--field-deep) 100%);
-  background-size:var(--canvas-tile) var(--canvas-tile),auto;
-  background-repeat:repeat,no-repeat;
-  background-attachment:scroll,fixed;
-  background-blend-mode:soft-light,normal;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
   color:var(--body);
   font-family:var(--font-body);
   font-size:var(--size-body);
   line-height:var(--lh-body);
   font-synthesis-weight:none;
+  /* And no synthetic obliques either, now that the italic is a real file. A
+     face either has the style or does not get it: the CJK body face has no
+     italic, and a slanted Songti is not one. */
+  font-synthesis-style:none;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
 }
@@ -79,20 +95,23 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
 
 /* ---------- the sheet ----------
    Priscilla's mockup is sage from edge to edge with cream plates behind the
-   paintings. Text on that sage measures 1.93-2.35:1, so it cannot stay there.
+   paintings. Text on that sage measures 1.93-2.35:1, so it cannot sit on the
+   field itself.
 
    Rather than reduce her green to a thin divider, the whole content column
-   becomes a cream SHEET mounted on the sage field — which is what a gallery
-   does to a work on paper anyway. The sage stays dominant at the margins, the
-   reading happens on cream, and the relationship between the two is the one
-   she drew. */
+   becomes a SHEET mounted on the field — which is what a gallery does to a
+   work on paper anyway. The sheet was cream until 20 September 2026 and is now
+   --wash-pale: the same green, held at the lightness prose can be read on. The
+   sage stays dominant at the margins, the reading happens on a lighter cut of
+   it, and the only cream left on the page is the mat around a painting. */
 .sheet{
   max-width:1240px;
   margin-inline:auto;
-  background:var(--wash-warm);
+  background:var(--wash-pale);
   /* The sheet's own shadow, plus the light a pane catches along its top
-     edge — which is what tells the eye the cream is lying ON the sage
-     rather than being a hole cut in it. */
+     edge — which is what tells the eye the sheet is lying ON the field
+     rather than being a hole cut in it. With both now the same hue, this
+     shadow and that rim are most of what separates them. */
   box-shadow:var(--shadow-sheet),var(--glass-rim);
   border-radius:var(--radius-sheet);
 }
@@ -118,6 +137,9 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
    leaving 54% of the mount empty, which reads as unfinished rather than
    generous. The mount comes in close around the measure instead. */
 .prose-page .sheet{ max-width:860px }
+/* Same finding, one page further. About's column is 34rem of serif rather than
+   62ch of sans, so an 860px mount would leave a third of it empty again. */
+.about-page .sheet{ max-width:660px }
 
 /* ---------- layout ---------- */
 .wrap{
@@ -236,10 +258,11 @@ a{ color:var(--sanguine) }
    Replaces the draft's 1px hairlines, which were 1.32:1 and doing no
    accessibility work anyway.
 
-   Two things matter here. oklab interpolation avoids the grey dip that sRGB
-   produces through the midpoint of a low-saturation gradient; and a gradient
-   this shallow over this large an area WILL band on 8-bit displays, which is
-   what .edge::after dithers away. */
+   oklab interpolation is what matters here: it avoids the grey dip that sRGB
+   produces through the midpoint of a low-saturation gradient. The band was
+   also dithered, on the assumption that a fade this shallow over this large an
+   area must step on 8-bit displays. It was measured instead, and it does not —
+   see the note below the .edge rules. */
 .edge{
   height:var(--edge-height);
   position:relative;
@@ -256,10 +279,10 @@ a{ color:var(--sanguine) }
    the mark draws — seen for a moment between rooms. No text ever sits on a
    band, so the contrast rules that keep the sage off reading surfaces are
    untouched. */
-.edge--warm-warm{   --edge-from:var(--wash-warm);   --edge-to:var(--wash-warm) }
-.edge--warm-violet{ --edge-from:var(--wash-warm);   --edge-to:var(--wash-violet) }
-.edge--violet-blue{ --edge-from:var(--wash-violet); --edge-to:var(--wash-blue) }
-.edge--blue-warm{   --edge-from:var(--wash-blue);   --edge-to:var(--wash-warm) }
+.edge--pale-pale{ --edge-from:var(--wash-pale); --edge-to:var(--wash-pale) }
+.edge--pale-mid{  --edge-from:var(--wash-pale); --edge-to:var(--wash-mid)  }
+.edge--mid-deep{  --edge-from:var(--wash-mid);  --edge-to:var(--wash-deep) }
+.edge--deep-pale{ --edge-from:var(--wash-deep); --edge-to:var(--wash-pale) }
 
 .edge{
   /* The breath follows a raised cosine, (1 - cos 2πx) / 2, sampled at nine
@@ -283,30 +306,29 @@ a{ color:var(--sanguine) }
   .edge{ background:linear-gradient(var(--edge-from),var(--edge-to)) }
 }
 
-/* Noise dither — the same tile as the canvas, at a fraction of its strength.
-   The band is not a material, it is a TRANSITION, and a nine-rem fade in eight
-   bits bands visibly without something to break the steps. What it needs is a
-   dither; what it must not become is a texture. At full canvas strength it
-   read as the noisiest thing on the page, sitting between two smooth stretches
-   of sheet — the texture's own rule (frame, never read on) says the band, which
-   is on the sheet, is not a surface to give tooth to.
+/* The band used to carry the canvas tile at 30% as a DITHER — not for texture,
+   but because a nine-rem fade in eight bits was assumed to step visibly.
+   Measured on 20 September 2026, at 1x, over the built page, that assumption
+   was wrong: the browser dithers the gradient itself. Removing the ramp and
+   looking at what is left,
 
-   One tile, two jobs, two strengths, both stated: --canvas-tile is the paper,
-   --dither-strength is how much of it a gradient needs to stop stepping. */
-.edge::after{
-  content:'';
-  position:absolute; inset:0;
-  opacity:var(--dither-strength);
-  background-image:var(--canvas-grain);
-  background-size:var(--canvas-tile) var(--canvas-tile);
-  mix-blend-mode:soft-light;
-}
+     with the tile   row-mean residual sd 0.195 of 255, peak excursion 3.69
+     without it      row-mean residual sd 0.173 of 255, peak excursion 1.04
+
+   — banding is a HORIZONTAL stripe, so the row-mean residual is the thing that
+   measures it, and it is lower without the tile than with it. The tile was
+   adding per-pixel noise and no smoothness. The band's whole range is 19 of
+   255 across 144 px, about 21 levels, so even an engine that does not dither
+   steps one level at a time across seven rows.
+
+   So the bands are bare, and the canvas tile is now on one material only: the
+   mat. See CANVAS in tokens.css. */
 
 /* Section grounds, so the wash continues behind content rather than
    appearing only in the band. */
-.ground--warm{   background:var(--wash-warm) }
-.ground--violet{ background:var(--wash-violet) }
-.ground--blue{   background:var(--wash-blue) }
+.ground--pale{   background:var(--wash-pale) }
+.ground--mid{ background:var(--wash-mid) }
+.ground--deep{   background:var(--wash-deep) }
 
 /* ---------- Leonardo hatch ----------
    D-03. Left-handed: the stroke runs upper-left to lower-right. Measured at

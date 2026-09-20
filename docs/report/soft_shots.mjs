@@ -96,7 +96,7 @@ stage('glass', `<style>
     background-color:color-mix(in srgb,var(--bar) var(--glass-bar-opacity),transparent)!important}
 </style>${bring('.hero__work img', -12)}`);
 /* a boundary BETWEEN two sections — Works above, Tribute below — centred */
-stage('band', `<style>.masthead{display:none!important}</style>${bring('.edge--warm-violet', 260 - 72)}`);
+stage('band', `<style>.masthead{display:none!important}</style>${bring('.edge--pale-mid', 260 - 72)}`);
 
 const [hover, glass, band] = await Promise.all([shoot('hover', 1440, 900), shoot('glass', 1440, 900), shoot('band', 1440, 520)]);
 

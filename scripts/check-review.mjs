@@ -23,6 +23,7 @@ const DIST = join(ROOT, 'dist');
 
 const read = (p) => readFileSync(join(DIST, p), 'utf8');
 const src = (p) => readFileSync(join(ROOT, p), 'utf8');
+const exists = (p) => existsSync(join(DIST, p));
 
 const home = read('index.html');
 const zhHome = read('zh/index.html');
@@ -67,7 +68,7 @@ check('A-01', 'a painting is in the hero, above the fold', () => {
   const heroFig = /<figure class="hero__work">/.test(home);
   const heroImg = /<figure class="hero__work">[\s\S]*?<img[^>]+fetchpriority="high"/.test(home);
   // the lifted work must not also appear among the latest works below it
-  const latest = (home.match(/<section class="section ground--warm" id="latest">([\s\S]*?)<\/section>/) ?? [])[1] ?? '';
+  const latest = (home.match(/<section class="section ground--pale" id="latest">([\s\S]*?)<\/section>/) ?? [])[1] ?? '';
   const listed = [...latest.matchAll(/<div class="tombstone" data-work="([a-z0-9-]+)"/g)].map((m) => m[1]);
   const heroSlug = (home.match(/<figure class="hero__work">\s*<a href="[^"]*\/works\/([a-z0-9-]+)\//) ?? [])[1];
   const capped = /max-height:clamp\(260px,48vh,460px\)/.test(css);
@@ -221,11 +222,19 @@ decided('C-04', 'the wordmark stays translated', 'closed by decision — 常识�
 
 /* ===================== D — layout and typography ===================== */
 
-check('D-01', 'prose pages get a mount that sits close around the measure', () =>
-  /<body class="prose-page">/.test(buy)
-  && /<body class="prose-page">/.test(read('about/index.html'))
-  && /<body class="prose-page">/.test(read('giving/index.html'))
-  && /\.prose-page \.sheet\{ ?max-width:860px ?\}/.test(css.replace(/\n\s*/g, '')));
+check('D-01', 'prose pages get a mount that sits close around the measure', () => {
+  const flatCss = css.replace(/\n\s*/g, '');
+  const bodies = ['how-to-buy', 'about', 'giving']
+    .map((p) => [p, /<body class="prose-page(?: [a-z-]+)?">/.test(read(`${p}/index.html`))]);
+  // About narrows further: its column is 34rem of serif, not 62ch of sans, so
+  // the 860px mount would leave a third of it empty again. Same finding.
+  const mounts = /\.prose-page \.sheet\{ ?max-width:860px ?\}/.test(flatCss)
+    && /\.about-page \.sheet\{ ?max-width:660px ?\}/.test(flatCss)
+    && /<body class="prose-page about-page">/.test(read('about/index.html'));
+  const bad = bodies.filter(([, ok]) => !ok).map(([p]) => p);
+  return { ok: !bad.length && mounts,
+           detail: bad.length ? `not mounted: ${bad.join(', ')}` : '860px for prose, 660px for About' };
+});
 
 check('D-01', 'the homepage keeps the full-width sheet', () => !/<body class="prose-page">/.test(home));
 
@@ -502,7 +511,7 @@ check('G-05', 'every page names each painting once, and the lightbox copy not at
 check('G-06', 'every boundary band joins the grounds actually either side of it', () => {
   // A band's endpoints must BE its neighbours, or the soft edge breaks into a
   // hard seam — three of four did before this pass. The hero sits on the bare
-  // sheet, which is --wash-warm.
+  // sheet, which is --wash-pale — the palest of the three sages.
   const bad = [];
   let bands = 0;
   for (const [p, html] of [['/', home], ['/zh/', zhHome]]) {
@@ -512,7 +521,7 @@ check('G-06', 'every boundary band joins the grounds actually either side of it'
       const m = c.match(/\bedge--([a-z]+)-([a-z]+)\b/);
       if (!m) return;
       bands++;
-      const ground = (cls) => (cls && /\bhero\b/.test(cls) ? 'warm' : (cls?.match(/\bground--([a-z]+)/) ?? [])[1]);
+      const ground = (cls) => (cls && /\bhero\b/.test(cls) ? 'pale' : (cls?.match(/\bground--([a-z]+)/) ?? [])[1]);
       const before = ground(seq[i - 1]), after = ground(seq[i + 1]);
       if (before !== m[1] || after !== m[2]) bad.push(`${p} edge--${m[1]}-${m[2]} sits between ${before} and ${after}`);
     });
@@ -536,7 +545,9 @@ check('G-07', 'the canvas is one tile, defined once and referenced', () => {
   const sheets = src('src/styles/base.css') + src('src/styles/gallery.css');
   const used = (sheets.replace(/\/\*[\s\S]*?\*\//g, '').match(/var\(--canvas-grain\)/g) ?? []).length;
   const noOther = !/feTurbulence/.test(sheets.replace(/\/\*[\s\S]*?\*\//g, ''));
-  return { ok: defined === 1 && used >= 3 && noOther,
+  // Two, since 20 September 2026: the tile is on the mat and on the video's
+  // mat, and on nothing else. It was three; the field and the bands gave it up.
+  return { ok: defined === 1 && used === 2 && noOther,
            detail: `defined ${defined}x, used ${used}x, no second noise in the stylesheets ${noOther}` };
 });
 
@@ -554,24 +565,25 @@ check('G-07', 'the tile cannot change a colour: neutral, mean 0.5, soft-light', 
   const centred = intercepts.length === 3 && intercepts.every(Boolean);
   const declared = Math.abs(slope - Number((tile.match(/feFuncR type='linear' slope='([\d.]+)'/) ?? [])[1])) < 1e-9;
   const sheets = src('src/styles/base.css') + src('src/styles/gallery.css');
-  const blended = (sheets.match(/(?:background-blend-mode|mix-blend-mode):[^;]*soft-light/g) ?? []).length >= 3;
+  const blended = (sheets.match(/(?:background-blend-mode|mix-blend-mode):[^;]*soft-light/g) ?? []).length >= 2;
   return { ok: grey && srgb && centred && declared && blended,
            detail: `greyscale ${grey}, sRGB ${srgb}, symmetric about 0.5 ${centred}, --canvas-slope matches the tile ${declared}, soft-light everywhere ${blended}` };
 });
 
-check('G-07', 'the texture frames and is never read on', () => {
-  // The same law the palette follows. check-contrast.mjs solves the arithmetic
-  // — what excursion each reading ground could take — and fails on a textured
-  // reading ground; this asserts the surfaces that ARE textured are the frame.
+check('G-07', 'the texture is on the mat and on nothing else', () => {
+  // check-contrast.mjs solves the arithmetic — what excursion each reading
+  // ground could take — and fails on a textured reading ground. This asserts
+  // the narrower rule the texture now follows: ONE material. A board has
+  // tooth; the walls (the field, the sheet, the bands) do not.
   const sheets = (src('src/styles/base.css') + src('src/styles/gallery.css'))
     .replace(/\/\*[\s\S]*?\*\//g, '');
   const textured = [...sheets.matchAll(/([^{}]+)\{([^{}]*var\(--canvas-grain\)[^{}]*)\}/g)]
     .map((m) => m[1].trim().replace(/\s+/g, ' '));
-  const frame = ['body', '.edge::after', '.work__img, .hero__work img', '.work__video'];
-  const same = textured.length === frame.length && frame.every((f) => textured.includes(f));
+  const mats = ['.work__img, .hero__work img', '.work__video'];
+  const same = textured.length === mats.length && mats.every((f) => textured.includes(f));
   const solved = /READING/.test(src('scripts/check-contrast.mjs'));
   return { ok: same && solved,
-           detail: `${textured.join(' · ') || 'nothing'}${same ? '' : ` — expected ${frame.join(' · ')}`}` };
+           detail: `${textured.join(' · ') || 'nothing'}${same ? '' : ` — expected ${mats.join(' · ')}`}` };
 });
 
 /* ===================== H — shop bar and work views ===================== */
@@ -833,6 +845,118 @@ check('J-01', 'every visible NEEDS-INPUT is flagged, and nothing else is', () =>
   const stray = pages.filter(([, h]) => /<mark class="needs-input">(?!NEEDS-INPUT<\/mark>)/.test(h)).length;
   return { ok: (RELEASE || flagged > 0) && !unflagged && !broken && !wrongPlace && !stray,
            detail: `${flagged} flagged, ${unflagged} unflagged, ${broken} inside attributes, ${wrongPlace} in title/script, ${stray} pages with a stray mark` };
+});
+
+/* ===================== L — the walls and the mat ===================== */
+/* 20 September 2026. Three decisions, taken together because they are one
+   decision about material: the walls are sage and untextured, cream is the mat
+   and nothing else, and the one page that is only prose is set as a book page.
+   Report, "The walls, the mat, and a book page". */
+
+check('L-01', 'cream paints the mat, the art, and the bar — and no page surface', () => {
+  // The rule in one line: --paper and --paper-deep may back an ARTWORK or sit
+  // on the dark bar as a light indicator. They may not paint a ground anyone
+  // reads on. Anything new that paints cream has to be named here, which is
+  // the point: the list is short and adding to it is a decision.
+  const sheets = (src('src/styles/base.css') + src('src/styles/gallery.css'))
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const allowed = new Set([
+    'img',                                  // holds an image box before its bytes arrive
+    '.work__img',                           // the painting itself
+    '.work__img, .hero__work img',          // the mat
+    '.work__video',                         // the same mat, around the video
+    '.gallery__thumb',                      // a thumbnail of a work
+    '.scale__work',                         // the work in the scale diagram
+    '.nav a[aria-current]',                 // on the bar
+    '.nav a[aria-current]::after',          // on the bar
+    '.lang-rule',                           // on the bar
+    '.shopbar__count',                      // on the bar
+    ':focus-visible',                       // the halo, which must beat a dark painting
+    '.btn', '.skip-link',                   // light label on a filled dark control
+    '.hero__work img',                      // the featured painting's own box
+    '.shopbar__link:hover, .social__link:hover, .lang-switch:hover', // 12% wash, on the bar
+  ]);
+  const bad = [];
+  for (const m of sheets.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const sel = m[1].trim().replace(/\s+/g, ' ');
+    const paints = [...m[2].matchAll(/(?:^|[;\s])(?:background(?:-color)?|box-shadow):[^;]*var\(--(paper(?:-deep)?)\)/g)];
+    if (!paints.length) continue;
+    if (!allowed.has(sel)) bad.push(`${sel} paints --${paints[0][1]}`);
+  }
+  return { ok: !bad.length, detail: bad.length ? bad.join('; ') : `cream is painted by ${allowed.size} named rules, all art, bar or focus` };
+});
+
+check('L-02', 'every reading ground is the field\'s own hue, held light enough to read', () => {
+  // The finding the grounds were moved on: a reading ground fails on
+  // LIGHTNESS, not on hue or chroma. So the three of them must be the field's
+  // hue (identity) and must stay above the lightness where --muted-ui's 3.0:1
+  // goes — which is L* 91.5. check-contrast.mjs solves the ratios themselves.
+  const T = Object.fromEntries([...src('src/styles/tokens.css')
+    .matchAll(/--([a-z0-9-]+):\s*(#[0-9A-Fa-f]{6})\s*;/g)].map((m) => [m[1], m[2]]));
+  const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const ok2 = (h) => {
+    const [r, g, b] = [0, 2, 4].map((i) => lin(parseInt(h.slice(i + 1, i + 3), 16)));
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    const L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s;
+    const A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s;
+    const B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+    return [L * 100, (Math.atan2(B, A) * 180 / Math.PI + 360) % 360];
+  };
+  const [, fieldHue] = ok2(T['field']);
+  const bad = [];
+  const rows = ['wash-pale', 'wash-mid', 'wash-deep', 'wash-lift'].map((k) => {
+    const [L, H] = ok2(T[k]);
+    if (Math.abs(H - fieldHue) > 2) bad.push(`--${k} is at ${H.toFixed(1)}°, the field is at ${fieldHue.toFixed(1)}°`);
+    if (L < 91.5) bad.push(`--${k} is L* ${L.toFixed(1)}, under the 91.5 where --muted-ui fails`);
+    return `--${k} L* ${L.toFixed(1)}`;
+  });
+  // and the ladder must actually be a ladder, or the sections do not separate
+  const ordered = /--wash-pale[\s\S]*--wash-mid[\s\S]*--wash-deep/.test(src('src/styles/tokens.css'));
+  return { ok: !bad.length && ordered,
+           detail: bad.length ? bad.join('; ') : `${rows.join(', ')}, all at ${fieldHue.toFixed(1)}° — the field's own hue` };
+});
+
+check('L-03', 'the italic is a real file, and nothing is slanted by the browser', () => {
+  const base = src('src/styles/base.css');
+  const face = /@font-face\{[^}]*fraunces-italic-latin\.woff2[^}]*font-style:italic[^}]*\}/.test(base.replace(/\s+/g, ''))
+    || /fraunces-italic-latin\.woff2/.test(base) && /font-style:italic/.test(base);
+  const shipped = exists('fonts/fraunces-italic-latin.woff2');
+  const noSynth = /font-synthesis-style:\s*none/.test(base);
+  // every italic the site sets must be in a family that has one
+  const sheets = (base + src('src/styles/gallery.css')).replace(/\/\*[\s\S]*?\*\//g, '');
+  const italics = [...sheets.matchAll(/([^{}]+)\{([^{}]*font-style:italic[^{}]*)\}/g)]
+    .map((m) => m[1].trim()).filter((sel) => !/@font-face/.test(sel));
+  return { ok: face && shipped && noSynth,
+           detail: `face declared ${face}, file shipped ${shipped}, synthesis off ${noSynth}, ${italics.length} rules set italic: ${italics.join(' · ')}` };
+});
+
+check('L-04', 'About is set as a book page, in both languages', () => {
+  const en = read('about/index.html'), zh = read('zh/about/index.html');
+  const css = src('src/styles/gallery.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const bad = [];
+  if (!/<section class="page page--about wrap">/.test(en)) bad.push('the English page is not marked page--about');
+  if (!/<section class="page page--about wrap">/.test(zh)) bad.push('the Chinese page is not marked page--about');
+  // the serif, at the size measured to match the sans it replaces
+  if (!/\.page--about \.prose\{[^}]*font-family:var\(--font-display\)[^}]*font-size:var\(--size-read\)/.test(css.replace(/\s+/g, ' ').replace(/ \{/g, '{')))
+    bad.push('the prose is not set in the display face at --size-read');
+  // the drop cap is English-only and degrades where initial-letter is absent
+  if (!/@supports \(initial-letter:3\)/.test(css)) bad.push('the drop cap is not behind an @supports test');
+  if (!/html\[lang="en"\] \.page--about[^{]*::first-letter/.test(css)) bad.push('the drop cap is not scoped to English');
+  // the Chinese page gets a system serif, not the subset display stack
+  if (!/html\[lang\^="zh"\] \.page--about \.prose\{[^}]*--font-read-cjk/.test(css.replace(/\s+/g, ' ').replace(/ \{/g, '{')))
+    bad.push('the Chinese page is not set in --font-read-cjk');
+  // The quotation is marked for the italic in English and left alone in
+  // Chinese. Conditional on the copy still ending a paragraph with one: this
+  // is Priscilla's text to change, and an assertion that fails because she
+  // rewrote a paragraph would be a check holding the content hostage.
+  const about = JSON.parse(src('src/data/site.json')).about.paragraphs;
+  const hasQuote = (arr) => arr.some((x) => /\u201C[^\u201C\u201D]+\u201D\s*$/.test(x));
+  if (hasQuote(about.en) && !/<em class="quoted">/.test(en))
+    bad.push('a paragraph ends in a quotation and it is not marked for the italic');
+  if (/<em class="quoted">/.test(zh)) bad.push('the Chinese quotation is marked — there is no CJK italic to set it in');
+  return { ok: !bad.length, detail: bad.length ? bad.join('; ') : 'serif at --size-read, lede, drop cap (English, @supports), system serif for Chinese, quotation in the real italic' };
 });
 
 /* ===================== K — readiness ===================== */
