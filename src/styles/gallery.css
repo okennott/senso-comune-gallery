@@ -200,7 +200,10 @@
 .section__head{
   display:grid; gap:var(--space-4);
   grid-template-columns:minmax(0,1fr);
-  margin-bottom:var(--space-6);
+  /* AW-06. 96px here on top of the section's own 96px put 192px of empty
+     ground between one section's content and the next one's. A head belongs
+     to what follows it; two thirds of the gap that separates sections. */
+  margin-bottom:var(--space-5b);
 }
 @media (min-width:760px){
   .section__head{ grid-template-columns:minmax(0,22ch) minmax(0,var(--measure)) }
@@ -976,7 +979,8 @@ html[lang^="zh"] .page--about .prose{
 .hero__motto{
   font-family:var(--font-display);
   font-size:var(--size-hero);
-  font-variation-settings:'opsz' 38.4,'SOFT' 0,'WONK' 1;
+  font-optical-sizing:auto;
+  font-variation-settings:'SOFT' 0,'WONK' 1;
   line-height:var(--lh-tight);
   color:var(--ink);
   margin:0;
@@ -993,9 +997,7 @@ html[lang^="zh"] .page--about .prose{
 
    check-render measures the rendered line count against the <br>s at five
    widths and fails the build on a re-wrap, so these two steps are held. */
-@media (max-width:519px){
-  .hero__motto{ font-size:calc(var(--size-hero) * .72) }
-}
+
 /* AW-01 and AW-04. The featured work was a 375x460 box in a 1060px column at
    both 1440 and 1920 — 12.5% of the screen's width, with 65% of its own block
    empty — and its tombstone row was let out to the full column, which put the
@@ -1380,6 +1382,6 @@ html[lang^="zh"] .page--about .prose{
   }
   .lang-switch{ order:2; margin-left:auto }
   .shopbar{ order:2; margin-left:0 }
-  .hero__motto{ font-size:calc(var(--size-hero) * .62) }
+
 }
 

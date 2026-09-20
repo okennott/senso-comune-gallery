@@ -342,9 +342,33 @@
   --font-body:    'Inter', system-ui, -apple-system, 'PingFang SC',
                   'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 
-  --size-hero:    38.4px;   /* the "height"            */
-  --size-h2:      33.6px;   /* less 1/8                */
-  --size-h3:      28.8px;   /* less 1/4                */
+  /* AW-06. The three display steps used to be 38.4, 33.6 and 28.8 — 1.14 and
+     1.17 apart, which is under the interval at which a reader sees a LEVEL
+     rather than a size, and then a 1.71 drop to body with nothing in between.
+     All of it in fixed px, so the motto was 38.4px on a 390px phone and 38.4px
+     on a 1920px display: the layout grew and the voice did not.
+
+     The Vitruvian fractions are kept, as the ENDS of each step rather than as
+     one value: every rung still lands on the draft's own sizes at the width it
+     was measured at, and moves between them with the column. The ladder, at
+     four widths:
+
+               390      900      1440     1920
+       hero    26.9     40.2     54.0     54.0
+       h2      24.0     27.7     35.3     38.4
+       h3      21.6     22.2     25.4     28.3
+       body    16.8     16.8     16.8     16.8
+
+     THE MOTTO IS WHAT BOUNDS THE TOP END. It is set as written and may never
+     re-wrap, so the longest line — "with love is well done.", 10.42 ems — has
+     to fit the column at every width check-render tests. At 54px that is 563px
+     inside 1060; at the 26px floor, 271px inside the 280 a 320px screen gives.
+     The two step-down overrides that used to do this job in the stylesheet are
+     gone: a clamp does it continuously, and does it for every heading rather
+     than for the motto alone. */
+  --size-hero:    clamp(26px,   2.6vw + 1rem,   54px);    /* the "height" */
+  --size-h2:      clamp(24px,   1.4vw + 0.9rem, 38.4px);  /* less 1/8     */
+  --size-h3:      clamp(21.6px, 0.6vw + 1rem,   28.8px);  /* less 1/4     */
   --size-mark:    22.4px;   /* wordmark                */
   --size-body:    16.8px;   /* the unit                */
   --size-caption: 12.6px;   /* less 1/4                */
@@ -375,7 +399,14 @@
   --space-4:  24px;     /* 1/4  */
   --space-5:  48px;     /* 1/2  */
   --space-6:  96px;     /* 1    */
-  --space-7:  144px;
+  --space-7:  144px;    /* 1.5  */
+  /* AW-06. Three values crowded under 17px, then a hole between 24 and 48 and
+     another between 48 and 96 — which is why the page was either cramped or
+     cavernous with nothing in between, and why a section's own heading stood
+     96px from its own content on top of the 96px that separated it from the
+     section above. Two rungs the same fractions already imply. */
+  --space-4b: 32px;     /* 1/3  */
+  --space-5b: 64px;     /* 2/3  */
 
   --measure:    62ch;   /* running prose  */
   --measure-sm: 26ch;   /* display headings */

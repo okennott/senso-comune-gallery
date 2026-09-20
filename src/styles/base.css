@@ -162,9 +162,16 @@ h1,h2,h3{
   text-wrap:balance;
   margin:0;
 }
-h1{ font-size:var(--size-hero); font-variation-settings:'opsz' 38.4,'SOFT' 0,'WONK' 1; line-height:var(--lh-tight) }
-h2{ font-size:var(--size-h2);   font-variation-settings:'opsz' 33.6,'SOFT' 0,'WONK' 1 }
-h3{ font-size:var(--size-h3);   font-variation-settings:'opsz' 28.8,'SOFT' 0,'WONK' 1 }
+/* The opsz axis is kept live in the font build (14-40) precisely so each size
+   gets its own drawing, and it used to be pinned here to the one size each
+   heading was. With the sizes fluid there is no one size to pin it to, so the
+   browser drives it from the size actually used — which is what the axis is
+   for, and what pinning it was approximating. SOFT and WONK stay set, and
+   font-variation-settings must NOT name opsz or it wins over the automatic. */
+h1,h2,h3{ font-optical-sizing:auto; font-variation-settings:'SOFT' 0,'WONK' 1 }
+h1{ font-size:var(--size-hero); line-height:var(--lh-tight) }
+h2{ font-size:var(--size-h2) }
+h3{ font-size:var(--size-h3) }
 p{ margin:0 0 var(--space-4); text-wrap:pretty }
 
 .eyebrow{
