@@ -195,6 +195,23 @@ package manager): it is converted to H.264 at up to 1080 px, with the sound
 track removed and the first frame taken as the poster. Without ffmpeg the
 placeholder stays, and the build says so.
 
+**Your own portrait.** *About* carries a frame for a photograph of you — beside
+the section on the homepage, and above the title on the About page itself. It
+works exactly like a view: put the file in `masters/portrait.jpg` and rebuild.
+
+```
+masters/portrait.jpg
+```
+
+Any shape will do; the frame is built from the file's own proportions, and the
+photograph is mounted in the same cream mat a painting gets. Then describe it
+in `src/data/site.json` under `about.portrait.alt`, in both languages — a
+photograph on a page has to be described, and the gate will not open until it
+is. **Until the file exists the frame holds a labelled placeholder in previews
+and is left out of a release altogether**, so nothing ships as an empty mat and
+there is no hurry: a site with no portrait is a site with no portrait, not a
+site with a hole in it.
+
 ## 1.3 Writing the description
 
 Three layers per work, and they do different jobs.
@@ -675,7 +692,7 @@ an iframe of exactly that width, with scrollbars hidden as a phone's are, and
 the check asserts the content width it actually received. `docs/report/shots.sh`
 takes the phone screenshot the same way.
 
-`check-review.mjs` holds 78 assertions over 52 findings — the September 2026
+`check-review.mjs` holds 88 assertions over 57 findings — the September 2026
 design review, the mark, softness, the shop bar and views, the structure, the
 red flags and the readiness gate — written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
@@ -683,7 +700,7 @@ also asserts that every `var(--token)` in the stylesheet resolves: a fix that
 referenced a token which did not exist fell back to inherited size, and a test
 that only matched the CSS text called it green.
 
-`test-readiness.mjs` proves the readiness gate with 44 tests: it opens on data
+`test-readiness.mjs` proves the readiness gate with 48 tests: it opens on data
 with every critical detail supplied, and closes on the named rule when any one
 of them is broken (§2.8).
 
@@ -896,7 +913,7 @@ enforced, not remembered.
 | Indexed by search engines | No — noindex on every page | Yes |
 | Marked on every page | A ribbon: *Preview — not open for sales. N critical details are still owed* | Nothing |
 | Buy and enquire buttons | Drawn, but unusable while anything is owed | Live |
-| Views without a photograph | Shown as labelled placeholders | Left out |
+| Views without a photograph, and the portrait | Shown as labelled placeholders | Left out |
 | `NEEDS-INPUT` | Flagged in red | Cannot exist — the release checks fail on a single one |
 
 A preview is the default; there is no way to forget to mark a build as not

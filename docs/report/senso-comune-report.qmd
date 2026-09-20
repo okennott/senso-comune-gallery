@@ -1326,6 +1326,62 @@ The consensus decides the shape; the site keeps its own character inside it.
   anything. When the cart works, *How to Buy* moves to the footer and the cart
   becomes the header's way in to buying — as five of the six have it.
 
+### The artist's portrait {#sec-portrait}
+
+A site selling one painter's work had no photograph of the painter. About is
+the one part of it that is a person rather than a catalogue — the pledge, the
+reason there are not many works, the sentence about pausing in front of one —
+and it was set as an essay with nobody in it.
+
+It is now framed in both the places About appears, and the two places take it
+differently because the pages are different shapes.
+
+**On the homepage** the frame sits in the heading column, under *About*, so it
+stands beside the prose at every width that column is beside it and above the
+prose on a phone. It needs no breakpoint of its own: the section head is
+already a two-column grid at 760 px and the portrait is simply the second
+thing in the first column.
+
+**On the About page** it is a frontispiece, over the title. It could not be
+anything else. That page's mount is 660 px around a 34 rem measure — finding
+D-01 brought it in to the column, because an 860 px mount left a third of it
+empty — and 660 less the 544 px the measure takes leaves 116 px, which is a
+margin, not a plate. A book with a portrait in it puts it on the leaf facing
+the title page, and that is the arrangement the page already has.
+
+**It is mounted as a painting.** The same cream mat, the same board grain, the
+same mount shadow, from the same rule: the stylesheet names `.portrait__img`
+alongside `.work__img`, so there is one mat on this site rather than two, and
+the artist's photograph is an object on a wall like everything else on it.
+What it does not take is everything that would make it a work — no zoom
+cursor, no lightbox, no view transition, no entry in the catalogue, no price.
+The caption under it is the artist's name, in the small caps a tombstone uses,
+in `--muted` at 4.62:1 on the wall.
+
+**While there is no photograph** the frame holds the image pipeline's own
+placeholder card, so the layout is real and can be judged at every width, and
+a release build leaves the frame out altogether rather than ship an empty mat.
+That is the arrangement rule WK-10 already uses for a work's unshot views, and
+it is what keeps this from becoming a permanent gap in the page: a site with
+no portrait is a site with no portrait, not a site with a hole in it.
+
+Two rules hold the two halves of that. **ID-08** is a warning, not a blocker —
+a portrait is editorial, not legal, so nothing here can keep the site from
+going live — and it reports, in every readiness report, that the frame will be
+omitted. **ID-07** is a blocker that cannot be waived, and applies the moment
+the photograph is real: a photograph on a page has to be described (1.1.1), and
+nobody can describe one that has not been taken, so until then the rule *owns*
+`site.about.portrait.alt` and the general placeholder backstop leaves it alone.
+Supplying `masters/portrait.jpg` and running the image build is the whole of
+turning the frame on; the photograph keeps its own proportions, because the
+frame is built from the size the pipeline recorded.
+
+Four assertions, M-01: that both places carry the frame in both languages, the
+frontispiece before the title; that it is matted like a painting, carries its
+own width and height so it costs no layout shift, and is in no way a work; that
+an empty frame is marked as a placeholder and is gated out of a release; and
+that the description rule is unwaivable, conditional and owns its own field.
+
 ### How it grows {#sec-structure-growth}
 
 The depth is fixed at three levels below the homepage — *Works / series / work* —
@@ -1372,7 +1428,7 @@ neither (@sec-readiness).
 
 ![The sold state. The price stays visible as social proof, "Sold" sits at full contrast in the price position, and the call-to-action slot becomes a capture rather than a dead end.](fig/cap-sold.png){#fig-sold width=100%}
 
-![About, set as a book page: the display face at 19.2 px, a lede, a three-line drop cap in sanguine, and the closing quotation in Fraunces' real italic. The mount comes in to 660 px around a 34 rem column, and with its plate transparent it is the shadow and the rim that draw it. The Chinese page is the same page in a system serif, without the drop cap or the italic (@sec-about-type).](fig/cap-about.png){#fig-about width=100%}
+![About, set as a book page: the display face at 19.2 px, a lede, a three-line drop cap in sanguine, and the closing quotation in Fraunces' real italic. The mount comes in to 660 px around a 34 rem column, and with its plate transparent it is the shadow and the rim that draw it. Over the title, the artist's portrait as a frontispiece, matted as a painting is and holding the pipeline's placeholder card until the photograph exists (@sec-portrait). The Chinese page is the same page in a system serif, without the drop cap or the italic (@sec-about-type).](fig/cap-about.png){#fig-about width=100%}
 
 ![The homepage on a 390 px phone. The masthead takes two rows — the short name and the shop bar, then the sections and the language switch — and does not stick: a sticky masthead that tall would take a third of the screen and hide the focused item. Van Gogh's line comes before the featured work.](fig/cap-mob.png){#fig-mob width=42%}
 
@@ -1861,8 +1917,8 @@ and the CI workflow installs the four wheels it needs so that it always does.
 |:----------------------|:----------------------------------------------------------|
 | `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white. With the plates off it also prints, without blocking, every pair as the page actually renders it (@sec-plates) |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **84 assertions over 56 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
-| `test-readiness` | Any of **44 tests** showing the gate opens only when it should (@sec-readiness-proof) |
+| `check-review` | **88 assertions over 57 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `test-readiness` | Any of **48 tests** showing the gate opens only when it should (@sec-readiness-proof) |
 | `check-review`, last assertion | The image tool failing its own round-trip: two fixtures, both directions, byte-exact when the source is opaque and within one unit per channel when it is not (@sec-image-tool) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
 
@@ -1932,7 +1988,7 @@ checks what is in each field, and a release cannot be built while it is closed.
 
 ### How it works {#sec-readiness-design}
 
-- **A rules engine over the data** (`scripts/readiness.mjs`): 26 rules, each with an
+- **A rules engine over the data** (`scripts/readiness.mjs`): 28 rules, each with an
   area, a severity, the condition under which it applies, the fix, and the law or
   finding it rests on. It reads nothing and writes nothing, so the build, the
   report and the tests ask the same question.
@@ -1985,7 +2041,7 @@ checks what is in each field, and a release cannot be built while it is closed.
 - **The gate opens when it should.** A copy of the data with every critical detail
   supplied passes; 32 single breakages each close it on the named rule; five waiver
   cases — valid, expired, unsigned, scoped to another field, and aimed at a rule that
-  cannot be waived — each behave as specified. 44 tests, in `npm run check`; weakening
+  cannot be waived — each behave as specified. 48 tests, in `npm run check`; weakening
   the 14-day rule or the reserved-domain list turns them red.
 - **End to end, on completed data.** With the fields temporarily supplied and the
   three header placeholders waived, the release ran: 0 blockers, 36 pages, no
@@ -2284,7 +2340,7 @@ the photographs, the titles and descriptions, and the contact details — the em
 and phone are not optional; they are the consumer-law requirement in
 @sec-disclosure.
 
-Three things that are not `NEEDS-INPUT` but are still owed:
+Four things that are not `NEEDS-INPUT` but are still owed:
 
 - **The Chinese-locale enquiry route** should be WeChat rather than a `mailto:`,
   and that needs a QR image that does not exist yet. It is the one part of
@@ -2294,6 +2350,13 @@ Three things that are not `NEEDS-INPUT` but are still owed:
   404 page. Supplying a handle turns its mark into the real link; an explicit
   `""` takes the channel off the site. Readiness rule ID-06 will not let a
   release build while any of them is undecided.
+- **The artist's portrait.** About now carries a frame for it in both the
+  places About appears (@sec-portrait), and the frame is the only part that
+  was missing: the photograph goes in `masters/portrait.jpg` and the build
+  cuts it like any other. Until it exists the frame holds a labelled
+  placeholder in previews and is left out of a release altogether, so nothing
+  ships as an empty mat. Rule ID-08 reports it as omitted; rule ID-07 blocks a
+  release the moment the photograph is real and its description is not.
 - **The mark's vector source** — open item 7 above.
 
 ```{=latex}

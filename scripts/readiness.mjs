@@ -144,6 +144,32 @@ export const RULES = [
     }),
   },
 
+  {
+    /* The portrait is the one photograph on the site that is not a painting.
+       It is editorial, not legal, so nothing here blocks a release: the
+       release build simply leaves the frame out while there is no master
+       (build.js, portraitShown), exactly as WK-10 leaves out an unshot view,
+       and this rule is the line in the report that says so. What DOES block
+       is a portrait that ships undescribed — the moment the photograph is
+       real, so is 1.1.1. */
+    id: 'ID-07', area: 'Identity and contact', severity: 'blocker', waivable: false,
+    title: 'The artist\'s portrait is described',
+    basis: 'WCAG 2.2, 1.1.1 Non-text Content',
+    fix: 'Set site.about.portrait.alt.en and .zh to what the photograph shows.',
+    owns: [/^site\.about\.portrait\.alt\./],
+    when: ({ views }) => views.portrait?.placeholder === false,
+    check: ({ site }) => ['en', 'zh'].filter((l) => !text(site.about?.portrait?.alt?.[l], 3))
+      .map((l) => ({ path: `site.about.portrait.alt.${l}`, message: 'missing' })),
+  },
+  {
+    id: 'ID-08', area: 'Identity and contact', severity: 'warning', waivable: true,
+    title: 'A portrait without a photograph is left out of the live site',
+    basis: 'The release build shows the frame only when the photograph exists; an empty mat is not a portrait',
+    fix: 'Add masters/portrait.jpg and run npm run build:images to show it.',
+    check: ({ views }) => (views.portrait?.placeholder === false ? []
+      : [{ path: 'masters/portrait.jpg', message: 'the portrait frame will be omitted from About' }]),
+  },
+
   /* ---------- legal ---------- */
   {
     id: 'LG-01', area: 'Legal', severity: 'blocker', waivable: false,

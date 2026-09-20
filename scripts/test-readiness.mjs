@@ -72,6 +72,31 @@ test('views without photographs do not block, and are reported as omitted', () =
   const r = assess(ready());
   return { ok: r.ready && r.warnings.some((w) => w.rule === 'WK-10'), detail: `${r.warnings.filter((w) => w.rule === 'WK-10').length} omitted views` };
 });
+/* The portrait, both ways round. Undescribed is fine while there is no
+   photograph — nobody can describe one that has not been taken — and is a
+   blocker the moment there is, which is also the moment the frame goes live. */
+test('a portrait with no photograph does not block, and is reported as omitted', () => {
+  const r = assess(ready());
+  return { ok: r.ready && r.warnings.some((w) => w.rule === 'ID-08'), detail: r.warnings.filter((w) => w.rule === 'ID-08').map((w) => w.path).join('') };
+});
+test('the portrait\'s alt is not caught by the placeholder backstop while it is owed', () => {
+  const d = ready();
+  const r = assess(d);
+  return { ok: r.ready && d.site.about.portrait.alt.en === 'NEEDS-INPUT'
+               && !r.blockers.some((b) => b.path.startsWith('site.about.portrait')),
+           detail: r.blockers.filter((b) => b.path.includes('portrait')).map((b) => `${b.rule} ${b.path}`).join('; ') };
+});
+closes('a real portrait, still undescribed', 'ID-07', (d) => {
+  d.views.portrait = { width: 960, height: 1200, placeholder: false };
+});
+test('a described portrait passes, and stops being reported as omitted', () => {
+  const d = ready();
+  d.views.portrait = { width: 960, height: 1200, placeholder: false };
+  d.site.about.portrait.alt = { en: 'Priscilla at the studio window', zh: '画室窗前的 Priscilla' };
+  const r = assess(d);
+  return { ok: r.ready && !r.warnings.some((w) => w.rule === 'ID-08'), detail: r.blockers.map((b) => `${b.rule} ${b.path}`).join('; ') };
+});
+
 test('the inactive entity\'s missing numbers do not block', () => {
   const d = ready(); // hk-sole-prop still has NEEDS-INPUT registration numbers
   return assess(d).ready && d.seller.entities['hk-sole-prop'].registration.businessRegistrationNo === 'NEEDS-INPUT';

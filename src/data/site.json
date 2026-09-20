@@ -210,6 +210,27 @@
   },
   "about": {
     "$comment": "Paragraphs from the original draft, plus one addition from finding D-04.",
+    "$portrait": [
+      "THE ARTIST'S PORTRAIT, which About carries in both the places it appears:",
+      "beside the homepage section, and as the frontispiece of the page itself.",
+      "",
+      "The photograph is not here. It goes in masters/portrait.jpg, like every",
+      "other photograph on the site, and npm run build:images cuts it. Until it",
+      "exists the frame holds a placeholder card, so the layout is real and can",
+      "be judged — and a RELEASE build leaves the frame out altogether rather",
+      "than ship an empty mat (readiness ID-08, the same arrangement WK-10 uses",
+      "for a work's unshot views).",
+      "",
+      "alt is NEEDS-INPUT because nobody can describe a photograph that has not",
+      "been taken. Rule ID-07 requires it the moment the master exists, and owns",
+      "the path until then so the general placeholder backstop leaves it alone."
+    ],
+    "portrait": {
+      "alt": {
+        "en": "NEEDS-INPUT",
+        "zh": "NEEDS-INPUT"
+      }
+    },
     "paragraphs": {
       "en": [
         "These paintings are my creations — born from moments, places, and feelings I wanted to hold onto long enough to paint. I also hope they can serve, in a small way, as a form of support: I personally donate 10% of my profits from this shop each quarter to research related to bipolar disorder.",

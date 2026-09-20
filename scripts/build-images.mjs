@@ -7,6 +7,7 @@
  * Reads full-resolution masters from  masters/{slug}.{jpg,png,tif,webp}
  *                                    masters/{slug}-{detail|edge|back}.{jpg,…}
  *                                    masters/{slug}-video.{mp4,mov,webm}
+ *                                    masters/portrait.{jpg,…}   (the artist)
  * Writes web derivatives to          public/img/{slug}[-{kind}]-{width}.{avif,webp}
  *                                    public/video/{slug}.mp4
  *                                    public/img/views.json  (true pixel sizes)
@@ -86,8 +87,15 @@ const VIEW_RATIO = {           // height / width
 
 async function placeholder(w, width, kind = '') {
   const ratio = kind ? VIEW_RATIO[kind](w) : w.heightCm / w.widthCm;
-  const height = Math.round(ratio * width);
   const label = kind ? `${w.slug}  ·  ${kind}` : `${w.slug}  ·  ${w.heightCm} × ${w.widthCm} cm`;
+  return card(label, width, ratio);
+}
+
+/** The card itself: a labelled rectangle at a stated ratio. Anything the site
+ *  has a frame for but no photograph of is drawn by this one function, so a
+ *  placeholder always looks like a placeholder. */
+async function card(label, width, ratio) {
+  const height = Math.round(ratio * width);
   const fs = Math.max(11, Math.round(width / 46));
   const svg = Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
@@ -202,6 +210,46 @@ for (const w of works) {
       }
     }
   }
+}
+
+/* ---------- the artist's portrait ----------
+ * Not a work — it is not for sale and it is not in artworks.json — but it is
+ * the one other photograph the site has a frame for (build.js, the portrait
+ * plate beside About). It goes through this pipeline rather than beside it so
+ * that it gets the same sRGB handling, the same AVIF/WebP pair and, above all,
+ * the same entry in views.json: that entry is how the readiness gate asks
+ * whether the photograph is real (ID-07) and how the release build knows to
+ * leave the frame out while it is not (ID-08).
+ *
+ * 4:5 while it is a placeholder, which is the crop a portrait is taken in. A
+ * real master keeps its own proportions, whatever they are, exactly as a
+ * painting does — the frame is built from the numbers in views.json.
+ *
+ * Three widths, not five: the plate is at most ~320 CSS px, so 960 covers it
+ * on a 3x phone and nothing larger is ever requested.
+ */
+const PORTRAIT = 'portrait';
+const PORTRAIT_WIDTHS = [320, 640, 960];
+{
+  const master = findMaster(PORTRAIT);
+  if (!master) missing.push(`${PORTRAIT}.jpg`);
+  for (const width of PORTRAIT_WIDTHS) {
+    const input = master ? sharp(master).rotate() : sharp(await card('the artist  ·  portrait', width, 5 / 4));
+    const base = input.resize({ width, withoutEnlargement: true })
+      .toColourspace('srgb').withIccProfile('srgb');
+    await base.clone().avif({ quality: 68, chromaSubsampling: '4:4:4', effort: effort(master) })
+      .toFile(join(OUT, `${PORTRAIT}-${width}.avif`));
+    await base.clone().webp({ quality: 82, effort: effort(master) })
+      .toFile(join(OUT, `${PORTRAIT}-${width}.webp`));
+    built += 2;
+  }
+  let size = { width: 960, height: 1200 };
+  if (master) {
+    const m = await sharp(master).rotate().metadata();
+    const scale = Math.min(1, 960 / m.width);
+    size = { width: Math.round(m.width * scale), height: Math.round(m.height * scale) };
+  }
+  manifest[PORTRAIT] = { ...size, placeholder: !master };
 }
 
 writeFileSync(join(OUT, 'views.json'), JSON.stringify(manifest, null, 2) + '\n');

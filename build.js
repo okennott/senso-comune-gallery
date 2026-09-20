@@ -443,7 +443,10 @@ function renderIndex(loc) {
 <section class="section ground--deep" id="about">
   <div class="wrap">
     <div class="section__head">
-      <h2>${esc(t(S.about.title, loc))}</h2>
+      <div class="section__aside">
+        <h2>${esc(t(S.about.title, loc))}</h2>
+        ${portraitFrame(loc, 'section')}
+      </div>
       <div class="prose measure">
         ${t(site.about.paragraphs, loc).slice(0, 2).map((p) => `<p>${esc(p)}</p>`).join('\n        ')}
         <p><a class="link-quiet" href="${lpath(loc, site, '/about/')}">${loc === 'zh' ? '继续阅读' : 'Read the rest'}</a></p>
@@ -694,6 +697,56 @@ ${jsonLd(w, site, seller, loc, origin)}`;
  * a link, and let /works/ carry the grid. Nothing here caps the       *
  * count — the decision is editorial, not structural.                  *
  * ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
+ * The artist's portrait                                               *
+ *                                                                     *
+ * About is the one part of the site that is a person rather than a    *
+ * catalogue, and it carried no face. The portrait is mounted the way  *
+ * a painting is — the same cream mat, the same mount shadow, the same *
+ * board grain — because that is the site's device for an object on a  *
+ * wall, and a photograph of the artist is an object like any other.   *
+ * It is NOT a work: it is not in artworks.json, has no price, no      *
+ * lightbox and no view transition, and it is never zoomable.          *
+ *                                                                     *
+ * WHERE IT SITS, in each of the two places About is featured:         *
+ *   the homepage section — in the heading column under the h2, so it  *
+ *     stands beside the prose at every width that column is beside    *
+ *     it, and above the prose on a phone, with no new breakpoint;     *
+ *   the About page — as a frontispiece over the title. That page's    *
+ *     mount is 660px around a 34rem measure (finding D-01) and there  *
+ *     is no room beside the column for a plate. A book puts the       *
+ *     portrait on the leaf facing the title; this is that leaf.       *
+ *                                                                     *
+ * WHILE THERE IS NO PHOTOGRAPH the frame holds the image pipeline's   *
+ * placeholder card, so the layout is real and can be judged at every  *
+ * width. A RELEASE build leaves the frame out altogether rather than  *
+ * ship an empty mat — readiness ID-08, the arrangement WK-10 already  *
+ * uses for a work's unshot views. Supplying masters/portrait.jpg and  *
+ * running the image build is the whole of turning it on.              *
+ * ------------------------------------------------------------------ */
+const PORTRAIT_WIDTHS = [320, 640, 960];
+const portraitShown = () => !RELEASE || VIEWS.portrait?.placeholder === false;
+
+/** @param {'section'|'page'} where  the homepage section, or the About page. */
+function portraitFrame(loc, where) {
+  if (!portraitShown()) return '';
+  const m = VIEWS.portrait ?? { width: 960, height: 1200, placeholder: true };
+  const srcset = (ext) => PORTRAIT_WIDTHS.map((x) => `${asset(`/img/portrait-${x}.${ext}`)} ${x}w`).join(', ');
+  // The plate is capped in CSS at 13.5rem in the section and 15rem on the
+  // page; the widths above cover both at 3x. A length, not a percentage:
+  // the box never tracks the viewport.
+  const sizes = where === 'page' ? '15rem' : '13.5rem';
+  return `<figure class="portrait portrait--${where}">
+      <picture>
+        <source type="image/avif" srcset="${srcset('avif')}" sizes="${sizes}">
+        <img class="portrait__img" src="${asset('/img/portrait-640.webp')}" srcset="${srcset('webp')}" sizes="${sizes}"
+             width="${m.width}" height="${m.height}" alt="${esc(t(site.about.portrait.alt, loc))}"
+             loading="lazy" decoding="async"${m.placeholder ? ' data-placeholder="portrait"' : ''}>
+      </picture>
+      <figcaption class="portrait__cap">${esc(t(seller.artist.name, loc))}</figcaption>
+    </figure>`;
+}
+
 /* The About page is the one page that is only prose, so it is the one page
    set as a page of a book rather than as a screen: the display face, a lede,
    a drop cap and a real italic. See "About, set as a book page" in the report.
@@ -711,6 +764,7 @@ function renderAbout(loc) {
   const paras = t(site.about.paragraphs, loc);
   const body = `
 <section class="page page--about wrap">
+  ${portraitFrame(loc, 'page')}
   <h1>${esc(t(site.sections.about.title, loc))}</h1>
   <div class="prose measure">
     ${paras.map((x) => `<p>${quoted(esc(x), loc)}</p>`).join('\n    ')}

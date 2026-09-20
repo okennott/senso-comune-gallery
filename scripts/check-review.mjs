@@ -658,7 +658,9 @@ check('G-07', 'the texture is on the mat and on nothing else', () => {
     .replace(/\/\*[\s\S]*?\*\//g, '');
   const textured = [...sheets.matchAll(/([^{}]+)\{([^{}]*var\(--canvas-grain\)[^{}]*)\}/g)]
     .map((m) => m[1].trim().replace(/\s+/g, ' '));
-  const mats = ['.work__img, .hero__work img', '.work__video'];
+  // The portrait joined the mat on 20 September 2026: one material, and the
+  // artist's photograph is an object on a wall like the paintings.
+  const mats = ['.work__img, .hero__work img, .portrait__img', '.work__video'];
   const same = textured.length === mats.length && mats.every((f) => textured.includes(f));
   const solved = /READING/.test(src('scripts/check-contrast.mjs'));
   return { ok: same && solved,
@@ -942,7 +944,7 @@ check('L-01', 'cream paints the mat, the art, and the bar — and no page surfac
   const allowed = new Set([
     'img',                                  // holds an image box before its bytes arrive
     '.work__img',                           // the painting itself
-    '.work__img, .hero__work img',          // the mat
+    '.work__img, .hero__work img, .portrait__img',  // the mat, paintings and the artist alike
     '.work__video',                         // the same mat, around the video
     '.gallery__thumb',                      // a thumbnail of a work
     '.scale__work',                         // the work in the scale diagram
@@ -1170,6 +1172,63 @@ check('K-03', 'a release is refused while blocked — and leaves the last site u
   const untouched = statSync(join(DIST, 'index.html')).mtimeMs === stamp && JSON.parse(read('readiness.json')).mode === 'preview';
   return { ok: r.status === 1 && /RELEASE REFUSED/.test(r.stderr) && untouched,
            detail: `exit ${r.status}, refused ${/RELEASE REFUSED/.test(r.stderr)}, dist untouched ${untouched}` };
+});
+
+/* ===================== M — the artist's portrait ===================== */
+/* Added 20 September 2026. About is the one part of the site that is a person
+   rather than a catalogue, and it had no face. The frame is in both the places
+   About appears, it is mounted as a painting is, and it is honest about being
+   empty: a placeholder while there is no photograph, and no frame at all in a
+   release until there is one. */
+
+const aboutPage = read('about/index.html');
+const zhAboutPage = read('zh/about/index.html');
+
+check('M-01', 'both the places About appears carry the portrait frame', () => {
+  const inSection = (h) => {
+    const sec = (h.match(/<section class="section ground--deep" id="about">([\s\S]*?)<\/section>/) ?? [])[1] ?? '';
+    return /<figure class="portrait portrait--section">/.test(sec) && /<h2>/.test(sec);
+  };
+  // on the page it is the frontispiece: the frame comes BEFORE the title
+  const onPage = (h) => /<figure class="portrait portrait--page">[\s\S]*?<\/figure>\s*<h1>/.test(h);
+  const pages = [['home', inSection(home)], ['zh home', inSection(zhHome)],
+                 ['about', onPage(aboutPage)], ['zh about', onPage(zhAboutPage)]];
+  const bad = pages.filter(([, ok]) => !ok).map(([n]) => n);
+  return { ok: !bad.length, detail: bad.length ? `missing on ${bad.join(', ')}` : 'section and frontispiece, both locales' };
+});
+
+check('M-01', 'the portrait is mounted as a painting, and is not one', () => {
+  // `flat` has every space stripped, so the descendant selector closes up
+  const matted = /\.work__img,\.hero__workimg,\.portrait__img\{box-sizing:border-box;padding:var\(--mat\)/.test(flat);
+  const img = (aboutPage.match(/<img class="portrait__img"[^>]*>/) ?? [''])[0];
+  const sized = /width="\d+"[^>]*height="\d+"/.test(img);          // CLS 0, like every other image
+  const quiet = !/view-transition-name/.test(img) && !/zoom/.test(img)
+             && !/commandfor/.test((aboutPage.match(/<figure class="portrait[\s\S]*?<\/figure>/) ?? [''])[0]);
+  const notAWork = !JSON.parse(src('src/data/artworks.json')).works.some((w) => w.image === 'portrait');
+  return { ok: matted && sized && quiet && notAWork,
+           detail: `mat ${matted}, width/height ${sized}, no zoom or transition ${quiet}, not in the catalogue ${notAWork}` };
+});
+
+check('M-01', 'an empty frame says so, and never reaches a release', () => {
+  const b = src('build.js');
+  // the preview build marks the placeholder where the audit can see it
+  const marked = /<img class="portrait__img"[^>]*data-placeholder="portrait"/.test(aboutPage)
+              || JSON.parse(src('public/img/views.json')).portrait?.placeholder === false;
+  // and the release build does not draw the frame at all until the master exists
+  const gated = /portraitShown\s*=\s*\(\)\s*=>\s*!RELEASE\s*\|\|\s*VIEWS\.portrait\?\.placeholder === false/.test(b)
+             && /if \(!portraitShown\(\)\) return '';/.test(b);
+  const rule = /id: 'ID-08'/.test(src('scripts/readiness.mjs'));
+  return { ok: marked && gated && rule, detail: `marked ${marked}, release gate ${gated}, ID-08 ${rule}` };
+});
+
+check('M-01', 'the portrait cannot ship undescribed', () => {
+  const r = src('scripts/readiness.mjs');
+  const rule = /id: 'ID-07'[\s\S]{0,600}?when: \(\{ views \}\) => views\.portrait\?\.placeholder === false/.test(r);
+  const owns = /owns: \[\/\^site\\\.about\\\.portrait\\\.alt\\\.\/\]/.test(r);
+  const blocking = /id: 'ID-07'[\s\S]{0,200}?severity: 'blocker', waivable: false/.test(r);
+  const alt = /<img class="portrait__img"[^>]*alt="[^"]*"/.test(aboutPage);
+  return { ok: rule && owns && blocking && alt,
+           detail: `1.1.1 the moment the photograph is real ${rule}, owns its own path ${owns}, unwaivable ${blocking}, alt attribute present ${alt}` };
 });
 
 /* ===================== cross-cutting ===================== */

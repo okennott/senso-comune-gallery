@@ -210,8 +210,13 @@
      - object-fit:contain, so if any box ever disagrees with a painting's
        ratio the painting is letterboxed inside its mat, never stretched.
    border-box keeps the mat inside the height caps the layout already sets. */
+/* The portrait is named here with the paintings on purpose: there is one mat
+   on this site, not two, and the artist's photograph is an object on a wall
+   like the rest of them. What it does NOT take is the rule above — it has no
+   zoom cursor, because it is not for sale and there is nothing to open. */
 .work__img,
-.hero__work img{
+.hero__work img,
+.portrait__img{
   box-sizing:border-box;
   padding:var(--mat);
   /* The mat is board, and board has tooth. The grain shows in the ring around
@@ -229,6 +234,37 @@
   .work__figure:hover .work__img,
   .hero__work:hover img{ box-shadow:var(--shadow-lift) }
 }
+
+/* ---------- the artist's portrait ----------
+   About is the one part of the site that is a person rather than a catalogue,
+   and until now it had no face. The photograph is mounted as a painting is —
+   the mat rule above names it — and differs in exactly three ways, each of
+   which says that this is not a work: it is capped in width, it carries a
+   caption, and nothing about it invites a click.
+
+   The cap is what keeps it a plate rather than a picture. 13.5rem beside the
+   homepage's 22ch heading column and 15rem over the About page's 34rem
+   measure; on a phone both stop at the column's own width, so the portrait
+   never becomes the largest thing on the screen above the prose it belongs
+   to. build.js gives the <img> the same numbers in `sizes`. */
+.portrait{ margin:0; display:grid; gap:var(--space-2); justify-items:start }
+.portrait__img{ display:block; width:100%; height:auto }
+.portrait--section{ max-width:min(100%,13.5rem) }
+.portrait--page{ max-width:min(100%,15rem); margin-bottom:var(--space-5) }
+/* A caption, not a label: the name of the person in the frame, in the same
+   small caps a tombstone uses. --muted is 4.62:1 on the wall. */
+.portrait__cap{
+  font-family:var(--font-body);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label);
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* The heading column of a section, when it carries more than the heading.
+   The gap is the one between a heading and the thing under it, not the one
+   between two sections. */
+.section__aside{ display:grid; gap:var(--space-5); align-content:start; justify-items:start }
 
 
 
