@@ -885,13 +885,28 @@ check('H-04', 'a placeholder view is marked as one, and its alt text is still ow
   return { ok: (RELEASE || views > 0) && views === wantViews && !mismatch && owed, detail: `${views} view images, flag disagrees with the manifest ${mismatch}, every view has an alt field ${owed}` };
 });
 
-check('H-05', 'only the front view carries the painting between pages', () => {
-  const bad = workPages.filter(([, h]) => {
-    const names = [...h.matchAll(/view-transition-name:work-/g)].length;
+/* A view-transition name is an identity, and the rule that matters is that no
+   two elements on a page claim the same one — a duplicate makes the transition
+   drop rather than animate. This used to say "one name per page", which was
+   the same thing while a work page showed exactly one painting. It shows four
+   since AW-09: its own, and three more at the foot. Those three SHOULD carry
+   their names, because that is what makes a related work fly out of the grid
+   into the page it leads to.
+
+   What has not changed: the page's own work is named once, and only on the
+   FRONT view — a detail, an edge, a back or the video carrying the same name
+   would be a second claim on it, and the painting would arrive as a crop of
+   its own surface. */
+check('H-05', 'every painting on a work page carries its own name, once', () => {
+  const bad = workPages.filter(([p, h]) => {
+    const slug = p.match(/\/works\/([a-z0-9-]+)\//)[1];
+    const names = [...h.matchAll(/view-transition-name:work-([a-z0-9-]+)/g)].map((m) => m[1]);
+    const unique = names.length === new Set(names).size;
+    const own = names.filter((n) => n === slug).length;
     const onView = /work__img--view"[^>]*view-transition-name/.test(h) || /<video[^>]*view-transition-name/.test(h);
-    return names !== 1 || onView;
+    return !unique || own !== 1 || onView;
   }).map(([p]) => p);
-  return { ok: !bad.length, detail: bad.length ? bad.join(' ') : 'one name per work page, on the front view' };
+  return { ok: !bad.length, detail: bad.length ? bad.join(' ') : `${workPages.length} work pages, every name distinct, the page's own on the front view` };
 });
 
 check('H-06', 'purchase limits are declared per entity, and still owed', () => {

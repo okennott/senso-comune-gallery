@@ -207,6 +207,9 @@
 }
 @media (min-width:760px){
   .section__head{ grid-template-columns:minmax(0,22ch) minmax(0,var(--measure)) }
+  /* A head with no intro beside it has no second column to make room for, and
+     22ch of heading broke "More from this series" over two lines. */
+  .section__head:not(:has(.section__intro)){ grid-template-columns:minmax(0,1fr) }
 }
 .section__intro{ margin:0; color:var(--body) }
 /* The head's bottom margin separates it from the content BELOW it. Three
@@ -420,7 +423,17 @@ h3.tombstone__title{ font-size:var(--size-body) }
 .detail{ padding-block:var(--space-6) }
 .detail__grid{ display:grid; gap:var(--space-6) }
 @media (min-width:900px){
-  .detail__grid{ grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); align-items:start }
+  /* AW-02, on the page that is about one object. The split was 1.6fr to 1fr
+     with a 96px gutter, and the image column then pays 80px to the thumbnail
+     rail, 16px to its gap and 32px to the strip's own padding before the
+     painting gets anything: 465px of a 1440px screen. The label needs about
+     20rem and no more — it is a tombstone, a scale drawing and two links —
+     so it takes that and the painting takes the rest. */
+  .detail__grid{
+    grid-template-columns:minmax(0,1fr) minmax(16rem,20rem);
+    column-gap:var(--space-5);
+    align-items:start;
+  }
   .detail__aside{ position:sticky; top:6.5rem }
 }
 .detail__desc{ max-width:var(--measure) }
@@ -1255,7 +1268,14 @@ html[lang^="zh"] .page--about .prose{
 /* The wall needs no phone exception: at one column it is the column's own
    width by --wall-ratio, which is the largest a painting can honestly be on a
    390px screen. The old rule capped it at 70vh and cost it a third of that. */
-.section__more{ margin:var(--space-5) 0 0 }
+/* The way out of a listing. It may carry more than one route — a series page
+   offers the whole catalogue and, where there is one, the archive — so it is a
+   row rather than a line of text, and the routes are spaced apart rather than
+   run together with a separator nobody would click. */
+.section__more{
+  margin:var(--space-5) 0 0;
+  display:flex; flex-wrap:wrap; gap:var(--space-3) var(--space-5);
+}
 
 /* Local navigation: the Works section's rooms, as one quiet row of tabs under
    the page heading — horizontal, because there are few (NN/g: less salient

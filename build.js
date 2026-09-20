@@ -378,7 +378,7 @@ function renderIndex(loc) {
     <h2 id="featured-h" class="hero__label">${esc(t(S.featured.title, loc))}</h2>
     <figure class="hero__work">
       <a class="hero__wall" style="--work-ratio:${(heroWork.widthCm / heroWork.heightCm).toFixed(4)}" href="${lpath(loc, site, `/works/${heroWork.slug}/`)}">
-        ${picture(heroWork, { eager: true, sizes: '(min-width:900px) 46vh, calc(100vw - 40px)' }, loc)}
+        ${picture(heroWork, { eager: true, sizes: `(min-width:900px) calc(min(62vh,38rem) * ${(heroWork.widthCm / heroWork.heightCm).toFixed(4)}), calc(100vw - 40px)` }, loc)}
       </a>
       <figcaption>
         ${tombstone(heroWork, loc, { level: 'h3' })}
@@ -534,11 +534,24 @@ function renderIndex(loc) {
     title: `${t(seller.artist.siteName, loc)}`,
     description: t(site.sections.works.intro, loc),
     body, strip,
-    ogImage: `/img/${works[0].image}-1600.webp`,
+    ...shareCard(works[0], loc),
     canonical: lpath(loc, site, '/'),
     altLocales: altFor('/'),
   });
 }
+
+/* THE SHARE CARD, for the five page types that put a painting on one.
+   og:image:height used to be written only on a work page; everywhere else the
+   template fell back to 1600, so the home page, Works, each series and the
+   archive all declared a 1600x1600 square for a file that is 1600x2000. A card
+   whose declared shape is not its real one is cropped or letterboxed by
+   whichever service is reading it, and that card is the first thing anyone
+   sees of this site. One function now, from the work itself. */
+const shareCard = (w, loc) => (w ? {
+  ogImage: `/img/${w.image}-1600.webp`,
+  ogImageAlt: t(w.alt, loc),
+  ogImageHeight: Math.round((w.heightCm / w.widthCm) * 1600),
+} : { ogImage: null });
 
 /* ------------------------------------------------------------------ *
  * the catalogue: Works, each series, sold works                       *
@@ -559,7 +572,7 @@ function renderWorks(loc) {
     site, seller, loc, current: 'works',
     title: `${t(S.works.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: t(S.works.intro, loc), body,
-    ogImage: available[0] ? `/img/${available[0].image}-1600.webp` : null,
+    ...shareCard(available[0], loc),
     canonical: lpath(loc, site, '/works/'), altLocales: altFor('/works/'),
   });
 }
@@ -585,13 +598,16 @@ function renderSeries(x, loc) {
   </div>
   ${worksNav(loc, x.id)}
   ${catalogue(available, loc, { eagerFirst: true })}
-  ${sold ? `<p class="section__more"><a class="link-quiet" href="${lpath(loc, site, '/works/sold/')}">${esc(t(site.sections.archive.linkLabel, loc))} (${sold})</a></p>` : ''}
+  <p class="section__more">
+    <a class="link-quiet" href="${lpath(loc, site, '/works/')}">${esc(t(site.sections.works.allWorks, loc))} (${works.filter((y) => !y.sold).length})</a>${sold ? `
+    <a class="link-quiet" href="${lpath(loc, site, '/works/sold/')}">${esc(t(site.sections.archive.linkLabel, loc))} (${sold})</a>` : ''}
+  </p>
 </section>`;
   return layout({
     site, seller, loc, current: 'works',
     title: `${t(x.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: t(x.intro, loc), body,
-    ogImage: available[0] ? `/img/${available[0].image}-1600.webp` : null,
+    ...shareCard(available[0], loc),
     canonical: lpath(loc, site, seriesPath(x.id)), altLocales: altFor(seriesPath(x.id)),
   });
 }
@@ -613,7 +629,7 @@ function renderSold(loc) {
     ${sold.map((w) => `<li class="work">
       <figure class="work__figure">
         <a href="${lpath(loc, site, `/works/${w.slug}/`)}" style="display:block">
-          ${picture(w, { sizes: '(min-width:900px) 22vw, (min-width:560px) 45vw, calc(100vw - 40px)' }, loc)}
+          ${picture(w, { sizes: '(min-width:1100px) 250px, (min-width:560px) 30vw, calc(100vw - 40px)' }, loc)}
         </a>
       </figure>
       ${tombstone(w, loc, { level: 'h2' })}
@@ -624,7 +640,7 @@ function renderSold(loc) {
     site, seller, loc, current: 'works',
     title: `${t(S.archive.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: t(S.archive.intro, loc), body,
-    ogImage: sold.length ? `/img/${sold[0].image}-1600.webp` : null,
+    ...shareCard(sold[0], loc),
     canonical: lpath(loc, site, '/works/sold/'), altLocales: altFor('/works/sold/'),
   });
 }
@@ -658,6 +674,20 @@ function renderWork(w, loc) {
   const desc = t(w.description, loc);
   const note = t(w.artistNote, loc);
 
+  /* AW-09. What follows the work. Siblings from its own series first, newest
+     first and only ones still for sale — a page that closes with three works
+     that have gone is a page that closes with three dead ends. Topped up from
+     the rest of the catalogue when the series is thin, at which point the
+     heading stops claiming they are from the series. Three, because the
+     catalogue grid is three across at the width this page is widest. */
+  const available = works.filter((x) => !x.sold && x.slug !== w.slug);
+  const siblings = available.filter((x) => x.section === w.section).sort(byNewest);
+  const more = [...siblings, ...available.filter((x) => x.section !== w.section).sort(byNewest)]
+    .slice(0, 3);
+  const [moreHref, moreLabel] = siblings.length >= 3
+    ? [seriesPath(w.section), site.sections.works.viewSeries]
+    : ['/works/', site.sections.works.allWorks];
+
   const body = `
 <article class="detail wrap">
   ${breadcrumb(loc, [[t(site.sections.works.title, loc), '/works/'], [t(seriesOf(w.section).title, loc), seriesPath(w.section)], [t(w.title, loc), null]])}
@@ -689,6 +719,14 @@ function renderWork(w, loc) {
       </p>
     </aside>
   </div>
+
+  ${more.length ? `<section class="section more" aria-labelledby="more-h">
+    <div class="section__head">
+      <h2 id="more-h">${esc(t(siblings.length ? ui.moreFromSeries : ui.moreWorks, loc))}</h2>
+    </div>
+    ${catalogue(more, loc, { level: 'h3' })}
+    <p class="section__more"><a class="link-quiet" href="${lpath(loc, site, moreHref)}">${esc(t(moreLabel, loc))}</a></p>
+  </section>` : ''}
 
   <nav class="pager" aria-label="${loc === 'zh' ? '作品导航' : 'Works'}">
     ${prev ? `<a rel="prev" href="${lpath(loc, site, `/works/${prev.slug}/`)}">← ${esc(t(ui.prevWork, loc))}</a>` : '<span></span>'}
@@ -723,9 +761,7 @@ ${jsonLd(w, site, seller, loc, origin)}`;
     title: `${t(w.title, loc)} — ${t(seller.artist.siteName, loc)}`,
     description: desc ? desc.slice(0, 180) : `${t(w.medium, loc)}, ${w.year}. ${dims(w)}.`,
     body,
-    ogImage: `/img/${w.image}-1600.webp`,
-    ogImageAlt: t(w.alt, loc),
-    ogImageHeight: Math.round((w.heightCm / w.widthCm) * 1600),
+    ...shareCard(w, loc),
     product: { amount: w.priceUSD, currency: artworksF.currency, sold: w.sold },
     canonical: lpath(loc, site, `/works/${w.slug}/`),
     altLocales: altFor(`/works/${w.slug}/`),

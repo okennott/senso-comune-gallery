@@ -309,6 +309,21 @@
       "en": "Back to works",
       "zh": "返回作品"
     },
+    "$moreWorks": [
+      "AW-09. A work page used to end on a rule and one right-aligned link to the",
+      "next work: no way back to the catalogue, nothing else by the same hand,",
+      "nothing from the same series. A leaf page that stops is a leaf page the",
+      "reader leaves. The heading is the series' own where there are siblings to",
+      "show, and the general one where the rest of the catalogue fills in."
+    ],
+    "moreFromSeries": {
+      "en": "More from this series",
+      "zh": "更多同系列作品"
+    },
+    "moreWorks": {
+      "en": "Other works",
+      "zh": "其他作品"
+    },
     "prevWork": {
       "en": "Previous work",
       "zh": "上一件"
