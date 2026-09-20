@@ -5,9 +5,52 @@ would a design jury — Awwwards, FWA, CSS Design Awards, or the editor of a
 gallery-sites roundup — stop on this page? Findings are numbered `AW-nn` so
 they do not collide with the codes already in `scripts/check-review.mjs`.
 
+## Status, 20 September 2026 — after the work
+
+Nine of the eleven findings are closed. What the pages measure now, against
+the numbers in this document:
+
+| | before | after |
+|:--|:--|:--|
+| Featured painting, 1440 and 1920 | 375 × 460 | 446 × 558 |
+| Price to its button | 742 px apart | 58 px, same column |
+| Catalogue cell / image / caption, 1440 | 321 / 289 / 321, three left edges | 321 / 321 / 321, one |
+| Latest works on a 390px phone | 208 px wide | 307 px |
+| Motto, 390 → 1920 | 38.4 px throughout | 26.1 → 39.4 → 53.4 → 54 |
+| Work page's own painting | 465 px | 562 px |
+| Reading ground | the sage wall, black at 6.14:1 | --wash-pale, black at 16.5:1 |
+| Masthead controls that lead nowhere | 3 | 0 |
+| Readiness blockers | 57 | 54 |
+
+Still open, and why:
+
+- **AW-10** — the prose pages still carry no image. The mechanism is there
+  (`masters/`, `npm run build:images`), but there is no photograph to put on
+  How to Buy, and an empty mat on a page that does not need one yet is worse
+  than white space. It waits on the shoot, with the work photographs.
+- **AW-11, the share card** — `og:image:height` is now derived on all five
+  page types, so no card is mis-declared. A dedicated 1200 × 630 render, so a
+  portrait canvas is not cropped to a sliver by `summary_large_image`, is
+  still worth building and is not built.
+- **AW-11, the SAMR line** — left as it is, on purpose. The Chinese sentence
+  is the declaration; the English under it is a gloss. Authoritative text
+  first is the right order even on an English page.
+
+Every change is held by the project's own gates: `npm run check` (contrast,
+links, 99 review assertions, 48 readiness tests) and `npm run check:render`
+(275 painting boxes at five widths) pass. Where a finding reversed a recorded
+decision — the plates, the band's ornament, the masthead's controls, one name
+per work page — the assertion that held the old decision was rewritten to hold
+the new one rather than deleted.
+
 ## Method
 
-Built at this commit, served from `dist/`, and laid out in headless Chrome at
+Everything from "The verdict" down describes the site AS REVIEWED, before any
+of it was acted on; the status above says what has changed since, and the
+numbers in the findings are left as they were measured so the two can be read
+against each other.
+
+Built at commit c95a085, served from `dist/`, and laid out in headless Chrome at
 390, 1024, 1280, 1440 and 1920 px in both locales. Element boxes were read out
 of the DOM rather than estimated from screenshots, so every number below is a
 measurement, not an impression.
