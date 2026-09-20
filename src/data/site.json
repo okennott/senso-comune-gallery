@@ -77,11 +77,7 @@
       "en": "That which is done\nwith love is well done.",
       "zh": "以爱完成之事，\n方为善成。"
     },
-    "cta": {
-      "en": "View works",
-      "zh": "浏览作品"
-    },
-    "original": {
+        "original": {
       "$comment": [
         "The sentence as van Gogh wrote it, in Dutch. Transcribed from the Van",
         "Gogh Museum / Huygens ING edition of letter 143, sheet 1r:1, where it",
@@ -114,7 +110,6 @@
       "`attribution` is the full name. He signed the paintings 'Vincent'; the",
       "name under a quotation is the man's, and his was Vincent Willem van Gogh."
     ],
-    "ctaHref": "/works/",
     "attribution": {
       "en": "Vincent Willem van Gogh",
       "zh": "文森特·威廉·梵高"

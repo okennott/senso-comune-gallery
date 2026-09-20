@@ -1480,6 +1480,80 @@ with its own page, and the Works section's rooms are one quiet row of tabs.
   answers with a 301 on Cloudflare Pages and with a redirecting page on hosts that
   cannot send one.
 
+### The order of the four {#sec-structure-order}
+
+The site has four places to go — *Works, About, How to Buy, Contact* — and
+Priscilla asked for them in that order, in the header and on the homepage.
+The header was already in it. The question worth answering was whether it is
+the right one, and what the homepage should do with it, so the sample from
+@sec-structure-method was widened and read for **order** rather than for
+structure.
+
+: What eight sites put first, and where they put Contact {#tbl-order}
+
+| Site | Header, in order | About | Contact |
+|:-----|:-----------------|:------|:--------|
+| Gagosian | Exhibitions · Artists · Fairs & Collecting · Quarterly · News · Locations · Shop | — | footer |
+| Pace | Artists · Exhibitions · Art Fairs · Events · Journal · Publishing · Galleries | secondary bar | footer |
+| Victoria Miro | Artists · Exhibitions · Art Fairs · Channel · Store | — | footer |
+| Kehinde Wiley | Exhibitions · Special Projects · Selected Works · **About \| Contact** · Press · Shop | 4th | 4th, with About |
+| Tappan Collective | Collect · Artists · The Edits · Journal · Info · Gift Cards | under *Info* | footer |
+| Singulart | New In · Painting · Prints · Photography · Sculpture · Drawing · Artists | footer | footer |
+| UGallery | Shop Art · Our Artists · Commissions · About Us | 4th | footer |
+| Artfinder | the catalogue, by medium and by artist | footer | footer |
+
+Three things every one of them agrees on.
+
+**The work is first.** Eight out of eight open with the catalogue under one
+name or another — *Exhibitions, Artists, Collect, Shop Art, New In*. Not one
+leads with the gallery's own story.
+
+**Contact is last, or it is not in the header at all.** Six of the eight keep
+it in the footer entirely; the two that surface it put it at the end. Nothing
+in the sample puts Contact before About.
+
+**Four to six items.** The marketplaces run longer because their nav *is* the
+catalogue's facets; the artists' and galleries' own sites sit at four to six.
+This site has four.
+
+That settles the order by convention, and the **serial position effect**
+settles why it is the right one rather than merely the common one: in any
+list, the first and last items are the ones attended to and remembered, and
+the middle is where attention goes to die.[^serial] The two that matter
+commercially here are the first — the work, which is the product — and the
+last — Contact, which on a site with no cart is the checkout. About and How to
+Buy are the reasons to act, and they belong between the two.
+
+Where this site departs from the sample, it does so knowingly, and both
+departures come from the same fact: **there is no cart, and the border is in
+the way**.
+
+- **How to Buy is in the header.** Five of the eight keep buying help in the
+  footer, behind an FAQ. Here, how buying works is a question the visitor has
+  *before* they choose anything — payment is arranged by message, duty is the
+  buyer's to anticipate, and the returns window is a promise that has to be
+  found. The threshold for moving it to the footer is already written down
+  (@tbl-structure-growth): when the cart takes payments.
+- **About is in the header.** The galleries push their own story into the
+  footer because the artists are the product. Here the artist *is* the
+  product: the pledge, the slowness and the reason there are not many works
+  are what a buyer is buying into.
+
+**The homepage now runs in the same order**, and ends where the header ends.
+It used to stop at *How to Buy*: it explained how buying works and handed the
+reader to the footer, which is where a legal address lives rather than where
+an invitation does. A **Contact close** was added — the section's own intro
+and one quiet link, with the details left in the one place they already live —
+so the last thing on the page is how to reach the person who painted it.
+
+One link came off in the same pass. The band under the masthead carried a
+*View works* link out of the hero with it (@sec-band); the header's first item
+already goes there and the Latest works section ends with the same link, so a
+third route to one page, inside the page's own statement, was a link asking to
+be counted rather than used. The band is the quote and the palette now, and
+nothing else. I-07 asserts the header's order and the page's, in both
+languages.
+
 ### Where it stays personal {#sec-structure-personal}
 
 The consensus decides the shape; the site keeps its own character inside it.
@@ -1634,6 +1708,7 @@ The render check covers the catalogue, both series pages and sold works.
 [^nng-rail]: Nielsen Norman Group, [Fight against "right-rail blindness"](https://www.nngroup.com/articles/fight-right-rail-blindness/) and [Banner blindness revisited](https://www.nngroup.com/articles/banner-blindness-old-and-new-findings/).
 [^nng-local]: Nielsen Norman Group, [Local navigation is a valuable orientation and wayfinding aid](https://www.nngroup.com/articles/local-navigation/).
 [^baymard-filters]: Baymard Institute, [Be careful with horizontal filtering toolbars](https://baymard.com/blog/horizontal-filtering-sorting-design).
+[^serial]: The serial-position effect: first and last items in a list are recalled best, the middle worst — Ebbinghaus's finding, summarised for interface work by [Laws of UX](https://lawsofux.com/serial-position-effect/) and applied to navigation order by [CXL](https://cxl.com/blog/serial-position-effect/) and [Convertize](https://tactics.convertize.com/tactic/restructure-your-navigation-menu). Nav orders in @tbl-order were read from each site's rendered header in September 2026.
 [^nng-flat]: Nielsen Norman Group, [Flat vs. deep website hierarchies](https://www.nngroup.com/articles/flat-vs-deep-hierarchy/).
 [^nng-poly]: Nielsen Norman Group, [Polyhierarchies improve findability for ambiguous IA categories](https://www.nngroup.com/articles/polyhierarchy/).
 
@@ -2140,7 +2215,7 @@ and the CI workflow installs the four wheels it needs so that it always does.
 |:----------------------|:----------------------------------------------------------|
 | `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white. With the plates off it also prints, without blocking, every pair as the page actually renders it (@sec-plates) |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **98 assertions over 61 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `check-review` | **99 assertions over 62 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
 | `test-readiness` | Any of **48 tests** showing the gate opens only when it should (@sec-readiness-proof) |
 | `check-review`, last assertion | The image tool failing its own round-trip: two fixtures, both directions, byte-exact when the source is opaque and within one unit per channel when it is not (@sec-image-tool) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |

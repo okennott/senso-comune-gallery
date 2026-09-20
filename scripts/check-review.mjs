@@ -905,6 +905,26 @@ check('I-01', 'the header marks where the visitor is', () => {
   return { ok, detail: `works ${worksPg} · a work ${workPg} · contact ${contact} · home ${homePg}` };
 });
 
+check('I-07', 'the homepage runs in the same order as the header', () => {
+  // Works, About, How to Buy, Contact — the order the header states, and the
+  // order the page itself now runs in, ending where the header ends. The
+  // research behind it is in the report (@sec-structure-order): of eight
+  // galleries, marketplaces and artists' own sites, every one leads with the
+  // work and not one puts Contact before About.
+  const order = (html) => [...html.matchAll(/<section class="[^"]*" id="([a-z]+)"/g)].map((m) => m[1]);
+  const want = ['latest', 'series', 'about', 'buy', 'contact'];
+  const nav = (html) => [...((html.match(/<nav class="nav"[^>]*>([\s\S]*?)<\/nav>/) ?? [])[1] ?? '')
+    .matchAll(/href="[^"]*\/([a-z-]+)\/"/g)].map((m) => m[1]);
+  const seen = order(home), zhSeen = order(zhHome);
+  // the hero is the fourth work surface and carries no id, so the page's
+  // four movements are: the works, About, How to Buy, Contact
+  const movements = seen.filter((x) => want.includes(x)).join();
+  const headerOrder = nav(home).join();
+  return { ok: movements === want.join() && zhSeen.filter((x) => want.includes(x)).join() === want.join()
+               && headerOrder === 'works,about,how-to-buy,contact',
+           detail: `header ${headerOrder} · page ${movements}` };
+});
+
 check('I-02', 'every work is reachable, once, from the catalogue', () => {
   const avail = artJson.works.filter((w) => !w.sold).map((w) => w.slug).sort();
   const sold = artJson.works.filter((w) => w.sold).map((w) => w.slug).sort();
@@ -1327,9 +1347,14 @@ check('N-01', 'the motto is a band under the bar, not a column beside a painting
   const band = home.match(/<div class="motto">[\s\S]*?<\/div>\s*<main/);
   const betweenHeaderAndMain = home.indexOf('</header>') < home.indexOf('<div class="motto">')
                             && home.indexOf('<div class="motto">') < home.indexOf('<main');
+  // The band carries the quote and the palette rules and NOTHING ELSE. The
+  // "View works" link that came with it out of the hero was dropped on 20
+  // September 2026: the header's first item already goes there, the latest
+  // works end with the same link, and a third route to one page inside the
+  // page's own statement was a link asking to be counted rather than used.
   const carries = !!band && /<p class="hero__motto">/.test(band[0])
-                         && /class="link-quiet"/.test(band[0])
-                         && /<span class="motto__rules" aria-hidden="true">/.test(band[0]);
+                         && /<span class="motto__rules" aria-hidden="true">/.test(band[0])
+                         && !/<a /.test(band[0]);
   // the hero keeps the painting and gives up the column the motto held
   const heroClean = /<section class="hero wrap">/.test(home) && !/hero__lede|hero--split/.test(home);
   // and it is the homepage's, not every page's
@@ -1337,7 +1362,7 @@ check('N-01', 'the motto is a band under the bar, not a column beside a painting
                            .filter(([, h]) => /class="motto"/.test(h)).length;
   const zh = /<div class="motto">/.test(zhHome);
   return { ok: betweenHeaderAndMain && carries && heroClean && zh && elsewhere === 0,
-           detail: `band between the bar and the sheet ${betweenHeaderAndMain}, carries quote + rules + link ${carries}, hero is the painting alone ${heroClean}, on ${elsewhere} other pages` };
+           detail: `band between the bar and the sheet ${betweenHeaderAndMain}, quote and rules only ${carries}, hero is the painting alone ${heroClean}, on ${elsewhere} other pages` };
 });
 
 check('N-01', 'the band\'s four rules are the palette, and say nothing', () => {

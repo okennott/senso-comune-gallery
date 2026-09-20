@@ -220,6 +220,10 @@
   .section__head{ grid-template-columns:minmax(0,22ch) minmax(0,var(--measure)) }
 }
 .section__intro{ margin:0; color:var(--body) }
+/* The head's bottom margin separates it from the content BELOW it. Three
+   sections — About, How to Buy and Contact — are nothing but their head, and
+   there the margin was showing as 96px of empty ground before the boundary. */
+.section__head:last-child{ margin-bottom:0 }
 
 /* ---------- work list ---------- */
 .works{ list-style:none; margin:0; padding:0; display:grid; gap:var(--space-7) }
@@ -304,10 +308,6 @@
     inset 0 -1px 0 var(--emboss-shade),
     0 0 0 1px var(--emboss-shade);
 }
-/* The head grid's bottom margin separates a section head from the content
-   BELOW it; inside the panel there is nothing below it, and the margin was
-   showing as 96px of empty green. */
-.panel--about .section__head{ margin-bottom:0 }
 .panel--about h2,
 .panel--about p,
 .panel--about a,

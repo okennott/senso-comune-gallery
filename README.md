@@ -515,7 +515,7 @@ reading it from the other.
 │   ├── check-links.mjs             dead links, missing alt, missing width or
 │   │                               height, heading order, landmarks, hreflang,
 │   │                               CJK subset coverage
-│   ├── check-review.mjs            98 assertions over 61 findings: the design
+│   ├── check-review.mjs            99 assertions over 62 findings: the design
 │   │                               review, the mark, softness, the shop bar,
 │   │                               the structure, the flags and the gate,
 │   │                               against built pages
@@ -704,7 +704,7 @@ an iframe of exactly that width, with scrollbars hidden as a phone's are, and
 the check asserts the content width it actually received. `docs/report/shots.sh`
 takes the phone screenshot the same way.
 
-`check-review.mjs` holds 98 assertions over 61 findings — the September 2026
+`check-review.mjs` holds 99 assertions over 62 findings — the September 2026
 design review, the mark, softness, the shop bar and views, the structure, the
 red flags and the readiness gate — written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
@@ -749,6 +749,13 @@ block people outright.
   letters fuse where they cross, and that is the second reason to ask for the
   vector source. The Fraunces construction that stood in before the artwork
   arrived is kept in `scripts/mark.mjs` for the report's figure only.
+- **Four places to go, in one order.** *Works, About, How to Buy, Contact* —
+  in the header and, since 20 September 2026, on the homepage too, which ends
+  with a Contact close rather than stopping at How to Buy. Eight galleries,
+  marketplaces and artists' own sites were read for their nav order: every one
+  leads with the work, none puts Contact before About, and most keep Contact
+  in the footer only. Where this site differs — *How to Buy* in the header at
+  all — it is because there is no cart yet, and that threshold is written down.
 - **The homepage opens with a band, not a column.** Van Gogh's line and its
   translation sit in a full-width strip under the masthead, with the four
   brand colours ruled across its foot; the hero below carries the painting and

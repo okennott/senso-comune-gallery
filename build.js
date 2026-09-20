@@ -428,10 +428,7 @@ function renderIndex(loc) {
       <blockquote cite="${esc(site.hero.original.source)}"><p class="hero__original" lang="${esc(site.hero.original.lang)}">${site.hero.original.text.split('\n').map(esc).join('<br>')}</p><p class="hero__motto">${t(site.hero.title, loc).split('\n').map(esc).join('<br>')}</p></blockquote>
       <figcaption class="hero__cite">— ${esc(t(site.hero.attribution, loc))}</figcaption>
     </figure>
-    <div class="motto__foot">
-      <span class="motto__rules" aria-hidden="true">${rule('sanguine')}${rule('deep')}${rule('bar')}${rule('paper')}</span>
-      <a class="link-quiet" href="${lpath(loc, site, site.hero.ctaHref)}">${esc(t(site.hero.cta, loc))}</a>
-    </div>
+    <span class="motto__rules" aria-hidden="true">${rule('sanguine')}${rule('deep')}${rule('bar')}${rule('paper')}</span>
   </div>
 </div>`;
 
@@ -498,6 +495,26 @@ function renderIndex(loc) {
       <p style="margin-top:var(--space-5)">${esc(t(entity.checkout.note, loc))}</p>
       <p><strong>${esc(t(ui.returnsShort, loc))}.</strong></p>
       <p><a class="link-quiet" href="${lpath(loc, site, '/how-to-buy/')}">${loc === 'zh' ? '完整购买说明' : 'Everything about buying'}</a></p>
+    </div>
+  </div>
+</section>
+
+<div class="edge edge--pale-pale" aria-hidden="true"></div>
+
+<!-- The homepage ends where the header ends. Works, About, How to Buy and
+     Contact are the four things this site is, in that order, and until now
+     the page stopped at the third: it explained how buying works and then
+     handed the reader to the footer, which is where a legal address lives
+     rather than where an invitation does. On a site with no cart, every sale
+     begins with a message, so the last thing on the page is how to send one.
+     The details themselves stay in one place — the contact page and the
+     footer — and this is the summary and the way in. -->
+<section class="section ground--pale wrap" id="contact">
+  <div class="section__head">
+    <h2>${esc(t(S.contact.title, loc))}</h2>
+    <div class="prose measure">
+      <p>${esc(t(S.contact.intro, loc))}</p>
+      <p><a class="link-quiet" href="${lpath(loc, site, '/contact/')}">${loc === 'zh' ? '联系方式' : 'Get in touch'}</a></p>
     </div>
   </div>
 </section>`;
