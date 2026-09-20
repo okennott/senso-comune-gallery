@@ -268,10 +268,10 @@
      So check-contrast.mjs no longer reports this and declines to certify: with
      the plates off it adds the WALL to the grounds every foreground is solved
      against, and a regression there blocks the build like any other.                                          */
-  --plate-sheet:      transparent;
-  --plate-pale:       transparent;
-  --plate-mid:        transparent;
-  --plate-deep:       transparent;
+  --plate-sheet:      var(--wash-pale);
+  --plate-pale:       var(--wash-pale);
+  --plate-mid:        var(--wash-mid);
+  --plate-deep:       var(--wash-deep);
   /* The lightbox backdrop, which is the only one of these that cannot be
      transparent: it exists to hide the page behind an opened work. So the
      "let the field through" of the four above is, here, the field itself. */
@@ -394,14 +394,14 @@
      boundary was only ever seen where it broke into a hard seam. The field
      at 20% is dE 5.3 from the warm ground: plainly there as you scroll, and
      still only a fifth of the way to the sage itself (dE 26.7).          */
-  /* 0% as of 20 September 2026, with the plates. A band exists to join two
-     grounds through the field; with the plates transparent there are no two
-     grounds to join and the field is already the whole page, so a breath of it
-     would only be a film of sage laid over sage — invisible in the middle of
-     the fall and a faint horizontal smudge at either end of it. The bands keep
-     their height, which is section spacing, and paint nothing. Restore this to
-     20% when the plates come back. */
-  --edge-breath: 0%;
+  /* 20% again as of 20 September 2026, later: the plates are back, so there
+     are two grounds to join and the band has its job back. It was 0% for the
+     hours the plates were transparent — a band that joins a ground to itself
+     through the field is a film of sage laid over sage, invisible in the
+     middle of the fall and a smudge at either end. Read that entry as the
+     measurement of what the flat page cost, not as a setting to return to:
+     the review's AW-05 has the bill in full. */
+  --edge-breath: 20%;
 
   /* ======================================================================
      MOTION
