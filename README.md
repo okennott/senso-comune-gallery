@@ -515,7 +515,7 @@ reading it from the other.
 │   ├── check-links.mjs             dead links, missing alt, missing width or
 │   │                               height, heading order, landmarks, hreflang,
 │   │                               CJK subset coverage
-│   ├── check-review.mjs            92 assertions over 58 findings: the design
+│   ├── check-review.mjs            98 assertions over 61 findings: the design
 │   │                               review, the mark, softness, the shop bar,
 │   │                               the structure, the flags and the gate,
 │   │                               against built pages
@@ -704,7 +704,7 @@ an iframe of exactly that width, with scrollbars hidden as a phone's are, and
 the check asserts the content width it actually received. `docs/report/shots.sh`
 takes the phone screenshot the same way.
 
-`check-review.mjs` holds 92 assertions over 58 findings — the September 2026
+`check-review.mjs` holds 98 assertions over 61 findings — the September 2026
 design review, the mark, softness, the shop bar and views, the structure, the
 red flags and the readiness gate — written against the built site, so a fix that stops being
 applied fails here rather than being noticed in a screenshot months later. It
@@ -740,13 +740,23 @@ block people outright.
   report rather than worked around: there is no vector source and the raster
   is 1536 × 1024; it does not survive 16 px; and the drawing itself cannot
   take `currentColor`. For the surfaces that need a colour rather than a
-  photograph — the browser tab, and any ground the site has not already chosen
-  — `npm run mark:vector` reduces the drawing to one colour and traces that,
-  as a declared derivative beside the artwork. What one colour cannot carry is
+  photograph — the masthead, the browser tab, and any ground the site has not
+  already chosen — `npm run mark:vector` reduces the drawing to one colour and
+  traces that, as a declared derivative beside the artwork. The bar carries
+  that vector inline, in the wordmark's own cream, so the mark and the name
+  can never drift apart. What one colour cannot carry is
   the interlock: it cannot say which stroke passes in front, so the two
   letters fuse where they cross, and that is the second reason to ask for the
   vector source. The Fraunces construction that stood in before the artwork
   arrived is kept in `scripts/mark.mjs` for the report's figure only.
+- **The homepage opens with a band, not a column.** Van Gogh's line and its
+  translation sit in a full-width strip under the masthead, with the four
+  brand colours ruled across its foot; the hero below carries the painting and
+  nothing else. Each section boundary is stated by an engraved hairline — a
+  line of shade with a line of light under it — and About is a painted panel
+  in Priscilla's Dark Sage `#727A5C`, outlined with the same pair. That green
+  admits exactly one ink: `--ink-deep`, at 4.55:1, where pure black itself
+  would reach only 4.65. Everything inside the panel is set in it.
 - **Sage is the wall; cream is the mat.** The three reading grounds are
   `--wash-pale`, `--wash-mid` and `--wash-deep`: the field's own hue, held at
   the lightness ladder that was already measured safe. A reading ground fails

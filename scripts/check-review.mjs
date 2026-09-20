@@ -71,7 +71,12 @@ const decided = (id, what, detail) => results.push({ id, what, ok: true, decided
 /* ===================== A — selling ===================== */
 
 check('A-01', 'a painting is in the hero, above the fold', () => {
-  const hasSplit = /class="hero wrap hero--split"/.test(home);
+  // 20 September 2026: the hero no longer splits. The motto that used to hold
+  // its left column is a band under the masthead (build.js, "The motto, as a
+  // strip"), so the hero carries the painting and nothing else — which is
+  // what this finding asked for, one step further on.
+  const hasSplit = /class="hero wrap"/.test(home) && !/hero--split/.test(home)
+                && !/hero__lede/.test(home);
   const heroFig = /<figure class="hero__work">/.test(home);
   const heroImg = /<figure class="hero__work">[\s\S]*?<img[^>]+fetchpriority="high"/.test(home);
   // the lifted work must not also appear among the latest works below it
@@ -81,7 +86,7 @@ check('A-01', 'a painting is in the hero, above the fold', () => {
   const capped = /max-height:clamp\(260px,48vh,460px\)/.test(css);
   return {
     ok: hasSplit && heroFig && heroImg && heroSlug && !listed.includes(heroSlug) && capped,
-    detail: `hero work ${heroSlug}; ${listed.length} latest works beneath, hero not repeated ${!listed.includes(heroSlug)}; height-capped ${capped}`,
+    detail: `hero work ${heroSlug}, alone in the hero ${hasSplit}; ${listed.length} latest works beneath, hero not repeated ${!listed.includes(heroSlug)}; height-capped ${capped}`,
   };
 });
 
@@ -261,16 +266,22 @@ check('D-03', 'the language switch is divided from the navigation', () =>
 check('D-04', 'the homepage names a subject in its h1', () => {
   const h1 = home.match(/<h1[^>]*>([^<]*)<\/h1>/);
   // the motto is set with its line breaks as written, and attributed in full
-  const motto = /<p class="hero__motto">That which<br>is done<br>with love<br>is well done\.<\/p><\/blockquote>\s*<figcaption class="hero__cite">— Vincent Willem van Gogh<\/figcaption>/.test(home);
+  // Two lines since the motto moved into the band: four short ones were a
+  // column, which is what the band exists to stop being. Still set as written
+  // — the browser never wraps it — and still attributed in full.
+  const motto = /<p class="hero__motto">That which is done<br>with love is well done\.<\/p><\/blockquote>\s*<figcaption class="hero__cite">— Vincent Willem van Gogh<\/figcaption>/.test(home);
+  const inBand = /<div class="motto">[\s\S]*?<p class="hero__motto">/.test(home)
+              && home.indexOf('<div class="motto">') < home.indexOf('<main');
   const zh = /<h1 class="visually-hidden">常识画廊<\/h1>/.test(zhHome);
-  return { ok: h1 && h1[1] === 'Senso Comune Gallery' && motto && zh, detail: `h1 "${h1?.[1]}", motto kept ${motto}` };
+  return { ok: h1 && h1[1] === 'Senso Comune Gallery' && motto && zh && inBand,
+           detail: `h1 "${h1?.[1]}", motto kept ${motto}, in the band above main ${inBand}` };
 });
 
 // The original above the translation, in Dutch, marked as Dutch, word for word
 // as letter 143 has it — and on the Chinese page too, because the original is
 // the original in both. The blockquote cites the letter it comes from.
 check('D-04', 'van Gogh is quoted in his own language first', () => {
-  const nl = '<p class="hero__original" lang="nl">wat met liefde<br>gedaan wordt<br>dat wordt<br>goed gedaan</p>';
+  const nl = '<p class="hero__original" lang="nl">wat met liefde gedaan wordt<br>dat wordt goed gedaan</p>';
   const cited = /<blockquote cite="https:\/\/vangoghletters\.org\/vg\/letters\/let143\/letter\.html">/;
   const before = home.indexOf(nl) < home.indexOf('<p class="hero__motto">') && home.includes(nl);
   return { ok: before && zhHome.includes(nl) && cited.test(home) && cited.test(zhHome),
@@ -423,16 +434,25 @@ check('F-01', 'every derivative is cut from that one file, by crop and resize al
            detail: `reads ${reads.join(' + ')}, crop+resize only ${cropped}, nothing redrawn ${noRedraw}` };
 });
 
-check('F-01', 'the masthead carries the artwork, sized, and does not reflow the bar', () => {
+check('F-01', 'the masthead carries the mark as ink, and does not reflow the bar', () => {
+  // Changed 20 September 2026: the bar used to carry the artwork itself, a
+  // cream plate on the brown. It now carries the vector traced from that same
+  // drawing, inline and in currentColor, so the mark IS the wordmark's colour
+  // rather than a photograph sitting beside it. The plate went with it — a
+  // shape needs no mount — and the size came down with the hatching.
   const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
   if (!m) return { ok: false, detail: 'no wordmark lockup' };
-  const img = (m[1].match(/<img class="wordmark__mark"[^>]*>/) ?? [''])[0];
-  const sized = /width="192"/.test(img) && /height="192"/.test(img);
-  const art = /src="[^"]*\/logo-mark\.png"/.test(img);
-  const plate = /\.wordmark__mark\{[^}]*border-radius:var\(--radius-ui\)/.test(flat)
-             && /\.wordmark__mark\{[^}]*box-shadow:var\(--shadow-mount\)/.test(flat);
-  return { ok: sized && art && plate,
-           detail: `artwork ${art}, width+height ${sized}, mounted as a plate ${plate}` };
+  const svg = (m[1].match(/<svg class="wordmark__mark"[^>]*>[\s\S]*?<\/svg>/) ?? [''])[0];
+  const sized = /viewBox="0 0 64 64"/.test(svg)
+             && /\.wordmark__mark\{width:[\d.]+em;height:[\d.]+em/.test(flat);
+  const ink = /<path fill="currentColor"/.test(svg) && /\.wordmark__mark\{[^}]*fill:currentColor/.test(flat);
+  // the path is the committed vector's, byte for byte — not a second drawing
+  const want = (src('public/mark-sc.svg').match(/<path[^>]*\sd="([^"]+)"/) ?? [])[1];
+  const same = !!want && svg.includes(want);
+  const noPlate = !/\.wordmark__mark\{[^}]*border-radius/.test(flat)
+               && !/\.wordmark__mark\{[^}]*box-shadow/.test(flat);
+  return { ok: sized && ink && same && noPlate,
+           detail: `inline vector ${same}, currentColor ${ink}, sized in em with a viewBox ${sized}, no plate ${noPlate}` };
 });
 
 check('F-02', 'the mark is one link and one tab stop with the wordmark', () => {
@@ -440,8 +460,11 @@ check('F-02', 'the mark is one link and one tab stop with the wordmark', () => {
   // contribute an accessible name of its own, and must not be a second link to
   // the same place. An <img> does that with an EMPTY alt, not a missing one.
   const m = home.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/a>/);
-  const img = (m[1].match(/<img class="wordmark__mark"[^>]*>/) ?? [''])[0];
-  const decorative = /\salt=""/.test(img) && !/aria-label=/.test(img) && !/title=/.test(img);
+  const img = (m[1].match(/<svg class="wordmark__mark"[^>]*>/) ?? [''])[0];
+  // An inline SVG says "decorative" with aria-hidden and focusable=false; an
+  // empty alt is the <img> spelling of the same sentence.
+  const decorative = /aria-hidden="true"/.test(img) && /focusable="false"/.test(img)
+                  && !/aria-label=/.test(img) && !/<title>/.test(m[1]);
   const named = /<span class="wordmark__name">/.test(m[1]);
   return { ok: decorative && named,
            detail: `empty alt, no name of its own ${decorative}, wordmark still the name ${named}` };
@@ -452,7 +475,7 @@ check('F-02', 'the monogram serves both locales unchanged', () => {
   // the Chinese page — and the monogram is the device that stands beside it,
   // identical in both. A device is not a translation.
   const lock = (h) => (h.match(/<a class="wordmark"[^>]*>([\s\S]*?)<\/span>/) ?? [])[0] ?? '';
-  const img = (h) => (lock(h).match(/<img class="wordmark__mark"[^>]*>/) ?? [''])[0];
+  const img = (h) => (lock(h).match(/<svg class="wordmark__mark"[\s\S]*?<\/svg>/) ?? [''])[0];
   const zhName = /常识画廊/.test(lock(zhHome));
   return { ok: img(home) && img(home) === img(zhHome) && zhName,
            detail: `byte-identical ${img(home) === img(zhHome)}, zh wordmark still translated ${zhName}` };
@@ -1017,6 +1040,7 @@ check('L-01', 'cream paints the mat, the art, and the bar — and no page surfac
     '.btn', '.skip-link',                   // light label on a filled dark control
     '.hero__work img',                      // the featured painting's own box
     '.shopbar__link:hover, .social__link:hover, .lang-switch:hover', // 12% wash, on the bar
+    '.motto__rule--paper',                  // 3px of the sheet's Warm Ivory, in the band's brand rules
   ]);
   const bad = [];
   for (const m of sheets.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
@@ -1294,6 +1318,83 @@ check('M-01', 'the portrait cannot ship undescribed', () => {
            detail: `1.1.1 the moment the photograph is real ${rule}, owns its own path ${owns}, unwaivable ${blocking}, alt attribute present ${alt}` };
 });
 
+/* ===================== N — the page, 20 September 2026 ===================== */
+/* Four changes asked for in one message: the mark becomes ink (F-01 above),
+   the motto becomes a band, the sections state their boundaries, and About
+   becomes a painted panel. These hold the last three. */
+
+check('N-01', 'the motto is a band under the bar, not a column beside a painting', () => {
+  const band = home.match(/<div class="motto">[\s\S]*?<\/div>\s*<main/);
+  const betweenHeaderAndMain = home.indexOf('</header>') < home.indexOf('<div class="motto">')
+                            && home.indexOf('<div class="motto">') < home.indexOf('<main');
+  const carries = !!band && /<p class="hero__motto">/.test(band[0])
+                         && /class="link-quiet"/.test(band[0])
+                         && /<span class="motto__rules" aria-hidden="true">/.test(band[0]);
+  // the hero keeps the painting and gives up the column the motto held
+  const heroClean = /<section class="hero wrap">/.test(home) && !/hero__lede|hero--split/.test(home);
+  // and it is the homepage's, not every page's
+  const elsewhere = allHtml.filter(([p2]) => !/^\/(zh\/)?index\.html$/.test(p2))
+                           .filter(([, h]) => /class="motto"/.test(h)).length;
+  const zh = /<div class="motto">/.test(zhHome);
+  return { ok: betweenHeaderAndMain && carries && heroClean && zh && elsewhere === 0,
+           detail: `band between the bar and the sheet ${betweenHeaderAndMain}, carries quote + rules + link ${carries}, hero is the painting alone ${heroClean}, on ${elsewhere} other pages` };
+});
+
+check('N-01', 'the band\'s four rules are the palette, and say nothing', () => {
+  const want = ['sanguine', 'deep', 'bar', 'paper'];
+  const drawn = [...home.matchAll(/motto__rule motto__rule--([a-z]+)/g)].map((m) => m[1]);
+  const paints = { sanguine: '--sanguine', deep: '--field-deep', bar: '--bar', paper: '--paper' };
+  const css_ok = want.every((n) => new RegExp(`\\.motto__rule--${n}\\{background:var\\(${paints[n]}\\)\\}`).test(flat));
+  // decoration, and it says so: inside an aria-hidden wrapper, no link, no text
+  const quiet = /<span class="motto__rules" aria-hidden="true">(<span class="motto__rule[^"]*"><\/span>){4}<\/span>/.test(home);
+  return { ok: drawn.join() === want.join() && css_ok && quiet,
+           detail: `${drawn.join(' · ')}, painted from the palette ${css_ok}, aria-hidden and empty ${quiet}` };
+});
+
+check('N-02', 'every section boundary states itself, in one pair of colours', () => {
+  // The bands paint nothing while the plates are off, so a boundary is now a
+  // line: shade over light, 2px, at the centre of the band. The same pair
+  // outlines the About panel — one idea of what an edge is, not two.
+  const line = /\.edge::after\{content:'';position:absolute;inset-inline:0;top:50%;height:2px;transform:translateY\(-1px\);background:linear-gradient\(var\(--emboss-shade\)01px,var\(--emboss-light\)1px2px\);?\}/.test(flat);
+  const tokens = src('src/styles/tokens.css');
+  const declared = /--emboss-light:\s*rgba\(/.test(tokens) && /--emboss-shade:\s*rgba\(/.test(tokens);
+  const sheets = (src('src/styles/base.css') + src('src/styles/gallery.css')).replace(/\/\*[\s\S]*?\*\//g, '');
+  const users = [...sheets.matchAll(/([^{}]+)\{([^{}]*var\(--emboss-(?:light|shade)\)[^{}]*)\}/g)]
+    .map((m) => m[1].trim().replace(/\s+/g, ' '));
+  const expected = ['.edge::after', '.motto', '.panel--about'];
+  const same = users.length === expected.length && expected.every((e) => users.includes(e));
+  const bands = (home.match(/class="edge edge--/g) ?? []).length;
+  return { ok: line && declared && same && bands >= 4,
+           detail: `${bands} boundaries ruled, one pair of tokens used by ${users.join(' · ')}` };
+});
+
+check('N-03', 'About is a painted panel, and everything in it is the one ink it allows', () => {
+  const panel = /<div class="panel panel--about">/.test(home) && /<div class="panel panel--about">/.test(zhHome);
+  const painted = /\.panel--about\{background:var\(--plate-about\);color:var\(--ink-deep\)/.test(flat);
+  const outlined = /\.panel--about\{[^}]*box-shadow:inset01px0var\(--emboss-light\),inset0-1px0var\(--emboss-shade\),000 ?1pxvar\(--emboss-shade\)/.test(flat);
+  // every text rule inside the panel resolves to --ink-deep: the heading, the
+  // prose, the link, its hover and the portrait's caption. Nothing in the
+  // panel may take a colour this ground cannot carry.
+  const inked = /\.panel--abouth2,\.panel--aboutp,\.panel--abouta,\.panel--about\.portrait__cap\{color:var\(--ink-deep\)\}/.test(flat)
+             && /\.panel--about\.link-quiet,\.panel--about\.link-quiet:hover\{color:var\(--ink-deep\)/.test(flat);
+  return { ok: panel && painted && outlined && inked,
+           detail: `panel in both locales ${panel}, plate + ink ${painted}, embossed outline ${outlined}, one ink throughout ${inked}` };
+});
+
+check('N-03', 'the panel is a ground the contrast gate solves, and only one token stands on it', () => {
+  const gate = src('scripts/check-contrast.mjs');
+  const ground = /about:\s*T\['plate-about'\]/.test(gate);
+  const rows = [...gate.matchAll(/\['([a-z-]+)',\s*([\d.]+),\s*\[([^\]]*)\]/g)]
+    .filter((m) => m[3].includes("'about'")).map((m) => `${m[1]} @${m[2]}`);
+  // the numbers this panel is built on, restated here so a change to either
+  // token has to come past this line
+  const T2 = { about: token('plate-about'), inkDeep: token('ink-deep') };
+  const r = ratio(T2.inkDeep, T2.about);
+  const black = ratio('#000000', T2.about), white = ratio('#FFFFFF', T2.about);
+  return { ok: ground && rows.length === 1 && rows[0].startsWith('ink-deep') && r >= 4.5 && black < 4.7,
+           detail: `--ink-deep ${r.toFixed(2)} on ${T2.about} (pure black would be ${black.toFixed(2)}, pure white ${white.toFixed(2)}); ${rows.length} token solved against it` };
+});
+
 /* ===================== cross-cutting ===================== */
 
 /* The first pass of the D-04 fix set font-size:var(--size-h1). No such token
@@ -1305,6 +1406,33 @@ check('CSS', 'every custom property referenced is actually defined', () => {
   const used = new Set([...css.matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((v) => !defined.has(v));
   return { ok: missing.length === 0, detail: missing.length ? missing.join(' ') : `${used.size} referenced, all defined` };
+});
+
+/* Found on 20 September 2026 by a rule that would not paint. A comment in
+   tokens.css had been closed twice; the second terminator ended it early, and
+   everything after it — up to and including the declaration of --sanguine —
+   was parsed as garbage and dropped. The browser had been running without the
+   accent for a day. Nothing caught it: the token check below greps the TEXT
+   for the declaration, which was there, and the contrast gate strips comments
+   non-greedily and found it too. Only a browser knew. This is the assertion
+   that would have, and writing it is how the same trap was found once more —
+   in this very comment, which is why it does not spell the terminator out. */
+check('CSS', 'every comment closes where it opened, so no declaration is eaten', () => {
+  const bad = [];
+  for (const f of ['src/styles/tokens.css', 'src/styles/base.css', 'src/styles/gallery.css']) {
+    const stripped = src(f).replace(/\/\*[\s\S]*?\*\//g, '');
+    const close = (stripped.match(/\*\//g) ?? []).length;
+    const open = (stripped.match(/\/\*/g) ?? []).length;
+    if (close || open) bad.push(`${f}: ${close} orphan */, ${open} orphan /*`);
+  }
+  // and the built sheet, which is the three of them concatenated
+  const live = cssRaw.replace(/\/\*[\s\S]*?\*\//g, '');
+  const declared = new Set([...live.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+  const claimed = new Set([...cssRaw.matchAll(/^\s*(--[a-z0-9-]+)\s*:\s*[^;]+;/gm)].map((m) => m[1]));
+  const eaten = [...claimed].filter((t) => !declared.has(t));
+  if (eaten.length) bad.push(`declared but not live: ${eaten.join(' ')}`);
+  return { ok: !bad.length,
+           detail: bad.length ? bad.join('; ') : `3 stylesheets, comments balanced; ${declared.size} tokens live` };
 });
 
 check('TOOL', 'the image tool still converts exactly, both directions', () => {

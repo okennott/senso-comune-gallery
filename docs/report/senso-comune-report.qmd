@@ -62,7 +62,7 @@ a data edit.
 | Published | A **preview** on GitHub Pages: not indexed, labelled on every page, and unable to take an order |
 | Ready to sell | **No.** The readiness gate counts 57 details still owed (@sec-readiness-today), and a release refuses to build until they are supplied |
 | Checked | Five checks on every build, and a sixth in a real browser (@sec-checks) |
-| Contrast | **AA, on the wall.** The plates are off and the wall is dark, so the ink ladder was re-solved for it the same evening: `--body` measures **4.92:1** on `--field` and `--muted` 4.62:1, against a floor of 4.5 (@sec-ink). The contrast check now solves the wall as an ordinary ground, so a regression blocks the build |
+| Contrast | **AA, on both grounds.** The plates are off and the wall is dark, so the ink ladder was re-solved for it: `--body` measures **4.92:1** on `--field` and `--muted` 4.62:1, against a floor of 4.5 (@sec-ink). About is now a painted panel in a darker green still, which admits exactly one ink — 4.55:1, where pure black would reach 4.65 (@sec-panel). The contrast check solves both as ordinary grounds, so a regression on either blocks the build |
 | Still to build | The buy box and disclosures on the work page; the cart, search and account behind the shop bar (@sec-next-todo) |
 
 ## The seven findings that would have sunk it {#sec-blockers}
@@ -438,6 +438,53 @@ flat wall instead of a lit fall, and an accent that no longer sets small text
 (@sec-ink). With the plates painted none of it would have signified; it
 signified because they are off, which is the other half of the same decision.
 
+### The panel, and what that green admits {#sec-panel}
+
+Priscilla asked for one section to be painted: About, in **"Dark Sage"
+#727A5C**, a darker cut of the wall, so it reads as a panel set into the page
+rather than as another stretch of it. The plates made that a one-line change —
+it is exactly the case the indirection was built for (@sec-plates) — and the
+colour made it the most constrained surface on the site.
+
+**That green is the exact centre of the mid-tone squeeze.** The wall is a
+mid-tone with a ceiling (@sec-ink); this is a mid-tone with barely a budget at
+all. Measured:
+
+: What #727A5C carries {#tbl-panel}
+
+| Ink | On the panel | Verdict |
+|:-----|--:|:-----|
+| pure black `#000000` | **4.65** | the ceiling for dark text |
+| pure white `#FFFFFF` | **4.52** | the ceiling for light text |
+| `--ink` | 4.33 | fails 4.5 |
+| `--body` | 3.73 | fails |
+| `--muted` | 3.50 | fails |
+| `--paper` | 3.81 | fails |
+| `--sanguine` | 2.43 | fails even 3.0 |
+| `--sanguine-deep` | 3.50 | fails |
+| `--muted-ui`, `--rule` | 2.44, 2.45 | fail 3.0 |
+
+Every rung of the ladder fails on it, in both polarities, and the whole of
+colour space has about **3 % of headroom**: nothing can do better than pure
+black's 4.65. So either the colour moves or the ink does, and the colour was
+the request.
+
+`--ink-deep` **#080301** is what the panel is set in: 4.55:1 on the green,
+5.99:1 on the wall, the ladder's own hue, and the only value that clears the
+floor with anything to spare. Lightening the green instead was solved and
+rejected — the ladder needs a ground at Y ≥ 0.249 and the wall is already at
+0.257, so the darkest sage that carries `--muted` is within one L\* step of
+the wall and would not read as a panel at all.
+
+**What it costs is the section's tonal hierarchy.** Everything inside the
+panel is that one ink: the heading, the prose, the caption under the portrait,
+the link and its hover. There is no quieter grey for a caption on this ground
+and no terracotta to hover into, so size, weight, small caps and the underline
+carry what colour used to. That is stated in the stylesheet beside the rule,
+in `--ink-deep` beside the token, and asserted by N-03 — and the contrast
+check solves the panel as a ground of its own, so nothing else can be painted
+on it without being solved for it first.
+
 ### The warm-ground trap {#sec-trap}
 
 `#767676` is the canonical "lightest grey that passes on white". On pure white
@@ -731,7 +778,7 @@ in this document.
 | **Subtle texture / Enhances depth and form / Not overpowering** | True at the sizes the sheet is drawn for. At 32 px the hatching has become tone rather than texture, and at 16 px it is a smudge. Nothing in the build can fix that; it is stated instead (@sec-mark-issues) |
 | **Primary (Sage Green)** `#969B7D` | Was `--field`, exactly, until 20 September 2026. The wall is now a darker, less saturated cut of it — the prototype's lightness at 21 % less chroma — because it went from a margin to the whole page (@sec-wall). This value remains the brand's: the mark, the icons and print use it |
 | **Black (For Print / Digital)** `#24241F` | **Not adopted as a site colour.** The site's ink and bar are `#3A2B22`, a warm brown the whole palette is solved against; a cool near-black beside sage reads as a second, colder identity. It is kept for print, where it is what the sheet says |
-| **Reversed (Dark Background)** | The variation that would suit the masthead best — and it is a *different drawing* from the preferred one: solid letters, no construction lines. Not used, because the instruction was to use the preferred option. The site instead lets the artwork's own cream paper be the plate, which is the site's own device |
+| **Reversed (Dark Background)** | The variation that would suit the masthead best — and it is a *different drawing* from the preferred one: solid letters, no construction lines. It is still not used, because it is supplied at about 110 px. What the masthead carries since 20 September 2026 is the same idea arrived at from the preferred option: the drawing reduced to one colour and traced (@sec-mark-vector), set in cream on the bar. Reversed, from her own artwork |
 | **Monochrome (One Color)** | Held in reserve for single-ink reproduction, where the hatching and the letter cannot be separated by lightness at all |
 | **Deep Green** `#737C61` | Was `--field-deep`, exactly, and moved with it (@sec-wall); still the sheet's, and still what the mark is drawn against |
 | **Warm Ivory** `#E9E2D3` | **Not added.** It was within one step of what was then `--wash-blue` `#E9E3D6`, and a fifth cream is a fifth cream. The reading grounds have since gone sage and the creams with them; the artwork's own paper measures `#E4DCCC` and is kept as it is |
@@ -770,11 +817,12 @@ as it is.
 `currentColor`, cannot invert for a dark theme, cannot be recoloured for a
 seasonal card, and cannot be knocked out of a coloured ground. The site works
 with that rather than against it: the artwork is opaque cream, so on the dark
-masthead it arrives as a small mounted plate — a cream sheet on a dark ground,
+masthead it arrived as a small mounted plate — a cream sheet on a dark ground,
 which is the site's central visual idea at wordmark size. **Since 20 September
-2026 there is also a shape**, traced from the drawing for the surfaces that
-cannot hold a photograph; what that costs is @sec-mark-vector, and the
-masthead is not one of them.
+2026 there is a shape too**, traced from the drawing for the surfaces that
+cannot hold a photograph; what that costs is @sec-mark-vector. The masthead is
+now one of them, by decision the same day: the bar carries the vector, in the
+wordmark's own colour.
 
 **4 — The SVG favicon went away with it, and has come back.** The site once
 shipped an `icon.svg`; a vector favicon is sharp at every size and is what a
@@ -847,11 +895,23 @@ one, because a favicon has no page to inherit a colour from. Beside it,
 text around it is, and handed to a printer it is a shape rather than a
 photograph of one.
 
-The **masthead is deliberately not one of them**. The artwork's own cream
-paper is the plate there, which is the site's central visual idea at wordmark
-size, and at 34 px on a phone the drawing still holds. Swapping it is one line
-in `templates.js` and it is Priscilla's decision, not the build's — and the
-first place to look before making it is whether the vector source exists.
+And the **masthead**, which is the decision this section was written to leave
+open and which Priscilla took the same day. The bar used to carry the artwork
+itself, a cream plate of paper on the brown. What it could not do is take a
+colour: a photograph is the same photograph whatever it is set in, so the mark
+could not follow the bar, could not invert, and carried a cream rectangle into
+a place where nothing else on the site has an edge. The vector can — it is one
+path in `currentColor`, inlined rather than linked because `currentColor` is a
+cascade and an `<img>` has none, so the mark *is* the wordmark's colour and
+inherits every future change to it for nothing.
+
+Three things went with that change, and each is the same sentence: it is made
+of ink now rather than of paper. The plate went — the radius and the mount
+shadow said "a cream sheet lies on the bar", and there is no sheet. The size
+came down from 2.1 em to 1.7 em, because the drawing needed the extra size to
+hold its construction lines at 34 px and the traced shape has none. And the
+cream is `--paper` at 11.45:1 on the bar, which is the wordmark's own colour
+and the most legible pair on the site.
 
 Four assertions, F-05: that the committed vector re-derives from the pinned
 artwork exactly, at an IoU of at least 0.95; that the inlinable copy names no
@@ -912,10 +972,11 @@ pixels — which is issue 2 above, arrived at twice from opposite directions.
 The icon set — `icon-32.png`, `favicon.ico`, the 180 px home-screen icon and
 the manifest; `logo-mark.png` in the masthead, where the mark and the name are
 a single link and a single tab stop; and this document, in the footer of every
-page. All from `brand/mark-lockup.png`, by one crop. Beside them, from that
-same crop by way of the reduction in @sec-mark-vector: `icon.svg`, which the
-tab is offered first, and `mark-sc.svg`, which carries no colour and is there
-for anything that has to supply its own.
+page — all from `brand/mark-lockup.png`, by one crop, except the masthead,
+which since 20 September 2026 carries the vector instead. From the same crop
+by way of the reduction in @sec-mark-vector: `icon.svg`, which the tab is
+offered first, `mark-sc.svg`, which carries no colour and is there for
+anything that has to supply its own, and the path inlined into the bar.
 
 The sheet's **horizontal lockup** was tried on this document's title page and
 taken off again, which is worth recording because it puts a number on open
@@ -1098,6 +1159,29 @@ declare a `--contrast-ground`. The check prefers it over whatever background
 the rule also paints, which is how a surface painted in a `color-mix()` the
 script cannot composite still gets solved against a real colour. The footer,
 the legal declaration and the channel row all declare one.
+
+### The line that says a section ended {#sec-soft-line}
+
+The sfumato bands were built to dissolve a boundary rather than rule it, and
+they do — while there is something either side to dissolve. With the plates
+off there is not: a band joins the wall to the wall, `--edge-breath` is 0, and
+all four paint nothing at all (@sec-plates). What that left was nine rem of
+spacing between sections and a page that read as one long scroll.
+
+So a boundary is now **stated**: an engraved hairline at the centre of each
+band — one line of shade with one line of light caught under it, 2 px in all.
+It is the pair an emboss is made of, and it is not a colour: black and white
+at low alpha, so the same two tokens work over the wall, over the About panel
+and over anything either of them is later changed to. The About panel's
+outline is the same pair, which is the point of there being only two — the
+page has one idea of what an edge is rather than a hairline here and a border
+there.
+
+It is drawn on a pseudo-element rather than folded into the gradient, so the
+two mechanisms stay independent: restore the plates and `--edge-breath` and
+the sfumato returns *underneath* the line, not instead of it. N-02 asserts
+that both — the boundaries and the panel — are drawn from that one pair, and
+that nothing else in the stylesheet uses it.
 
 ### The canvas {#sec-soft-canvas}
 
@@ -1414,6 +1498,54 @@ The consensus decides the shape; the site keeps its own character inside it.
   anything. When the cart works, *How to Buy* moves to the footer and the cart
   becomes the header's way in to buying — as five of the six have it.
 
+### The band under the bar {#sec-band}
+
+The gallery's own line — van Gogh's *wat met liefde gedaan wordt dat wordt
+goed gedaan*, and its translation — used to stand in the hero's left column
+beside the featured painting, with *View works* under it. Six words and a link
+holding a column open next to an object is the arrangement finding A-01 was
+about in the first place, one step further on: a quote that is the gallery's
+statement is not a sibling of a work, it is the top of the page.
+
+It is now a **band**, full width, immediately under the masthead: the wall
+itself, held open by its padding, with the four brand colours ruled across its
+foot and an engraved line closing it. The hero below carries nothing but the
+painting.
+
+Three things had to be measured rather than chosen.
+
+**The fold.** A band that pushes the painting off the opening screen would
+undo A-01 with better manners. At 1440 × 900 the masthead is 110 px, the band
+330, the hero's own padding came down from 96 to 48, and the featured
+painting now starts at y = 600 in a release build — on screen, where the
+finding asked for it.
+
+**The shape of the quote.** It was set in four short lines, so that the Dutch
+and the English stood in the same shape; in a wide band four short lines are a
+column, which is the thing the band exists to stop being. Both are now two
+lines, still the same shape as each other, and still set as written.
+
+**The size on a phone.** The motto may never be re-wrapped by the browser —
+the attribution is aligned to the real right edge of its longest line, and a
+browser cannot shrink a box to the longest line of wrapped text. So its size
+on a narrow screen is decided by that line: *"with love is well done."* is
+400 px at 38.4 px, 296 at 27.6, and 255 at 23.8, against columns of 480, 350
+and 280. Two steps, at 519 px and 359 px, and `check-render` measures the
+rendered line count against the `<br>`s at five widths and fails the build on
+a re-wrap.
+
+The band sits **between `<header>` and `<main>`** rather than inside either.
+Inside the header it would become the sticky bar's containing block, and the
+bar would stop sticking once the band scrolled past — which is the bar
+@sec-soft-glass measures. Inside `main` it would be inside the mounted sheet,
+and a band that stops at the mount's rounded corner is not a band. It carries
+no landmark of its own, so the page's landmark count is what it was.
+
+The four rules at its foot are the sheet's own brand colours in the order they
+can be seen on sage — the accent, her deep green, the bar's brown, the cream —
+and they are decoration that says so: inside an `aria-hidden` wrapper, no
+link, no text, nothing carried by any of them but the palette.
+
 ### The artist's portrait {#sec-portrait}
 
 A site selling one painter's work had no photograph of the painter. About is
@@ -1513,7 +1645,7 @@ document is built, so they show the site as it is. The ribbon across the top of
 each page and the red `NEEDS-INPUT` flags are the preview's; a release has
 neither (@sec-readiness).
 
-![The homepage as it now stands, with the plates off (@sec-plates): one sage field from the bar to the footer, the content column visible only as a shadow and a rim light, and cream kept for the mat around the work. Dark brown bar, the SC monogram at the head of the wordmark, and search, account and cart at the right. Van Gogh's line stands twice: his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line. Beside it, the featured work; on a phone the quote leads and the work follows.](fig/cap-home.png){#fig-home width=100%}
+![The homepage as it now stands, with the plates off (@sec-plates): one sage field from the bar to the footer, the content column visible only as a shadow and a rim light, and cream kept for the mat around the work. Dark brown bar, the SC monogram at the head of the wordmark — the traced vector, in the wordmark's own cream (@sec-mark-vector) — and search, account and cart at the right. Under the bar, the band: van Gogh's line stands twice, his Dutch from letter 143 to Theo — *wat met liefde gedaan wordt dat wordt goed gedaan* — set small and italic above the reader's own language, with his full name beneath, aligned to the quote's longest line, and the four brand colours ruled across its foot (@sec-band). The featured work follows below it, and each section boundary is stated by an engraved line (@sec-soft-line).](fig/cap-home.png){#fig-home width=100%}
 
 ![A work page. The views of the work — front, detail, edge, back and video — sit in a strip with thumbnails always visible, grey placeholders until the photographs exist. The price is the boldest element in the block. The scale diagram shows the painting against a 244 cm wall and a 213 cm sofa, hung at the museum standard of 144.78 cm, which is also where the mark's datum sits.](fig/cap-work.png){#fig-work width=100%}
 
@@ -2008,7 +2140,7 @@ and the CI workflow installs the four wheels it needs so that it always does.
 |:----------------------|:----------------------------------------------------------|
 | `check-contrast` | Any token below its floor on the darkest ground it is painted on — resolving the cascade, so the declaration that actually wins is the one measured — and the glass bar under 7:1 over white. With the plates off it also prints, without blocking, every pair as the page actually renders it (@sec-plates) |
 | `check-links` | A dead link; missing `alt`, `width` or `height`; heading order; landmarks; hreflang; a Chinese character the font subset does not cover; a placeholder route that resolves. In a release, any `NEEDS-INPUT` or placeholder at all |
-| `check-review` | **92 assertions over 58 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
+| `check-review` | **98 assertions over 61 findings** — the design review, the mark, softness, the shop bar and views, the structure, the flags and the gate — written against the built pages, so a fix that stops being applied fails the build |
 | `test-readiness` | Any of **48 tests** showing the gate opens only when it should (@sec-readiness-proof) |
 | `check-review`, last assertion | The image tool failing its own round-trip: two fixtures, both directions, byte-exact when the source is opaque and within one unit per channel when it is not (@sec-image-tool) |
 | `check-render` | In Chrome, at 1440, 900, 390, 360 and 320 px across 12 pages: a painting out of its own proportions, rounded or transformed; a masthead that overflows, takes more than two rows or has a control under 44 px; either half of van Gogh's line re-wrapped, its attribution off the quote's edge, or the featured work ahead of the quote |
@@ -2044,6 +2176,27 @@ outright. The checks are a floor, not a pass.
 ```{=latex}
 \end{finding}
 ```
+
+### A comment that closed twice {#sec-checks-comment}
+
+Worth recording, because it is the kind of failure a suite of 98 assertions
+can walk straight past. A comment in `tokens.css` had been closed twice: the
+second terminator ended it early, and everything after it — up to and
+including the declaration of `--sanguine` — was parsed as garbage and dropped
+by the browser. The site ran for a day without its accent colour: no
+terracotta focus ring, no filled button hover.
+
+Nothing caught it. The token check greps the stylesheet's TEXT for the
+declaration, and the text was there. The contrast gate strips comments
+non-greedily before reading the tokens, and found it too. Every figure in this
+document that reads `tokens.css` read it the same way. Only a browser knew,
+and a browser is what found it: a decorative rule in the new band would not
+paint.
+
+The assertion that would have caught it now exists — after stripping comments
+from each stylesheet, no orphan terminator may remain, and every declaration
+the raw file makes must still be present in what the parser would see. It is
+the cheapest kind of check and it holds a whole class of silent loss.
 
 ## Readiness {#sec-readiness}
 

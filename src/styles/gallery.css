@@ -66,21 +66,23 @@
      the wordmark shrinks below 720px. */
   display:inline-flex; align-items:baseline; gap:.42em;
 }
-/* The artwork is opaque cream, which is the point: on the dark bar it reads
-   as a small mounted plate — the site's own device, a cream sheet on a dark
-   ground, at wordmark size. It takes the panel radius and the mount shadow
-   for the same reason.
+/* The mark is a shape now, not a plate (templates.js). Three things go with
+   that change, and each of them is the same sentence: it is made of ink
+   rather than of paper.
 
-   2.1em rather than the 1.5em the old geometric mark used. That mark was
-   three rectangles and survived being small; this one is a pencil drawing
-   with construction lines, and at 1.5em (about 34px) the letters had gone
-   soft. 2.1em is 47px, which still clears neither the 48px nav targets nor
-   the bar's own height, so nothing grows. It is centred rather than sat on
-   the baseline: a square plate hung off a baseline reads as having slipped. */
+   No plate. The radius and the mount shadow were there to say "a cream sheet
+   lies on the bar"; there is no sheet, so they would be an edge around
+   nothing. The mark is simply set in the wordmark's colour — it inherits it,
+   through currentColor, so the two can never drift apart.
+
+   1.7em rather than 2.1em. The drawing needed the extra size because its
+   construction lines and hatching had gone soft by 34px; the traced shape has
+   neither, and at 1.7em (38px) it is a monogram rather than a smudge while
+   sitting inside the bar's own height. Still centred rather than sat on the
+   baseline: a square hung off a baseline reads as having slipped. */
 .wordmark__mark{
-  width:2.1em; height:2.1em; flex:none; align-self:center; display:block;
-  border-radius:var(--radius-ui);
-  box-shadow:var(--shadow-mount);
+  width:1.7em; height:1.7em; flex:none; align-self:center; display:block;
+  fill:currentColor;
 }
 .wordmark__name{ display:inline-block }
 .nav{ display:flex; gap:var(--space-4); flex-wrap:wrap; align-items:center }
@@ -158,8 +160,50 @@
 }
 .lang-switch:hover{ color:#fff }
 
+/* ---------- the motto strip ----------
+   The gallery's own line, as a band under the bar rather than as a column
+   beside the featured painting (build.js says why it moved). It is the wall
+   itself — nothing paints a background here — held open by its padding and
+   closed by the engraved line every section boundary now uses.
+
+   The four rules across its foot are the sheet's four brand colours, in the
+   order they can be seen on sage: the accent, her deep green, the bar's brown
+   and the cream. They are decoration and they say so — aria-hidden, no
+   meaning carried by any of them, and none of them is a link. */
+.motto{
+  padding-block:var(--space-4);
+  border-bottom:1px solid var(--emboss-shade);
+  box-shadow:0 1px 0 var(--emboss-light);
+}
+/* The band has a ceiling, and it is the fold. Finding A-01 put a painting on
+   the opening screen; a quote that pushes it back off again would undo the
+   finding with better manners. Measured at 1440x900: masthead 110, band 330,
+   and the featured work's own heading at 520. */
+.motto .hero__quote{ margin-bottom:var(--space-4) }
+.motto__foot{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--space-4) var(--space-5); flex-wrap:wrap;
+}
+.motto__rules{ display:flex; align-items:center; gap:var(--space-3) }
+.motto__rule{ display:block; width:clamp(2.6rem,7vw,7rem); height:3px; border-radius:1.5px }
+.motto__rule--sanguine{ background:var(--sanguine) }
+.motto__rule--deep{ background:var(--field-deep) }
+.motto__rule--bar{ background:var(--bar) }
+/* The one cream thing on the site that is not art, a mat or the bar: 4mm of
+   the sheet's Warm Ivory in a decorative rule. Named in L-01 for that. */
+.motto__rule--paper{ background:var(--paper) }
+/* On a phone the CTA drops under the rules rather than squeezing them. */
+@media (max-width:519px){
+  .motto{ padding-block:var(--space-5) var(--space-4) }
+  .motto__rule{ height:2px }
+}
+
 /* ---------- hero ---------- */
-.hero{ padding-block:var(--space-6) var(--space-5) }
+/* The band above it already separates the hero from the bar, so the hero's
+   own top padding came down with the move: at 1440x900 the featured painting
+   now starts at y=600 in a release build, which is what finding A-01 asked
+   for and what the motto in the left column had been costing. */
+.hero{ padding-block:var(--space-5) }
 .hero h1{ max-width:var(--measure-sm); margin-bottom:var(--space-4) }
 /* The van Gogh quote that used to live here now opens Tribute as .epigraph.
    Finding D-05: the .hero blockquote rules it left behind matched nothing and
@@ -233,6 +277,47 @@
 @media (hover:hover) and (pointer:fine){
   .work__figure:hover .work__img,
   .hero__work:hover img{ box-shadow:var(--shadow-lift) }
+}
+
+/* ---------- the About panel ----------
+   Priscilla's "Dark Sage" #727A5C, 20 September 2026: About is set INTO the
+   page rather than laid on it, as a panel with an embossed outline — a catch
+   of light along its top edge, a shade under its foot, and a hairline ring
+   round the whole of it. The same two tokens draw the section dividers, so
+   the page has one idea of what an edge is.
+
+   THE INK IS NOT THE PAGE'S INK. That green is the exact centre of the
+   mid-tone squeeze: pure black is 4.65:1 on it and pure white 4.52:1, so
+   nothing in this palette clears 4.5 there except --ink-deep, which is why
+   everything inside the panel is set in that one colour — the caption and
+   the link included. It costs the section its tonal hierarchy: no quieter
+   grey for the caption, no terracotta to hover into. Size, weight and the
+   underline carry what colour used to. See --ink-deep in tokens.css for the
+   whole table, and check-contrast solves the panel as its own ground. */
+.panel--about{
+  background:var(--plate-about);
+  color:var(--ink-deep);
+  padding:var(--space-6) var(--space-5);
+  border-radius:var(--radius-sheet);
+  box-shadow:
+    inset 0 1px 0 var(--emboss-light),
+    inset 0 -1px 0 var(--emboss-shade),
+    0 0 0 1px var(--emboss-shade);
+}
+/* The head grid's bottom margin separates a section head from the content
+   BELOW it; inside the panel there is nothing below it, and the margin was
+   showing as 96px of empty green. */
+.panel--about .section__head{ margin-bottom:0 }
+.panel--about h2,
+.panel--about p,
+.panel--about a,
+.panel--about .portrait__cap{ color:var(--ink-deep) }
+/* The hover keeps the underline it always had and gives up the accent it
+   cannot afford: --sanguine-deep is 3.50:1 on this green. */
+.panel--about .link-quiet,
+.panel--about .link-quiet:hover{ color:var(--ink-deep); text-decoration-color:currentColor }
+@media (max-width:519px){
+  .panel--about{ padding:var(--space-5) var(--space-4) }
 }
 
 /* ---------- the artist's portrait ----------
@@ -898,6 +983,21 @@ html[lang^="zh"] .page--about .prose{
   color:var(--ink);
   margin:0;
 }
+/* THE MOTTO IS SET AS WRITTEN and the browser may never re-wrap it — the
+   attribution is aligned to the real right edge of its longest line, and a
+   browser cannot shrink a box to the longest line of wrapped text. So its
+   size on a narrow screen is decided by that line rather than by taste.
+   Measured, in the two lines it now carries:
+
+     "with love is well done."   38.4px → 400px    519px column: fits
+                                 27.6px → 296px    390px column (350): fits
+                                 23.8px → 255px    320px column (280): fits
+
+   check-render measures the rendered line count against the <br>s at five
+   widths and fails the build on a re-wrap, so these two steps are held. */
+@media (max-width:519px){
+  .hero__motto{ font-size:calc(var(--size-hero) * .72) }
+}
 .hero__work{ margin:0 }
 .hero__work img{
   width:auto;
@@ -1225,6 +1325,6 @@ html[lang^="zh"] .page--about .prose{
   }
   .lang-switch{ order:2; margin-left:auto }
   .shopbar{ order:2; margin-left:0 }
-  .hero__motto{ font-size:calc(var(--size-hero) * .85) }
+  .hero__motto{ font-size:calc(var(--size-hero) * .62) }
 }
 

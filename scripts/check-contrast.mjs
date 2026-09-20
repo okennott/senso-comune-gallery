@@ -55,6 +55,13 @@ const GROUNDS = {
      two, because the fall was flattened for exactly this reason: at the foot
      of it pure black measured 4.10:1, so no ink could have passed. */
   wall:   T['field'],
+  /* The About panel, #727A5C, painted 20 September 2026. The darkest ground
+     on the site that carries prose, and the tightest: pure black measures
+     4.65:1 on it and pure white 4.52:1, so the whole of colour space has
+     about 3% of headroom here and only one token in this palette clears the
+     4.5 floor — see --ink-deep. Nothing else may be painted on it without
+     being solved for it first, which is what listing it here enforces. */
+  about:  T['plate-about'],
 };
 
 /* ---------- the plates ----------
@@ -126,6 +133,10 @@ const ownGround = [];
  */
 const CHECKS = [
   ['ink',           4.5, ['mat','pale','mid','deep','wall'], 'headings, primary text, links'],
+  /* The one ink for the About panel. It is not in the row above because the
+     panel is not a ground the rest of the ladder can stand on: this token is
+     the whole of what that green admits at 4.5. */
+  ['ink-deep',      4.5, ['mat','pale','mid','deep','wall','about'], 'every word inside the About panel'],
   ['body',          4.5, ['mat','pale','mid','deep','wall'], 'running text'],
   ['muted',         4.5, ['mat','pale','mid','deep','wall'], 'captions, tombstone meta'],
   ['sanguine',      4.5, ['mat','pale','mid','deep'],        'small accent text — on a PLATE only'],

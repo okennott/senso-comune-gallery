@@ -299,6 +299,23 @@ a{ color:var(--ink) }
    plate changes value, which is the one way a soft edge turns back into a
    seam. Restore the plates and --edge-breath and the bands return, already
    joined to the right sections. Until then a boundary is 9rem of spacing. */
+/* THE LINE ACROSS EACH BOUNDARY, 20 September 2026. With the plates off a
+   band paints nothing, so the sections ran into one another and the page read
+   as one long scroll. A boundary is now stated: an engraved hairline at the
+   centre of the band — a line of shade with a line of light caught under it,
+   which is the same pair the About panel is outlined with.
+
+   It is drawn on a pseudo-element rather than added to the gradient, so the
+   two mechanisms stay separate: restore the plates and --edge-breath and the
+   sfumato returns underneath this line, not instead of it. Decorative, so it
+   is inside an element that is already aria-hidden. */
+.edge::after{
+  content:'';
+  position:absolute; inset-inline:0; top:50%;
+  height:2px; transform:translateY(-1px);
+  background:linear-gradient(var(--emboss-shade) 0 1px,var(--emboss-light) 1px 2px);
+}
+
 .edge--pale-pale{ --edge-from:var(--plate-pale); --edge-to:var(--plate-pale) }
 .edge--pale-mid{  --edge-from:var(--plate-pale); --edge-to:var(--plate-mid)  }
 .edge--mid-deep{  --edge-from:var(--plate-mid);  --edge-to:var(--plate-deep) }

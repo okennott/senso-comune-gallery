@@ -74,7 +74,7 @@
   ],
   "hero": {
     "title": {
-      "en": "That which\nis done\nwith love\nis well done.",
+      "en": "That which is done\nwith love is well done.",
       "zh": "以爱完成之事，\n方为善成。"
     },
     "cta": {
@@ -92,11 +92,14 @@
         "nineteenth-century 'wordt ... wordt' is his, not a typo.",
         "",
         "It carries its own line breaks for the same reason `title` does, and",
-        "it is broken into four lines so the original and the translation are",
-        "set in the same shape."
+        "it is broken into the same number of lines as the translation, so the",
+        "two are set in the same shape. TWO lines each since 20 September 2026,",
+        "when the motto left the hero column for the band under the masthead:",
+        "four short lines were a column, and a column is the thing that band",
+        "exists to stop being."
       ],
       "lang": "nl",
-      "text": "wat met liefde\ngedaan wordt\ndat wordt\ngoed gedaan",
+      "text": "wat met liefde gedaan wordt\ndat wordt goed gedaan",
       "source": "https://vangoghletters.org/vg/letters/let143/letter.html"
     },
     "$comment": [

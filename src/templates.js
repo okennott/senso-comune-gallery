@@ -6,6 +6,8 @@
  * contradict its own aesthetic argument. This is that build script's half.
  */
 
+import { readFileSync } from 'node:fs';
+
 /* ---------- helpers ---------- */
 
 export const esc = (s = '') =>
@@ -205,16 +207,35 @@ const favicon = (asset) => `<link rel="icon" href="${asset('/icon.svg')}" type="
 <link rel="apple-touch-icon" href="${asset('/apple-touch-icon.png')}">
 <link rel="manifest" href="${asset('/site.webmanifest')}">`;
 
-/* The masthead lockup: the monogram AS DRAWN, on the paper it was drawn on.
-   The artwork is opaque cream, so it arrives on the dark bar as a small plate
-   — which is the site's own device, a cream sheet mounted on a dark ground,
-   at wordmark size.
+/* The masthead lockup: the monogram as a SHAPE, in the bar's own ink.
+   Changed 20 September 2026, by decision.
+
+   It used to be the artwork itself — opaque cream paper, arriving on the dark
+   bar as a small mounted plate, which is the site's own device at wordmark
+   size. What it could not do is take a colour: a photograph of paper is the
+   same photograph whatever it is set in, so the mark could not invert, could
+   not follow the bar if the bar ever changes, and carried a cream rectangle
+   into a place where nothing else has an edge. The vector traced from that
+   same drawing (scripts/build-mark-vector.py) can: it is one path in
+   `currentColor`, so it IS the wordmark's colour — --paper, 11.45:1 on the
+   bar — and it inherits every future change to it for nothing.
+
+   Inlined rather than linked, because `currentColor` is a cascade and an
+   <img> has none. The file is read once at build time and its single path
+   is dropped in; nothing is redrawn here.
 
    Decorative: the link's own text is the accessible name, and a second one
-   here would violate 2.5.3 Label in Name. Width and height are set so the bar
-   does not reflow when the file lands. */
-const MASTHEAD_MARK = (asset) =>
-  `<img class="wordmark__mark" src="${asset('/logo-mark.png')}" alt="" width="192" height="192" decoding="async">`;
+   here would violate 2.5.3 Label in Name. An inline SVG says that with
+   aria-hidden and focusable=false rather than with an empty alt. The box is
+   sized in CSS and has an explicit viewBox, so the bar cannot reflow. */
+const MARK_PATH = (() => {
+  const svg = readFileSync(new URL('../public/mark-sc.svg', import.meta.url), 'utf8');
+  const d = svg.match(/<path[^>]*\sd="([^"]+)"/)?.[1];
+  if (!d) throw new Error('public/mark-sc.svg has no path — run: npm run mark:vector');
+  return d;
+})();
+const MASTHEAD_MARK = () =>
+  `<svg class="wordmark__mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path fill="currentColor" d="${MARK_PATH}"/></svg>`;
 
 /* The shop bar's icons: 24-unit, one stroke weight, drawn in currentColor so
    they take the bar's text colour and are checked with it. */
@@ -301,7 +322,8 @@ const wordmarkName = (seller, loc) => {
 
 /* ---------- document shell ---------- */
 export function layout({ site, seller, loc, title, description, body, ogImage, ogImageAlt,
-                         ogImageHeight, product, canonical, altLocales, bodyClass = '', noindex = false, current = null }) {
+                         ogImageHeight, product, canonical, altLocales, bodyClass = '',
+                         noindex = false, current = null, strip = '' }) {
   const L = site.locales[loc];
   const ui = site.ui;
   const origin = process.env.SITE_URL || site.url;   // same source build.js uses for the sitemap
@@ -390,7 +412,7 @@ ${loc === 'zh'
 ${PREVIEW ? `<div class="readiness-ribbon" role="note">${esc(t(READINESS.ready ? site.readiness.previewReady : site.readiness.previewBlocked, loc).replace('{n}', READINESS.blockers.length))}</div>` : ''}
 <header class="masthead">
   <div class="wrap masthead__inner">
-    <a class="wordmark" href="${esc(path(loc, site, '/'))}">${MASTHEAD_MARK(asset)}<span class="wordmark__name">${wordmarkName(seller, loc)}</span></a>
+    <a class="wordmark" href="${esc(path(loc, site, '/'))}">${MASTHEAD_MARK()}<span class="wordmark__name">${wordmarkName(seller, loc)}</span></a>
     <nav class="nav" aria-label="${loc === 'zh' ? '主导航' : 'Main'}">
       ${nav}
     </nav>
@@ -401,7 +423,7 @@ ${PREVIEW ? `<div class="readiness-ribbon" role="note">${esc(t(READINESS.ready ?
     </ul>
   </div>
 </header>
-
+${strip}
 <main id="main" tabindex="-1" class="sheet">
 ${body}
 </main>

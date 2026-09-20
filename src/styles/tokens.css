@@ -134,11 +134,29 @@
   --ink:              #160903;   /*  5.71 on the wall · 16.66 on a plate   */
   --body:             #261B0F;   /*  4.92 · 14.37 — running text           */
 
+  /* One rung below the ladder, for one surface: the About panel's dark sage
+     (--plate-about, below). That green is the exact centre of the mid-tone
+     squeeze — it holds 4.65:1 for PURE BLACK and 4.52:1 for PURE WHITE — so
+     it has about 3% of headroom in the whole of colour space, and nothing
+     else in this palette can carry small text on it:
+
+       ink       4.33      body   3.73      muted      3.50
+       paper     3.81      rule   2.45      muted-ui   2.44
+       sanguine  2.43      sanguine-deep 3.50
+
+     This is the only value that clears 4.5 there with anything to spare, and
+     it keeps the ladder's hue. Everything inside that panel is set in it —
+     including the caption and the link, which is what that ground costs: on
+     the dark sage there is no quieter grey and no accent to hover into, only
+     size, weight and the underline. */
+  --ink-deep:         #080301;   /*  4.55 on the dark sage · 5.99 on the wall */
+
   /* --- accents -----------------------------------------------------------
      Her latest terracotta is #98564B; this keeps #8B4A3C, which is the same
      colour a shade deeper and carries more headroom on every ground
      (5.64 vs 4.71 on paper; 6.68 vs 5.57 for white-on-fill). It is also,
-     within measurement error, sanguine — the red chalk Leonardo drew in.  */
+     within measurement error, sanguine — the red chalk Leonardo drew in.
+
      RE-SOLVED with the ink, and the accent is the one that was demoted. No
      red-brown that is still a red-brown clears 4.5:1 on the wall: at that
      floor it is Y 0.0182, which is a maroon indistinguishable from the ink.
@@ -258,6 +276,37 @@
      transparent: it exists to hide the page behind an opened work. So the
      "let the field through" of the four above is, here, the field itself. */
   --plate-lightbox:   var(--field);
+
+  /* --- the About panel ---------------------------------------------------
+     The one plate that is painted while the rest are off, chosen by
+     Priscilla on 20 September 2026: "Dark Sage" #727A5C, a darker cut of the
+     wall, so About reads as a panel set INTO the page rather than as another
+     stretch of it.
+
+     It is the darkest ground on the site that carries prose, and it is at the
+     limit: see --ink-deep for the whole of what it admits. Two consequences
+     are structural rather than stylistic, and both are held by the contrast
+     check as its own ground:
+       · everything inside the panel is one ink. No muted caption, no
+         terracotta hover — neither clears 4.5 on this green.
+       · nothing else may be painted on it without solving for it first.
+
+     To take the panel back out, set this to `transparent` and the section
+     returns to the wall with the others; --ink-deep then has no surface and
+     the check stops asking about it.                                      */
+  --plate-about:      #727A5C;
+
+  /* --- emboss ------------------------------------------------------------
+     An emboss is not a colour, it is light: one line of it catching and one
+     line of shade under the catch. Black and white at low alpha, so the same
+     pair works over the wall, over the panel and over the bar without being
+     re-solved for each — and so a change to the green cannot leave a hairline
+     behind in the wrong hue.
+
+     The section dividers and the About panel's outline are the same device,
+     which is why they are one pair of tokens and not two.                 */
+  --emboss-light:     rgba(255,255,255,.26);
+  --emboss-shade:     rgba(0,0,0,.20);
 
   /* ======================================================================
      TYPE — the Vitruvian scale

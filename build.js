@@ -397,16 +397,47 @@ function renderIndex(loc) {
     </li>`;
   }).join('\n    ');
 
-  const body = `
-<section class="hero wrap${heroWork ? ' hero--split' : ''}">
-  <div class="hero__lede">
-    <h1 class="visually-hidden">${esc(t(seller.artist.siteName, loc))}</h1>
+  /* ---------------------------------------------------------------- *
+   * The motto, as a strip under the bar                                *
+   *                                                                    *
+   * It used to stand in the hero's left column, beside the featured    *
+   * painting, with the CTA under it — six words and a link holding a   *
+   * column open next to an object, which is the arrangement finding    *
+   * A-01 was about in the first place, one step further on. A quote    *
+   * that is the gallery's own statement is not a sibling of a work; it *
+   * is the top of the page.                                            *
+   *                                                                    *
+   * So it is a BAND, full width, immediately under the masthead: the   *
+   * wall itself, with the four brand colours ruled across its foot and *
+   * an embossed line closing it. The hero below now carries nothing    *
+   * but the painting, which is the one thing finding A-01 asked for.   *
+   *                                                                    *
+   * WHY IT SITS BETWEEN <header> AND <main> rather than inside either. *
+   * Inside the header it would become the sticky bar's containing      *
+   * block, and the bar would stop sticking once the band scrolled past *
+   * — G-03 measures that bar. Inside main it would be inside the       *
+   * mounted sheet, and a band that stops at the mount's rounded corner *
+   * is not a band. It carries no landmark of its own, so the page's    *
+   * landmark count is what it was.                                     *
+   * ---------------------------------------------------------------- */
+  const rule = (name) => `<span class="motto__rule motto__rule--${name}"></span>`;
+  const strip = `
+<div class="motto">
+  <div class="wrap motto__inner">
     <figure class="hero__quote">
       <blockquote cite="${esc(site.hero.original.source)}"><p class="hero__original" lang="${esc(site.hero.original.lang)}">${site.hero.original.text.split('\n').map(esc).join('<br>')}</p><p class="hero__motto">${t(site.hero.title, loc).split('\n').map(esc).join('<br>')}</p></blockquote>
       <figcaption class="hero__cite">— ${esc(t(site.hero.attribution, loc))}</figcaption>
     </figure>
-    <a class="link-quiet" href="${lpath(loc, site, site.hero.ctaHref)}">${esc(t(site.hero.cta, loc))}</a>
-  </div>${heroFigure}
+    <div class="motto__foot">
+      <span class="motto__rules" aria-hidden="true">${rule('sanguine')}${rule('deep')}${rule('bar')}${rule('paper')}</span>
+      <a class="link-quiet" href="${lpath(loc, site, site.hero.ctaHref)}">${esc(t(site.hero.cta, loc))}</a>
+    </div>
+  </div>
+</div>`;
+
+  const body = `
+<section class="hero wrap">
+  <h1 class="visually-hidden">${esc(t(seller.artist.siteName, loc))}</h1>${heroFigure}
 </section>
 
 <!-- Every band is named by the two grounds it joins, and nothing sits on the
@@ -442,6 +473,7 @@ function renderIndex(loc) {
 
 <section class="section ground--deep" id="about">
   <div class="wrap">
+    <div class="panel panel--about">
     <div class="section__head">
       <h2>${esc(t(S.about.title, loc))}</h2>
       <div class="prose measure">
@@ -449,6 +481,7 @@ function renderIndex(loc) {
         ${portraitFrame(loc, 'section')}
         <p><a class="link-quiet" href="${lpath(loc, site, '/about/')}">${loc === 'zh' ? '继续阅读' : 'Read the rest'}</a></p>
       </div>
+    </div>
     </div>
   </div>
 </section>
@@ -473,7 +506,7 @@ function renderIndex(loc) {
     site, seller, loc,
     title: `${t(seller.artist.siteName, loc)}`,
     description: t(site.sections.works.intro, loc),
-    body,
+    body, strip,
     ogImage: `/img/${works[0].image}-1600.webp`,
     canonical: lpath(loc, site, '/'),
     altLocales: altFor('/'),
