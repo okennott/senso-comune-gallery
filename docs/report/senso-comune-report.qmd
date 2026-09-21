@@ -164,9 +164,35 @@ it.
 ## Where the design came from {#sec-brief}
 
 Priscilla supplied a nine-page draft and, later, a live mockup with a revised
-palette, having already built a prototype on Netlify. All three were treated
-as the brief. The work here was not to redesign but to find where the drawing
-and the medium disagree — and they disagreed mostly about contrast.
+palette, having already built a prototype on Netlify. All three were treated as
+the brief. The work here was not to redesign but to find where the drawing and
+the medium disagree.
+
+**How the decisions in this document were taken.** Two things had a vote. The
+first is her own work — the draft, the mockup, the prototype and the brand
+sheet — which carries the intent, and which this project does not overrule on
+taste. The second is measurement: contrast solved rather than judged, layouts
+read out of a browser rather than estimated, type set as specimens rather than
+chosen from a list. Where the two agree, the artefact wins and nothing is
+written down. Where they disagree, three things are established before anything
+moves:
+
+1. **what exactly fails**, in numbers — not *the green is hard to read* but
+   *`--muted-ui` drops below 3.0:1 under L\* 91.5, whatever the chroma*;
+2. **the smallest change that fixes it** — the failing variable and no other,
+   so the drawing survives the correction;
+3. **whether the alternative can be kept live**, because a decision about how a
+   gallery should look is the artist's to revisit, and a decision that can only
+   be revisited by re-reading this report is a decision she does not really
+   have.
+
+That third test is why several things in this document exist as switches rather
+than as settlements: the reading ground (@sec-switch-ground), the entity
+(@sec-switch), the shop controls (@sec-next-decisions). Each is one edit in a
+data or token file, and each has a check that measures whichever position it is
+in, so neither position can ship unmeasured.
+
+The disagreements were mostly about contrast.
 
 ## Colour {#sec-colour}
 
@@ -199,13 +225,14 @@ Her green stays dominant at the margins, and nothing sets text on the field.
 \end{finding}
 ```
 
-That sheet was cream for the first three months of the project. It was sage for
-an afternoon — @sec-sage-ground — and by that evening it was painting nothing at
-all: @sec-plates.
+The sheet was cream while the palette was cream. Her brief moved it to sage
+(@sec-sage-ground) and then asked for no reading ground at all (@sec-plates);
+what the page shows is the second of those, with the first kept live beside it
+(@sec-switch-ground).
 
 ### Sage as the reading ground {#sec-sage-ground}
 
-*Decision of 20 September 2026, and the research behind it.*
+*Her brief: cream for the art, sage for everything else. What that turned out to require.*
 
 The brief for this pass was one line: restrict cream to the backgrounds of the
 art pieces, and put everything else on sage and its variations. That is a
@@ -276,7 +303,7 @@ read on it.
 
 ### The plates, switched off {#sec-plates}
 
-*Decision of 20 September 2026, later the same evening.*
+*The same brief, one step further: no reading ground at all.*
 
 The brief for this one was also a line: make the backgrounds behind the text
 transparent, so that nothing of `#EBEFDB` shows anywhere and the only
@@ -284,9 +311,8 @@ background colour on the site is the sage. It is @sec-sage-ground read
 backwards. That pass asked what a reading ground may be; this one asks what is
 left when there is none.
 
-**Nothing was deleted to do it.** A background that is edited away is an
-afternoon's work to put back, and the request was explicitly for a switch
-rather than a demolition. So every surface that is read now paints a token of
+**Nothing was deleted to do it,** because the request was for a switch rather
+than a demolition (@sec-brief). Every surface that is read paints a token of
 its own, and those tokens are what is transparent:
 
 : What paints a surface that is read {#tbl-plates}
@@ -327,7 +353,7 @@ this palette that was never solved for text. It is also lit — `--field` at the
 top of the fall, `--field-deep` at the foot — so both columns below are real
 grounds on the same page, not a range.
 
-: What the plates cost the palette **as it then stood** — the ink of the morning, read on the wall of the evening. This is the bill that forced the type re-solve of @sec-ink, and every figure in it has since been superseded. {#tbl-plates-cost}
+: The bill for switching the plates off, against the ink as the cream palette had left it. Every figure here is superseded by the re-solve of @sec-ink; it is kept because it is what the re-solve had to beat. {#tbl-plates-cost}
 
 | Token, as it was | On `--wash-pale` | On `--field` | On `--field-deep` | Floor |
 |:----------------|-----------:|-----------:|----------:|------:|
@@ -352,12 +378,12 @@ is now solved inside.
 **What the check does about it.** `check-contrast.mjs` reads the plate tokens,
 and when any of them is transparent it adds the **wall** to the grounds every
 foreground is solved against — so with the plates off, `--field` is checked
-exactly as a plate is, and a regression on it blocks the build. That is a change
-from the morning, when the same block could only *print* the bill and say it
-could not certify the page: there was no ladder that passed. There is now
-(@sec-ink), so the check binds instead of reporting. Beside the verdict it
-still prints the headroom — how much of the wall's own budget each rung is
-using — because the budget is what will bite if the wall moves again.
+exactly as a plate is, and a regression on it blocks the build. Before the
+re-solve of @sec-ink the same block could only *print* the bill and decline to
+certify the page, because no ladder passed; now that one does, the check binds
+rather than reports. Beside the verdict it still prints the headroom — how much
+of the wall's own budget each rung is using — because the budget is what will
+bite if the wall moves again.
 
 `check-review.mjs` L-05 holds the mechanism rather than the value: the five
 plates must be declared, the five rules that paint a ground must name them —
@@ -373,13 +399,13 @@ at 72%. That panel is now the one plate left on the site, and the arithmetic of
 the foot. The plate that could only ever make text paler is now the most
 legible reading surface on the site.
 
-**And the mount goes with the plate.** The sheet kept a shadow and a rim light
-for a while — the pair that says a sheet is lying *on* the field rather than
-being a hole cut in it. With `--plate-sheet` transparent there is no sheet
-lying there: the pair drew a 1240 px rectangle, filled with the field's own
-green, whose edges corresponded to nothing anybody could see. That reads as a
-rendering fault rather than as a mount, so it is `--mount-sheet`, it is `none`
-on the wall, and it comes back with the paper.
+**The mount goes with the plate.** A shadow and a rim light are what say a
+sheet is lying *on* the field rather than being a hole cut in it; with
+`--plate-sheet` transparent there is no sheet lying there, and the pair draws a
+1240 px rectangle, filled with the field's own green, whose edges correspond to
+nothing anybody can see. That reads as a rendering fault rather than as a
+mount. It is `--mount-sheet`, `none` on the wall, and it returns with the
+paper.
 
 ### The switch, kept in both positions {#sec-switch-ground}
 
@@ -420,7 +446,7 @@ and painting box passes — then back to the wall, clean.
 
 ### The wall, re-solved against the prototype {#sec-wall}
 
-*Decision of 20 September 2026, after the plates came off.*
+*The wall, once it became the page.*
 
 With the plates transparent the field stopped being a margin and became the
 whole page, and at that size it read fresher and lighter than the site
@@ -938,11 +964,10 @@ as it is.
 seasonal card, and cannot be knocked out of a coloured ground. The site works
 with that rather than against it: the artwork is opaque cream, so on the dark
 masthead it arrived as a small mounted plate — a cream sheet on a dark ground,
-which is the site's central visual idea at wordmark size. **Since 20 September
-2026 there is a shape too**, traced from the drawing for the surfaces that
-cannot hold a photograph; what that costs is @sec-mark-vector. The masthead is
-now one of them, by decision the same day: the bar carries the vector, in the
-wordmark's own colour.
+which is the site's central visual idea at wordmark size. **There is a shape
+too**, traced from the drawing for the surfaces that cannot hold a photograph;
+what that costs is @sec-mark-vector. The masthead is one of them by Priscilla's
+decision: the bar carries the vector, in the wordmark's own colour.
 
 **4 — The SVG favicon went away with it, and has come back.** The site once
 shipped an `icon.svg`; a vector favicon is sharp at every size and is what a
@@ -1015,12 +1040,11 @@ one, because a favicon has no page to inherit a colour from. Beside it,
 text around it is, and handed to a printer it is a shape rather than a
 photograph of one.
 
-And the **masthead**, which is the decision this section was written to leave
-open and which Priscilla took the same day. The bar used to carry the artwork
-itself, a cream plate of paper on the brown. What it could not do is take a
-colour: a photograph is the same photograph whatever it is set in, so the mark
-could not follow the bar, could not invert, and carried a cream rectangle into
-a place where nothing else on the site has an edge. The vector can — it is one
+And the **masthead**, which this section was written to leave open and which
+Priscilla decided. The bar carried the artwork itself, a cream plate of paper
+on the brown. What a photograph cannot do is take a colour: the mark could not
+follow the bar, could not invert, and carried a cream rectangle into a place
+where nothing else on the site has an edge. The vector can — it is one
 path in `currentColor`, inlined rather than linked because `currentColor` is a
 cascade and an `<img>` has none, so the mark *is* the wordmark's colour and
 inherits every future change to it for nothing.
@@ -1705,11 +1729,11 @@ It is now a **band**, full width, immediately under the masthead, held open by
 its padding and closed by an engraved line. The hero below carries nothing but
 the painting.
 
-It is **painted in the About panel's dark sage**, `#727A5C`. It was the bare
-wall, which made it a stretch of page with a quotation lying on it rather than
-a band, and left the boundary at its foot ruling one green off from the same
-green. Now the two places this site speaks in the first person — the gallery's
-own line, and the artist's own — share a ground.
+It is **painted in the About panel's dark sage**, `#727A5C`. On the bare wall
+it was a stretch of page with a quotation lying on it rather than a band, and
+the boundary at its foot ruled one green off from the same green. Painted, the
+two places this site speaks in the first person — the gallery's own line, and
+the artist's own — share a ground, and the boundary has an edge to state.
 
 That ground is the exact centre of the mid-tone squeeze (@sec-panel): pure
 black measures 4.65:1 on it and pure white 4.52, so the whole palette has about
@@ -1743,11 +1767,10 @@ decided by that line rather than by taste: *"with love is well done."* is
 10.42 ems wide, which is 563 px at the ladder's 54 px ceiling inside a 1060 px
 column, and 271 px at its 26 px floor inside the 280 a 320 px screen gives.
 
-It used to be 38.4 px with two step-downs, at 519 px and 359 px. It is now the
-`clamp()` of @sec-scale-fluid, which does the same job continuously and does it
-for every heading rather than for the motto alone. `check-render` measures the
-rendered line count against the `<br>`s at five widths either way, and fails
-the build on a re-wrap.
+The `clamp()` of @sec-scale-fluid does that continuously, and for every heading
+rather than for the motto alone; two hand-set step-downs at 519 px and 359 px
+did it before. `check-render` measures the rendered line count against the
+`<br>`s at five widths either way and fails the build on a re-wrap.
 
 The band sits **between `<header>` and `<main>`** rather than inside either.
 Inside the header it would become the sticky bar's containing block, and the
@@ -1756,12 +1779,12 @@ bar would stop sticking once the band scrolled past — which is the bar
 and a band that stops at the mount's rounded corner is not a band. It carries
 no landmark of its own, so the page's landmark count is what it was.
 
-Four decorative rules in the sheet's own brand colours ran across its foot
-until the second review took them out (@sec-review-aw). On sage they read as a
-progress bar or a palette chip, and the cream one as a stray highlight: the
-only unexplained ornament on a site whose argument is that nothing here is
-unexplained. `check-review` N-01 used to hold them in place and now holds them
-out, of the markup and of the stylesheet both.
+**The band carries no ornament.** Four decorative rules in the sheet's own
+brand colours were drawn across its foot and then taken out (@sec-review-aw):
+on sage they read as a progress bar or a palette chip, and the cream one as a
+stray highlight — the only unexplained mark on a site whose argument is that
+nothing here is unexplained. `check-review` N-01 holds them out, of the markup
+and of the stylesheet both.
 
 ### The artist's portrait {#sec-portrait}
 
@@ -1912,7 +1935,7 @@ forgotten.
 
 ## The second review, against the award {#sec-review-aw}
 
-*20–21 September 2026. Eleven findings, coded `AW-nn`.*
+*Eleven findings, coded `AW-nn`. The document is in `docs/review/`.*
 
 The first review asked whether the site was correct. The second asked a
 different question — whether a design jury would stop on it — and it was
@@ -1964,46 +1987,54 @@ and the tombstone row is back inside the 32 rem the base rule has always capped
 it to and always explained.
 
 **Three things came out.** The masthead's search, account and cart
-(@sec-next-decisions); the band's four decorative rules (@sec-band); and, in
-`check-review`, four `opsz` values pinned to sizes that had become fluid. Each
-removal is held by the assertion that used to hold the thing in place — N-01
-holds the ornament *out* of the band now, and H-01 holds the shop bar to its
-route list in both directions.
+(@sec-next-decisions); the band's four decorative rules (@sec-band); and four
+`opsz` values pinned to sizes that had become fluid. Each removal is held by
+the assertion that had held the thing in place: N-01 holds the ornament *out*
+of the band, and H-01 holds the shop bar to its route list in both
+directions.
 
-**Endings.** A work page closed on a rule and one right-aligned *Next work*: no
-route back to the catalogue, nothing from the same series, nothing else at all.
-It closes with three works now — siblings first, newest first, only ones still
-for sale — and those three carry their view-transition names, so clicking one
-flies it out of the grid into the page it leads to. `check-review` H-05 said
-"one name per work page", which was the same thing as the rule that actually
-matters only while a work page showed one painting; it asserts what matters
-now — every name on the page distinct, the page's own exactly once, and never
-on a detail, an edge, a back or the video.
+**Endings.** A work page closed on a rule and one right-aligned *Next work* —
+no route back to the catalogue, nothing from the same series. It closes with
+three works now, siblings first and only ones still for sale, and those three
+carry their view-transition names, so clicking one flies it out of the grid
+into the page it leads to. `check-review` H-05 read "one name per work page",
+which is the same thing as the rule that actually matters only while a page
+shows one painting; it now asserts that rule — every name distinct, the page's
+own exactly once, and never on a detail, an edge, a back or the video.
 
 **The share card.** `og:image` pointed at the painting's own file, and a 4:5
 canvas under `summary_large_image` is shown as a 1.91:1 sliver of itself
 whatever the page declares — while the home page, Works, every series and the
 archive declared a 1600 × 1600 square for a 1600 × 2000 file, because only the
-work page wrote a height at all. The card is drawn rather than cropped now:
-1200 × 630, the sage wall, the painting in its mat, the monogram beside it, one
-per work from the same master the pages use. No text on it, because text needs
-a font the SVG rasteriser can load and CI has no Fraunces, while every platform
-already sets `og:title` beside the image. Its colours are read out of
-`tokens.css`, like this report's figures, so the card cannot drift from the site
-it pictures.
+work page wrote a height at all. It is drawn rather than cropped now: 1200 ×
+630, the sage wall, the painting in its mat, the monogram beside it, one per
+work from the same master the pages use. No text on it — text needs a font the
+SVG rasteriser can load and CI has no Fraunces, while every platform already
+sets `og:title` beside the image. Its colours are read out of `tokens.css`,
+like this report's figures, so the card cannot drift from the site it pictures.
 
-**And one bug that predates both reviews.** `og:image` was the only absolute URL
-on the page built from a raw path rather than through `path()`, so on a project
-site served from `/<repo>/` — which is exactly what the GitHub Pages preview is
-— it lost the prefix that canonical, `og:url`, hreflang and every sitemap entry
-kept, and the card 404'd for every scraper that fetched it.
+Building it surfaced a defect older than either review: `og:image` was the one
+absolute URL on the page built from a raw path rather than through `path()`, so
+on a project site served from `/<repo>/` it lost the prefix that canonical,
+`og:url`, hreflang and every sitemap entry kept — and the card 404'd for every
+scraper that fetched it.
 
-Nine of the eleven findings are closed. **AW-05** — which measured what the flat
-page costs, and put the plates back — was reversed the next day by decision, and
-@sec-switch-ground is the settlement: the bill it measured is printed on every
-build, and the half of the problem it did not solve, weight, is @sec-weight.
-**AW-10** waits on the shoot: the prose pages carry no image because there is no
-photograph to put on them, and an empty mat on a page that does not need one
+Nine of the eleven are closed as written. Two are not.
+
+**AW-05 was right about the measurement and wrong about the remedy.** It found
+that the flat ground caps the palette — pure black reaches 6.14:1 on the wall,
+so running text has 9% of headroom and captions 3% — and proposed painting the
+plates, which is what the arithmetic points at. But that corrects the look of
+the gallery rather than a defect in it, and @sec-brief is explicit about who
+decides those: the ground stays sage. The finding is answered three other ways.
+Its bill is printed on every build, so the constraint is never out of sight
+(@sec-plates); the alternative is kept one edit away and solved by the same
+check (@sec-switch-ground); and the half of the problem it did not address —
+that with colour at its ceiling the remaining variable is weight — is
+@sec-weight.
+
+**AW-10 waits on the shoot.** The prose pages carry no image because there is
+no photograph to put on them, and an empty mat on a page that does not need one
 yet is worse than white space.
 
 ### Looking at the pages {#sec-review-look}
@@ -2013,8 +2044,8 @@ six things that were wrong rather than arguable. They are recorded because each
 one had survived the measured reviews: **a measurement finds what you thought to
 measure, and looking finds what you did not.**
 
-- The **404** named search, accounts and the cart as the things still being
-  built, after the controls that led there had gone.
+- The **404** still named search, accounts and the cart as the things being
+  built, after the controls that led to it had been withdrawn.
 - `.link-quiet` was an `inline-flex`, so the arrow in `::after` was a flex
   *item*: a label that wrapped left it stranded, centred between the two lines
   and 240 px right of its own words.
@@ -2618,7 +2649,7 @@ checks what is in each field, and a release cannot be built while it is closed.
 | The site | 2 | An `example` or `http` site address; a header control that leads to the 404 |
 | Works and prices | 7 | No work for sale; a title as *TODO*; alt text as an ellipsis; a price of 0; a currency that is not ISO 4217; a work dated next year; a payment link over `http` |
 | Photography | 3 | A work for sale still showing its placeholder; a real view photograph with no description |
-| Payments | 3 | No way to pay on the active entity; a cart taking payments with no transaction ceiling. PY-02 used to infer the cart's existence from a missing placeholder route, which stopped being true the day the control came out because there is no cart; `site.shop.cart` states it instead |
+| Payments | 3 | No way to pay on the active entity; a cart taking payments with no transaction ceiling. Whether there is a cart is stated by `site.shop.cart` rather than inferred from the route list, which cannot tell a cart that was built from a control that was withdrawn |
 | Backstop | 1 | A placeholder in any field no rule names |
 
 ### How it is proved {#sec-readiness-proof}
@@ -2672,18 +2703,21 @@ nearly every shop. Five decisions were taken on 17 September 2026
 (@sec-next-decisions). The views are built; the buy box and the three shop
 pages are specified and not yet built (@sec-next-todo).
 
-**D1 has since been reversed, and the reversal is the interesting part.** The
-three controls were built and shipped as placeholders, and the second review
-took them back out (@sec-review-aw): three e-commerce icons in the most
-valuable strip on the site, for a catalogue of six unique objects sold by
-enquiry, read as a store template rather than as a gallery — and all three were
-readiness blockers for the same underlying reason, a control that leads
-nowhere. Nothing was deleted to achieve it. The bar is built from
-`site.placeholders.routes`, which is now empty, so a route put back puts its
-control back with its icon, its accessible name in both languages and its 44 px
-target. Everything below stands as the specification for the day it is; what
-changed is only that the control now arrives **with** the page rather than
-ahead of it.
+**D1 has been superseded: the controls wait for their pages.** They were built
+and shipped as placeholders, and the second review measured what that cost
+(@sec-review-aw). Three e-commerce icons in the most valuable strip on the
+site, for a catalogue of six unique objects sold by enquiry, read as a store
+template rather than as a gallery; and all three were readiness blockers under
+SH-01 for the same underlying reason, a control that leads nowhere. The
+masthead is the wordmark, four words of navigation and the language switch,
+which is the one control there that changes anything.
+
+The specification below is unaffected, because the controls were withdrawn
+rather than deleted. The bar is built from `site.placeholders.routes`, so a
+route put back restores its control with its icon, its accessible name in both
+languages and its 44 px target — and SH-01 asks for the page it points at,
+exactly as before. The only change is the order: the control now arrives
+**with** the page rather than ahead of it.
 
 ## What the reference shops do {#sec-next-refs}
 
@@ -2778,7 +2812,7 @@ one checkout for everything in the cart. None of those is true of this site yet.
 
 | # | Decided | What it means |
 |:--|:----------------------------------------|:----------------------------------------|
-| D1 | ~~**Search, account and cart** in the header now~~ **Reversed.** | Each led to a placeholder route that landed on the 404. Built, shipped, and taken back out at the second review (@sec-review-aw): the controls return with the pages behind them |
+| D1 | **Search, account and cart** in the header — *superseded* | Built and shipped as placeholder routes landing on the 404. Withdrawn at the second review (@sec-review-aw); each control returns with the page behind it |
 | D2 | **Detail, edge, back and video** views on every work | Placeholders until the photographs and video exist. The scale diagram stays beside the work rather than becoming a generated view |
 | D3 | **Any number of works in one order** | Limited only by availability and by the payment route's largest single transaction |
 | D4 | **No search threshold** | Search appears regardless of catalogue size, provided the query and the searchable text are correctly scoped |
@@ -2788,26 +2822,24 @@ one checkout for everything in the cart. None of those is true of this site yet.
 
 @fig-work shows the result on a desktop.
 
-- **The shop bar — built, then withdrawn.** Search, account and cart appeared on
-  every page in both languages, as icons whose accessible names were the words
-  (*Search*, *Account*, *Cart*; 搜索, 账户, 购物车), each destination a declared
-  placeholder that `check-links` would fail the build over if it ever resolved.
-  It is not drawn now (@sec-review-aw), and everything in that sentence is still
-  true of it the moment a route returns: the markup, the icons, the names, the
-  44 px targets and the check are all in place and driven by the route list.
-  On a phone the masthead takes two rows either way: the short name,
+- **The shop bar, built and held.** Search, account and cart in both languages,
+  as icons whose accessible names are the words (*Search*, *Account*, *Cart*;
+  搜索, 账户, 购物车), each destination a declared placeholder that `check-links`
+  fails the build over if it ever resolves. The markup, the icons, the names,
+  the 44 px targets and the check are all in place and driven by the route
+  list; none of it is drawn while that list is empty (@sec-review-aw). On a
+  phone the masthead takes two rows either way: the short name,
   *Senso Comune*; then the sections and the language switch. Below 360 px the
   name is kept for screen readers and the mark alone leads home.
 - **Icons only, at every width.** The research above favours visible words; the
-  reference Priscilla chose shows icons alone, and that is what was built. Only
-  the magnifying glass is close to universal. If the account or cart icon proves
-  ambiguous when the controls come back, the labels are one CSS change away: the
-  words are already in the markup.
+  reference Priscilla chose shows icons alone, and that is what was built —
+  only the magnifying glass is close to universal. If either proves ambiguous
+  in use, the labels are one CSS change away: the words are already in the
+  markup.
 - **A bilingual 404.** Every placeholder lands on it: both languages, no
-  canonical, not indexed, not in the sitemap. It named search, accounts and the
-  cart as the things still being built until the controls went; what lands there
-  now is a mistyped address, an old link and the footer's channel marks whose
-  handles are owed, so it names none of them.
+  canonical, not indexed, not in the sitemap. What arrives there is a mistyped
+  address, an old link, or a footer channel mark whose handle is owed, so it
+  names no feature in particular.
 - **The five views.** Front, detail, edge, back and video on every work page, in a
   scroll-snap strip that swipes natively, with thumbnails always visible — a rail
   from 900 px, a row below that. It works with no script. A small script adds
@@ -2921,7 +2953,7 @@ writing more code.
 | 4 | Export declaration for a \$300 painting | Not established | Also determines what supports the bank's FX check |
 | 5 | Airwallex + HK sole proprietorship | Entity list verified for account opening only | Ask before incorporating |
 | 6 | Several works in one payment, and the largest single transaction | **Not established** on either route | Ask the provider in writing before the cart is built; the figure becomes `maxTransactionUSD` |
-| 7 | The mark has no vector source | The whole supply is one **1536 × 1024** raster; the monogram is about 590 px of it. A one-colour vector has since been traced from it (@sec-mark-vector), which answers the tab and any coloured ground — and cannot answer the interlock, because one colour cannot say which stroke passes in front | Ask whoever drew it for the vector, or a much larger scan. Nothing on the site needs it — a 180 px icon and a 2× masthead mark are inside the ceiling — but a business card, a 15 mm foil stamp or a gallery window each want it, the interlock wants it, and it costs nothing to keep with the rest (@sec-mark-issues) |
+| 7 | The mark has no vector source | The whole supply is one **1536 × 1024** raster; the monogram is about 590 px of it. A one-colour vector is traced from it (@sec-mark-vector), which answers the tab and any coloured ground — and cannot answer the interlock, because one colour cannot say which stroke passes in front | Ask whoever drew it for the vector, or a much larger scan. Nothing on the site needs it — a 180 px icon and a 2× masthead mark are inside the ceiling — but a business card, a 15 mm foil stamp or a gallery window each want it, the interlock wants it, and it costs nothing to keep with the rest (@sec-mark-issues) |
 
 ## Settled in the build {#sec-closed}
 
