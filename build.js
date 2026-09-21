@@ -541,16 +541,22 @@ function renderIndex(loc) {
 }
 
 /* THE SHARE CARD, for the five page types that put a painting on one.
-   og:image:height used to be written only on a work page; everywhere else the
-   template fell back to 1600, so the home page, Works, each series and the
-   archive all declared a 1600x1600 square for a file that is 1600x2000. A card
-   whose declared shape is not its real one is cropped or letterboxed by
-   whichever service is reading it, and that card is the first thing anyone
-   sees of this site. One function now, from the work itself. */
+
+   It used to be the painting's own file, and og:image:height was written only
+   on a work page — so the home page, Works, each series and the archive all
+   declared a 1600x1600 square for a file that is 1600x2000. Declaring the
+   wrong shape is only half of it: a 4:5 portrait under summary_large_image is
+   cropped to a 1.91:1 sliver whatever it declares, and the card is the first
+   thing anyone sees of this site, often the only thing.
+
+   So the card is COMPOSED rather than cropped: 1200x630, the sage wall, the
+   painting in its mat, the monogram beside it. scripts/build-images.mjs draws
+   one per work from the same master the pages use, and says why. */
 const shareCard = (w, loc) => (w ? {
-  ogImage: `/img/${w.image}-1600.webp`,
+  ogImage: `/img/${w.image}-card.jpg`,
   ogImageAlt: t(w.alt, loc),
-  ogImageHeight: Math.round((w.heightCm / w.widthCm) * 1600),
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
 } : { ogImage: null });
 
 /* ------------------------------------------------------------------ *

@@ -111,6 +111,85 @@ async function card(label, width, ratio) {
   return sharp(svg).png().toBuffer();
 }
 
+/* ---------------------------------------------------------------- *
+ * THE SHARE CARD                                                    *
+ *                                                                   *
+ * AW-11. Every page that puts a painting on a social card pointed   *
+ * at the painting itself: a 4:5 portrait, which `summary_large_`    *
+ * `image` crops to a 1.91:1 sliver. A share card is the first thing *
+ * anyone sees of this site — often the ONLY thing, in a timeline    *
+ * someone scrolls past — so it is composed rather than cropped.     *
+ *                                                                   *
+ * The card is the site in one frame: the sage wall, the painting in *
+ * its cream mat with the mount's own shadow, and the monogram. No   *
+ * TEXT, deliberately — text on a card needs a font that librvsg can *
+ * load, and every platform already draws og:title beside the image. *
+ * The drawn mark needs no font and cannot go missing.               *
+ *                                                                   *
+ * Colours are read from tokens.css, like the report's figures, so   *
+ * the card cannot drift from the site it is a picture of.           *
+ * ---------------------------------------------------------------- */
+const CARD = { w: 1200, h: 630, margin: 64, mat: 20, mark: 96 };
+
+const TOKENS = (() => {
+  const css = readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const get = (name) => css.match(new RegExp(`--${name}:\\s*(#[0-9A-Fa-f]{3,8})`))?.[1]
+    ?? (() => { throw new Error(`tokens.css has no --${name}`); })();
+  return { field: get('field'), paperDeep: get('paper-deep'), paper: get('paper'), bar: get('bar') };
+})();
+
+const MARK_D = (() => {
+  const svg = readFileSync(join(ROOT, 'public/mark-sc.svg'), 'utf8');
+  const d = svg.match(/<path[^>]*\sd="([^"]+)"/)?.[1];
+  if (!d) throw new Error('public/mark-sc.svg has no path — run: npm run mark:vector');
+  return d;
+})();
+
+/** One work's card. `art` is any sharp input; its own ratio is preserved. */
+async function shareCard(art) {
+  const { w, h, margin, mat, mark } = CARD;
+  /* The painting is as tall as the card allows and no wider than half of it,
+     so a landscape work cannot run under the mark. */
+  const maxH = h - margin * 2 - mat * 2;
+  const maxW = Math.round(w * 0.46) - mat * 2;
+  const painting = await sharp(art).rotate()
+    .resize({ width: maxW, height: maxH, fit: 'inside', withoutEnlargement: false })
+    .toColourspace('srgb').png().toBuffer();
+  const pm = await sharp(painting).metadata();
+
+  const mountW = pm.width + mat * 2;
+  const mountH = pm.height + mat * 2;
+  const mountX = margin + 32;
+  const mountY = Math.round((h - mountH) / 2);
+
+  /* The mark stands in the middle of the wall the painting is not on, not
+     jammed against the right edge: at this size a corner-set monogram reads as
+     a watermark, and this is a signature. */
+  const markSize = mark;
+  const markX = Math.round(mountX + mountW + (w - margin - (mountX + mountW) - markSize) / 2);
+  const markY = Math.round((h - markSize) / 2);
+  const scale = markSize / 64;             // mark-sc.svg is drawn on a 64 grid
+
+  const ground = Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+      <rect width="100%" height="100%" fill="${TOKENS.field}"/>
+      <rect x="${mountX + 4}" y="${mountY + 9}" width="${mountW}" height="${mountH}"
+            fill="${TOKENS.bar}" opacity="0.24"/>
+      <rect x="${mountX}" y="${mountY}" width="${mountW}" height="${mountH}"
+            fill="${TOKENS.paperDeep}"/>
+      <g transform="translate(${markX},${markY}) scale(${scale})">
+        <path fill="${TOKENS.paper}" d="${MARK_D}"/>
+      </g>
+    </svg>`
+  );
+
+  return sharp(ground)
+    .composite([{ input: painting, left: mountX + mat, top: mountY + mat }])
+    .toColourspace('srgb').withIccProfile('srgb')
+    .jpeg({ quality: 86, chromaSubsampling: '4:4:4', mozjpeg: true })
+    .toBuffer();
+}
+
 let built = 0;
 const missing = [];
 const notes = [];
@@ -153,6 +232,11 @@ for (const w of works) {
 
     built += 2;
   }
+
+  /* The share card, from the same source as the page's own images. */
+  writeFileSync(join(OUT, `${w.image}-card.jpg`),
+    await shareCard(master ? master : await placeholder(w, 1200)));
+  built += 1;
 
   manifest[w.image] = {
     width: 2000, height: Math.round((w.heightCm / w.widthCm) * 2000), placeholder: !master,

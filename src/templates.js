@@ -322,7 +322,7 @@ const wordmarkName = (seller, loc) => {
 
 /* ---------- document shell ---------- */
 export function layout({ site, seller, loc, title, description, body, ogImage, ogImageAlt,
-                         ogImageHeight, product, canonical, altLocales, bodyClass = '',
+                         ogImageWidth, ogImageHeight, product, canonical, altLocales, bodyClass = '',
                          noindex = false, current = null, strip = '' }) {
   const L = site.locales[loc];
   const ui = site.ui;
@@ -400,7 +400,7 @@ ${product ? `<meta property="product:price:amount" content="${product.amount}">
 <meta property="product:price:currency" content="${esc(product.currency)}">
 <meta property="product:availability" content="${product.sold ? 'oos' : 'instock'}">` : ''}
 ${ogImage ? `<meta property="og:image" content="${esc(origin + ogImage)}">
-<meta property="og:image:width" content="1600">
+<meta property="og:image:width" content="${ogImageWidth ?? 1600}">
 <meta property="og:image:height" content="${ogImageHeight ?? 1600}">
 <meta property="og:image:alt" content="${esc(ogImageAlt ?? description)}">
 <meta name="twitter:card" content="summary_large_image">

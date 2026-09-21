@@ -7,7 +7,7 @@ they do not collide with the codes already in `scripts/check-review.mjs`.
 
 ## Status, 20 September 2026 — after the work
 
-Nine of the eleven findings are closed. What the pages measure now, against
+Ten of the eleven findings are closed. What the pages measure now, against
 the numbers in this document:
 
 | | before | after |
@@ -21,6 +21,7 @@ the numbers in this document:
 | Reading ground | the sage wall, black at 6.14:1 | --wash-pale, black at 16.5:1 |
 | Masthead controls that lead nowhere | 3 | 0 |
 | Readiness blockers | 57 | 54 |
+| Share card | the painting, cropped to a 1.91:1 sliver | composed, 1200 × 630 |
 
 Still open, and why:
 
@@ -28,10 +29,12 @@ Still open, and why:
   (`masters/`, `npm run build:images`), but there is no photograph to put on
   How to Buy, and an empty mat on a page that does not need one yet is worse
   than white space. It waits on the shoot, with the work photographs.
-- **AW-11, the share card** — `og:image:height` is now derived on all five
-  page types, so no card is mis-declared. A dedicated 1200 × 630 render, so a
-  portrait canvas is not cropped to a sliver by `summary_large_image`, is
-  still worth building and is not built.
+- ~~**AW-11, the share card**~~ — **built, 21 September 2026.** One 1200 × 630
+  card per work, drawn by `scripts/build-images.mjs` from the same master the
+  pages use: the sage wall, the painting in its mat, the monogram beside it.
+  Every page that carries a card now declares 1200 × 630 and points at it, and
+  `check-review` C-03 asserts that on every one of them rather than on the work
+  page alone.
 - **AW-11, the SAMR line** — left as it is, on purpose. The Chinese sentence
   is the declaration; the English under it is a gloss. Authoritative text
   first is the right order even on an English page.

@@ -25,6 +25,25 @@ const read = (p) => readFileSync(join(DIST, p), 'utf8');
 const src = (p) => readFileSync(join(ROOT, p), 'utf8');
 const exists = (p) => existsSync(join(DIST, p));
 
+/* Every built page, as [path, html]. Defined here rather than beside the
+   assertions that first needed it: `check()` runs its function as it is
+   declared, so anything several groups use has to exist before the first of
+   them — C-03 reads it, and C-03 is the third group. */
+const allHtml = (() => {
+  const out = [];
+  (function walk(d) {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name === 'index.html') {
+        const html = readFileSync(p, 'utf8');
+        if (!/<meta http-equiv="refresh"/.test(html)) out.push([p.slice(DIST.length), html]);   // stubs are not pages
+      }
+    }
+  })(DIST);
+  return out;
+})();
+
 const home = read('index.html');
 const zhHome = read('zh/index.html');
 const work = read('works/harbour-light/index.html');
@@ -227,8 +246,23 @@ check('C-03', 'a work page is typed as a product with its price', () => {
 check('C-03', 'a sold work is advertised as out of stock', () =>
   /product:availability" content="oos"/.test(read('works/long-afternoon/index.html')));
 
-check('C-03', 'the share image declares height and alt', () =>
-  /og:image:height" content="2000"/.test(work) && /og:image:alt"/.test(work) && /twitter:image:alt"/.test(work));
+/* The share card, since AW-11: composed at 1200x630 rather than the painting's
+   own file, which summary_large_image cropped to a 1.91:1 sliver of a portrait
+   canvas. Both dimensions are declared, on EVERY page that carries a card —
+   the home page, Works, each series and the archive used to fall back to a
+   1600x1600 square for a 1600x2000 file, because only the work page wrote a
+   height at all. */
+check('C-03', 'every share card declares its real size and an alt', () => {
+  const carded = allHtml.filter(([, h]) => /og:image"/.test(h));
+  const bad = carded.filter(([, h]) =>
+    !/og:image" content="[^"]+-card\.jpg"/.test(h)
+    || !/og:image:width" content="1200"/.test(h)
+    || !/og:image:height" content="630"/.test(h)
+    || !/og:image:alt"/.test(h) || !/twitter:image:alt"/.test(h)
+    || !/twitter:card" content="summary_large_image"/.test(h)).map(([p]) => p);
+  return { ok: carded.length > 0 && !bad.length,
+           detail: bad.length ? bad.slice(0, 3).join(' ') : `${carded.length} pages carry a card, all 1200x630` };
+});
 
 check('C-03', 'locales use OG territory codes, with the alternate named', () =>
   /og:locale" content="en_US"/.test(home)
@@ -596,20 +630,6 @@ check('F-05', 'the derivative says what it is, and the artwork stays the artwork
 
 const rulesFor = (selRe) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
   .filter((m) => selRe.test(m[1])).map((m) => m[2]);
-const allHtml = (() => {
-  const out = [];
-  (function walk(d) {
-    for (const e of readdirSync(d, { withFileTypes: true })) {
-      const p = join(d, e.name);
-      if (e.isDirectory()) walk(p);
-      else if (e.name === 'index.html') {
-        const html = readFileSync(p, 'utf8');
-        if (!/<meta http-equiv="refresh"/.test(html)) out.push([p.slice(DIST.length), html]);   // stubs are not pages
-      }
-    }
-  })(DIST);
-  return out;
-})();
 
 check('G-01', 'softness adds no colour: shadows, glass and bands are palette tokens', () => {
   const tokens = src('src/styles/tokens.css').replace(/\/\*[\s\S]*?\*\//g, '');

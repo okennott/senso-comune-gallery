@@ -544,6 +544,12 @@ reading it from the other.
 │   │                               retired. Nothing builds from it; kept
 │   │                               because measurements were taken from it.
 │   │                               Its README says which, and what replaced it.
+│   ├── review/                     design reviews, dated, in Markdown. Each
+│   │                               is measured off a built site in headless
+│   │                               Chrome and carries the boxes it read, so a
+│   │                               later reader can re-measure rather than
+│   │                               take the finding on trust. The AW-nn codes
+│   │                               live in check-review.mjs with the rest.
 │   └── report/                     the printable technical report
 │       ├── senso-comune-report.pdf   built: A4 trim, indexed. npm run
 │       │                             report:print writes a second file with
@@ -757,9 +763,11 @@ block people outright.
   in the footer only. Where this site differs — *How to Buy* in the header at
   all — it is because there is no cart yet, and that threshold is written down.
 - **The homepage opens with a band, not a column.** Van Gogh's line and its
-  translation sit in a full-width strip under the masthead, with the four
-  brand colours ruled across its foot; the hero below carries the painting and
-  nothing else. Each section boundary is stated by an engraved hairline — a
+  translation sit in a full-width strip under the masthead; the hero below
+  carries the painting and nothing else. Four decorative rules in the brand's
+  colours ran across the band's foot until AW-08 took them out — on sage they
+  read as a progress bar, and they were the only unexplained ornament on a site
+  whose argument is that nothing here is unexplained. Each section boundary is stated by an engraved hairline — a
   line of shade with a line of light under it — and About is a painted panel
   in Priscilla's Dark Sage `#727A5C`, outlined with the same pair. That green
   admits exactly one ink: `--ink-deep`, at 4.55:1, where pure black itself
@@ -773,6 +781,36 @@ block people outright.
   painting, the box that holds an image, light ink on the dark bar and the
   focus halo; it paints no page surface, and `check-review` L-01 lists the
   fifteen rules allowed to use it.
+- **A cell is a piece of wall.** Every grid that lists work — the catalogue,
+  the homepage's latest, a series card's cover, the archive — lays each
+  painting in a box whose proportion is `--wall-ratio`: the narrowest work in
+  the catalogue, derived in `build.js` from the data rather than typed. Every
+  painting is therefore width-bound and hung to the bottom-left of its cell, so
+  one left line and one right line run down the page and the tombstones stay
+  level because the walls are. The featured work gets a wall of its own ratio,
+  which is what lets its label stand at the painting's foot. Before AW-02 each
+  of these was a constant — 22rem, 16rem, 14rem, `clamp(260px,48vh,460px)` —
+  and a painting was the same size on a 27-inch display as on a 13-inch laptop,
+  and *smaller* on a phone than its own column had offered.
+- **The share card is composed, not cropped.** A 4:5 painting under
+  `summary_large_image` is shown as a 1.91:1 sliver of itself whatever the
+  page declares, and the card is the first thing most people see of this site
+  — often the only thing. `scripts/build-images.mjs` draws one 1200 × 630 card
+  per work from the same master the pages use: the sage wall, the painting in
+  its mat with the mount's shadow, and the monogram beside it. No text on it,
+  deliberately — text needs a font the SVG rasteriser can load, and every
+  platform already sets `og:title` beside the image; the drawn mark needs no
+  font and cannot go missing. Its colours are read out of `tokens.css`, like
+  the report's figures, so the card cannot drift from the site it pictures.
+- **The type ladder moves with the column.** `--size-hero`, `--size-h2` and
+  `--size-h3` are clamps, not constants; the Vitruvian fractions are the ends
+  of each step rather than one value, so every rung still lands on the draft's
+  own size at the width it was measured at. The motto bounds the top end — it
+  is set as written and may never re-wrap, so its longest line has to fit the
+  column at every width `check-render` tests. `opsz` is no longer pinned per
+  size, because with the sizes fluid there is no one size to pin it to:
+  `font-optical-sizing: auto` drives it from the size actually used, which is
+  what pinning it was approximating.
 - **One canvas, on one material.** The ground of the artwork was measured — a
   cold-press cotton-rag sheet, 1/f spectrum, luminance σ 4.87 of 255 — and
   reproduced as a single tile in `tokens.css` (`--canvas-grain`). It is neutral
@@ -797,12 +835,16 @@ block people outright.
   laid on.
   Paintings are never rounded, zoomed or stretched. The report's Softness
   section lists every option considered, adopted and optional.
-- **The work page and the shop bar.** Decisions D1–D5 (report, Part 6): search,
-  account and cart in the header, as placeholders until built; detail, edge,
-  back and video views on every work; any number of works in one order, within
-  availability and the payment route's limit; no search threshold; video on work
-  pages only. The views and the shop bar are built; the buy box and the pages
-  behind the shop bar are not (§2.7).
+- **The work page, and the shop bar that is not there yet.** Decisions D1–D5
+  (report, Part 6): detail, edge, back and video views on every work; any number
+  of works in one order, within availability and the payment route's limit; no
+  search threshold; video on work pages only. The views are built; the buy box
+  and the pages behind the shop bar are not (§2.7). D1 put search, account and
+  cart in the header as placeholders until built; **AW-07 took them back out**
+  — three e-commerce icons for a catalogue of six unique objects sold by
+  enquiry read as a store template, and all three were SH-01 blockers for the
+  same reason. The bar is built from `placeholders.routes`, which is now empty,
+  so a route put back puts its control back.
 - **Cloudflare Pages.** The only host with no bill, no pause and no terms
   problem. `vercel.app` and `workers.dev` measure 100% blocked from mainland
   China; `pages.dev` measures 0%.
@@ -840,15 +882,26 @@ block people outright.
 
 ## 2.7 Scripting still needed
 
-Decisions of 17 September 2026 (report, Part 6). The masthead shows **search,
-account and cart** on every page, and every work page shows **detail, edge,
-back and video** views. The views are complete and only wait for files (§1.2).
-The three shop controls are real links with real names whose **destinations do
-not exist yet**: each is marked `data-placeholder`, declared in
-`src/data/site.json` → `placeholders.routes`, and lands on the bilingual 404
-page. `check-links` fails the build if a marked link starts resolving, so
+Decisions of 17 September 2026 (report, Part 6). Every work page shows
+**detail, edge, back and video** views; those are complete and only wait for
+files (§1.2). The masthead showed **search, account and cart** on every page as
+real links with real names whose destinations did not exist — each marked
+`data-placeholder`, declared in `src/data/site.json` → `placeholders.routes`,
+landing on the bilingual 404 page.
+
+**That list is empty since AW-07** and the bar is not drawn. The mechanism is
+untouched: the masthead is built from `placeholders.routes`, so adding a route
+puts its control back with its icon, its accessible name in both languages and
+its 44px target — and SH-01 goes back to asking for the page it points at.
+`check-links` still fails the build if a marked link starts resolving, so
 building one of these pages always means removing its placeholder entry in the
-same change.
+same change. What each one needs is unchanged, and is the rest of this section.
+
+The cart's transaction ceiling is now asked for by `site.shop.cart`, not by the
+absence of a cart route: PY-02 used to read a missing route as a cart that had
+been *built*, which stopped being true the moment the control came out because
+there is no cart. Set `shop.cart` to `true` with the cart, and the ceiling is
+owed again.
 
 What each one still needs, in the order it should be built:
 
@@ -987,10 +1040,11 @@ waiver is printed in every report and recorded in the release's
 photographs and payment links cannot be waived: a waiver naming one keeps the
 gate shut.
 
-**Today** the gate reports 57 blockers. The largest group is the works'
-titles, descriptions and alt text; one that needs a decision rather than
-typing is the search, account and cart placeholders (rule SH-01), which block a
-release until those pages exist or a waiver is signed for them.
+**Today** the gate reports 54 blockers, almost all of them typing: the works'
+titles, descriptions and alt text, the contact details, and the photographs
+themselves (WK-08, which cannot be waived). SH-01 — the search, account and
+cart placeholders — closed with AW-07, when the three controls came out of the
+masthead; it reopens the day a route is put back.
 
 **Where it stands in front of the public.** The production host's build command
 should be `node scripts/release.mjs`, output directory `dist` (Cloudflare Pages:
