@@ -290,14 +290,21 @@ check('D-01', 'prose pages get a mount that sits close around the measure', () =
   const flatCss = css.replace(/\n\s*/g, '');
   const bodies = ['how-to-buy', 'about', 'giving']
     .map((p) => [p, /<body class="prose-page(?: [a-z-]+)?">/.test(read(`${p}/index.html`))]);
-  // About narrows further: its column is 34rem of serif, not 62ch of sans, so
-  // the 860px mount would leave a third of it empty again. Same finding.
-  const mounts = /\.prose-page \.sheet\{ ?max-width:860px ?\}/.test(flatCss)
-    && /\.about-page \.sheet\{ ?max-width:660px ?\}/.test(flatCss)
+  // CLOSE MEANS THE MEASURE. This used to assert two constants — 860px for
+  // prose and 660px for About — and a constant near the measure is not the
+  // same claim as the measure: at 860 the column stood 303px from the left of
+  // a 1440px screen and 478 from the right, which read as an off-centre page
+  // once the plate went transparent and there was no mount edge to call the
+  // rest a margin. Each mount is now its own measure plus the two gutters it
+  // carries, stated in the same units the column is set in, so a change to
+  // either measure moves its mount with it.
+  const mounts = /\.prose-page \.sheet\{ ?max-width:calc\(var\(--measure\) ?\+ ?var\(--gutter\) ?\* ?2\) ?\}/.test(flatCss)
+    && /\.about-page \.sheet\{ ?max-width:calc\(34rem ?\+ ?var\(--gutter\) ?\* ?2\) ?\}/.test(flatCss)
+    && /\.page--about \.prose\{[^}]*max-width:34rem|\.page--about \.prose\{ ?max-width:34rem ?\}/.test(flatCss)
     && /<body class="prose-page about-page">/.test(read('about/index.html'));
   const bad = bodies.filter(([, ok]) => !ok).map(([p]) => p);
   return { ok: !bad.length && mounts,
-           detail: bad.length ? `not mounted: ${bad.join(', ')}` : '860px for prose, 660px for About' };
+           detail: bad.length ? `not mounted: ${bad.join(', ')}` : 'each mount is its own measure plus its gutters' };
 });
 
 check('D-01', 'the homepage keeps the full-width sheet', () => !/<body class="prose-page">/.test(home));

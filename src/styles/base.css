@@ -144,11 +144,20 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
 
 /* Finding D-01. Prose pages set one column at ~65ch inside a 1240px sheet,
    leaving 54% of the mount empty, which reads as unfinished rather than
-   generous. The mount comes in close around the measure instead. */
-.prose-page .sheet{ max-width:860px }
+   generous. The mount comes in close around the measure instead.
+
+   CLOSE MEANS THE MEASURE, not near it. 860px was close enough while the
+   mount was a painted sheet with an edge: the column sat left inside it and
+   the rest read as margin. With the plate transparent there is no sheet and
+   no margin — only a column of text that measured 303px from the left of a
+   1440px screen and 478 from the right, which is not a wide margin, it is an
+   off-centre page. The mount is now the measure plus its own two gutters, so
+   the text centres on the wall because the box it centres in is its own size.
+   Each page states the measure it is actually set in. */
+.prose-page .sheet{ max-width:calc(var(--measure) + var(--gutter) * 2) }
 /* Same finding, one page further. About's column is 34rem of serif rather than
-   62ch of sans, so an 860px mount would leave a third of it empty again. */
-.about-page .sheet{ max-width:660px }
+   62ch of sans, and it was 91px off centre for the same reason. */
+.about-page .sheet{ max-width:calc(34rem + var(--gutter) * 2) }
 
 /* ---------- layout ---------- */
 .wrap{
@@ -257,10 +266,24 @@ a{ color:var(--ink) }
   .btn:active{ transform:none; box-shadow:none; transition-duration:var(--dur-quick) }
 }
 
-/* Quiet secondary action — a real link, not a ghost button. */
+/* Quiet secondary action — a real link, not a ghost button.
+
+   AN INLINE-BLOCK, NOT AN INLINE-FLEX. As a flex box the arrow in ::after was
+   a flex ITEM rather than part of the sentence, so a label that wrapped left
+   it stranded: on a sold work's page "Sold — tell me when new work is listed"
+   broke over two lines in the 20rem aside and the arrow sat alone, centred
+   between them, 240px to the right of the words it belongs to. The grid had
+   the same fault and a local override for it.
+
+   Inline-block puts ::after back in the text flow, where the nbsp in front of
+   it keeps it against the last word and it wraps with that word. The 48px
+   target comes from symmetric padding instead of min-height on a flex box,
+   which also centres a one-line label in the target exactly as the flex did
+   and keeps a two-line one centred too. */
 .link-quiet{
-  display:inline-flex; align-items:center;
-  min-height:var(--target-min);
+  display:inline-block;
+  line-height:1.5;
+  padding-block:calc((var(--target-min) - 1.5em) / 2);
   color:var(--ink);
   font-size:var(--size-caption);
   letter-spacing:var(--track-label); text-transform:uppercase;

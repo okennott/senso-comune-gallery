@@ -564,14 +564,23 @@
       "xiaohongshu": "/elsewhere/xiaohongshu/"
     }
   },
+  "$notFound": [
+    "The 404, which is bilingual because nothing knows the visitor's language",
+    "before it is served. It used to name search, accounts and the cart as the",
+    "things still being built; AW-07 took those three controls out of the",
+    "masthead and emptied placeholders.routes, so the page was advertising",
+    "features nothing on the site links to. What still lands here is a mistyped",
+    "address, an old link, and the footer's channel marks whose handles are",
+    "owed — so it says what is true of all three and names nothing."
+  ],
   "notFound": {
     "title": {
       "en": "Not here yet",
       "zh": "此页尚未开放"
     },
     "body": {
-      "en": "This page does not exist — or does not exist yet. Search, accounts and the cart are still being built.",
-      "zh": "此页面不存在，或尚未开放。搜索、账户与购物车功能正在建设中。"
+      "en": "This page does not exist — or does not exist yet. Some of what this site will have is still being built.",
+      "zh": "此页面不存在，或尚未开放。本站的部分功能仍在建设中。"
     },
     "home": {
       "en": "Back to the gallery",

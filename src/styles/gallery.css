@@ -968,10 +968,15 @@ html[lang^="zh"] .page--about .prose{
 }
 
 
-/* "Original Works" was wrapping to two lines in a 22ch column. The display
-   face needs more room than the body face at the same measure. */
+/* "Original Works" was wrapping to two lines in a 22ch column, and 28ch was
+   not enough either: measured at 1440, the two words want 361px of Fraunces
+   and 28ch of Inter is 298. A `ch` sized against the BODY face will always be
+   the wrong unit for a heading set in the display face at three times the
+   size, so the track stops guessing and asks: 22ch is the floor every head
+   keeps, and a heading wider than that takes what it needs. Only the page
+   with a long title moves its intro; the rest keep the column they had. */
 @media (min-width:760px){
-  .section__head{ grid-template-columns:minmax(0,28ch) minmax(0,var(--measure)) }
+  .section__head{ grid-template-columns:minmax(22ch,max-content) minmax(0,var(--measure)) }
 }
 
 /* A buyer on a work page should not have to go back to the homepage to find
@@ -1106,14 +1111,14 @@ html[lang^="zh"] .page--about .prose{
 .works--grid .work__img{ width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain }
 .works--grid .tombstone__title{ font-size:var(--size-body) }
 .works--grid .price{ font-size:var(--size-body) }
-/* In a 210px cell the sold label wraps, and .link-quiet is an inline-flex
-   whose trailing arrow then floats away from the last line. Stack the row and
-   let the link be ordinary inline text so the arrow stays in the sentence. */
+/* In a 210px cell the sold label wraps. The arrow used to float away from the
+   last line when it did; .link-quiet is an inline-block now and keeps it in
+   the sentence by itself, so what is left here is the stacked row. */
 .works--grid .tombstone__row{
   margin-top:var(--space-2);
   flex-direction:column; align-items:flex-start; gap:var(--space-1);
 }
-.works--grid .link-quiet{ display:inline; font-size:var(--size-caption); line-height:1.5 }
+.works--grid .link-quiet{ font-size:var(--size-caption) }
 
 /* ---------- contact panel ----------
    Finding A-03. How to Buy asked the reader to get in touch three times and
@@ -1182,8 +1187,15 @@ html[lang^="zh"] .page--about .prose{
   flex:0 0 100%; min-width:0; box-sizing:border-box;
   scroll-snap-align:center; scroll-snap-stop:always;
   display:flex; align-items:center; justify-content:center;
-  /* room inside the scroll box for the mount shadow, which overflow clips */
-  padding:var(--space-2) var(--space-3) var(--space-5);
+  /* Room inside the scroll box for the mount shadow, which overflow clips —
+     and the shadow is cast DOWNWARD: --shadow-mount has no x-offset, and its
+     widest layer blurs 28px against a 10px spread, so it reaches about 4px to
+     either side and 32px below. The side padding was 16px and bought those
+     4px at the price of the only misalignment on the page: measured at 390,
+     everything else stood at x34 across 307px and the painting alone at x50
+     across 275. A clipped shadow edge is invisible; a painting 16px off the
+     column line is the first thing the eye finds. */
+  padding:var(--space-2) 0 var(--space-5);
 }
 .gallery__view .work__figure{ width:100% }
 .gallery__view .work__img,
@@ -1295,6 +1307,15 @@ html[lang^="zh"] .page--about .prose{
   overflow-x:auto; scrollbar-width:none;
 }
 .localnav ul::-webkit-scrollbar{ display:none }
+/* The row scrolls with its scrollbar hidden, which is fine while every tab
+   fits and hides content the moment one does not: at 390px the four tabs want
+   390 of a 307px column, so SOLD WORKS sat off the right edge — including on
+   the sold works page itself, where it is the tab that says where you are.
+   Nothing indicated there was more. Below 600px they wrap instead: still one
+   quiet row of tabs, on two lines, with nothing out of sight. */
+@media (max-width:599px){
+  .localnav ul{ flex-wrap:wrap; overflow-x:visible; gap:0 var(--space-4) }
+}
 .localnav a{
   position:relative;
   display:inline-flex; align-items:baseline; gap:.45em;
