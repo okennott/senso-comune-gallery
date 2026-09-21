@@ -8,6 +8,36 @@
    The governing rule, from the build report:
      Buy quietness with SIZE and WHITESPACE, never with contrast.
    The draft failed because every call to action was #A19E97 at 2.67:1.
+
+   ---------------------------------------------------------------------------
+   THE GROUND SWITCH — six pairs, and the whole of it
+
+   The page reads on the WALL, #898D76 Aloe Thorn, with every reading surface
+   transparent. It can read on PAPER, #EBEFDB Amazon Mist, instead: that is
+   the ground that measures best and it is kept, commented, everywhere it is
+   needed. Nothing else has to be re-solved — the ink ladder clears its floors
+   on both, and check-contrast reads the plates and solves whichever is on
+   screen, so neither state can ship unmeasured.
+
+   Six pairs, all of them in this file but one. Swap the commented line for the
+   live one at each, and `npm run check`:
+
+     --plate-sheet/-pale/-mid/-deep     "the plates", below
+     --edge-breath                      "sfumato band"
+     --rule-soft                        "rules"
+     --wght-text / --wght-prose         "weight, which is the ground's business"
+     --mount-sheet                      "the mount"
+     the Leonardo hatch, 7% / 4%        base.css, ".hatch" — the one outside
+
+   WALL                                 PAPER
+     transparent · 0% · #A2A593           var(--wash-*) · 20% · #D6DAC4
+     450 / 500 · mount none               400 / 400 · mount shadow + rim
+     hatch 7%                             hatch 4%
+
+   Why each one moves is written where it lives. The short of it: a mid-tone
+   ground takes strokes (weight), takes a decorative line's quietness (the
+   hairline and the hatch are ratios, not colours), and leaves a transparent
+   sheet nothing to cast a shadow from (the mount).
    =========================================================================== */
 
 :root{
