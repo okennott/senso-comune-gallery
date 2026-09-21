@@ -254,14 +254,23 @@ check('C-03', 'a sold work is advertised as out of stock', () =>
    height at all. */
 check('C-03', 'every share card declares its real size and an alt', () => {
   const carded = allHtml.filter(([, h]) => /og:image"/.test(h));
-  const bad = carded.filter(([, h]) =>
-    !/og:image" content="[^"]+-card\.jpg"/.test(h)
-    || !/og:image:width" content="1200"/.test(h)
-    || !/og:image:height" content="630"/.test(h)
-    || !/og:image:alt"/.test(h) || !/twitter:image:alt"/.test(h)
-    || !/twitter:card" content="summary_large_image"/.test(h)).map(([p]) => p);
+  /* And it must be REACHABLE. og:image is the one absolute URL on the page
+     built from a raw path rather than through path(), so on a project site at
+     /<repo>/ it lost the prefix that canonical, og:url and the sitemap all
+     kept — and the card 404'd for every scraper. The prefix is read back out
+     of the page's own stylesheet link, so this holds at any BASE_PATH. */
+  const bad = carded.filter(([, h]) => {
+    const base = h.match(/<link rel="stylesheet" href="(.*)styles\.[0-9a-f]+\.css"/)?.[1] ?? '/';
+    const img = h.match(/og:image" content="([^"]+)"/)?.[1] ?? '';
+    return !/og:image" content="[^"]+-card\.jpg"/.test(h)
+      || !img.includes(`${base}img/`)
+      || !/og:image:width" content="1200"/.test(h)
+      || !/og:image:height" content="630"/.test(h)
+      || !/og:image:alt"/.test(h) || !/twitter:image:alt"/.test(h)
+      || !/twitter:card" content="summary_large_image"/.test(h);
+  }).map(([p]) => p);
   return { ok: carded.length > 0 && !bad.length,
-           detail: bad.length ? bad.slice(0, 3).join(' ') : `${carded.length} pages carry a card, all 1200x630` };
+           detail: bad.length ? bad.slice(0, 3).join(' ') : `${carded.length} pages carry a card, all 1200x630, all under the deployment base` };
 });
 
 check('C-03', 'locales use OG territory codes, with the alternate named', () =>

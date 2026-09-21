@@ -393,13 +393,17 @@ ${canonical ? `<link rel="canonical" href="${esc(origin + canonical)}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 ${canonical ? `<meta property="og:url" content="${esc(origin + canonical)}">` : ''}
+<!-- og:image goes through asset(): canonical and og:url come from path(),
+     which already carries BASE_PATH, but ogImage is a raw /img/... path and
+     was the one absolute URL on the page that did not. On a project site at
+     /<repo>/ the card 404'd for every scraper. -->
 <meta property="og:site_name" content="${esc(t(seller.artist.siteName, loc))}">
 <meta property="og:locale" content="${ogLocale(L.lang)}">
 ${altLocales.filter(([l]) => l !== loc).map(([l]) => `<meta property="og:locale:alternate" content="${ogLocale(site.locales[l].lang)}">`).join('\n')}
 ${product ? `<meta property="product:price:amount" content="${product.amount}">
 <meta property="product:price:currency" content="${esc(product.currency)}">
 <meta property="product:availability" content="${product.sold ? 'oos' : 'instock'}">` : ''}
-${ogImage ? `<meta property="og:image" content="${esc(origin + ogImage)}">
+${ogImage ? `<meta property="og:image" content="${esc(origin + asset(ogImage))}">
 <meta property="og:image:width" content="${ogImageWidth ?? 1600}">
 <meta property="og:image:height" content="${ogImageHeight ?? 1600}">
 <meta property="og:image:alt" content="${esc(ogImageAlt ?? description)}">
