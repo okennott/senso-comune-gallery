@@ -18,10 +18,23 @@ the numbers in this document:
 | Latest works on a 390px phone | 208 px wide | 307 px |
 | Motto, 390 → 1920 | 38.4 px throughout | 26.1 → 39.4 → 53.4 → 54 |
 | Work page's own painting | 465 px | 562 px |
-| Reading ground | the sage wall, black at 6.14:1 | --wash-pale, black at 16.5:1 |
+| Reading ground | the sage wall, black at 6.14:1 | the wall, by decision — see below |
 | Masthead controls that lead nowhere | 3 | 0 |
 | Readiness blockers | 57 | 54 |
 | Share card | the painting, cropped to a 1.91:1 sliver | composed, 1200 × 630 |
+
+**AW-05 was reversed on 21 September 2026, by decision.** The plates went back
+to `transparent` and the page is on the sage wall again; `#EBEFDB` is kept in
+`tokens.css`, commented, one uncomment from being the ground. The finding's
+measurement stands and is printed on every build — pure black reaches 6.14:1 on
+the wall, so running text has 9% of headroom and captions 3% — and what the
+reversal added is the half of the problem the finding did not solve: with the
+ink at its ceiling, the remaining lever is WEIGHT. Measured by specimen, Inter
+goes to 450 and Fraunces-as-prose to 500 on the wall, and back to 400 on paper.
+Four more values switch with the plates — the band's breath, the decorative
+hairline (1.22:1 on paper is 2.39:1 on the wall, so it is re-solved to 1.36),
+the Leonardo hatch, and the sheet's mount, which on a transparent sheet was
+drawing a 1240px box around nothing.
 
 Still open, and why:
 

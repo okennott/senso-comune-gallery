@@ -82,7 +82,12 @@ body{
   color:var(--body);
   font-family:var(--font-body);
   font-size:var(--size-body);
+  font-weight:var(--wght-text);
   line-height:var(--lh-body);
+  /* No synthetic weight: Inter is variable 400-600, so 450 is a real
+     interpolation rather than a smear, and the system CJK face this stack
+     falls through to rounds to a weight it actually has instead of being
+     emboldened by the rasteriser. */
   font-synthesis-weight:none;
   /* And no synthetic obliques either, now that the italic is a real file. A
      face either has the style or does not get it: the CJK body face has no
@@ -102,21 +107,21 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
 
    Rather than reduce her green to a thin divider, the whole content column
    becomes a SHEET mounted on the field — which is what a gallery does to a
-   work on paper anyway. The sheet was cream until 20 September 2026, then
-   --wash-pale, then TRANSPARENT for an afternoon — a sheet of glass rather
-   than of paper, with the field showing through the content column — and is
-   --wash-pale again since AW-05, which has the bill the glass ran up. It
-   paints --plate-sheet either way: the mount, its shadow and its rim light do
-   not know which. See "the plates" in tokens.css. */
+   work on paper anyway. It has been cream, then --wash-pale, then transparent,
+   then --wash-pale again with AW-05, and is TRANSPARENT once more by decision:
+   #EBEFDB is kept in tokens.css, commented, one uncomment from being the
+   ground again, and the wall is what the page shows.
+
+   It paints --plate-sheet either way. What does NOT survive the switch is the
+   mount: a shadow and a rim light say a sheet is lying on the field, and with
+   nothing lying there they draw a box around nothing. That pair is
+   --mount-sheet, and it moves with the plate. See "the plates" and "the
+   mount" in tokens.css. */
 .sheet{
   max-width:1240px;
   margin-inline:auto;
   background:var(--plate-sheet);
-  /* The sheet's own shadow, plus the light a pane catches along its top
-     edge — which is what tells the eye the sheet is lying ON the field
-     rather than being a hole cut in it. With both now the same hue, this
-     shadow and that rim are most of what separates them. */
-  box-shadow:var(--shadow-sheet),var(--glass-rim);
+  box-shadow:var(--mount-sheet);
   border-radius:var(--radius-sheet);
 }
 /* The sheet floats on the sage — a mounted object, not a page that starts at
@@ -157,7 +162,7 @@ img{ background:var(--paper) }   /* holds the box before bytes arrive */
 h1,h2,h3{
   font-family:var(--font-display);
   color:var(--ink);
-  font-weight:400;
+  font-weight:var(--wght-head);
   line-height:var(--lh-head);
   text-wrap:balance;
   margin:0;
@@ -386,10 +391,10 @@ a{ color:var(--ink) }
    you don't, which is the whole point.
 
    THE ALPHA IS TUNED TO THE GROUND. 7% was measured on the sage, where the
-   ground sits at L* 57; on --wash-mid at L* 93 the same brown line has half
-   again the contrast and the hatch stops being subliminal and starts being
-   stripes. 4% puts it back where it was meant to be. A ground that moves
-   moves this with it.
+   ground sits at L* 57. On --wash-mid at L* 93 the same brown line carries
+   half again the contrast and the hatch stops being subliminal and starts
+   being stripes, so it went to 4% for the hours the plates were on. A ground
+   that moves moves this with it: 7% on the wall, 4% on paper.
 
    ONE section. Never a page background, never behind body text. */
 .hatch{
@@ -403,13 +408,13 @@ a{ color:var(--ink) }
   pointer-events:none;
   background-image:repeating-linear-gradient(
     45deg,
-    color-mix(in oklab,var(--sanguine) 4%,transparent) 0 1px,
+    color-mix(in oklab,var(--sanguine) 7%,transparent) 0 1px,
     transparent 1px 9px
   );
 }
 @supports not (color:color-mix(in oklab,red,blue)){
   .hatch::before{
-    background-image:repeating-linear-gradient(45deg,rgba(139,74,60,.04) 0 1px,transparent 1px 9px);
+    background-image:repeating-linear-gradient(45deg,rgba(139,74,60,.07) 0 1px,transparent 1px 9px);
   }
 }
 

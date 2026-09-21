@@ -772,15 +772,35 @@ block people outright.
   in Priscilla's Dark Sage `#727A5C`, outlined with the same pair. That green
   admits exactly one ink: `--ink-deep`, at 4.55:1, where pure black itself
   would reach only 4.65. Everything inside the panel is set in it.
-- **Sage is the wall; cream is the mat.** The three reading grounds are
-  `--wash-pale`, `--wash-mid` and `--wash-deep`: the field's own hue, held at
-  the lightness ladder that was already measured safe. A reading ground fails
-  on lightness and nothing else — below L\* 91.5 `--muted-ui` drops through
-  3.0:1, and above it chroma is free — so moving them onto the sage cost no
-  foreground token and improved every pair. Cream paints the mat around a
-  painting, the box that holds an image, light ink on the dark bar and the
-  focus halo; it paints no page surface, and `check-review` L-01 lists the
-  fifteen rules allowed to use it.
+- **Sage is the wall; cream is the mat — and the wall is what the page shows.**
+  The three reading grounds are `--wash-pale` `#EBEFDB`, `--wash-mid` and
+  `--wash-deep`: the field's own hue at the lightness ladder that was measured
+  safe. A reading ground fails on lightness and nothing else — below L\* 91.5
+  `--muted-ui` drops through 3.0:1, and above it chroma is free.
+
+  **They are not painted.** The four `--plate-*` tokens are `transparent`, so
+  every word on the site is read on `#898D76` and cream is kept for the one
+  thing it was always for: the mat around a painting, the box that holds an
+  image, light ink on the dark bar, the focus halo. `check-review` L-01 lists
+  the fifteen rules allowed to use it.
+
+  **The switch is one uncomment, both ways.** `#EBEFDB` is kept in `tokens.css`
+  beside the transparent four, with `--edge-breath`, `--rule-soft`, the weights
+  and `--mount-sheet` each carrying their paper value commented next to their
+  wall value. `check-contrast` reads the plates and solves whichever ground is
+  actually on screen, so neither state can ship unmeasured. What the wall costs
+  is printed every build: pure black reaches 6.14:1 on it, so running text has
+  9% of headroom and captions 3%, where on `#EBEFDB` the same ink has 14.4:1.
+- **On a mid-tone ground, weight does what colour cannot.** With the ink ladder
+  at the wall's ceiling there is no contrast left to find, and a stroke on a
+  mid-tone ground loses to irradiation in a way it does not on paper. Measured
+  by specimen — the same paragraph on `--field` against the same on `#EBEFDB` —
+  Inter 400 breaks up, 450 holds, 500 reads as emphasis; Fraunces at 400 loses
+  its hairlines outright and needs 500. So `--wght-text` is 450 and
+  `--wght-prose` 500 on the wall, and both go back to 400 on paper: the
+  correction is the ground's, not the typeface's. Headings stay at 400 either
+  way — display sizes pay almost nothing to irradiation — but through a token,
+  so a ground that moves moves them too.
 - **A cell is a piece of wall.** Every grid that lists work — the catalogue,
   the homepage's latest, a series card's cover, the archive — lays each
   painting in a box whose proportion is `--wall-ratio`: the narrowest work in
