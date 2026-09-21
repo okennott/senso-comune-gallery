@@ -1135,8 +1135,11 @@ check('L-01', 'cream paints the mat, the art, and the bar — and no page surfac
     '.btn', '.skip-link',                   // light label on a filled dark control
     '.hero__work img',                      // the featured painting's own box
     '.shopbar__link:hover, .social__link:hover, .lang-switch:hover', // 12% wash, on the bar
-    '.motto__rule--paper',                  // 3px of the sheet's Warm Ivory, in the band's brand rules
   ]);
+  /* .motto__rule--paper stood here until AW-08: 3px of the sheet's Warm Ivory
+     in the band's four decorative rules. The rules are gone and so is it — a
+     whitelist that keeps entries for rules which no longer exist stops being
+     a list of what may paint cream and becomes a list of what once did. */
   const bad = [];
   for (const m of sheets.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const sel = m[1].trim().replace(/\s+/g, ' ');

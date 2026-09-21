@@ -162,16 +162,46 @@
 
 /* ---------- the motto strip ----------
    The gallery's own line, as a band under the bar rather than as a column
-   beside the featured painting (build.js says why it moved). It is the wall
-   itself — nothing paints a background here — held open by its padding and
-   closed by the engraved line every section boundary now uses.
+   beside the featured painting (build.js says why it moved), held open by its
+   padding and closed by the engraved line every section boundary uses.
+
+   PAINTED IN THE ABOUT PANEL'S DARK SAGE, by decision. It was the bare wall,
+   which made it a stretch of page with a quotation lying on it rather than a
+   band; #727A5C is the same green About is set into, and the two places the
+   site speaks in the first person now share a ground. The boundary at its
+   foot has a real edge to state as well, where it used to rule one green off
+   from the same green.
+
+   WHAT THAT GROUND COSTS, and it is the whole of it: #727A5C is the exact
+   centre of the mid-tone squeeze — pure black measures 4.65:1 on it and pure
+   white 4.52 — so the entire palette has about 3% of headroom there and
+   --ink-deep is the only token that clears 4.5. On this band as in the panel,
+   everything is set in that one ink: the Dutch, the translation and the
+   attribution, which used to be --body, --ink and --muted (3.73, 4.33 and
+   3.50 here — all three under the floor). No quieter grey, no accent; size
+   and position carry what colour used to. check-contrast solves the panel as
+   its own ground, so a fourth colour cannot arrive here unmeasured.
 
    It carried four decorative rules in the brand's four colours until AW-08
    took them out; build.js has the reasoning. */
 .motto{
+  background:var(--plate-about);
+  color:var(--ink-deep);
   padding-block:var(--space-4);
   border-bottom:1px solid var(--emboss-shade);
   box-shadow:0 1px 0 var(--emboss-light);
+}
+/* One ink, stated on each part rather than left to inherit, because each of
+   the three sets its own colour for the wall it no longer stands on. */
+.motto .hero__original,
+.motto .hero__motto,
+.motto .hero__cite{ color:var(--ink-deep) }
+/* And the hairline between his words and their translation. --rule-soft is
+   solved for the wall at 1.36:1 and measures 1.79 here, which is a line you
+   read rather than one you feel. The wall's own colour on this green is
+   1.34 — the same quietness, out of the palette, no new value. */
+.motto .hero__original{
+  background-image:linear-gradient(var(--field),var(--field));
 }
 /* The band has a ceiling, and it is the fold. Finding A-01 put a painting on
    the opening screen; a quote that pushes it back off again would undo the
