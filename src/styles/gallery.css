@@ -341,6 +341,16 @@
 @media (max-width:519px){
   .panel--about{ padding:var(--space-5) var(--space-4) }
 }
+/* The homepage only needs an introduction; a narrower panel lets its short
+   excerpt and portrait sign-off read as one passage. The full About page keeps
+   its own longer composition. */
+#about .panel--about{ max-width:58rem; margin-inline:auto; padding:var(--space-5b) }
+@media (min-width:760px){
+  #about .section__head{ grid-template-columns:minmax(0,13rem) minmax(0,1fr); gap:var(--space-5) }
+}
+@media (max-width:759px){
+  #about .panel--about{ padding:var(--space-5) var(--space-4) }
+}
 
 /* ---------- the artist's portrait ----------
    About is the one part of the site that is a person rather than a catalogue,
@@ -1394,26 +1404,19 @@ html[lang^="zh"] .page--about .prose{
 }
 .breadcrumb [aria-current]{ color:var(--body) }
 
-/* Series cards on the homepage: one room each, cover in its mat. */
+/* Series are routes into the catalogue. Text gives each room a name and a
+   purpose without repeating paintings already shown above. */
 .series-cards{
   list-style:none; margin:0; padding:0;
   display:grid; gap:var(--space-5);
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));
 }
+.series-card{ border-top:1px solid var(--rule-soft) }
 .series-card__link{
-  display:grid; gap:var(--space-4); grid-template-columns:minmax(0,1fr);
+  display:block; padding-block:var(--space-4) var(--space-5);
   color:inherit; text-decoration:none;
 }
-@media (min-width:600px){
-  .series-card__link{ grid-template-columns:minmax(0,11rem) minmax(0,1fr); align-items:start }
-}
-/* The wall again, in the 11rem column a series card gives its cover. Both the
-   image's dimensions stay auto under two caps: a replaced element resolved
-   that way keeps its own ratio, where a fixed height inside this column did
-   not — the render check measured a 0.80 painting drawn at 0.745. */
-.series-card__cover{ display:flex; justify-content:flex-start; align-items:flex-end; aspect-ratio:var(--wall-ratio) }
-.series-card__cover .work__img{ width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain; cursor:pointer }
-.series-card__text{ display:grid; gap:var(--space-1); align-content:start }
+.series-card__text{ display:grid; grid-template-rows:auto auto 1fr auto; gap:var(--space-2); min-height:13rem }
 .series-card__title{
   font-family:var(--font-display); font-size:var(--size-h3);
   font-optical-sizing:auto;
@@ -1423,20 +1426,26 @@ html[lang^="zh"] .page--about .prose{
 .series-card__count{ font-size:var(--size-caption); letter-spacing:var(--track-label); text-transform:uppercase; color:var(--muted) }
 .series-card__intro{ color:var(--body) }
 .series-card__more{ justify-self:start }
+@media (max-width:679px){ .series-card__text{ min-height:0 } }
 @media (hover:hover) and (pointer:fine){
-  .series-card__link:hover .work__img{ box-shadow:var(--shadow-lift) }
   .series-card__link:hover .series-card__more{ color:var(--sanguine-deep); text-decoration-color:currentColor }
 }
 
-/* The homepage shows four latest works: four across, two across, or one — never
-   three, which would leave the fourth alone on its own row. */
-#latest .works--catalogue{ grid-template-columns:minmax(0,1fr) }
-@media (min-width:600px){ #latest .works--catalogue{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
-@media (min-width:1100px){ #latest .works--catalogue{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--space-5) var(--space-4) } }
+/* Two selected works have enough wall to be seen, while the full catalogue
+   remains one clear link away. The phone keeps each work at column width. */
+#latest .works--catalogue{ grid-template-columns:minmax(0,1fr); max-width:30rem; gap:var(--space-5b) }
+@media (min-width:680px){
+  #latest .works--catalogue{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:60rem; gap:var(--space-5) }
+}
 /* A 17rem cap and a 17rem floor used to stand here, from before the wall.
    They outlived it by a day: on a phone, where #latest is one column 307px
    wide, they held a 40x30 painting to 208px of it. The wall is the cell, at
    every width and on every page that lists work. */
+
+/* The buying note and the invitation to speak form one closing movement. */
+#buy{ padding-bottom:var(--space-4b) }
+.edge--close{ height:var(--space-5b) }
+#contact{ padding-top:var(--space-4b) }
 
 /* ---------- readiness ----------
    Report, "Readiness". Every build that is not a release says so in a ribbon
@@ -1480,4 +1489,3 @@ html[lang^="zh"] .page--about .prose{
   .shopbar{ order:2; margin-left:0 }
 
 }
-

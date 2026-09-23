@@ -361,10 +361,9 @@ function renderIndex(loc) {
   // work of the first series.
   const heroWork = available.find((w) => w.section === SERIES[0].id) ?? available[0] ?? null;
 
-  // The homepage used to show every work at full size, one per screen — fine
-  // for six, impossible for sixty. It now shows the newest few, the series as
-  // rooms, and sends everything else to /works/ (report, "The site's structure").
-  const LATEST = 4;
+  // Keep the homepage an edit of the catalogue: two works can be shown at a
+  // useful size without repeating the whole available selection on a phone.
+  const LATEST = 2;
   const latest = available.filter((w) => w !== heroWork).sort(byNewest).slice(0, LATEST);
 
   /* The featured work hangs on a piece of wall of its OWN proportion, so the
@@ -388,11 +387,9 @@ function renderIndex(loc) {
 
   const seriesCards = SERIES.map((x) => {
     const inSeries = works.filter((w) => w.section === x.id);
-    const cover = inSeries.find((w) => !w.sold) ?? inSeries[0];
     const n = inSeries.filter((w) => !w.sold).length;
     return `<li class="series-card">
       <a class="series-card__link" href="${lpath(loc, site, seriesPath(x.id))}">
-        ${cover ? `<span class="series-card__cover">${picture(cover, { vt: false, sizes: '(min-width:900px) 360px, calc(100vw - 60px)' }, loc)}</span>` : ''}
         <span class="series-card__text">
           <span class="series-card__title">${esc(t(x.title, loc))}</span>
           <span class="series-card__count">${n} ${esc(t(S.works.count, loc))}</span>
@@ -484,7 +481,7 @@ function renderIndex(loc) {
     <div class="section__head">
       <h2>${esc(t(S.about.title, loc))}</h2>
       <div class="prose measure">
-        ${t(site.about.paragraphs, loc).slice(0, 2).map((p) => `<p>${esc(p)}</p>`).join('\n        ')}
+        <p>${esc(t(site.about.paragraphs, loc)[0])}</p>
         ${portraitFrame(loc, 'section')}
         <p><a class="link-quiet" href="${lpath(loc, site, '/about/')}">${loc === 'zh' ? '继续阅读' : 'Read the rest'}</a></p>
       </div>
@@ -509,7 +506,7 @@ function renderIndex(loc) {
   </div>
 </section>
 
-<div class="edge edge--pale-pale" aria-hidden="true"></div>
+<div class="edge edge--pale-pale edge--close" aria-hidden="true"></div>
 
 <!-- The homepage ends where the header ends. Works, About, How to Buy and
      Contact are the four things this site is, in that order, and until now
@@ -524,7 +521,7 @@ function renderIndex(loc) {
     <h2>${esc(t(S.contact.title, loc))}</h2>
     <div class="prose measure">
       <p>${esc(t(S.contact.intro, loc))}</p>
-      <p><a class="link-quiet" href="${lpath(loc, site, '/contact/')}">${loc === 'zh' ? '联系方式' : 'Get in touch'}</a></p>
+      <p><a class="btn" href="${lpath(loc, site, '/contact/')}">${esc(t(S.contact.homeCta, loc))}</a></p>
     </div>
   </div>
 </section>`;

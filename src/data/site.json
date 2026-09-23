@@ -197,6 +197,10 @@
       "intro": {
         "en": "Questions about a work, a commission, shipping to your country, or anything else. For a specific painting, the enquiry button on its page names it for you.",
         "zh": "关于作品、定制、寄送到您所在的国家或其他任何问题，都欢迎联系。若询问某一件作品，其页面上的咨询按钮会自动注明作品名称。"
+      },
+      "homeCta": {
+        "en": "Ask about a work",
+        "zh": "咨询作品"
       }
     },
     "featured": {

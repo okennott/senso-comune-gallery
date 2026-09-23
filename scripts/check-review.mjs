@@ -1017,8 +1017,9 @@ check('I-02', 'the homepage shows a selection and says how many there are', () =
   const avail = artJson.works.filter((w) => !w.sold).length;
   const more = new RegExp(`href="${B}/works/">[^<]*\\(${avail}\\)<`).test(latest);
   const cards = [...home.matchAll(/<li class="series-card">/g)].length;
-  return { ok: n > 0 && n <= 4 && more && cards === seriesItems.length,
-           detail: `${n} latest works (at most 4), link to all ${avail} ${more}, ${cards} series cards for ${seriesItems.length} series` };
+  const selected = Math.min(2, Math.max(0, avail - 1)); // one available work may be featured
+  return { ok: n === selected && more && cards === seriesItems.length,
+           detail: `${n} latest works (expected ${selected}), link to all ${avail} ${more}, ${cards} series cards for ${seriesItems.length} series` };
 });
 
 check('I-03', 'a new series needs data only: a page, a tab and a card each', () => {
@@ -1343,7 +1344,11 @@ check('K-01', 'a build that is not a release says so on every page', () => {
 
 check('K-02', 'while the gate is closed, nothing can be bought', () => {
   if (readinessJson.ready) return { ok: true, detail: 'gate open' };
-  const live = allHtml.flatMap(([p, h]) => [...h.matchAll(/<a class="btn"(?![^>]*aria-disabled)[^>]*href=/g)].map(() => p));
+  // The homepage's contact button is a route to a page, not a purchase
+  // control. Only that internal destination is exempt while sales are closed.
+  const contactRoutes = new Set([`${B}/contact/`, `${B}/zh/contact/`]);
+  const live = allHtml.flatMap(([p, h]) => [...h.matchAll(/<a class="btn"(?![^>]*aria-disabled)[^>]*href="([^"]+)"/g)]
+    .filter(([, href]) => !contactRoutes.has(href)).map(() => p));
   const inert = allHtml.reduce((n, [, h]) => n + [...h.matchAll(/<a class="btn" aria-disabled="true"[^>]*data-inert-href="[^"]+"/g)].length, 0);
   return { ok: !live.length && inert > 0, detail: live.length ? `usable on ${[...new Set(live)].slice(0, 3).join(' ')}` : `${inert} purchase controls inert, none usable` };
 });

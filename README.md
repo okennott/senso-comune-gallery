@@ -114,7 +114,8 @@ reader could see is flagged **in red on a pink ground**; fill in the field and
 rebuild, and its flag is gone — nothing to switch off. Placeholders inside alt
 text, page titles and link previews cannot be highlighted, and are covered by
 the build's list. The new work appears on its series page, on
-*Works*, and — if it is among the four newest — on the homepage.
+*Works*, and — if it is featured or among the two latest selections — on the
+homepage.
 
 ### Adding a series
 
@@ -732,7 +733,7 @@ block people outright.
   goes to four real pages — Works, About, How to Buy, Contact — and never jumps down
   the homepage. Every available work is on `/works/`, each series has a page, and
   sold works are at `/works/sold/` (the old `/archive/` redirects). The homepage
-  shows four latest works and a card per series, not the whole catalogue. Six
+  shows two latest works and a text link per series, not the whole catalogue. Six
   reference sites agree on all of this except *How to Buy* in the header, which
   stays until the cart works.
 - **The logo is Priscilla's own SC monogram, used as drawn.** The wordmark
@@ -802,7 +803,7 @@ block people outright.
   way — display sizes pay almost nothing to irradiation — but through a token,
   so a ground that moves moves them too.
 - **A cell is a piece of wall.** Every grid that lists work — the catalogue,
-  the homepage's latest, a series card's cover, the archive — lays each
+  the homepage's latest, and the archive — lays each
   painting in a box whose proportion is `--wall-ratio`: the narrowest work in
   the catalogue, derived in `build.js` from the data rather than typed. Every
   painting is therefore width-bound and hung to the bottom-left of its cell, so
