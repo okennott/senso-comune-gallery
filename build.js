@@ -372,24 +372,43 @@ function renderIndex(loc) {
      the work's, in centimetres — the photograph agrees with it to within 0.04%
      and could not letterbox the painting in any case: the image keeps auto
      dimensions inside the wall and only ever scales to fit it. */
+  const heroSeries = seriesOf(heroWork?.section);
+  const heroDesc = heroWork ? t(heroWork.description, loc) : '';
   const heroFigure = heroWork ? `
   <section class="hero__feature" aria-labelledby="featured-h">
     <h2 id="featured-h" class="hero__label">${esc(t(S.featured.title, loc))}</h2>
     <figure class="hero__work">
       <a class="hero__wall" style="--work-ratio:${(heroWork.widthCm / heroWork.heightCm).toFixed(4)}" href="${lpath(loc, site, `/works/${heroWork.slug}/`)}">
-        ${picture(heroWork, { eager: true, sizes: `(min-width:900px) calc(min(62vh,38rem) * ${(heroWork.widthCm / heroWork.heightCm).toFixed(4)}), calc(100vw - 40px)` }, loc)}
+        ${picture(heroWork, { eager: true, sizes: `(min-width:900px) calc(min(50vh,32rem) * ${(heroWork.widthCm / heroWork.heightCm).toFixed(4)}), calc(100vw - 40px)` }, loc)}
       </a>
       <figcaption>
+        ${heroSeries ? `<p class="hero__series"><a href="${lpath(loc, site, seriesPath(heroSeries.id))}">${esc(t(heroSeries.title, loc))}</a></p>` : ''}
         ${tombstone(heroWork, loc, { level: 'h3' })}
+        ${heroDesc ? `<p class="hero__desc">${esc(heroDesc)}</p>` : ''}
       </figcaption>
     </figure>
   </section>` : '';
 
+  // A card gave a room a name and a purpose but showed none of its work —
+  // the one place on the homepage that described paintings without picturing
+  // any. The cover is the room's own newest available piece (its oldest, once
+  // everything in it has sold), found from the data the same way every other
+  // list on this page is: no series id named here, so I-03's "data only" holds.
   const seriesCards = SERIES.map((x) => {
     const inSeries = works.filter((w) => w.section === x.id);
     const n = inSeries.filter((w) => !w.sold).length;
+    // Not the hero work again if the room has another available piece to show —
+    // the hero already stands two sections above, and showing it twice in one
+    // scroll would read as a mistake rather than as a second doorway in.
+    const available = inSeries.filter((w) => !w.sold);
+    const pool = (available.length > 1 ? available.filter((w) => w !== heroWork) : available);
+    const cover = pool.sort(byNewest)[0] ?? inSeries[0];
+    // vt:false — this same painting may already be named elsewhere on the
+    // page (the hero, the latest list), and two elements sharing one
+    // view-transition-name would abort the transition (G-05).
     return `<li class="series-card">
       <a class="series-card__link" href="${lpath(loc, site, seriesPath(x.id))}">
+        ${cover ? `<span class="series-card__cover">${picture(cover, { sizes: '(min-width:600px) 45vw, calc(100vw - 60px)', vt: false }, loc)}</span>` : ''}
         <span class="series-card__text">
           <span class="series-card__title">${esc(t(x.title, loc))}</span>
           <span class="series-card__count">${n} ${esc(t(S.works.count, loc))}</span>
@@ -492,7 +511,14 @@ function renderIndex(loc) {
 
 <div class="edge edge--deep-pale" aria-hidden="true"></div>
 
-<section class="section ground--pale wrap" id="buy">
+<!-- How to Buy and Contact are one closing movement — the mechanics of a sale
+     and the way to start one — so on the width that can afford it they stand
+     side by side rather than as two more full-width bands. The wrapper carries
+     .wrap itself; each <section> keeps its own id, heading and ground exactly
+     as before (I-07 reads the page by its <section id>s, in this order), and
+     the edge that used to separate them is gone with the seam it ruled. -->
+<div class="closing wrap">
+<section class="section ground--pale" id="buy">
   <div class="section__head">
     <h2>${esc(t(S.buy.title, loc))}</h2>
     <div class="prose measure">
@@ -506,8 +532,6 @@ function renderIndex(loc) {
   </div>
 </section>
 
-<div class="edge edge--pale-pale edge--close" aria-hidden="true"></div>
-
 <!-- The homepage ends where the header ends. Works, About, How to Buy and
      Contact are the four things this site is, in that order, and until now
      the page stopped at the third: it explained how buying works and then
@@ -516,7 +540,7 @@ function renderIndex(loc) {
      begins with a message, so the last thing on the page is how to send one.
      The details themselves stay in one place — the contact page and the
      footer — and this is the summary and the way in. -->
-<section class="section ground--pale wrap" id="contact">
+<section class="section ground--pale" id="contact">
   <div class="section__head">
     <h2>${esc(t(S.contact.title, loc))}</h2>
     <div class="prose measure">
@@ -524,7 +548,8 @@ function renderIndex(loc) {
       <p><a class="btn" href="${lpath(loc, site, '/contact/')}">${esc(t(S.contact.homeCta, loc))}</a></p>
     </div>
   </div>
-</section>`;
+</section>
+</div>`;
 
   return layout({
     site, seller, loc,
@@ -831,10 +856,11 @@ function portraitFrame(loc, where) {
   if (!portraitShown()) return '';
   const m = VIEWS.portrait ?? { width: 960, height: 1200, placeholder: true };
   const srcset = (ext) => PORTRAIT_WIDTHS.map((x) => `${asset(`/img/portrait-${x}.${ext}`)} ${x}w`).join(', ');
-  // A sign-off is small: the plate is capped in CSS at 9rem in the section
-  // and 10.5rem on the page, and the widths above cover both at 3x. A length,
-  // not a percentage: the box never tracks the viewport.
-  const sizes = where === 'page' ? '10.5rem' : '9rem';
+  // A sign-off is small: the plate is capped in CSS at 11rem in the section,
+  // beside the prose it signs, and 10.5rem on the page — and the widths above
+  // cover both at 3x. A length, not a percentage: the box never tracks the
+  // viewport.
+  const sizes = where === 'page' ? '10.5rem' : '11rem';
   return `<figure class="portrait portrait--${where}">
       <picture>
         <source type="image/avif" srcset="${srcset('avif')}" sizes="${sizes}">

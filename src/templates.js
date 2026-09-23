@@ -446,9 +446,17 @@ ${body}
         <a href="tel:${esc(String(seller.contact.phone).replace(/\s+/g, ''))}">${esc(seller.contact.phone)}</a>
       </p>
     </div>
-    <ul>
-      ${site.footer.links.map((l) => `<li><a href="${esc(path(loc, site, l.href))}">${esc(t(l.label, loc))}</a></li>`).join('\n      ')}
-    </ul>
+    <div class="footer-links">
+      ${(() => {
+        // Nine links in one column ran the length of the address block beside
+        // it and left the social marks stranded off to the side. Split down
+        // the middle rather than adding a second field to every link in
+        // site.json for a grouping the split already gives for free.
+        const mid = Math.ceil(site.footer.links.length / 2);
+        const col = (list) => `<ul>${list.map((l) => `<li><a href="${esc(path(loc, site, l.href))}">${esc(t(l.label, loc))}</a></li>`).join('')}</ul>`;
+        return col(site.footer.links.slice(0, mid)) + col(site.footer.links.slice(mid));
+      })()}
+    </div>
     ${socialRow(site, seller, loc)}
   </div>
   ${decl ? `<div class="wrap"><p class="legal-declaration" lang="zh-CN">${esc(decl.zh)}</p>

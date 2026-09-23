@@ -227,6 +227,15 @@
 
 /* ---------- section headers ---------- */
 .section{ padding-block:var(--space-6) }
+/* The homepage's five sections are short — a handful of works, a sentence of
+   introduction, one paragraph — so the full 96px this rule gives every
+   section, top and bottom, plus the sfumato band between them, read as more
+   ground than content on a page meant to keep moving toward Contact. Desktop
+   only: below 720px .section already drops to --space-5 for the same reason
+   (found first on a phone), and this leaves that rule alone. */
+@media (min-width:720px){
+  #latest, #series, #about, #buy, #contact{ padding-block:var(--space-5b) }
+}
 .section__head{
   display:grid; gap:var(--space-4);
   grid-template-columns:minmax(0,1fr);
@@ -341,12 +350,30 @@
 @media (max-width:519px){
   .panel--about{ padding:var(--space-5) var(--space-4) }
 }
-/* The homepage only needs an introduction; a narrower panel lets its short
-   excerpt and portrait sign-off read as one passage. The full About page keeps
-   its own longer composition. */
-#about .panel--about{ max-width:58rem; margin-inline:auto; padding:var(--space-5b) }
+/* The homepage only needs an introduction, but capping the panel at 58rem
+   made it the one section on the page not lined up with the others: every
+   other section reads to the .wrap edge at 1100px, and About stopped 86px
+   short of it on either side. It now takes the same width as everything else
+   and the excerpt itself stays short. */
+#about .panel--about{ padding:var(--space-5b) }
 @media (min-width:760px){
-  #about .section__head{ grid-template-columns:minmax(0,13rem) minmax(0,1fr); gap:var(--space-5) }
+  #about .section__head{
+    grid-template-columns:minmax(0,13rem) minmax(0,1fr);
+    column-gap:var(--space-5); row-gap:var(--space-4);
+  }
+  /* The heading's own column stood empty below "About" — 13rem of ground with
+     nothing on it, on the one section of the page that has a face to put
+     there. display:contents un-boxes .prose without moving anything in the
+     source (M-01 reads the paragraph, the portrait and the link in exactly
+     this order), so its three children can be placed straight onto the head's
+     grid: the heading and the excerpt share the first row, the portrait sits
+     under the heading, and the closing link keeps it company. */
+  #about .section__head > h2{ grid-column:1; grid-row:1 }
+  #about .prose{ display:contents }
+  #about .prose > p{ margin:0; max-width:var(--measure) }
+  #about .prose > p:first-of-type{ grid-column:2; grid-row:1 }
+  #about .portrait--section{ grid-column:1; grid-row:2; align-self:start; margin:0 }
+  #about .prose > p:last-of-type{ grid-column:2; grid-row:2; align-self:start }
 }
 @media (max-width:759px){
   #about .panel--about{ padding:var(--space-5) var(--space-4) }
@@ -365,15 +392,16 @@
    different page from the one that follows. At the end it is what it is —
    who wrote that — and the onward links come after it.
 
-   Small enough to read as a signature rather than as a plate: 9rem in the
-   homepage section, 10.5rem on the page, and on a phone both stop at the
-   column's own width. build.js gives the <img> the same numbers in `sizes`. */
+   Small enough to read as a signature rather than as a plate: 11rem in the
+   homepage section, where it stands beside the prose rather than inside it,
+   10.5rem on the page, and on a phone both stop at the column's own width.
+   build.js gives the <img> the same numbers in `sizes`. */
 .portrait{
   margin:var(--space-5) 0 var(--space-4);
   display:grid; gap:var(--space-2); justify-items:start;
 }
 .portrait__img{ display:block; width:100%; height:auto }
-.portrait--section{ max-width:min(100%,9rem) }
+.portrait--section{ max-width:min(100%,11rem) }
 .portrait--page{ max-width:min(100%,10.5rem) }
 /* A caption, not a label: the name of the person in the frame, in the same
    small caps a tombstone uses. --muted is 4.62:1 on the wall. The About page
@@ -669,6 +697,11 @@ dialog.lightbox img{ box-shadow:var(--shadow-mount) }
 .footer a{ color:var(--paper); text-decoration:none; --contrast-ground:var(--glass-footer) }
 .footer a:hover{ color:#fff; text-decoration:underline }
 .footer ul{ list-style:none; margin:0; padding:0; display:grid; gap:var(--space-1) }
+/* Nine links in one column ran the full height of the address block beside
+   it, on every page — the footer is shared chrome, not homepage-only markup —
+   and left the channel marks looking stranded rather than aligned with
+   anything. Split into two shorter columns instead of one tall one. */
+.footer-links{ display:flex; flex-wrap:wrap; gap:var(--space-2) var(--space-6) }
 
 /* ---------- the channel row ----------
    A link-in-bio business is found through its profiles, so the footer carries
@@ -987,6 +1020,27 @@ html[lang^="zh"] .page--about .prose{
   color:var(--muted);
 }
 
+/* The wall label used to be a tombstone and nothing else: a title, a price, a
+   button, with the whole rest of the column standing empty above it (the row
+   is as tall as the painting, and the label is bottom-aligned to its foot).
+   Two lines now fill that column instead — which series the work belongs to,
+   and the line of description every work already carries — so the label
+   reads as a passage rather than a stub, and the tombstone sits higher in the
+   row for it. */
+.hero__series{
+  margin:0 0 var(--space-2);
+  font-family:var(--font-body);
+  font-size:var(--size-caption);
+  letter-spacing:var(--track-label);
+  text-transform:uppercase;
+}
+.hero__series a{ color:var(--muted); text-decoration:none }
+.hero__series a:hover{ color:var(--sanguine-deep); text-decoration:underline }
+.hero__desc{
+  margin:var(--space-3) 0 0;
+  color:var(--body);
+}
+
 /* ---------- epigraph ----------
    Set smaller and quieter than the hero motto so Tribute opens with a breath
    rather than competing with the top of the page. */
@@ -1080,9 +1134,16 @@ html[lang^="zh"] .page--about .prose{
 /* The featured work's own piece of wall: as tall as the opening screen can
    afford and exactly as wide as the painting, so the link has a definite width
    and the label next to it can stand at the painting's edge. */
+/* Shorter than the 62vh/38rem this opened with: at a common 1440x900 laptop
+   window the work's own label — now carrying the series and a line of the
+   description as well — ended past y=900, so the price and the way to buy
+   needed a scroll before anything else did. The wall gives up some of its
+   height so the label it carries can still stand at the work's own foot,
+   inside the first screen, on the sizes check-render.mjs actually lays pages
+   out at (1440 and 900 among them). */
 .hero__wall{
   display:block;
-  height:min(62vh,38rem);
+  height:min(50vh,32rem);
   aspect-ratio:var(--work-ratio,var(--wall-ratio));
 }
 .hero__work img{
@@ -1416,6 +1477,17 @@ html[lang^="zh"] .page--about .prose{
   display:block; padding-block:var(--space-4) var(--space-5);
   color:inherit; text-decoration:none;
 }
+/* A room described in words alone, with none of what is in it. The cover is
+   hung the same way the catalogue hangs a painting — a piece of wall at the
+   catalogue's own ratio, the work bottom-left inside it (.works--catalogue
+   says why) — so the two series read as two different rooms and not only as
+   two blocks of the same text. */
+.series-card__cover{
+  display:flex; justify-content:flex-start; align-items:flex-end;
+  aspect-ratio:var(--wall-ratio);
+  margin-bottom:var(--space-4);
+}
+.series-card__cover .work__img{ width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain }
 .series-card__text{ display:grid; grid-template-rows:auto auto 1fr auto; gap:var(--space-2); min-height:13rem }
 .series-card__title{
   font-family:var(--font-display); font-size:var(--size-h3);
@@ -1435,17 +1507,59 @@ html[lang^="zh"] .page--about .prose{
    remains one clear link away. The phone keeps each work at column width. */
 #latest .works--catalogue{ grid-template-columns:minmax(0,1fr); max-width:30rem; gap:var(--space-5b) }
 @media (min-width:680px){
-  #latest .works--catalogue{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:60rem; gap:var(--space-5) }
+  /* Centred rather than widened: two works at a useful size, not two works
+     stretched to fill a row built for the whole catalogue. Left-aligned with
+     no margin of its own, the pair sat flush with the section's left edge and
+     left the right third of a wide screen bare — the one asymmetry on the
+     page that wasn't a deliberate one. */
+  #latest .works--catalogue{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:60rem; gap:var(--space-5); margin-inline:auto }
 }
 /* A 17rem cap and a 17rem floor used to stand here, from before the wall.
    They outlived it by a day: on a phone, where #latest is one column 307px
    wide, they held a 40x30 painting to 208px of it. The wall is the cell, at
    every width and on every page that lists work. */
 
-/* The buying note and the invitation to speak form one closing movement. */
+/* The homepage's second and third works are a browsing list, not a purchase
+   moment — the hero already carries the site's one full-weight call to buy.
+   Styled here as a quiet link, matching the "view the series" and "all
+   works" links this same page already uses, so three identical boxed buttons
+   in two screens become one. Full weight is one click away, on the work's
+   own page, where tombstone() draws the same control unchanged. */
+#latest .works--catalogue .btn{
+  display:inline-block;
+  min-height:0; padding:0;
+  background:none; border:0; box-shadow:none;
+  line-height:1.5;
+  padding-block:calc((var(--target-min) - 1.5em) / 2);
+  color:var(--ink); font-weight:400;
+  text-decoration:underline; text-decoration-thickness:1px;
+  text-underline-offset:.28em; text-decoration-color:var(--muted-ui);
+}
+#latest .works--catalogue .btn::after{ content:'\00a0→' }
+#latest .works--catalogue .btn:hover{
+  background:none; color:var(--sanguine-deep); text-decoration-color:currentColor;
+  transform:none; box-shadow:none;
+}
+#latest .works--catalogue .btn[aria-disabled="true"]{ border:0; color:var(--body) }
+
+/* The buying note and the invitation to speak form one closing movement, and
+   on a screen wide enough to hold both without narrowing either below its own
+   measure, they stand side by side rather than as two more full-width bands
+   stacked the way every section above them already was. Below that width
+   they fall back to the page's ordinary stacked order, a rule between them
+   standing in for the edge band the wrapper replaced. */
 #buy{ padding-bottom:var(--space-4b) }
-.edge--close{ height:var(--space-5b) }
 #contact{ padding-top:var(--space-4b) }
+@media (max-width:899px){
+  .closing #contact{ border-top:1px solid var(--rule-soft) }
+}
+@media (min-width:900px){
+  .closing{
+    display:grid; align-items:start;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    column-gap:var(--space-6);
+  }
+}
 
 /* ---------- readiness ----------
    Report, "Readiness". Every build that is not a release says so in a ribbon
