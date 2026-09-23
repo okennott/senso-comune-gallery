@@ -1346,7 +1346,7 @@ check('K-02', 'while the gate is closed, nothing can be bought', () => {
   if (readinessJson.ready) return { ok: true, detail: 'gate open' };
   // The homepage's contact button is a route to a page, not a purchase
   // control. Only that internal destination is exempt while sales are closed.
-  const contactRoutes = new Set([`${B}/contact/`, `${B}/zh/contact/`]);
+  const contactRoutes = new Set([`${BASE}/contact/`, `${BASE}/zh/contact/`]);
   const live = allHtml.flatMap(([p, h]) => [...h.matchAll(/<a class="btn"(?![^>]*aria-disabled)[^>]*href="([^"]+)"/g)]
     .filter(([, href]) => !contactRoutes.has(href)).map(() => p));
   const inert = allHtml.reduce((n, [, h]) => n + [...h.matchAll(/<a class="btn" aria-disabled="true"[^>]*data-inert-href="[^"]+"/g)].length, 0);
