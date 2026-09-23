@@ -61,6 +61,21 @@ printf '<!doctype html><body style="margin:0"><iframe src="%s" style="border:0;w
   "${BASE_PATH:-}/" > "$ROOT/dist/_report/phone.html"
 shoot mob  "/_report/phone.html"             390 844  2
 
+# The same pages on the Chinese side, for the Chinese edition of the report.
+# A Chinese reader shown seven captures of the English site is being shown
+# somebody else's site. Written as cap-zh-*.png; translate.mjs points the
+# Chinese .qmd at one of these wherever the file exists, and leaves the English
+# capture in place where it does not, so an edition never fails to build over a
+# missing screenshot.
+printf '<!doctype html><body style="margin:0"><iframe src="%s" style="border:0;width:390px;height:844px;display:block"></iframe>' \
+  "${BASE_PATH:-}/zh/" > "$ROOT/dist/_report/phone-zh.html"
+shoot zh-home  "/zh/"                            1440 900  2
+shoot zh-work  "/zh/works/harbour-light/"        1440 900  2
+shoot zh-sold  "/zh/works/long-afternoon/"       1440 620  2
+shoot zh-buy   "/zh/how-to-buy/"                 1440 900  2
+shoot zh-about "/zh/about/"                      1440 1620 2
+shoot zh-mob   "/_report/phone-zh.html"           390 844  2
+
 # The softness plate needs a painting to show a mat, a mount shadow or glass
 # on, and forced states a plain screenshot cannot reach. See soft_shots.mjs.
 node "$HERE/soft_shots.mjs" "http://127.0.0.1:$PORT"

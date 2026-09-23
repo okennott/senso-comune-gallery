@@ -11,5 +11,13 @@
 *.tex
 cjk-chars.txt
 
-# preamble.tex is a source file, not an intermediate
+# preamble.tex and preamble-zh.tex are source files, not intermediates.
+# report-zh-strings.tex IS an intermediate and is caught by *.tex above:
+# scripts/translate.mjs writes it from src/data/lexicon.json on every build.
 !preamble.tex
+!preamble-zh.tex
+
+# The Chinese edition is composed from the English source and the reviewed
+# translation memory in translations/. The memory is the source and is
+# committed; this file is its output and is not.
+senso-comune-report.zh.qmd

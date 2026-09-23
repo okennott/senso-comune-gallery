@@ -40,15 +40,32 @@ SRC = {
     "notoserifsc":     "ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf",
 }
 
-# The CJK cut. XeTeX drops a glyph the font does not have SILENTLY, which in a
+# The CJK cuts. XeTeX drops a glyph the font does not have SILENTLY, which in a
 # document that quotes SAMR Order 37 Art. 12 verbatim is a correctness problem,
 # not a cosmetic one — the citation would render with the characters simply
 # gone. The subset used to be built by hand and cjk-chars.txt was a record of
 # what someone had built, with nothing checking it still matched the prose.
 # It is now derived FROM the prose on every build.
-CJK_FONT = "NotoSerifSC-report.otf"
+#
+# TWO cuts, since the report is produced in Chinese as well as in English.
+#   Regular  the English edition's statutory quotations, and the Chinese
+#            edition's body text.
+#   Bold     only the Chinese edition needs it, and needs it badly: fontspec
+#            with no BoldFont declared leaves \bfseries at the regular weight
+#            without complaint, so every **emphasis**, every callout title and
+#            every table header in a Chinese document would come out looking
+#            like body text. Same class of silent failure as a dropped glyph.
+#
+# Both are subset to the same character set, which is derived from every file
+# XeTeX will actually read: the English .qmd, the generated Chinese .qmd, and
+# the generated furniture strings. docs/report/build.sh composes the Chinese
+# .qmd BEFORE calling this script, so that set is complete when it is taken.
+CJK_FONTS = [("NotoSerifSC-report.otf", "wght=400"),
+             ("NotoSerifSC-report-Bold.otf", "wght=700")]
 CJK_CHARS = HERE / "cjk-chars.txt"
-DOC = HERE / "senso-comune-report.qmd"
+DOCS = [HERE / "senso-comune-report.qmd",
+        HERE / "senso-comune-report.zh.qmd",
+        HERE / "report-zh-strings.tex"]
 CJK_RANGES = ((0x3000, 0x303F), (0x3400, 0x4DBF), (0x4E00, 0x9FFF), (0xFF00, 0xFFEF))
 # matplotlib measures the string "lp" against whatever face a text artist uses,
 # to find that face's descent for vertical alignment. figures.py sets one
@@ -59,8 +76,14 @@ CJK_RANGES = ((0x3000, 0x303F), (0x3400, 0x4DBF), (0x4E00, 0x9FFF), (0xFF00, 0xF
 # punctuation and, inside a verbatim environment, takes it from the CJK MONO
 # face — which is this file. Without it, every dot separating the file names in
 # the build-tree listings disappears silently.
+# U+0020 is the third of these, and it is the Chinese edition that needs it.
+# Where a CJK run meets bold, an inline macro or a Latin word, xeCJK asks the
+# CJK face for the space itself rather than the Latin one — and a subset built
+# from CJK ranges alone does not have it, so XeTeX reports a missing character
+# and sets NOTHING. The words run together, with the document still building.
+# It is the same silent failure as a dropped glyph, one codepoint away.
 # xeCJK routes nothing else here, so none of these are set in running text.
-CJK_EXTRA = "lp\u00b7"
+CJK_EXTRA = "lp\u00b7\u0020\u2026"
 
 # (output name, source key, axis settings)
 CUTS = [
@@ -83,24 +106,34 @@ CUTS = [
 
 
 def cjk_in_document() -> str:
-    """Every CJK codepoint the report actually sets, in codepoint order."""
-    text = DOC.read_text(encoding="utf-8")
-    found = {c for c in text
-             if any(lo <= ord(c) <= hi for lo, hi in CJK_RANGES)}
+    """Every CJK codepoint the report actually sets, in codepoint order. Both
+    editions are read: a character that appears only in the Chinese one still
+    has to be in the font, and the Chinese one is the larger set by far."""
+    found = set()
+    for doc in DOCS:
+        if not doc.exists():
+            continue
+        found |= {c for c in doc.read_text(encoding="utf-8")
+                  if any(lo <= ord(c) <= hi for lo, hi in CJK_RANGES)}
     return "".join(sorted(found))
 
 
 def cjk_missing() -> str:
-    """Characters the document sets that the committed subset cannot draw.
-    The test is the FONT, not cjk-chars.txt: that file is a build intermediate
+    """Characters the document sets that the committed subsets cannot draw.
+    The test is the FONTS, not cjk-chars.txt: that file is a build intermediate
     and is not in the repository, so keying off it would make a fresh clone
-    refetch 25 MB of Noto over the network to rebuild a font it already has."""
+    refetch 25 MB of Noto over the network to rebuild fonts it already has.
+    Either cut falling short rebuilds both, so the two can never cover
+    different character sets."""
     want = cjk_in_document() + CJK_EXTRA
-    dst = OUT / CJK_FONT
-    if not dst.exists():
-        return want
-    cmap = TTFont(dst).getBestCmap()
-    return "".join(c for c in want if ord(c) not in cmap)
+    gaps = ""
+    for name, _ in CJK_FONTS:
+        dst = OUT / name
+        if not dst.exists():
+            return want
+        cmap = TTFont(dst).getBestCmap()
+        gaps += "".join(c for c in want if ord(c) not in cmap and c not in gaps)
+    return gaps
 
 
 def build_cjk(tmp: pathlib.Path) -> bool:
@@ -109,44 +142,52 @@ def build_cjk(tmp: pathlib.Path) -> bool:
     subset that no longer covers the text."""
     want = cjk_in_document() + CJK_EXTRA
     added = cjk_missing()
-    dst = OUT / CJK_FONT
     src = tmp / "notoserifsc.ttf"
     print(f"  fetching notoserifsc")
     urllib.request.urlretrieve(BASE + SRC["notoserifsc"], src)
 
-    # Instance to Regular FIRST. Noto Serif SC's variable default is wght 200,
-    # so subsetting the raw file yields an ExtraLight that XeTeX will happily
-    # set the statutory quotations in, two weights lighter than everything
-    # around them, with no error anywhere.
-    static = tmp / "notoserifsc-400.ttf"
-    subprocess.run(
-        [sys.executable, "-m", "fontTools.varLib.instancer",
-         "-q", "-o", str(static), str(src), "wght=400"],
-        check=True, stdout=subprocess.DEVNULL,
-    )
-    subprocess.run(
-        [sys.executable, "-m", "fontTools.subset", str(static),
-         f"--text={want}", "--flavor=", f"--output-file={dst}",
-         "--layout-features=", "--no-hinting", "--desubroutinize"],
-        check=True, stdout=subprocess.DEVNULL,
-    )
-    # instancer leaves the variable default's family name behind, so the file
-    # still calls itself ExtraLight. XeTeX picks this font by path and does not
-    # care, but matplotlib and every font dialog do.
-    font = TTFont(dst)
-    for rec in font["name"].names:
-        if rec.nameID in (1, 16) and "ExtraLight" in str(rec):
-            rec.string = "Noto Serif SC"
-        elif rec.nameID == 17:
-            rec.string = "Regular"
-    font.save(dst)
+    for name, axes in CJK_FONTS:
+        dst = OUT / name
+        wanted_weight = int(axes.split("=")[1])
+        # Instance to the target weight FIRST. Noto Serif SC's variable default
+        # is wght 200, so subsetting the raw file yields an ExtraLight that
+        # XeTeX will happily set the statutory quotations in, two weights
+        # lighter than everything around them, with no error anywhere.
+        static = tmp / f"notoserifsc-{wanted_weight}.ttf"
+        subprocess.run(
+            [sys.executable, "-m", "fontTools.varLib.instancer",
+             "-q", "-o", str(static), str(src), axes],
+            check=True, stdout=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            [sys.executable, "-m", "fontTools.subset", str(static),
+             f"--text={want}", "--flavor=", f"--output-file={dst}",
+             "--layout-features=", "--no-hinting", "--desubroutinize"],
+            check=True, stdout=subprocess.DEVNULL,
+        )
+        # instancer leaves the variable default's family name behind, so the
+        # file still calls itself ExtraLight. XeTeX picks this font by path and
+        # does not care, but matplotlib and every font dialog do.
+        style = "Regular" if wanted_weight == 400 else "Bold"
+        font = TTFont(dst)
+        for rec in font["name"].names:
+            if rec.nameID in (1, 16) and "ExtraLight" in str(rec):
+                rec.string = "Noto Serif SC"
+            elif rec.nameID == 17:
+                rec.string = style
+        # fontspec picks a BoldFont by path, but a file that reports wght 400
+        # in OS/2 is a file that will be wrong the first time anything else
+        # reads it. Say what it is.
+        font["OS/2"].usWeightClass = wanted_weight
+        font.save(dst)
 
-    weight = font["OS/2"].usWeightClass
-    if weight != 400:
-        raise SystemExit(f"  CJK subset came out at wght {weight}, not 400")
+        weight = TTFont(dst)["OS/2"].usWeightClass
+        if weight != wanted_weight:
+            raise SystemExit(f"  CJK subset came out at wght {weight}, not {wanted_weight}")
+        print(f"  {name:32s} {dst.stat().st_size:8,} bytes   "
+              f"[{len(want)} characters]" + (f"  +{added}" if added else ""))
+
     CJK_CHARS.write_text(want + "\n", encoding="utf-8")
-    print(f"  {CJK_FONT:32s} {dst.stat().st_size:8,} bytes   "
-          f"[{len(want)} characters]" + (f"  +{added}" if added else ""))
     return True
 
 

@@ -5,7 +5,8 @@ and a Chinese domestic audience, run by Priscilla herself from mainland China.
 Six are catalogued today; the site takes as many as `src/data/artworks.json`
 lists, and nothing in the build caps that.
 
-**Phase 1 (complete):** research and review — see the report.
+**Phase 1 (complete):** research and review — see the report, in English and
+in Chinese.
 **Phase 2 (in progress):** the site is built, passing its checks and published
 as a preview. It cannot go live until every critical detail is supplied
 (§2.8): photographs, titles, descriptions and contact details. The buy box and
@@ -21,12 +22,21 @@ table of contents, list of figures, list of tables, numbered parts and an
 alphabetical index. This is the one to print, share, or hand to an accountant
 or a lawyer.
 
+**[`docs/report/senso-comune-report.zh.pdf`](docs/report/senso-comune-report.zh.pdf)** —
+the same report in Chinese. Same 89 pages, same figures, same index, same
+paper. Not a summary and not a variant: the same document, composed from the
+same source, so a page in one edition is the same page in the other.
+
 ```bash
-npm run report:pdf
+npm run report:pdf        # both editions
 ```
 
+One command, both editions, four passes each — the Chinese one is not a later
+step and cannot be skipped. §2.9 is how its prose gets there.
+
 Figures regenerate from `src/styles/tokens.css` on every build, so the palette
-in the document cannot drift from the palette in the site.
+in the document cannot drift from the palette in the site. The page screenshots
+in the Chinese edition are of the Chinese site, not the English one.
 
 **[`docs/brief/`](docs/brief/)** — Priscilla's original nine-page draft,
 retired. Nothing builds from it; it is kept because several measurements in the
@@ -450,7 +460,14 @@ reading it from the other.
 │   │   │                           length — add an entry and rebuild.
 │   │   ├── seller.json             identity, both entity profiles, returns,
 │   │   │                           donation, shipping and import notes
-│   │   └── site.json               navigation, page copy, UI strings, en + zh
+│   │   ├── site.json               navigation, page copy, UI strings, en + zh
+│   │   └── lexicon.json            the CURATED half of the language corpus:
+│   │                               the report's design, commerce and legal
+│   │                               vocabulary, the terms that stay in Latin,
+│   │                               the dual renderings that are deliberate,
+│   │                               and the printed document's own words.
+│   │                               Nothing the three files above already say
+│   │                               is repeated here (§2.9)
 │   ├── styles/
 │   │   ├── tokens.css              palette, type scale, spacing, motion, all
 │   │   │                           of it solved against contrast
@@ -523,6 +540,19 @@ reading it from the other.
 │   ├── check-render.mjs            lays pages out in headless Chrome; fails if
 │   │                               a painting is distorted, rounded or
 │   │                               transformed. Needs Chrome, so CI runs it
+│   ├── corpus.mjs                  the one language corpus, assembled by
+│   │                               HARVEST: every en/zh pair in the three
+│   │                               data files and in build.js, merged with
+│   │                               lexicon.json. One English term, one
+│   │                               Chinese rendering — or a conflict (§2.9)
+│   ├── translate.mjs               content-aware English → Chinese for the
+│   │                               report. Segments the .qmd by kind, masks
+│   │                               every span that is not prose, drafts what
+│   │                               is owed, validates it, and composes the
+│   │                               Chinese edition. Never runs in a build
+│   ├── check-corpus.mjs            four checks over the corpus and the
+│   │                               translation memory; --site runs the one
+│   │                               that is about the site's own data
 │   └── preview.mjs                 one page as a single self-contained file
 │
 ├── public/                       copied to the site as-is
@@ -555,7 +585,27 @@ reading it from the other.
 │       ├── senso-comune-report.pdf   built: A4 trim, indexed. npm run
 │       │                             report:print writes a second file with
 │       │                             3mm bleed and crop marks (gitignored)
-│       ├── senso-comune-report.qmd   the source
+│       ├── senso-comune-report.zh.pdf  the same document in Chinese, built by
+│       │                             the same command and the same four
+│       │                             passes. Its .qmd is composed from the
+│       │                             source below and translations/, and is
+│       │                             gitignored because it is output
+│       ├── senso-comune-report.qmd   the source. ONE source: the Chinese
+│       │                             edition is composed from it, so a
+│       │                             correction is made once
+│       ├── translations/             the reviewed translation memory, one
+│       │                             entry per unit, keyed by a hash of the
+│       │                             English, so an edit cannot leave stale
+│       │                             Chinese attached to it. Committed —
+│       │                             this is source — and STATUS.md beside
+│       │                             it says what is still owed
+│       ├── preamble-zh.tex           the whole difference between the two
+│       │                             editions apart from words: the bold
+│       │                             Chinese cut, the leading, the names
+│       │                             LaTeX supplies, and the mark on an
+│       │                             untranslated passage. Deliberately
+│       │                             short — the layout is written once,
+│       │                             next door
 │       ├── preamble.tex              typesetting: fonts, heads, callouts, the
 │       │                             mark and the lockup as supplied, and the
 │       │                             paper — this document is printed on the
@@ -564,10 +614,17 @@ reading it from the other.
 │       │                             including the two that carry the research
 │       │                             behind the sage grounds and --size-read
 │       ├── fonts.py                  static cuts of Fraunces and Inter, plus
-│       │                             the Chinese subset — derived from the
-│       │                             .qmd, so the prose cannot outgrow it
+│       │                             the Chinese subset IN TWO WEIGHTS,
+│       │                             derived from both editions so the prose
+│       │                             cannot outgrow it. The bold cut exists
+│       │                             because fontspec leaves \bfseries at the
+│       │                             regular weight when none is declared,
+│       │                             and says nothing about it
 │       ├── shots.sh                  the page screenshots, taken from dist/ at
-│       │                             2x and resampled to 287 dpi, lossless
+│       │                             2x and resampled to 287 dpi, lossless.
+│       │                             Every route on both sides of the site,
+│       │                             so the Chinese edition shows a Chinese
+│       │                             reader the pages they would see
 │       ├── soft_plate.py             the pixels for the softness plate and the
 │       │                             captures — Pillow, so the report needs no
 │       │                             per-platform image binary
@@ -579,8 +636,10 @@ reading it from the other.
 │       │                              fresh clone builds offline)
 │       ├── fig/                      the figures and page screenshots
 │       ├── fonts/                    committed, so it builds offline
-│       └── build.sh                  fonts → mark → shots → figures → quarto
-│                                     → tectonic ×2 → makeindex → tectonic
+│       └── build.sh                  compose zh → fonts → shots → figures,
+│                                     then, per edition: quarto → tectonic →
+│                                     makeindex → tectonic. Both editions in
+│                                     one loop, so neither can be skipped
 │
 ├── .github/workflows/pages.yml   preview deploy, for layout review only, at
 │                                 okennott.github.io/senso-comune-gallery/.
@@ -670,11 +729,12 @@ that adds an unaudited third party able to inject arbitrary CSS.
 
 ## 2.5 Checks
 
-Five, and every one blocks. `npm run check` runs the first four in seconds;
+Six, and every one blocks. `npm run check` runs the first five in seconds;
 `npm run check:render` needs Chrome, and GitHub runs it on every preview. A
-release runs all five (§2.8).
+release runs all six (§2.8) — `check-corpus` as `--site`, for the reason in
+§2.9.
 
-One of the four reaches outside Node: `check-review` ends by running
+One of the five reaches outside Node: `check-review` ends by running
 `scripts/image.py`'s own selftest. That was chosen over letting it skip when
 Python is bare — a check that can quietly not run is not a check — and the CI
 workflow installs the four wheels it needs so that it always does.
@@ -718,6 +778,13 @@ applied fails here rather than being noticed in a screenshot months later. It
 also asserts that every `var(--token)` in the stylesheet resolves: a fix that
 referenced a token which did not exist fell back to inherited size, and a test
 that only matched the CSS text called it green.
+
+`check-corpus.mjs` holds the two languages to one vocabulary: that no English
+term has two Chinese renderings unless the split is argued in `lexicon.json`,
+that the printed document's own words match in both places they are written
+down, and that every translation in the report's memory still carries the code,
+the cross-references and the terminology of the English it translates — and
+still translates the English that is there now. §2.9.
 
 `test-readiness.mjs` proves the readiness gate with 48 tests: it opens on data
 with every critical detail supplied, and closes on the named rule when any one
@@ -1075,6 +1142,145 @@ the waivers. Review assertions K-01 to K-03 prove every preview page says so,
 nothing can be bought while blocked, and a release attempt is refused without
 touching the last built site.
 
+## 2.9 One language, twice: the corpus and the Chinese report
+
+The site has been bilingual since it was built. Its Chinese lived as `en`/`zh`
+pairs in four places — `site.json`, `seller.json`, `artworks.json`, and the
+legal-page literals inside `build.js` — with nothing holding them to one
+vocabulary and nothing outside `build.js` able to reach them. Producing a second
+Chinese artefact under those conditions means inventing a second set of words
+for things that already have words: 作品 or 画作, 购买方式 or 如何购买.
+
+So there is now one corpus, and it is **assembled rather than transcribed**.
+
+```bash
+npm run corpus            # what is in it, and any conflicts
+npm run corpus -- --terms # every term, en → zh, with where it came from
+```
+
+`scripts/corpus.mjs` walks the three data files and `build.js` for pairs, then
+merges `src/data/lexicon.json` on top. The site's own strings are the authority
+for anything a buyer reads; the lexicon adds **only** what the site never says —
+the report's design, commerce and legal vocabulary, the terms that must stay in
+Latin script, and the printed document's furniture. Nothing is copied into it
+that already has an owner elsewhere, because two copies of a string are two
+strings that will drift.
+
+Today: **162 terms, 38 phrases, 52 kept in Latin.**
+
+**One English term, one Chinese rendering.** Two is a conflict and fails
+`npm run check` — which found two the first time it ran, both of them terms this
+README's own author had written into `lexicon.json` and also into the keep-list.
+A split that is *deliberate* is listed under `splits` with the reason: `Works`
+is 作品 and `works` is 件作品, because Chinese counts with a measure word and a
+heading cannot carry one.
+
+**Not every pair can be enforced.** `ui.viewOf` is the "of" in *2 of 5* and its
+Chinese is `/`; `sections.works.all` is the *All* of a filter row. Asserting
+those across running prose reports every sentence in the report containing the
+word "of". The line is drawn by provenance: everything in the lexicon is
+enforced, every multi-word site term is enforced, and single-word site labels
+are offered but not asserted. A label that *is* vocabulary gets promoted by
+naming it in the lexicon — which is the one place that decision is recorded.
+
+### The translator
+
+```bash
+npm run translate                 # what is translated, what is owed
+npm run translate:assist          # draft what is owed
+npm run translate:emit            # compose the Chinese .qmd
+```
+
+The report is 3,000 lines of prose with the machinery of a typeset document
+running through it: inline LaTeX, `\index` entries, `@sec-` cross-references,
+pipe tables, figure captions with attribute blocks, footnote references, CSS
+variable names, hex values and file paths. Handed to any translator as plain
+text it comes back as a document that no longer compiles and whose
+cross-references point nowhere.
+
+`scripts/translate.mjs` segments the source into **1,610 units** by kind —
+paragraph, heading, table cell, caption, list item, footnote, callout title,
+block quote — and inside each unit replaces every span that is not prose with a
+sentinel before any translation happens. A translation that lost a sentinel, or
+duplicated one, is **rejected rather than written**. Emphasis markers are
+counted on both sides. The segmenter round-trips the source, so a construct it
+does not understand survives as itself instead of being quietly dropped.
+
+**The build never translates.** Translation happens when a person runs it and
+lands in `docs/report/translations/`, which is reviewed and committed;
+`build.sh` only ever *composes*. Two reasons, and both are the same reason the
+rest of this repository is built the way it is: a document that quotes SAMR
+Order 37 verbatim must not have its statutory text regenerated by a model on
+every build, and a PDF that needs the network to reproduce is not reproducible.
+
+Each unit is keyed by a **hash of its English**. Edit an English sentence and
+its Chinese goes `stale` — reported, not silently left attached to text it no
+longer translates. Move a paragraph and its Chinese follows it by hash.
+
+`--assist` drafts through the local `claude` CLI, in batches, and each batch
+carries three things from the corpus: the terms that occur in it, the terms
+named in its `\index` entries, and two or three of **the site's own sentences
+about the same subject, with their Chinese**. The terms fix the words; the
+sentences fix the register. The report quotes no sentence of the site verbatim,
+so the exact-match path fires nowhere — this is the form the phrase layer
+actually takes, and it is what makes a paragraph about returns come out in the
+Chinese the returns page already uses.
+
+Drafts are `draft` until a person marks them `reviewed`. Only `reviewed` is
+finished.
+
+### What an untranslated passage does
+
+It falls back to English **and says so**: a small superscript EN at the head of
+the passage, and a count on the title page, so a reader is told how much of the
+document that applies to before meeting the first instance of it. The same
+discipline as the site's `NEEDS-INPUT` marks — a gap a reader cannot see is a
+gap nobody closes. The Chinese edition therefore builds from the first day and
+is readable throughout; it is simply honest about which parts are not Chinese
+yet.
+
+### The two editions are the same build
+
+`npm run report` runs both through the same four passes in one loop. The Chinese
+edition is not a variant, a branch or a later step, and it cannot be skipped.
+
+The whole difference between them, apart from the words, is
+`docs/report/preamble-zh.tex` — under sixty lines, of which four matter. The
+layout, the palette, the page, the running heads, the callouts and the title
+page are written once, in `preamble.tex`, where every string the reader sees is
+now a macro with the English as its default; `translate.mjs` writes out
+`report-zh-strings.tex`, which renews those macros and nothing else.
+
+Three things in the Chinese edition are typesetting decisions rather than
+translations, and each is there because its absence fails silently:
+
+| | |
+|:--|:--|
+| A **bold** Chinese cut | fontspec with no `BoldFont` declared leaves `\bfseries` at the regular weight and says nothing, so every `**emphasis**`, every callout title and every table header would have come out looking like body text |
+| `linestretch` **1.45**, against the English edition's 1.15 | a page of han characters carries far more ink per line at the same size; at 1.15 the lines lock together |
+| `lang` left at `en` | Quarto answers a Chinese document by loading babel or polyglossia, neither of which sets Chinese without a locale package and both of which then argue with xeCJK under tectonic. Every visible effect — `\contentsname`, `\figurename`, `\tablename`, `\indexname`, and the PDF's own declared language — is set explicitly in `preamble-zh.tex` instead |
+
+Paragraph indentation is **not** changed to the Chinese convention. The two
+editions are meant to be readable page against page, and a reader comparing them
+should find the same document rather than two different ones.
+
+**Two silent failures were found by building it.** xeCJK takes the space itself
+from the Chinese face where a CJK run meets bold or a macro, and the subset —
+built from CJK ranges — had no space in it, so words ran together with the
+document still building. And `…` sits in xeCJK's CJK punctuation class: six
+ellipses had been **missing from the English report all along**, because the
+Chinese subset had no ellipsis and XeTeX drops what it cannot draw. The English
+edition hands the ellipsis to the Latin face; the Chinese edition takes it back,
+because there it is Chinese punctuation.
+
+### Why the corpus check runs twice
+
+`release.mjs` runs `check-corpus.mjs --site`, which asks only whether the corpus
+agrees with itself. Two of the site's own `zh` strings disagreeing is a site
+defect and must stop a release. The report's translation state is not a site
+defect — without the split, publishing the site would depend on a document
+having been recomposed recently, which is the wrong way round.
+
 ## Still open
 
 Six items, and every one needs a person outside this project.
@@ -1097,6 +1303,14 @@ Six items, and every one needs a person outside this project.
 **Content** is the other outstanding half: a photograph, title and description
 for each catalogued work, and the contact details. The email and phone are not optional —
 they are the consumer-law requirement. `npm run readiness` lists every field still owed.
+
+**The Chinese report's prose** is the third. The machinery is finished and
+checked, the vocabulary is settled, and the document builds and reads; what is
+owed is the translation itself. `npm run translate` gives the count by kind,
+`docs/report/translations/STATUS.md` gives it per unit, and every passage still
+in English is marked in the PDF and counted on its title page — so this is
+visible in the document rather than only here. Nothing about it is a
+special case: it is a data edit, like the works are.
 
 ---
 

@@ -36,6 +36,10 @@ const steps = [
   ['contrast',  ['scripts/check-contrast.mjs']],
   ['links',     ['scripts/check-links.mjs']],
   ['review',    ['scripts/check-review.mjs']],
+  /* --site: the corpus's self-consistency only. Two of the site's own zh
+     strings disagreeing is a site defect; the report's translation state is
+     not, and a site release must not wait on a document being recomposed. */
+  ['corpus',    ['scripts/check-corpus.mjs', '--site']],
   ['gate tests',['scripts/test-readiness.mjs']],
   ...(chrome ? [['rendering', ['scripts/check-render.mjs']]] : []),
 ];
