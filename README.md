@@ -856,16 +856,14 @@ block people outright.
   laid on.
   Paintings are never rounded, zoomed or stretched. The report's Softness
   section lists every option considered, adopted and optional.
-- **The work page, and the shop bar that is not there yet.** Decisions D1–D5
+- **The work page and the placeholder shop bar.** Decisions D1–D5
   (report, Part 6): detail, edge, back and video views on every work; any number
   of works in one order, within availability and the payment route's limit; no
   search threshold; video on work pages only. The views are built; the buy box
-  and the pages behind the shop bar are not (§2.7). D1 put search, account and
-  cart in the header as placeholders until built; **AW-07 took them back out**
-  — three e-commerce icons for a catalogue of six unique objects sold by
-  enquiry read as a store template, and all three were SH-01 blockers for the
-  same reason. The bar is built from `placeholders.routes`, which is now empty,
-  so a route put back puts its control back.
+  and the pages behind the shop bar are not (§2.7). Search, cart and account
+  appear in the header as designed placeholders; each goes to the shared
+  bilingual 404 until its route is built. Their unfinished destinations remain
+  tracked as SH-01 release blockers.
 - **Cloudflare Pages.** The only host with no bill, no pause and no terms
   problem. `vercel.app` and `workers.dev` measure 100% blocked from mainland
   China; `pages.dev` measures 0%.
@@ -905,24 +903,21 @@ block people outright.
 
 Decisions of 17 September 2026 (report, Part 6). Every work page shows
 **detail, edge, back and video** views; those are complete and only wait for
-files (§1.2). The masthead showed **search, account and cart** on every page as
-real links with real names whose destinations did not exist — each marked
+files (§1.2). The masthead shows **search, cart and account** on every page as
+real links with real names whose destinations do not exist yet — each marked
 `data-placeholder`, declared in `src/data/site.json` → `placeholders.routes`,
 landing on the bilingual 404 page.
 
-**That list is empty since AW-07** and the bar is not drawn. The mechanism is
-untouched: the masthead is built from `placeholders.routes`, so adding a route
-puts its control back with its icon, its accessible name in both languages and
-its 44px target — and SH-01 goes back to asking for the page it points at.
+The masthead is built from `placeholders.routes`; each entry supplies its icon,
+accessible name in both languages and a 44px target. SH-01 asks for the real
+page behind each control before release.
 `check-links` still fails the build if a marked link starts resolving, so
 building one of these pages always means removing its placeholder entry in the
 same change. What each one needs is unchanged, and is the rest of this section.
 
 The cart's transaction ceiling is now asked for by `site.shop.cart`, not by the
-absence of a cart route: PY-02 used to read a missing route as a cart that had
-been *built*, which stopped being true the moment the control came out because
-there is no cart. Set `shop.cart` to `true` with the cart, and the ceiling is
-owed again.
+absence of a cart route: a placeholder route does not mean a functional cart.
+Set `shop.cart` to `true` with the cart, and the ceiling is owed again.
 
 What each one still needs, in the order it should be built:
 
@@ -1061,11 +1056,10 @@ waiver is printed in every report and recorded in the release's
 photographs and payment links cannot be waived: a waiver naming one keeps the
 gate shut.
 
-**Today** the gate reports 54 blockers, almost all of them typing: the works'
+**Today** the gate reports 57 blockers, almost all of them typing: the works'
 titles, descriptions and alt text, the contact details, and the photographs
-themselves (WK-08, which cannot be waived). SH-01 — the search, account and
-cart placeholders — closed with AW-07, when the three controls came out of the
-masthead; it reopens the day a route is put back.
+themselves (WK-08, which cannot be waived). SH-01 also tracks the three
+placeholder search, cart and account pages until they are built.
 
 **Where it stands in front of the public.** The production host's build command
 should be `node scripts/release.mjs`, output directory `dist` (Cloudflare Pages:

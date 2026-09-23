@@ -352,16 +352,13 @@ export function layout({ site, seller, loc, title, description, body, ogImage, o
     })
     .join('\n      ');
 
-  /* Decision D1: search, account and cart. The destinations do not exist yet,
+  /* Search, cart and account. The destinations do not exist yet,
      so each link is marked data-placeholder and lands on the 404 page; the
      routes are declared in site.json, and check-links fails the build if a
      marked link starts resolving without the marker being removed. The icons
      are aria-hidden: each link's name is the word, which is what a screen
-     reader announces and what voice control needs to match.
-
-     The route list is EMPTY since AW-07, so this builds nothing and the bar
-     does not appear; site.json says why, and putting a route back puts its
-     control back with everything below still true of it. */
+     reader announces and what voice control needs to match. The bar reads its
+     order from the route list and disappears when that list is empty. */
   const shopLinks = Object.entries(site.placeholders.routes).map(([role, route]) => {
     const label = esc(t(ui[role], loc));
     const count = role === 'cart'

@@ -526,27 +526,21 @@
   },
   "placeholders": {
     "$comment": [
-      "Decision D1. The masthead shows search, account and cart, and each links to a",
+      "The masthead shows search, cart and account, and each links to a",
       "route that does not exist yet, so a click lands on the site's 404 page. The",
       "controls are real links with real accessible names; only their destinations",
       "are missing. check-links.mjs requires every link marked data-placeholder to be",
       "listed here AND to be dead: when one of these pages is built, its entry must",
       "come out of this list, or the build fails. README, 'Scripting still needed'.",
-      "",
-      "EMPTY since AW-07. Three e-commerce icons in the most valuable strip on the",
-      "site, for a catalogue of six unique objects sold by enquiry, say 'store",
-      "template' — which is the wrong first signal for a one-artist gallery and the",
-      "wrong one for anyone judging the design. All three were blockers under SH-01",
-      "for the same underlying reason: a control that leads nowhere. The masthead is",
-      "now the wordmark, four words of navigation and the language switch, which is",
-      "the control on this site that actually changes something.",
-      "",
-      "Nothing was deleted to get here. The bar is built from this object, so a",
-      "route put back puts its control back — icon, accessible name in both",
-      "languages, 44px target — and SH-01 asks for the page it points at, exactly",
-      "as before."
+      "The shared bilingual 404 stays useful for these controls, the social",
+      "channels still awaiting handles, and ordinary missing URLs. SH-01 keeps",
+      "these three routes visible as release blockers until their pages exist."
     ],
-    "routes": {},
+    "routes": {
+      "search": "/search/",
+      "cart": "/cart/",
+      "account": "/account/"
+    },
     "$social": [
       "The same arrangement for the footer's channel marks. A channel whose",
       "handle in seller.artist is still NEEDS-INPUT has no address to link to,",
@@ -570,12 +564,9 @@
   },
   "$notFound": [
     "The 404, which is bilingual because nothing knows the visitor's language",
-    "before it is served. It used to name search, accounts and the cart as the",
-    "things still being built; AW-07 took those three controls out of the",
-    "masthead and emptied placeholders.routes, so the page was advertising",
-    "features nothing on the site links to. What still lands here is a mistyped",
-    "address, an old link, and the footer's channel marks whose handles are",
-    "owed — so it says what is true of all three and names nothing."
+    "before it is served. Search, cart, account, channels awaiting handles,",
+    "mistyped addresses and old links all land here, so the copy describes the",
+    "shared state and names no single unfinished feature."
   ],
   "notFound": {
     "title": {

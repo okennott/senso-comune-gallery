@@ -797,7 +797,7 @@ check('G-07', 'the texture is on the mat and on nothing else', () => {
 });
 
 /* ===================== H — shop bar and work views ===================== */
-/* Decisions of 17 September 2026 (report, Part 6): search, account and cart
+/* Decisions of 17 September 2026 (report, Part 6): search, cart and account
    shown now with placeholder destinations; detail, edge, back and video views
    on every work page as placeholders until the photographs exist. */
 
@@ -808,20 +808,14 @@ const isWork = (p) => { const m = p.match(/\/works\/([a-z0-9-]+)\/index\.html$/)
 const workPages = allHtml.filter(([p]) => isWork(p));
 const notWorkPages = allHtml.filter(([p]) => !isWork(p));
 
-/* Decision D1 put search, account and cart in the masthead with placeholder
-   destinations. AW-07 took them out: three e-commerce icons in the most
-   valuable strip on the site, for a catalogue of six unique objects sold by
-   enquiry, read as a store template — and all three were SH-01 blockers for
-   the same underlying reason, a control that leads nowhere.
-
-   The two assertions that held the three controls in place now hold the bar
-   to its DATA instead, in both directions: the masthead carries exactly the
-   controls site.json declares a route for, in declaration order, and no <ul>
-   at all when it declares none. Put a route back and the control comes back,
-   named in both languages, and this says so. */
+/* The three controls are restored as deliberately unfinished routes. Keep
+   their presence and order explicit here, then verify that the rendered bar
+   follows site.json on every page in both languages. When a destination is
+   built, remove only that route from placeholders and update this contract. */
 check('H-01', 'the masthead carries exactly the shop controls that have a route', () => {
   const want = Object.keys(siteJson.placeholders.routes);
   const bad = [];
+  if (want.join(' ') !== 'search cart account') bad.push(`routes: ${want.join(' ') || 'none'}`);
   for (const [p, html] of allHtml) {
     const bar = (html.match(/<ul class="shopbar">([\s\S]*?)<\/ul>/) ?? [])[1];
     const roles = [...(bar ?? '').matchAll(/data-placeholder="([a-z]+)"/g)].map((m) => m[1]);

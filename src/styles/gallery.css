@@ -109,7 +109,7 @@
 .nav__short{ display:none }
 
 /* ---------- shop bar ----------
-   Decision D1: search, account, cart, top right, as shoppers expect. Placeholder
+   Search, cart, account, top right. Placeholder
    destinations (site.json → placeholders). Each target is the site's 48px; the
    icon is drawn in the bar's own text colour and checked with it. */
 .shopbar{

@@ -19,8 +19,8 @@
  *   - no border-radius: rounding a corner crops the object being sold;
  *   - no transform: a painting is never drawn scaled or skewed.
  *
- * The same pass covers the work videos, and the masthead: with search, account
- * and cart added it must still fit a phone — no horizontal overflow, at most
+ * The same pass covers the work videos, and the masthead: with search, cart
+ * and account added it must still fit a phone — no horizontal overflow, at most
  * two rows below 720px, and every shop control at least 44px square — and the
  * homepage quote: the Dutch original and the translation both set as written,
  * the attribution flush with their right edge, and read before the featured
